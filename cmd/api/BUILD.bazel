@@ -1,0 +1,27 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["api.go"],
+    importpath = "powerssl.io/cmd/api",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//api/v1:go_default_library",
+        "//pkg/domain:go_default_library",
+        "//pkg/domain/endpoint:go_default_library",
+        "//pkg/domain/service:go_default_library",
+        "//pkg/domain/transport:go_default_library",
+        "@com_github_go_kit_kit//log:go_default_library",
+        "@com_github_go_kit_kit//transport/grpc:go_default_library",
+        "@com_github_jinzhu_gorm//:go_default_library",
+        "@com_github_jinzhu_gorm//dialects/sqlite:go_default_library",
+        "@com_github_oklog_oklog//pkg/group:go_default_library",
+        "@org_golang_google_grpc//:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "api",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)

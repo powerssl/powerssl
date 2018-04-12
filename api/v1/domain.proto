@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package powerssl.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "powerssl.io/api/v1;api";
+
+service DomainService {
+  rpc CreateDomain (CreateDomainRequest) returns (Domain) {
+    option (google.api.http) = {
+      post: "/v1/domains"
+      body: "domain"
+    };
+  }
+  rpc DeleteDomain (DeleteDomainRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/{name=domains/*}"
+    };
+  }
+  rpc GetDomain (GetDomainRequest) returns (Domain) {
+    option (google.api.http) = {
+      get: "/v1/{name=domains/*}"
+    };
+  }
+  rpc ListDomains (ListDomainsRequest) returns (ListDomainsResponse) {
+    option (google.api.http) = {
+      get: "/v1/domains"
+    };
+  }
+  rpc UpdateDomain (UpdateDomainRequest) returns (Domain) {
+    option (google.api.http) = {
+      patch: "/v1/{domain.name=domains/*}"
+      body: "domain"
+    };
+  }
+}
+
+message CreateDomainRequest {
+  Domain domain = 1;
+}
+
+message DeleteDomainRequest {
+  string name = 1;
+}
+
+message Domain {
+  string name = 1;
+  string dns_name = 2;
+  map<string, string> labels = 3;
+  // bool discarded = 4;
+  google.protobuf.Timestamp create_time = 5;
+  google.protobuf.Timestamp update_time = 6;
+  google.protobuf.Timestamp discard_time = 7;
+}
+
+message GetDomainRequest {
+  string name = 1;
+}
+
+message ListDomainsRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  // bool show_discarded = 3;
+}
+
+message ListDomainsResponse {
+  repeated Domain domains = 1;
+  string next_page_token = 2;
+}
+
+message UpdateDomainRequest {
+  Domain domain = 1;
+  google.protobuf.FieldMask update_mask = 2;
+}
