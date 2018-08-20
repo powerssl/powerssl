@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package powerssl.integration.v1;
+
+import "google/protobuf/struct.proto";
+
+service Integration {
+  rpc Validate (IntegrationValidationRequest) returns (IntegrationValidationResponse);
+}
+
+message IntegrationValidationRequest {
+  google.protobuf.Struct options = 1;
+  google.protobuf.Struct properties = 2;
+}
+
+message IntegrationValidationResponse {
+  bool success = 1;
+  map<string, string> errors = 2;
+}

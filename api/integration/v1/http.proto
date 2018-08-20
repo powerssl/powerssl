@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package powerssl.integration.v1;
+
+import "google/protobuf/struct.proto";
+
+service HTTP {
+  rpc CreateFile (HTTPFileCreationRequest) returns (HTTPFileCreationResponse);
+  rpc DeleteFile (HTTPFileDeletionRequest) returns (HTTPFileDeletionResponse);
+}
+
+message HTTPFileCreationRequest {
+  string path = 1;
+  string content = 2;
+  string type = 3;
+  google.protobuf.Struct properties = 4;
+}
+
+message HTTPFileCreationResponse {
+  bool success = 1;
+}
+
+message HTTPFileDeletionRequest {
+  string path = 1;
+  google.protobuf.Struct properties = 2;
+}
+
+message HTTPFileDeletionResponse {
+  bool success = 1;
+}

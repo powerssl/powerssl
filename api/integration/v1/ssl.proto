@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package powerssl.integration.v1;
+
+import "google/protobuf/struct.proto";
+
+service SSL {
+  rpc AuthorizeDomain (SSLDomainAuthorizationRequest) returns (SSLDomainAuthorizationResponse);
+  rpc RequestCertificate (SSLCertificateRequestionRequest) returns (SSLCertificateRequestionResponse);
+  rpc RevokeCertificate (SSLCertificateRevokationRequest) returns (SSLCertificateRevokationResponse);
+  rpc VerifyDomain (SSLDomainVerificationRequest) returns (SSLDomainVerificationResponse);
+}
+
+message SSLCertificateRequestionRequest {
+  string csr = 1;
+  google.protobuf.Struct properties = 2;
+}
+
+message SSLCertificateRequestionResponse {
+  bool success = 1;
+  string cert = 2;
+}
+
+message SSLCertificateRevokationRequest {
+  string cert = 1;
+  google.protobuf.Struct properties = 2;
+}
+
+message SSLCertificateRevokationResponse {
+  bool success = 1;
+}
+
+message SSLChallenge {
+  string type = 1;
+  map<string, string> details = 2;
+}
+
+message SSLDomainAuthorizationRequest {
+  string domain = 1;
+  google.protobuf.Struct properties = 2;
+}
+
+message SSLDomainAuthorizationResponse {
+  bool success = 1;
+  repeated SSLChallenge challenges = 2;
+}
+
+message SSLDomainVerificationRequest {
+  string domain = 1;
+  string challenge = 2;
+  google.protobuf.Struct properties = 3;
+}
+
+message SSLDomainVerificationResponse {
+  bool success = 1;
+}

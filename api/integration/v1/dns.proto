@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package powerssl.integration.v1;
+
+import "google/protobuf/struct.proto";
+
+service DNS {
+  rpc CreateRecord (DNSRecordCreationRequest) returns (DNSRecordCreationResponse);
+  rpc DeleteRecord (DNSRecordDeletionRequest) returns (DNSRecordDeletionResponse);
+  rpc VerifyDomain (DNSDomainVerificationRequest) returns (DNSDomainVerificationResponse);
+}
+
+enum DNSRecordType {
+  TXT = 0;
+}
+
+message DNSRecordCreationRequest {
+  string domain = 1;
+  DNSRecordType type = 2;
+  string content = 3;
+  google.protobuf.Struct properties = 4;
+}
+
+message DNSRecordCreationResponse {
+  bool success = 1;
+}
+
+message DNSRecordDeletionRequest {
+  string domain = 1;
+  DNSRecordType type = 2;
+  google.protobuf.Struct properties = 3;
+}
+
+message DNSRecordDeletionResponse {
+  bool success = 1;
+}
+
+message DNSDomainVerificationRequest {
+  string domain = 1;
+  google.protobuf.Struct properties = 2;
+}
+
+message DNSDomainVerificationResponse {
+  bool success = 1;
+}

@@ -16,16 +16,18 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 
-	pb "powerssl.io/api/v1"
+	"powerssl.io/pkg/util/resource"
+
+	domainmodel "powerssl.io/pkg/domain/model"
+
 	"powerssl.io/pkg/domain"
-	domainendpoint "powerssl.io/pkg/domain/endpoint"
-	domainservice "powerssl.io/pkg/domain/service"
-	domaintransport "powerssl.io/pkg/domain/transport"
+)
+
+const (
+	grpcAddr = "localhost:8082"
 )
 
 func main() {
-	grpcAddr := ":8082"
-
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(os.Stderr)
@@ -42,14 +44,13 @@ func main() {
 		}
 		defer db.Close()
 
-		db.AutoMigrate(&domain.Domain{})
+		db.AutoMigrate(&domainmodel.Domain{})
 	}
 
-	var (
-		service    = domainservice.New(db, logger)
-		endpoints  = domainendpoint.New(service, logger)
-		grpcServer = domaintransport.NewGRPCServer(endpoints, logger)
-	)
+	resources := []resource.APIResource{
+		// certificate.New(db, logger),
+		domain.New(db, logger),
+	}
 
 	var g group.Group
 	{
@@ -61,7 +62,11 @@ func main() {
 		g.Add(func() error {
 			logger.Log("transport", "gRPC", "addr", grpcAddr)
 			baseServer := grpc.NewServer(grpc.UnaryInterceptor(kitgrpc.Interceptor))
-			pb.RegisterDomainServiceServer(baseServer, grpcServer)
+
+			for _, r := range resources {
+				r.RegisterGRPCServer(baseServer)
+			}
+
 			return baseServer.Serve(grpcListener)
 		}, func(error) {
 			grpcListener.Close()

@@ -1,45 +1,45 @@
-package endpoint
+package domainendpoint
 
 import (
 	"context"
 
-	kitendpoint "github.com/go-kit/kit/endpoint"
+	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 
-	domainmodel "powerssl.io/pkg/domain"
-	"powerssl.io/pkg/domain/service"
+	domainmodel "powerssl.io/pkg/domain/model"
+	domainservice "powerssl.io/pkg/domain/service"
 )
 
 type Set struct {
-	CreateEndpoint kitendpoint.Endpoint
-	DeleteEndpoint kitendpoint.Endpoint
-	GetEndpoint    kitendpoint.Endpoint
-	ListEndpoint   kitendpoint.Endpoint
-	UpdateEndpoint kitendpoint.Endpoint
+	CreateEndpoint endpoint.Endpoint
+	DeleteEndpoint endpoint.Endpoint
+	GetEndpoint    endpoint.Endpoint
+	ListEndpoint   endpoint.Endpoint
+	UpdateEndpoint endpoint.Endpoint
 }
 
-func New(svc service.Service, logger log.Logger) Set {
-	var createEndpoint kitendpoint.Endpoint
+func New(svc domainservice.Service, logger log.Logger) Set {
+	var createEndpoint endpoint.Endpoint
 	{
 		createEndpoint = MakeCreateEndpoint(svc)
 		createEndpoint = LoggingMiddleware(log.With(logger, "method", "Create"))(createEndpoint)
 	}
-	var deleteEndpoint kitendpoint.Endpoint
+	var deleteEndpoint endpoint.Endpoint
 	{
 		deleteEndpoint = MakeDeleteEndpoint(svc)
 		deleteEndpoint = LoggingMiddleware(log.With(logger, "method", "Delete"))(deleteEndpoint)
 	}
-	var getEndpoint kitendpoint.Endpoint
+	var getEndpoint endpoint.Endpoint
 	{
 		getEndpoint = MakeGetEndpoint(svc)
 		getEndpoint = LoggingMiddleware(log.With(logger, "method", "Get"))(getEndpoint)
 	}
-	var listEndpoint kitendpoint.Endpoint
+	var listEndpoint endpoint.Endpoint
 	{
 		listEndpoint = MakeListEndpoint(svc)
 		listEndpoint = LoggingMiddleware(log.With(logger, "method", "List"))(listEndpoint)
 	}
-	var updateEndpoint kitendpoint.Endpoint
+	var updateEndpoint endpoint.Endpoint
 	{
 		updateEndpoint = MakeUpdateEndpoint(svc)
 		updateEndpoint = LoggingMiddleware(log.With(logger, "method", "Update"))(updateEndpoint)
@@ -104,7 +104,7 @@ func (s Set) Update(ctx context.Context, domain domainmodel.Domain, updateMask s
 	return response.Domain, response.Err
 }
 
-func MakeCreateEndpoint(s service.Service) kitendpoint.Endpoint {
+func MakeCreateEndpoint(s domainservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(CreateRequest)
 		domain, err := s.Create(ctx, req.Domain)
@@ -112,7 +112,7 @@ func MakeCreateEndpoint(s service.Service) kitendpoint.Endpoint {
 	}
 }
 
-func MakeDeleteEndpoint(s service.Service) kitendpoint.Endpoint {
+func MakeDeleteEndpoint(s domainservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(DeleteRequest)
 		err = s.Delete(ctx, req.Name)
@@ -120,7 +120,7 @@ func MakeDeleteEndpoint(s service.Service) kitendpoint.Endpoint {
 	}
 }
 
-func MakeGetEndpoint(s service.Service) kitendpoint.Endpoint {
+func MakeGetEndpoint(s domainservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(GetRequest)
 		domain, err := s.Get(ctx, req.Name)
@@ -128,7 +128,7 @@ func MakeGetEndpoint(s service.Service) kitendpoint.Endpoint {
 	}
 }
 
-func MakeListEndpoint(s service.Service) kitendpoint.Endpoint {
+func MakeListEndpoint(s domainservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(ListRequest)
 		domains, err := s.List(ctx, req.PageSize, req.PageToken)
@@ -136,7 +136,7 @@ func MakeListEndpoint(s service.Service) kitendpoint.Endpoint {
 	}
 }
 
-func MakeUpdateEndpoint(s service.Service) kitendpoint.Endpoint {
+func MakeUpdateEndpoint(s domainservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(UpdateRequest)
 		domain, err := s.Update(ctx, req.Domain, req.UpdateMask)

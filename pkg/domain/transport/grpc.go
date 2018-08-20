@@ -1,4 +1,4 @@
-package transport
+package domaintransport
 
 import (
 	"context"
@@ -7,16 +7,16 @@ import (
 
 	oldcontext "golang.org/x/net/context"
 
-	// kitendpoint "github.com/go-kit/kit/endpoint"
+	// "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 
-	pbempty "github.com/golang/protobuf/ptypes/empty"
+	types "github.com/gogo/protobuf/types"
 
 	pb "powerssl.io/api/v1"
-	domainmodel "powerssl.io/pkg/domain"
-	"powerssl.io/pkg/domain/endpoint"
-	// "powerssl.io/pkg/domain/service"
+	domainendpoint "powerssl.io/pkg/domain/endpoint"
+	domainmodel "powerssl.io/pkg/domain/model"
+	// domainservice "powerssl.io/pkg/domain/service"
 )
 
 type grpcServer struct {
@@ -27,7 +27,7 @@ type grpcServer struct {
 	update grpctransport.Handler
 }
 
-func NewGRPCServer(endpoints endpoint.Set, logger log.Logger) pb.DomainServiceServer {
+func NewGRPCServer(endpoints domainendpoint.Set, logger log.Logger) pb.DomainServiceServer {
 	options := []grpctransport.ServerOption{
 		grpctransport.ServerErrorLogger(logger),
 	}
@@ -74,12 +74,12 @@ func (s *grpcServer) CreateDomain(ctx oldcontext.Context, req *pb.CreateDomainRe
 	return rep.(*pb.Domain), nil
 }
 
-func (s *grpcServer) DeleteDomain(ctx oldcontext.Context, req *pb.DeleteDomainRequest) (*pbempty.Empty, error) {
+func (s *grpcServer) DeleteDomain(ctx oldcontext.Context, req *pb.DeleteDomainRequest) (*types.Empty, error) {
 	_, rep, err := s.delete.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*pbempty.Empty), nil
+	return rep.(*types.Empty), nil
 }
 
 func (s *grpcServer) GetDomain(ctx oldcontext.Context, req *pb.GetDomainRequest) (*pb.Domain, error) {
@@ -110,7 +110,7 @@ func (s *grpcServer) UpdateDomain(ctx oldcontext.Context, req *pb.UpdateDomainRe
 func NewGRPCClient(conn *grpc.ClientConn) service.Service {
 	options := []grpctransport.ClientOption{}
 
-	var getEndpoint kitendpoint.Endpoint
+	var getEndpoint endpoint.Endpoint
 	{
 		getEndpoint = grpctransport.NewClient(
 			conn,
@@ -123,7 +123,7 @@ func NewGRPCClient(conn *grpc.ClientConn) service.Service {
 		).Endpoint()
 	}
 
-	var listEndpoint kitendpoint.Endpoint
+	var listEndpoint endpoint.Endpoint
 	{
 		listEndpoint = grpctransport.NewClient(
 			conn,
@@ -136,7 +136,7 @@ func NewGRPCClient(conn *grpc.ClientConn) service.Service {
 		).Endpoint()
 	}
 
-	return endpoint.Set{
+	return domainendpoint.Set{
 		GetEndpoint:  getEndpoint,
 		ListEndpoint: listEndpoint,
 	}
@@ -148,22 +148,22 @@ func decodeGRPCCreateRequest(_ context.Context, grpcReq interface{}) (interface{
 	domain := domainmodel.Domain{
 		DNSName: req.Domain.DnsName,
 	}
-	return endpoint.CreateRequest{Domain: domain}, nil
+	return domainendpoint.CreateRequest{Domain: domain}, nil
 }
 
 func decodeGRPCDeleteRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*pb.DeleteDomainRequest)
-	return endpoint.DeleteRequest{Name: req.Name}, nil
+	return domainendpoint.DeleteRequest{Name: req.Name}, nil
 }
 
 func decodeGRPCGetRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*pb.GetDomainRequest)
-	return endpoint.GetRequest{Name: req.Name}, nil
+	return domainendpoint.GetRequest{Name: req.Name}, nil
 }
 
 func decodeGRPCListRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*pb.ListDomainsRequest)
-	return endpoint.ListRequest{
+	return domainendpoint.ListRequest{
 		PageSize:  int(req.PageSize),
 		PageToken: req.PageToken,
 	}, nil
@@ -174,7 +174,7 @@ func decodeGRPCUpdateRequest(_ context.Context, grpcReq interface{}) (interface{
 	domain := domainmodel.Domain{
 		DNSName: req.Domain.DnsName,
 	}
-	return endpoint.UpdateRequest{
+	return domainendpoint.UpdateRequest{
 		Domain:     domain,
 		UpdateMask: "",
 		// UpdateMask: string(req.UpdateMask), // TODO: ...
@@ -183,16 +183,16 @@ func decodeGRPCUpdateRequest(_ context.Context, grpcReq interface{}) (interface{
 
 // func decodeGRPCGetResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
 // 	reply := grpcReply.(*pb.Domain)
-// 	return endpoint.GetResponse{Domain: reply.Domain, Err: str2err(reply.Err)}, nil
+// 	return domainendpoint.GetResponse{Domain: reply.Domain, Err: str2err(reply.Err)}, nil
 // }
 
 // func decodeGRPCListResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
 // 	reply := grpcReply.(*pb.ListDomainsResponse)
-// 	return endpoint.ListResponse{Domains: reply.Domains, Err: str2err(reply.Err)}, nil
+// 	return domainendpoint.ListResponse{Domains: reply.Domains, Err: str2err(reply.Err)}, nil
 // }
 
 func encodeGRPCCreateResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(endpoint.CreateResponse)
+	resp := response.(domainendpoint.CreateResponse)
 	return &pb.Domain{
 		Name:    resp.Domain.ExternalName(),
 		DnsName: resp.Domain.DNSName,
@@ -200,12 +200,12 @@ func encodeGRPCCreateResponse(_ context.Context, response interface{}) (interfac
 }
 
 func encodeGRPCDeleteResponse(_ context.Context, response interface{}) (interface{}, error) {
-	// resp := response.(endpoint.DeleteResponse)
+	// resp := response.(domainendpoint.DeleteResponse)
 	return nil, nil // TODO: empty
 }
 
 func encodeGRPCGetResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(endpoint.GetResponse)
+	resp := response.(domainendpoint.GetResponse)
 	// return &pb.Domain{Domain: resp.Domain, Err: err2str(resp.Err)}, nil
 	return &pb.Domain{
 		Name:    resp.Domain.ExternalName(),
@@ -214,7 +214,7 @@ func encodeGRPCGetResponse(_ context.Context, response interface{}) (interface{}
 }
 
 func encodeGRPCListResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(endpoint.ListResponse)
+	resp := response.(domainendpoint.ListResponse)
 	// return &pb.ListDomainsResponse{Domains: resp.Domains, Err: err2str(resp.Err)}, nil
 	var domains []*pb.Domain
 	for _, domain := range resp.Domains {
@@ -224,7 +224,7 @@ func encodeGRPCListResponse(_ context.Context, response interface{}) (interface{
 }
 
 func encodeGRPCUpdateResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(endpoint.UpdateResponse)
+	resp := response.(domainendpoint.UpdateResponse)
 	// return &pb.Domain{Domain: resp.Domain, Err: err2str(resp.Err)}, nil
 	return &pb.Domain{
 		Name:    resp.Domain.ExternalName(),
@@ -233,12 +233,12 @@ func encodeGRPCUpdateResponse(_ context.Context, response interface{}) (interfac
 }
 
 // func encodeGRPCGetRequest(_ context.Context, request interface{}) (interface{}, error) {
-// 	req := request.(endpoint.GetRequest)
+// 	req := request.(domainendpoint.GetRequest)
 // 	return &pb.GetDomainRequest{Name: req.Name}, nil
 // }
 
 // func encodeGRPCListRequest(_ context.Context, request interface{}) (interface{}, error) {
-// 	req := request.(endpoint.ListRequest)
+// 	req := request.(domainendpoint.ListRequest)
 // 	return &pb.ListDomainsRequest{}, nil
 // }
 

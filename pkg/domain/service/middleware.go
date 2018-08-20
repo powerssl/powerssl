@@ -1,11 +1,11 @@
-package service
+package domainservice
 
 import (
 	"context"
 
 	"github.com/go-kit/kit/log"
 
-	domainmodel "powerssl.io/pkg/domain"
+	"powerssl.io/pkg/domain/model"
 )
 
 type Middleware func(Service) Service

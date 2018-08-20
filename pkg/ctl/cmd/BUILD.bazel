@@ -2,8 +2,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "go_default_library",
-    srcs = ["model.go"],
-    importpath = "powerssl.io/pkg/domain",
+    srcs = ["doc.go"],
+    importpath = "powerssl.io/pkg/ctl/cmd",
     visibility = ["//visibility:public"],
-    deps = ["@com_github_jinzhu_gorm//:go_default_library"],
 )

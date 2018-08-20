@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package powerssl.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "powerssl.io/api/v1;api";
+
+service IssueService {
+  rpc CreateIssue (CreateIssueRequest) returns (Issue) {
+    option (google.api.http) = {
+      post: "/v1/issues"
+      body: "issue"
+    };
+  }
+  rpc DeleteIssue (DeleteIssueRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/{name=issues/*}"
+    };
+  }
+  rpc GetIssue (GetIssueRequest) returns (Issue) {
+    option (google.api.http) = {
+      get: "/v1/{name=issues/*}"
+    };
+  }
+  rpc ListIssues (ListIssuesRequest) returns (ListIssuesResponse) {
+    option (google.api.http) = {
+      get: "/v1/issues"
+    };
+  }
+  rpc UpdateIssue (UpdateIssueRequest) returns (Issue) {
+    option (google.api.http) = {
+      patch: "/v1/{issue.name=issues/*}"
+      body: "issue"
+    };
+  }
+}
+
+message CreateIssueRequest {
+  Issue issue = 1;
+}
+
+message DeleteIssueRequest {
+  string name = 1;
+}
+
+message Issue {
+  string name = 1;
+  map<string, string> labels = 2;
+  bool discarded = 3;
+  google.protobuf.Timestamp create_time = 4;
+  google.protobuf.Timestamp update_time = 5;
+  google.protobuf.Timestamp discard_time = 6;
+}
+
+message GetIssueRequest {
+  string name = 1;
+}
+
+message ListIssuesRequest {
+  uint32 page_size = 1;
+  string page_token = 2;
+  bool show_discarded = 3;
+}
+
+message ListIssuesResponse {
+  repeated Issue issues = 1;
+  string next_page_token = 2;
+}
+
+message UpdateIssueRequest {
+  Issue issue = 1;
+  google.protobuf.FieldMask update_mask = 2;
+}

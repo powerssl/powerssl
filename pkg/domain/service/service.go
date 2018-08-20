@@ -1,4 +1,4 @@
-package service
+package domainservice
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 
-	domainmodel "powerssl.io/pkg/domain"
+	"powerssl.io/pkg/domain/model"
 )
 
 type Service interface {
