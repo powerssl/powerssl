@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package powerssl.v1;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "powerssl.io/pkg/api/v1;api";
+
+service CertificateAuthorityService {
+  rpc CreateCertificateAuthority(CertificateAuthorityRequest)
+      returns (CertificateAuthority) {
+  }
+  rpc DeleteCertificatAuthority(DeleteCertificatAuthorityRequest)
+      returns (google.protobuf.Empty) {
+  }
+  rpc GetCertificateAuthority(GetCertificateAuthorityRequest)
+      returns (CertificateAuthority) {
+  }
+  rpc ListCertificateAuthorities(ListCertificateAuthoritiesRequest)
+      returns (ListCertificateAuthoritiesResponse) {
+  }
+  rpc UpdateCertificateAuthority(UpdateCertificateAuthorityRequest)
+      returns (CertificateAuthority) {
+  }
+}
+
+message CertificateAuthorityRequest {
+  CertificateAuthority certificate_authority = 1;
+}
+
+message DeleteCertificatAuthorityRequest {
+  string name = 1;
+}
+
+message CertificateAuthority {
+  string name = 1;
+}
+
+message GetCertificateAuthorityRequest {
+  string name = 1;
+}
+
+message ListCertificateAuthoritiesRequest {
+}
+
+message ListCertificateAuthoritiesResponse {
+  repeated CertificateAuthority certificate_authority = 1;
+}
+
+message UpdateCertificateAuthorityRequest {
+  CertificateAuthority certificate_authority = 1;
+}

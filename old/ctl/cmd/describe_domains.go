@@ -8,7 +8,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	api_v1 "powerssl.io/api/v1"
+	api_v1 "powerssl.io/pkg/api/v1"
 )
 
 const (

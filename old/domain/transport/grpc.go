@@ -13,7 +13,7 @@ import (
 
 	types "github.com/gogo/protobuf/types"
 
-	pb "powerssl.io/api/v1"
+	pb "powerssl.io/pkg/api/v1"
 	domainendpoint "powerssl.io/pkg/domain/endpoint"
 	domainmodel "powerssl.io/pkg/domain/model"
 	// domainservice "powerssl.io/pkg/domain/service"

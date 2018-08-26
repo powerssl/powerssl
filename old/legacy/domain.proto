@@ -6,8 +6,33 @@ import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
+import "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options/annotations.proto";
+import "github.com/mwitkow/go-proto-validators/validator.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 
 option go_package = "powerssl.io/api/v1;api";
+
+option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
+  info: {
+    version: "1.0";
+  };
+  external_docs: {
+    url: "https://github.com/powerssl/powerssl";
+    description: "gRPC example repository";
+  }
+  schemes: HTTPS;
+};
+
+// Enable custom Marshal method.
+option (gogoproto.marshaler_all) = true;
+// Enable custom Unmarshal method.
+option (gogoproto.unmarshaler_all) = true;
+// Enable custom Size method (Required by Marshal and Unmarshal).
+option (gogoproto.sizer_all) = true;
+// Enable registration with golang/protobuf for the grpc-gateway.
+option (gogoproto.goproto_registration) = true;
+// Enable generation of XXX_MessageName methods for grpc-go/status.
+option (gogoproto.messagename_all) = true;
 
 service DomainService {
   rpc CreateDomain (CreateDomainRequest) returns (Domain) {
@@ -48,7 +73,7 @@ message DeleteDomainRequest {
 }
 
 message Domain {
-  string name = 1;
+  string name = 1 [(validator.field) = {msg_exists : true}];
   string dns_name = 2;
   map<string, string> labels = 3;
   // bool discarded = 4;

@@ -1,57 +1,71 @@
-GOCMD=go
-GOMOD=$(GOCMD) mod
-GOBUILD=$(GOCMD) build
-GOCLEAN=$(GOCMD) clean
-GOTEST=$(GOCMD) test
+PROTOC := $(shell which protoc)
+JQ := $(shell which jq)
 
-API_BINARY_NAME=bin/api
-API_BINARY_UNIX=$(CTL_BINARY_NAME)_unix
-CTL_BINARY_NAME=bin/ctl
-CTL_BINARY_UNIX=$(CTL_BINARY_NAME)_unix
+BIN_PATH := $(abspath bin)
+PKG_PATH := $(abspath pkg)
 
-all: test build
-build: build-api build-ctl
-build-api:
-	$(GOBUILD) -o $(API_BINARY_NAME) -v ./cmd/api
-build-ctl:
-	$(GOBUILD) -o $(CTL_BINARY_NAME) -v ./cmd/ctl
-test: 
-	$(GOTEST) -v ./...
-clean: clean-api clean-ctl
-clean-api: 
-	$(GOCLEAN) ./cmd/api
-	rm -f $(API_BINARY_NAME)
-	rm -f $(API_BINARY_UNIX)
-clean-ctl: 
-	$(GOCLEAN) ./cmd/ctl
-	rm -f $(CTL_BINARY_NAME)
-	rm -f $(CTL_BINARY_UNIX)
-run-api:
-	$(GOBUILD) -o $(API_BINARY_NAME) -v ./cmd/api/...
-	./$(API_BINARY_NAME)
-run-ctl:
-	$(GOBUILD) -o $(CTL_BINARY_NAME) -v ./cmd/ctl/...
-	./$(CTL_BINARY_NAME)
+export PATH := $(BIN_PATH):$(PATH)
 
-# Cross compilation
-build-api-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(API_BINARY_UNIX) -v ./cmd/api
-docker-api-build:
-	docker run --rm -it -v "$(GOPATH)":/go -w /go/src/powerssl.io golang:1.11rc1 go build -o "$(API_BINARY_UNIX)" -v ./cmd/api
-build-ctl-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(CTL_BINARY_UNIX) -v ./cmd/ctl
-docker-ctl-build:
-	docker run --rm -it -v "$(GOPATH)":/go -w /go/src/powerssl.io golang:1.11rc1 go build -o "$(CTL_BINARY_UNIX)" -v ./cmd/ctl
+FIND_RELEVANT := find $(PKG_PATH)
 
-generate:
-	protoc \
-		--proto_path=. \
-		--proto_path=$$($(GOMOD) download -json github.com/gogo/protobuf | jq -r '.Dir') \
-		--proto_path=$$($(GOMOD) download -json github.com/gogo/googleapis | jq -r '.Dir') \
-		--gogo_out=paths=source_relative,plugins=grpc,\
-Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/field_mask.proto=github.com/gogo/protobuf/types,\
-Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,\
-Mgoogle/api/annotations.proto=github.com/gogo/googleapis/google/api:.\
-		api/v1/*.proto
+GOGO_PROTOBUF_PATH := $(shell go mod download -json github.com/gogo/protobuf | $(JQ) -r '.Dir')
+PROTOBUF_PATH := $(GOGO_PROTOBUF_PATH)/protobuf
+
+PROTO_MAPPINGS :=
+PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types,
+
+GO_PROTOS := $(sort $(shell $(FIND_RELEVANT) -type f -name '*.proto' -print))
+GO_SOURCES := $(GO_PROTOS:%.proto=%.pb.go)
+
+PROTOBUF_TARGETS := bin/.go_protobuf_sources
+
+.DELETE_ON_ERROR:
+
+.ALWAYS_REBUILD:
+.PHONY: .ALWAYS_REBUILD
+
+.DEFAULT_GOAL := all
+all: build
+
+bin/.go_protobuf_sources: bin/protoc-gen-gogo
+	$(FIND_RELEVANT) -type f -name '*.pb.go' -exec rm {} +
+	set -e; for dir in $(sort $(dir $(GO_PROTOS))); do \
+		$(PROTOC) -I$(PKG_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) --gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src $$dir/*.proto; \
+	done
+	gofmt -s -w $(GO_SOURCES)
+	touch $@
+
+bin/protoc-gen-gogo:
+	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | $(JQ) -r '.Dir')/protoc-gen-gogo
+
+bin/powerssl-apiserver: .ALWAYS_REBUILD
+	go build -o bin/powerssl-apiserver ./cmd/powerssl-apiserver
+
+bin/powerctl: .ALWAYS_REBUILD
+	go build -o bin/powerctl ./cmd/powerctl
+
+.PHONY: build
+build: bin/powerssl-apiserver bin/powerctl
+
+.PHONY: fmt
+fmt:
+	go fmt $$(go list ./...)
+	clang-format -i --style=google $(GO_PROTOS)
+
+.PHONY: vet
+vet:
+	go vet $$(go list ./...)
+
+.PHONY: clean
+clean:
+	go clean ./cmd/powerssl-api ./cmd/powerctl
+	rm -f bin/.go_protobuf_sources
+	rm -f bin/powerssl-apiserver bin/powerctl
+
+.PHONY: protobuf
+protobuf: $(PROTOBUF_TARGETS)
+
+# build-linux:
+# 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/powerctl -v ./cmd/powerctl
+# docker-build:
+# 	docker run --rm -it -e GO111MODULE=on -v $$(pwd):/go/src -v $$(pwd)/bin:/go/bin -w /go/src golang:1.11rc1 go build -o /go/bin/powerctl -v ./cmd/powerctl

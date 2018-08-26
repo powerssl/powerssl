@@ -7,7 +7,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 
-	pb "powerssl.io/api/v1"
+	pb "powerssl.io/pkg/api/v1"
 	"powerssl.io/pkg/util/resource"
 
 	endpoint "powerssl.io/pkg/domain/endpoint"

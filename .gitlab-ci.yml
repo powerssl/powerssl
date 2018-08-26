@@ -1,0 +1,20 @@
+image: golang:1.11rc1
+
+stages:
+    - test
+    - build
+
+format:
+    stage: test
+    script:
+      - make fmt
+      - make vet
+
+compile:
+    stage: build
+    script:
+      - make build
+    artifacts:
+      paths:
+        - bin/powerssl-api
+        - bin/powerctl
