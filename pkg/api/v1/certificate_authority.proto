@@ -1,13 +1,14 @@
 syntax = "proto3";
 
-package powerssl.v1;
+package powerssl.api.v1;
 
 import "google/protobuf/empty.proto";
+import "api/v1/meta.proto";
 
 option go_package = "powerssl.io/pkg/api/v1;api";
 
 service CertificateAuthorityService {
-  rpc CreateCertificateAuthority(CertificateAuthorityRequest)
+  rpc CreateCertificateAuthority(CreateCertificateAuthorityRequest)
       returns (CertificateAuthority) {
   }
   rpc DeleteCertificatAuthority(DeleteCertificatAuthorityRequest)
@@ -24,15 +25,11 @@ service CertificateAuthorityService {
   }
 }
 
-message CertificateAuthorityRequest {
+message CreateCertificateAuthorityRequest {
   CertificateAuthority certificate_authority = 1;
 }
 
 message DeleteCertificatAuthorityRequest {
-  string name = 1;
-}
-
-message CertificateAuthority {
   string name = 1;
 }
 
@@ -44,9 +41,23 @@ message ListCertificateAuthoritiesRequest {
 }
 
 message ListCertificateAuthoritiesResponse {
-  repeated CertificateAuthority certificate_authority = 1;
+  TypeMeta type_meta = 1;
+  ListMeta list_meta = 2;
+
+  repeated CertificateAuthority items = 3;
 }
 
 message UpdateCertificateAuthorityRequest {
   CertificateAuthority certificate_authority = 1;
+}
+
+message CertificateAuthority {
+  TypeMeta type_meta = 1;
+  ObjectMeta object_meta = 2;
+
+  CertificateAuthoritySpec spec = 3;
+}
+
+message CertificateAuthoritySpec {
+  string vendor = 1;
 }

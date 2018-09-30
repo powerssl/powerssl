@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package powerssl.api.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "powerssl.io/pkg/api/v1;api";
+
+message ListMeta {
+  string resource_version = 1;
+  string continue = 2;
+}
+
+message ObjectMeta {
+  string resource_version = 1;
+  string name = 2;
+  string uid = 3;
+  google.protobuf.Timestamp creation_timestamp = 4;
+  google.protobuf.Timestamp deletion_timestamp = 5;
+  map<string, string> labels = 6;
+}
+
+message TypeMeta {
+  string api_version = 1;
+  string kind = 2;
+}

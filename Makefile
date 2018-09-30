@@ -13,6 +13,7 @@ PROTOBUF_PATH := $(GOGO_PROTOBUF_PATH)/protobuf
 
 PROTO_MAPPINGS :=
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types,
+PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,
 
 GO_PROTOS := $(sort $(shell $(FIND_RELEVANT) -type f -name '*.proto' -print))
 GO_SOURCES := $(GO_PROTOS:%.proto=%.pb.go)
@@ -37,6 +38,15 @@ bin/.go_protobuf_sources: bin/protoc-gen-gogo
 
 bin/protoc-gen-gogo:
 	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | $(JQ) -r '.Dir')/protoc-gen-gogo
+
+# Not used just as a reference
+bin/protoc-gen-grpc-web:
+	rm -rf /tmp/grpc-web
+	git clone --branch 0.4.0 https://github.com/grpc/grpc-web.git /tmp/grpc-web
+	cd /tmp/grpc-web/javascript/net/grpc/web && \
+		make protoc-gen-grpc-web && \
+		install protoc-gen-grpc-web $(BIN_PATH)/protoc-gen-grpc-web
+	# --js_out=import_style=commonjs:js --grpc-web_out=import_style=commonjs,mode=grpcwebtext:js \
 
 bin/powerssl-apiserver: .ALWAYS_REBUILD
 	go build -o bin/powerssl-apiserver ./cmd/powerssl-apiserver
