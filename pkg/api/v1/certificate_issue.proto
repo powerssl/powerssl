@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package powerssl.api.v1;
+
+import "google/protobuf/empty.proto";
+import "api/v1/meta.proto";
+
+option go_package = "powerssl.io/pkg/api/v1;api";
+
+service CertificateIssueService {
+  rpc CreateCertificateIssue(CreateCertificateIssueRequest)
+      returns (CertificateIssue) {
+  }
+  rpc DeleteCertificatIssue(DeleteCertificatIssueRequest)
+      returns (google.protobuf.Empty) {
+  }
+  rpc GetCertificateIssue(GetCertificateIssueRequest)
+      returns (CertificateIssue) {
+  }
+  rpc ListCertificateIssues(ListCertificateIssuesRequest)
+      returns (ListCertificateIssuesResponse) {
+  }
+  rpc UpdateCertificateIssue(UpdateCertificateIssueRequest)
+      returns (CertificateIssue) {
+  }
+}
+
+message CreateCertificateIssueRequest {
+  CertificateIssue certificate_authority = 1;
+}
+
+message DeleteCertificatIssueRequest {
+  string name = 1;
+}
+
+message GetCertificateIssueRequest {
+  string name = 1;
+}
+
+message ListCertificateIssuesRequest {
+}
+
+message ListCertificateIssuesResponse {
+  TypeMeta type_meta = 1;
+  ListMeta list_meta = 2;
+
+  repeated CertificateIssue items = 3;
+}
+
+message UpdateCertificateIssueRequest {
+  CertificateIssue certificate_authority = 1;
+}
+
+message CertificateIssue {
+  TypeMeta type_meta = 1;
+  ObjectMeta object_meta = 2;
+
+  CertificateIssueSpec spec = 3;
+  CertificateIssueStatus status = 4;
+}
+
+message CertificateIssueSpec {
+  string common_name = 1;
+  string encryption_algorithm = 2;
+  int32 key_size = 3;
+  string signature_algorithm = 4;
+}
+
+message CertificateIssueStatus {
+  string phase = 1;
+}

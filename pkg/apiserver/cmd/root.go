@@ -6,6 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"powerssl.io/pkg/apiserver"
 )
 
 var cfgFile string
@@ -17,9 +19,9 @@ var rootCmd = &cobra.Command{
 	Long: `powerssl-apiserver provides PowerSSL API.
 
 Find more information at: https://powerssl.io`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Run: func(cmd *cobra.Command, args []string) {
+		apiserver.Run("localhost:8080")
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

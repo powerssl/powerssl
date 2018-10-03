@@ -1,4 +1,4 @@
-package main
+package apiserver
 
 import (
 	"fmt"
@@ -11,28 +11,35 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/metrics"
+	"github.com/go-kit/kit/metrics/prometheus"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
+	stdprometheus "github.com/prometheus/client_golang/prometheus"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 
-	"powerssl.io/pkg/util/resource"
-
-	domainmodel "powerssl.io/pkg/domain/model"
-
-	"powerssl.io/pkg/domain"
+	"powerssl.io/pkg/resources"
+	"powerssl.io/pkg/resources/certificate_authority"
 )
 
-const (
-	grpcAddr = "localhost:8082"
-)
-
-func main() {
+func Run(grpcAddr string) {
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(os.Stderr)
 		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 		logger = log.With(logger, "caller", log.DefaultCaller)
+	}
+
+	var duration metrics.Histogram
+	{
+		// Endpoint-level metrics.
+		duration = prometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
+			Namespace: "powerssl_io",
+			Subsystem: "api",
+			Name:      "request_duration_seconds",
+			Help:      "Request duration in seconds.",
+		}, []string{"method", "success"})
 	}
 
 	var db *gorm.DB
@@ -43,13 +50,10 @@ func main() {
 			os.Exit(1)
 		}
 		defer db.Close()
-
-		db.AutoMigrate(&domainmodel.Domain{})
 	}
 
-	resources := []resource.APIResource{
-		// certificate.New(db, logger),
-		domain.New(db, logger),
+	resources := []resources.Resource{
+		certificate_authority.New(db, logger, duration),
 	}
 
 	var g group.Group

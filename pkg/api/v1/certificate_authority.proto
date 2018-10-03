@@ -11,7 +11,7 @@ service CertificateAuthorityService {
   rpc CreateCertificateAuthority(CreateCertificateAuthorityRequest)
       returns (CertificateAuthority) {
   }
-  rpc DeleteCertificatAuthority(DeleteCertificatAuthorityRequest)
+  rpc DeleteCertificateAuthority(DeleteCertificateAuthorityRequest)
       returns (google.protobuf.Empty) {
   }
   rpc GetCertificateAuthority(GetCertificateAuthorityRequest)
@@ -29,7 +29,7 @@ message CreateCertificateAuthorityRequest {
   CertificateAuthority certificate_authority = 1;
 }
 
-message DeleteCertificatAuthorityRequest {
+message DeleteCertificateAuthorityRequest {
   string name = 1;
 }
 
