@@ -8,7 +8,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 
-	api "powerssl.io/pkg/api/v1"
+	pb "powerssl.io/pkg/api/v1"
 	model "powerssl.io/pkg/db"
 
 	"powerssl.io/pkg/resources"
@@ -43,9 +43,9 @@ func New(db *gorm.DB, logger log.Logger, duration metrics.Histogram) resources.R
 }
 
 func (ca CertificateAuthority) RegisterGRPCServer(baseServer *grpc.Server) {
-	api.RegisterCertificateAuthorityServiceServer(baseServer, ca.grpcServer())
+	pb.RegisterCertificateAuthorityServiceServer(baseServer, ca.grpcServer())
 }
 
-func (ca CertificateAuthority) grpcServer() api.CertificateAuthorityServiceServer {
+func (ca CertificateAuthority) grpcServer() pb.CertificateAuthorityServiceServer {
 	return transport.NewGRPCServer(ca.endpoints, ca.logger)
 }

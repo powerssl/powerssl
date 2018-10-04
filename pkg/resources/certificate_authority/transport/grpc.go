@@ -92,7 +92,7 @@ func (s *grpcServer) GetCertificateAuthority(ctx oldcontext.Context, req *pb.Get
 }
 
 func (s *grpcServer) ListCertificateAuthorities(ctx oldcontext.Context, req *pb.ListCertificateAuthoritiesRequest) (*pb.ListCertificateAuthoritiesResponse, error) {
-	_, rep, err := s.get.ServeGRPC(ctx, req)
+	_, rep, err := s.list.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -194,10 +194,10 @@ func (s *grpcServer) UpdateCertificateAuthority(ctx oldcontext.Context, req *pb.
 
 func decodeGRPCCertificateAuthority(certificateAuthority *pb.CertificateAuthority) api.CertificateAuthority {
 	return api.CertificateAuthority{
-		TypeMeta:   transport.DecodeGRPCTypeMeta(certificateAuthority.TypeMeta),
-		ObjectMeta: transport.DecodeGRPCObjectMeta(certificateAuthority.ObjectMeta),
+		TypeMeta:   transport.DecodeGRPCTypeMeta(certificateAuthority.GetTypeMeta()),
+		ObjectMeta: transport.DecodeGRPCObjectMeta(certificateAuthority.GetObjectMeta()),
 		Spec: api.CertificateAuthoritySpec{
-			Vendor: certificateAuthority.Spec.Vendor,
+			Vendor: certificateAuthority.GetSpec().GetVendor(),
 		},
 	}
 }
@@ -215,7 +215,7 @@ func encodeGRPCCertificateAuthority(certificateAuthority api.CertificateAuthorit
 func decodeGRPCCreateRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*pb.CreateCertificateAuthorityRequest)
 	return endpoints.CreateRequest{
-		CertificateAuthority: decodeGRPCCertificateAuthority(req.CertificateAuthority),
+		CertificateAuthority: decodeGRPCCertificateAuthority(req.GetCertificateAuthority()),
 	}, nil
 }
 
@@ -229,7 +229,7 @@ func decodeGRPCCreateResponse(_ context.Context, grpcReply interface{}) (interfa
 func decodeGRPCDeleteRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*pb.DeleteCertificateAuthorityRequest)
 	return endpoints.DeleteRequest{
-		Name: req.Name,
+		Name: req.GetName(),
 	}, nil
 }
 

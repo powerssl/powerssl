@@ -33,10 +33,28 @@ Available Commands:
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 
-		response, err := c.ListCertificateAuthorities(ctx, &api.ListCertificateAuthoritiesRequest{})
+		certificateAuthority := &api.CertificateAuthority{
+			TypeMeta: &api.TypeMeta{
+				ApiVersion: "v1",
+				Kind:       "CertificateAuthority",
+			},
+			ObjectMeta: &api.ObjectMeta{
+				Labels: map[string]string{
+					"foo": "bar",
+					"baz": "boo",
+				},
+			},
+			Spec: &api.CertificateAuthoritySpec{
+				Vendor: "rofl",
+			},
+		}
+		response, err := c.CreateCertificateAuthority(ctx, &api.CreateCertificateAuthorityRequest{
+			CertificateAuthority: certificateAuthority,
+		})
 		if err != nil {
 			log.Fatalf("could not list: %v", err)
 		}
+		log.Println("RESPONSE:")
 		log.Println(response)
 	},
 }

@@ -9,19 +9,19 @@ import (
 
 func DecodeGRPCObjectMeta(objectMeta *pb.ObjectMeta) api.ObjectMeta {
 	return api.ObjectMeta{
-		CreationTimestamp: time.Time{}, // TODO: objectMeta.CreationTimestamp,
-		DeletionTimestamp: nil,         // TODO: objectMeta.DeletionTimestamp,
-		Labels:            objectMeta.Labels,
-		Name:              objectMeta.Name,
-		ResourceVersion:   objectMeta.ResourceVersion,
-		UID:               objectMeta.Uid,
+		CreationTimestamp: time.Time{}, // TODO: objectMeta.GetCreationTimestamp(),
+		DeletionTimestamp: nil,         // TODO: objectMeta.GetDeletionTimestamp(),
+		Labels:            objectMeta.GetLabels(),
+		Name:              objectMeta.GetName(),
+		ResourceVersion:   objectMeta.GetResourceVersion(),
+		UID:               objectMeta.GetUid(),
 	}
 }
 
 func DecodeGRPCTypeMeta(typeMeta *pb.TypeMeta) api.TypeMeta {
 	return api.TypeMeta{
-		APIVersion: typeMeta.ApiVersion,
-		Kind:       typeMeta.Kind,
+		APIVersion: typeMeta.GetApiVersion(),
+		Kind:       typeMeta.GetKind(),
 	}
 }
 

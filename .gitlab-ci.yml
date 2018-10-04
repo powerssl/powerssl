@@ -1,16 +1,12 @@
 image: golang:1.11
 
+variables:
+  GO111MODULE: "on"
+
 stages:
-    - test
     - build
 
-format:
-    stage: test
-    script:
-      - make fmt
-      - make vet
-
-compile:
+build:
     stage: build
     script:
       - make build
