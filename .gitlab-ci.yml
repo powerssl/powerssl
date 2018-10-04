@@ -1,16 +1,22 @@
 image: golang:1.11
 
 variables:
-  GO111MODULE: "on"
+  GOPATH: "$CI_PROJECT_DIR/go"
 
 stages:
     - build
 
 build:
-    stage: build
+    artifacts:
+      name: "$CI_COMMIT_REF_NAME"
+      paths:
+        - bin/powerctl
+        - bin/powerssl-apiserver
+    cache:
+      key: "$CI_COMMIT_REF_SLUG"
+      paths:
+        - "go/pkg/mod"
+    dependencies: []
     script:
       - make build
-    artifacts:
-      paths:
-        - bin/powerssl-api
-        - bin/powerctl
+    stage: build
