@@ -8,7 +8,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	"powerssl.io/pkg/api/v1"
+	apiv1 "powerssl.io/pkg/api/v1"
 )
 
 // createCmd represents the create command
@@ -27,35 +27,45 @@ Available Commands:
 			log.Fatalf("did not connect: %v", err)
 		}
 		defer conn.Close()
-		c := api.NewCertificateAuthorityServiceClient(conn)
+		c := apiv1.NewCertificateAuthorityServiceClient(conn)
 		log.Println(c)
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
-		certificateAuthority := &api.CertificateAuthority{
-			TypeMeta: &api.TypeMeta{
+		certificateAuthority := &apiv1.CertificateAuthority{
+			TypeMeta: &apiv1.TypeMeta{
 				ApiVersion: "v1",
 				Kind:       "CertificateAuthority",
 			},
-			ObjectMeta: &api.ObjectMeta{
+			ObjectMeta: &apiv1.ObjectMeta{
 				Labels: map[string]string{
 					"foo": "bar",
 					"baz": "boo",
 				},
 			},
-			Spec: &api.CertificateAuthoritySpec{
+			Spec: &apiv1.CertificateAuthoritySpec{
 				Vendor: "rofl",
 			},
 		}
-		response, err := c.CreateCertificateAuthority(ctx, &api.CreateCertificateAuthorityRequest{
-			CertificateAuthority: certificateAuthority,
-		})
-		if err != nil {
-			log.Fatalf("could not list: %v", err)
+		n := 10000
+		done := make(chan bool)
+		for i := 1; i <= n; i++ {
+			go func() {
+				_, err := c.CreateCertificateAuthority(ctx, &apiv1.CreateCertificateAuthorityRequest{
+					CertificateAuthority: certificateAuthority,
+				})
+				if err != nil {
+					log.Fatalf("could not list: %v", err)
+				}
+				//log.Println("RESPONSE:")
+				//log.Println(response)
+				done <- true
+			}()
 		}
-		log.Println("RESPONSE:")
-		log.Println(response)
+		for i := 0; i < n; i++ {
+			<-done
+		}
 	},
 }
 

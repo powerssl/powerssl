@@ -13,7 +13,7 @@ import (
 	types "github.com/gogo/protobuf/types"
 
 	"powerssl.io/pkg/api"
-	pb "powerssl.io/pkg/api/v1"
+	apiv1 "powerssl.io/pkg/api/v1"
 	"powerssl.io/pkg/resources/certificate_authority/endpoints"
 	//"powerssl.io/pkg/resources/certificate_authority/service"
 	"powerssl.io/pkg/resources/transport"
@@ -28,7 +28,7 @@ type grpcServer struct {
 }
 
 // NewGRPCServer makes a set of endpoints available as a gRPC CertificateAuthorityServiceServer.
-func NewGRPCServer(endpoints endpoints.Endpoints, logger log.Logger) pb.CertificateAuthorityServiceServer {
+func NewGRPCServer(endpoints endpoints.Endpoints, logger log.Logger) apiv1.CertificateAuthorityServiceServer {
 	options := []grpctransport.ServerOption{
 		grpctransport.ServerErrorLogger(logger),
 	}
@@ -67,15 +67,15 @@ func NewGRPCServer(endpoints endpoints.Endpoints, logger log.Logger) pb.Certific
 	}
 }
 
-func (s *grpcServer) CreateCertificateAuthority(ctx oldcontext.Context, req *pb.CreateCertificateAuthorityRequest) (*pb.CertificateAuthority, error) {
+func (s *grpcServer) CreateCertificateAuthority(ctx oldcontext.Context, req *apiv1.CreateCertificateAuthorityRequest) (*apiv1.CertificateAuthority, error) {
 	_, rep, err := s.create.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*pb.CertificateAuthority), nil
+	return rep.(*apiv1.CertificateAuthority), nil
 }
 
-func (s *grpcServer) DeleteCertificateAuthority(ctx oldcontext.Context, req *pb.DeleteCertificateAuthorityRequest) (*types.Empty, error) {
+func (s *grpcServer) DeleteCertificateAuthority(ctx oldcontext.Context, req *apiv1.DeleteCertificateAuthorityRequest) (*types.Empty, error) {
 	_, rep, err := s.delete.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
@@ -83,28 +83,28 @@ func (s *grpcServer) DeleteCertificateAuthority(ctx oldcontext.Context, req *pb.
 	return rep.(*types.Empty), nil
 }
 
-func (s *grpcServer) GetCertificateAuthority(ctx oldcontext.Context, req *pb.GetCertificateAuthorityRequest) (*pb.CertificateAuthority, error) {
+func (s *grpcServer) GetCertificateAuthority(ctx oldcontext.Context, req *apiv1.GetCertificateAuthorityRequest) (*apiv1.CertificateAuthority, error) {
 	_, rep, err := s.get.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*pb.CertificateAuthority), nil
+	return rep.(*apiv1.CertificateAuthority), nil
 }
 
-func (s *grpcServer) ListCertificateAuthorities(ctx oldcontext.Context, req *pb.ListCertificateAuthoritiesRequest) (*pb.ListCertificateAuthoritiesResponse, error) {
+func (s *grpcServer) ListCertificateAuthorities(ctx oldcontext.Context, req *apiv1.ListCertificateAuthoritiesRequest) (*apiv1.ListCertificateAuthoritiesResponse, error) {
 	_, rep, err := s.list.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*pb.ListCertificateAuthoritiesResponse), nil
+	return rep.(*apiv1.ListCertificateAuthoritiesResponse), nil
 }
 
-func (s *grpcServer) UpdateCertificateAuthority(ctx oldcontext.Context, req *pb.UpdateCertificateAuthorityRequest) (*pb.CertificateAuthority, error) {
+func (s *grpcServer) UpdateCertificateAuthority(ctx oldcontext.Context, req *apiv1.UpdateCertificateAuthorityRequest) (*apiv1.CertificateAuthority, error) {
 	_, rep, err := s.update.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*pb.CertificateAuthority), nil
+	return rep.(*apiv1.CertificateAuthority), nil
 }
 
 // NewGRPCClient returns an AddService backed by a gRPC server at the other end
@@ -119,11 +119,11 @@ func (s *grpcServer) UpdateCertificateAuthority(ctx oldcontext.Context, req *pb.
 // 	{
 // 		createEndpoint = grpctransport.NewClient(
 // 			conn,
-// 			"pb.CreateCertificateAuthority",
+// 			"apiv1.CreateCertificateAuthority",
 // 			"Create",
 // 			encodeGRPCCreateRequest,
 // 			decodeGRPCCreateResponse,
-// 			pb.CertificateAuthority{},
+// 			apiv1.CertificateAuthority{},
 // 			options...,
 // 		).Endpoint()
 // 	}
@@ -132,7 +132,7 @@ func (s *grpcServer) UpdateCertificateAuthority(ctx oldcontext.Context, req *pb.
 // 	{
 // 		deleteEndpoint = grpctransport.NewClient(
 // 			conn,
-// 			"pb.DeleteCertificateAuthority",
+// 			"apiv1.DeleteCertificateAuthority",
 // 			"Delete",
 // 			encodeGRPCDeleteRequest,
 // 			decodeGRPCDeleteResponse,
@@ -145,11 +145,11 @@ func (s *grpcServer) UpdateCertificateAuthority(ctx oldcontext.Context, req *pb.
 // 	{
 // 		getEndpoint = grpctransport.NewClient(
 // 			conn,
-// 			"pb.GetCertificateAuthority",
+// 			"apiv1.GetCertificateAuthority",
 // 			"Get",
 // 			encodeGRPCGetRequest,
 // 			decodeGRPCGetResponse,
-// 			pb.CertificateAuthority{},
+// 			apiv1.CertificateAuthority{},
 // 			options...,
 // 		).Endpoint()
 // 	}
@@ -158,11 +158,11 @@ func (s *grpcServer) UpdateCertificateAuthority(ctx oldcontext.Context, req *pb.
 // 	{
 // 		getEndpoint = grpctransport.NewClient(
 // 			conn,
-// 			"pb.ListCertificateAuthorities",
+// 			"apiv1.ListCertificateAuthorities",
 // 			"Get",
 // 			encodeGRPCListRequest,
 // 			decodeGRPCListResponse,
-// 			pb.ListCertificateAuthoritiesResponse{},
+// 			apiv1.ListCertificateAuthoritiesResponse{},
 // 			options...,
 // 		).Endpoint()
 // 	}
@@ -171,11 +171,11 @@ func (s *grpcServer) UpdateCertificateAuthority(ctx oldcontext.Context, req *pb.
 // 	{
 // 		getEndpoint = grpctransport.NewClient(
 // 			conn,
-// 			"pb.UpdateCertificateAuthority",
+// 			"apiv1.UpdateCertificateAuthority",
 // 			"Update",
 // 			encodeGRPCUpdateRequest,
 // 			decodeGRPCUpdateResponse,
-// 			pb.CertificateAuthority{},
+// 			apiv1.CertificateAuthority{},
 // 			options...,
 // 		).Endpoint()
 // 	}
@@ -192,7 +192,15 @@ func (s *grpcServer) UpdateCertificateAuthority(ctx oldcontext.Context, req *pb.
 // 	}
 // }
 
-func decodeGRPCCertificateAuthority(certificateAuthority *pb.CertificateAuthority) api.CertificateAuthority {
+func decodeGRPCCertificateAuthorities(certificateAuthorities []*apiv1.CertificateAuthority) []api.CertificateAuthority {
+	items := make([]api.CertificateAuthority, len(certificateAuthorities))
+	for i, certificateAuthority := range certificateAuthorities {
+		items[i] = decodeGRPCCertificateAuthority(certificateAuthority)
+	}
+	return items
+}
+
+func decodeGRPCCertificateAuthority(certificateAuthority *apiv1.CertificateAuthority) api.CertificateAuthority {
 	return api.CertificateAuthority{
 		TypeMeta:   transport.DecodeGRPCTypeMeta(certificateAuthority.GetTypeMeta()),
 		ObjectMeta: transport.DecodeGRPCObjectMeta(certificateAuthority.GetObjectMeta()),
@@ -202,32 +210,40 @@ func decodeGRPCCertificateAuthority(certificateAuthority *pb.CertificateAuthorit
 	}
 }
 
-func encodeGRPCCertificateAuthority(certificateAuthority api.CertificateAuthority) *pb.CertificateAuthority {
-	return &pb.CertificateAuthority{
+func encodeGRPCCertificateAuthorities(certificateAuthorities []api.CertificateAuthority) []*apiv1.CertificateAuthority {
+	items := make([]*apiv1.CertificateAuthority, len(certificateAuthorities))
+	for i, certificateAuthority := range certificateAuthorities {
+		items[i] = encodeGRPCCertificateAuthority(certificateAuthority)
+	}
+	return items
+}
+
+func encodeGRPCCertificateAuthority(certificateAuthority api.CertificateAuthority) *apiv1.CertificateAuthority {
+	return &apiv1.CertificateAuthority{
 		TypeMeta:   transport.EncodeGRPCTypeMeta(certificateAuthority.TypeMeta),
 		ObjectMeta: transport.EncodeGRPCObjectMeta(certificateAuthority.ObjectMeta),
-		Spec: &pb.CertificateAuthoritySpec{
+		Spec: &apiv1.CertificateAuthoritySpec{
 			Vendor: certificateAuthority.Spec.Vendor,
 		},
 	}
 }
 
 func decodeGRPCCreateRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	req := grpcReq.(*pb.CreateCertificateAuthorityRequest)
+	req := grpcReq.(*apiv1.CreateCertificateAuthorityRequest)
 	return endpoints.CreateRequest{
 		CertificateAuthority: decodeGRPCCertificateAuthority(req.GetCertificateAuthority()),
 	}, nil
 }
 
 func decodeGRPCCreateResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
-	reply := grpcReply.(*pb.CertificateAuthority)
+	reply := grpcReply.(*apiv1.CertificateAuthority)
 	return endpoints.CreateResponse{
 		CertificateAuthority: decodeGRPCCertificateAuthority(reply),
 	}, nil
 }
 
 func decodeGRPCDeleteRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	req := grpcReq.(*pb.DeleteCertificateAuthorityRequest)
+	req := grpcReq.(*apiv1.DeleteCertificateAuthorityRequest)
 	return endpoints.DeleteRequest{
 		Name: req.GetName(),
 	}, nil
@@ -238,33 +254,42 @@ func decodeGRPCDeleteResponse(_ context.Context, grpcReply interface{}) (interfa
 }
 
 func decodeGRPCGetRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	// TODO
-	return nil, nil
+	req := grpcReq.(*apiv1.GetCertificateAuthorityRequest)
+	return endpoints.GetRequest{
+		Name: req.GetName(),
+	}, nil
 }
 
 func decodeGRPCGetResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
-	// TODO
-	return nil, nil
+	reply := grpcReply.(*apiv1.CertificateAuthority)
+	return endpoints.GetResponse{
+		CertificateAuthority: decodeGRPCCertificateAuthority(reply),
+	}, nil
 }
 
 func decodeGRPCListRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	// TODO
-	return nil, nil
+	return endpoints.ListRequest{}, nil
 }
 
 func decodeGRPCListResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
-	// TODO
-	return nil, nil
+	reply := grpcReply.(*apiv1.ListCertificateAuthoritiesResponse)
+	return endpoints.ListResponse{
+		CertificateAuthorities: decodeGRPCCertificateAuthorities(reply.GetItems()),
+	}, nil
 }
 
 func decodeGRPCUpdateRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	// TODO
-	return nil, nil
+	req := grpcReq.(*apiv1.UpdateCertificateAuthorityRequest)
+	return endpoints.UpdateRequest{
+		CertificateAuthority: decodeGRPCCertificateAuthority(req.GetCertificateAuthority()),
+	}, nil
 }
 
 func decodeGRPCUpdateResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
-	// TODO
-	return nil, nil
+	reply := grpcReply.(*apiv1.CertificateAuthority)
+	return endpoints.UpdateResponse{
+		CertificateAuthority: decodeGRPCCertificateAuthority(reply),
+	}, nil
 }
 
 func encodeGRPCCreateResponse(_ context.Context, response interface{}) (interface{}, error) {
@@ -274,7 +299,7 @@ func encodeGRPCCreateResponse(_ context.Context, response interface{}) (interfac
 
 func encodeGRPCCreateRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(endpoints.CreateRequest)
-	return &pb.CreateCertificateAuthorityRequest{
+	return &apiv1.CreateCertificateAuthorityRequest{
 		CertificateAuthority: encodeGRPCCertificateAuthority(req.CertificateAuthority),
 	}, nil
 }
@@ -285,37 +310,40 @@ func encodeGRPCDeleteResponse(_ context.Context, response interface{}) (interfac
 
 func encodeGRPCDeleteRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(endpoints.DeleteRequest)
-	return &pb.DeleteCertificateAuthorityRequest{
+	return &apiv1.DeleteCertificateAuthorityRequest{
 		Name: req.Name,
 	}, nil
 }
 
 func encodeGRPCGetResponse(_ context.Context, response interface{}) (interface{}, error) {
-	// TODO
-	return nil, nil
+	resp := response.(endpoints.GetResponse)
+	return encodeGRPCCertificateAuthority(resp.CertificateAuthority), nil
 }
 
 func encodeGRPCGetRequest(_ context.Context, request interface{}) (interface{}, error) {
-	// TODO
-	return nil, nil
+	req := request.(endpoints.GetRequest)
+	return &apiv1.GetCertificateAuthorityRequest{
+		Name: req.Name,
+	}, nil
 }
 
 func encodeGRPCListResponse(_ context.Context, response interface{}) (interface{}, error) {
-	// TODO
-	return nil, nil
+	resp := response.(endpoints.ListResponse)
+	return encodeGRPCCertificateAuthorities(resp.CertificateAuthorities), nil
 }
 
 func encodeGRPCListRequest(_ context.Context, request interface{}) (interface{}, error) {
-	// TODO
-	return nil, nil
+	return &apiv1.ListCertificateAuthoritiesRequest{}, nil
 }
 
 func encodeGRPCUpdateResponse(_ context.Context, response interface{}) (interface{}, error) {
-	// TODO
-	return nil, nil
+	resp := response.(endpoints.UpdateResponse)
+	return encodeGRPCCertificateAuthority(resp.CertificateAuthority), nil
 }
 
 func encodeGRPCUpdateRequest(_ context.Context, request interface{}) (interface{}, error) {
-	// TODO
-	return nil, nil
+	req := request.(endpoints.UpdateRequest)
+	return &apiv1.UpdateCertificateAuthorityRequest{
+		CertificateAuthority: encodeGRPCCertificateAuthority(req.CertificateAuthority),
+	}, nil
 }

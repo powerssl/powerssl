@@ -1,16 +1,20 @@
 package transport
 
 import (
-	"time"
+	"github.com/gogo/protobuf/types"
 
 	"powerssl.io/pkg/api"
-	pb "powerssl.io/pkg/api/v1"
+	apiv1 "powerssl.io/pkg/api/v1"
 )
 
-func DecodeGRPCObjectMeta(objectMeta *pb.ObjectMeta) api.ObjectMeta {
+// TODO: Error handling
+func DecodeGRPCObjectMeta(objectMeta *apiv1.ObjectMeta) api.ObjectMeta {
+	creationTimestamp, _ := types.TimestampFromProto(objectMeta.GetCreationTimestamp())
+	deletionTimestamp, _ := types.TimestampFromProto(objectMeta.GetDeletionTimestamp())
+
 	return api.ObjectMeta{
-		CreationTimestamp: time.Time{}, // TODO: objectMeta.GetCreationTimestamp(),
-		DeletionTimestamp: nil,         // TODO: objectMeta.GetDeletionTimestamp(),
+		CreationTimestamp: creationTimestamp,
+		DeletionTimestamp: &deletionTimestamp,
 		Labels:            objectMeta.GetLabels(),
 		Name:              objectMeta.GetName(),
 		ResourceVersion:   objectMeta.GetResourceVersion(),
@@ -18,17 +22,21 @@ func DecodeGRPCObjectMeta(objectMeta *pb.ObjectMeta) api.ObjectMeta {
 	}
 }
 
-func DecodeGRPCTypeMeta(typeMeta *pb.TypeMeta) api.TypeMeta {
+func DecodeGRPCTypeMeta(typeMeta *apiv1.TypeMeta) api.TypeMeta {
 	return api.TypeMeta{
 		APIVersion: typeMeta.GetApiVersion(),
 		Kind:       typeMeta.GetKind(),
 	}
 }
 
-func EncodeGRPCObjectMeta(objectMeta api.ObjectMeta) *pb.ObjectMeta {
-	return &pb.ObjectMeta{
-		CreationTimestamp: nil, // TODO: objectMeta.CreationTimestamp,
-		DeletionTimestamp: nil, // TODO: objectMeta.DeletionTimestamp,
+// TODO: Error handling
+func EncodeGRPCObjectMeta(objectMeta api.ObjectMeta) *apiv1.ObjectMeta {
+	creationTimestamp, _ := types.TimestampProto(objectMeta.CreationTimestamp)
+	deletionTimestamp, _ := types.TimestampProto(*objectMeta.DeletionTimestamp)
+
+	return &apiv1.ObjectMeta{
+		CreationTimestamp: creationTimestamp,
+		DeletionTimestamp: deletionTimestamp,
 		Labels:            objectMeta.Labels,
 		Name:              objectMeta.Name,
 		ResourceVersion:   objectMeta.ResourceVersion,
@@ -36,8 +44,8 @@ func EncodeGRPCObjectMeta(objectMeta api.ObjectMeta) *pb.ObjectMeta {
 	}
 }
 
-func EncodeGRPCTypeMeta(typeMeta api.TypeMeta) *pb.TypeMeta {
-	return &pb.TypeMeta{
+func EncodeGRPCTypeMeta(typeMeta api.TypeMeta) *apiv1.TypeMeta {
+	return &apiv1.TypeMeta{
 		ApiVersion: typeMeta.APIVersion,
 		Kind:       typeMeta.Kind,
 	}

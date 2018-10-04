@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"powerssl.io/pkg/api"
 )
@@ -29,6 +30,7 @@ func newBasicService() Service {
 }
 
 func (bs basicService) Create(_ context.Context, ca api.CertificateAuthority) (api.CertificateAuthority, error) {
+	time.Sleep(1 * time.Second)
 	return ca, nil
 }
 
