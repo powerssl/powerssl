@@ -8,17 +8,17 @@ import "api/v1/meta.proto";
 option go_package = "powerssl.io/pkg/api/v1;api";
 
 service CertificateService {
-  rpc CreateCertificate(CreateCertificateRequest) returns (Certificate) {
+  rpc Create(CreateCertificateRequest) returns (Certificate) {
   }
-  rpc DeleteCertificat(DeleteCertificatRequest)
+  rpc Delete(DeleteCertificatRequest)
       returns (google.protobuf.Empty) {
   }
-  rpc GetCertificate(GetCertificateRequest) returns (Certificate) {
+  rpc Get(GetCertificateRequest) returns (Certificate) {
   }
-  rpc ListCertificate(ListCertificateRequest)
+  rpc List(ListCertificateRequest)
       returns (ListCertificateResponse) {
   }
-  rpc UpdateCertificate(UpdateCertificateRequest) returns (Certificate) {
+  rpc Update(UpdateCertificateRequest) returns (Certificate) {
   }
 }
 

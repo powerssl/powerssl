@@ -2,26 +2,44 @@ syntax = "proto3";
 
 package powerssl.api.v1;
 
+import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "api/v1/meta.proto";
 
 option go_package = "powerssl.io/pkg/api/v1;api";
 
 service CertificateAuthorityService {
-  rpc CreateCertificateAuthority(CreateCertificateAuthorityRequest)
+  rpc Create(CreateCertificateAuthorityRequest)
       returns (CertificateAuthority) {
+    option (google.api.http) = {
+      post: "/v1/certificate-authorities"
+      body: "certificate-authority"
+    };
   }
-  rpc DeleteCertificateAuthority(DeleteCertificateAuthorityRequest)
+  rpc Delete(DeleteCertificateAuthorityRequest)
       returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/{name=certificate-authorities/*}"
+    };
   }
-  rpc GetCertificateAuthority(GetCertificateAuthorityRequest)
+  rpc Get(GetCertificateAuthorityRequest)
       returns (CertificateAuthority) {
+    option (google.api.http) = {
+      get: "/v1/{name=certificate-authorities/*}"
+    };
   }
-  rpc ListCertificateAuthorities(ListCertificateAuthoritiesRequest)
+  rpc List(ListCertificateAuthoritiesRequest)
       returns (ListCertificateAuthoritiesResponse) {
+    option (google.api.http) = {
+      get: "/v1/certificate-authorities"
+    };
   }
-  rpc UpdateCertificateAuthority(UpdateCertificateAuthorityRequest)
+  rpc Update(UpdateCertificateAuthorityRequest)
       returns (CertificateAuthority) {
+    option (google.api.http) = {
+      put: "/v1/{name=certificate-authorities/*}",
+      body: "certificate-authority"
+    };
   }
 }
 
@@ -38,9 +56,12 @@ message GetCertificateAuthorityRequest {
 }
 
 message ListCertificateAuthoritiesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
 }
 
 message ListCertificateAuthoritiesResponse {
+  string next_page_token = 4;
   TypeMeta type_meta = 1;
   ListMeta list_meta = 2;
 
@@ -48,6 +69,7 @@ message ListCertificateAuthoritiesResponse {
 }
 
 message UpdateCertificateAuthorityRequest {
+  string name = 2;
   CertificateAuthority certificate_authority = 1;
 }
 

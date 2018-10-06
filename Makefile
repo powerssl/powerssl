@@ -8,10 +8,12 @@ export PATH := $(BIN_PATH):$(PATH)
 
 FIND_RELEVANT := find $(PKG_PATH)
 
+GOGO_GOOGLEAPIS_PATH := $(shell go mod download -json github.com/gogo/googleapis | $(JQ) -r '.Dir')
 GOGO_PROTOBUF_PATH := $(shell go mod download -json github.com/gogo/protobuf | $(JQ) -r '.Dir')
 PROTOBUF_PATH := $(GOGO_PROTOBUF_PATH)/protobuf
 
 PROTO_MAPPINGS :=
+PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/api/annotations.proto=github.com/gogo/googleapis/google/api,
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types,
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,
 
@@ -31,7 +33,7 @@ all: build
 bin/.go_protobuf_sources: bin/protoc-gen-gogo
 	$(FIND_RELEVANT) -type f -name '*.pb.go' -exec rm {} +
 	set -e; for dir in $(sort $(dir $(GO_PROTOS))); do \
-		$(PROTOC) -I$(PKG_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) --gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src $$dir/*.proto; \
+		$(PROTOC) -I$(PKG_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) --gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src $$dir/*.proto; \
 	done
 	gofmt -s -w $(GO_SOURCES)
 	touch $@

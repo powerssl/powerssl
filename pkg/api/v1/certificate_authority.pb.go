@@ -6,6 +6,7 @@ package api // import "powerssl.io/pkg/api/v1"
 import proto "github.com/gogo/protobuf/proto"
 import fmt "fmt"
 import math "math"
+import _ "github.com/gogo/googleapis/google/api"
 import types "github.com/gogo/protobuf/types"
 
 import context "golang.org/x/net/context"
@@ -33,7 +34,7 @@ func (m *CreateCertificateAuthorityRequest) Reset()         { *m = CreateCertifi
 func (m *CreateCertificateAuthorityRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateCertificateAuthorityRequest) ProtoMessage()    {}
 func (*CreateCertificateAuthorityRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_certificate_authority_29a6abb5cfbd2612, []int{0}
+	return fileDescriptor_certificate_authority_cc9d796a42156bc4, []int{0}
 }
 func (m *CreateCertificateAuthorityRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateCertificateAuthorityRequest.Unmarshal(m, b)
@@ -71,7 +72,7 @@ func (m *DeleteCertificateAuthorityRequest) Reset()         { *m = DeleteCertifi
 func (m *DeleteCertificateAuthorityRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteCertificateAuthorityRequest) ProtoMessage()    {}
 func (*DeleteCertificateAuthorityRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_certificate_authority_29a6abb5cfbd2612, []int{1}
+	return fileDescriptor_certificate_authority_cc9d796a42156bc4, []int{1}
 }
 func (m *DeleteCertificateAuthorityRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteCertificateAuthorityRequest.Unmarshal(m, b)
@@ -109,7 +110,7 @@ func (m *GetCertificateAuthorityRequest) Reset()         { *m = GetCertificateAu
 func (m *GetCertificateAuthorityRequest) String() string { return proto.CompactTextString(m) }
 func (*GetCertificateAuthorityRequest) ProtoMessage()    {}
 func (*GetCertificateAuthorityRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_certificate_authority_29a6abb5cfbd2612, []int{2}
+	return fileDescriptor_certificate_authority_cc9d796a42156bc4, []int{2}
 }
 func (m *GetCertificateAuthorityRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetCertificateAuthorityRequest.Unmarshal(m, b)
@@ -137,6 +138,8 @@ func (m *GetCertificateAuthorityRequest) GetName() string {
 }
 
 type ListCertificateAuthoritiesRequest struct {
+	PageSize             int32    `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken            string   `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -146,7 +149,7 @@ func (m *ListCertificateAuthoritiesRequest) Reset()         { *m = ListCertifica
 func (m *ListCertificateAuthoritiesRequest) String() string { return proto.CompactTextString(m) }
 func (*ListCertificateAuthoritiesRequest) ProtoMessage()    {}
 func (*ListCertificateAuthoritiesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_certificate_authority_29a6abb5cfbd2612, []int{3}
+	return fileDescriptor_certificate_authority_cc9d796a42156bc4, []int{3}
 }
 func (m *ListCertificateAuthoritiesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListCertificateAuthoritiesRequest.Unmarshal(m, b)
@@ -166,7 +169,22 @@ func (m *ListCertificateAuthoritiesRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ListCertificateAuthoritiesRequest proto.InternalMessageInfo
 
+func (m *ListCertificateAuthoritiesRequest) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *ListCertificateAuthoritiesRequest) GetPageToken() string {
+	if m != nil {
+		return m.PageToken
+	}
+	return ""
+}
+
 type ListCertificateAuthoritiesResponse struct {
+	NextPageToken        string                  `protobuf:"bytes,4,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	TypeMeta             *TypeMeta               `protobuf:"bytes,1,opt,name=type_meta,json=typeMeta" json:"type_meta,omitempty"`
 	ListMeta             *ListMeta               `protobuf:"bytes,2,opt,name=list_meta,json=listMeta" json:"list_meta,omitempty"`
 	Items                []*CertificateAuthority `protobuf:"bytes,3,rep,name=items" json:"items,omitempty"`
@@ -179,7 +197,7 @@ func (m *ListCertificateAuthoritiesResponse) Reset()         { *m = ListCertific
 func (m *ListCertificateAuthoritiesResponse) String() string { return proto.CompactTextString(m) }
 func (*ListCertificateAuthoritiesResponse) ProtoMessage()    {}
 func (*ListCertificateAuthoritiesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_certificate_authority_29a6abb5cfbd2612, []int{4}
+	return fileDescriptor_certificate_authority_cc9d796a42156bc4, []int{4}
 }
 func (m *ListCertificateAuthoritiesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListCertificateAuthoritiesResponse.Unmarshal(m, b)
@@ -198,6 +216,13 @@ func (m *ListCertificateAuthoritiesResponse) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_ListCertificateAuthoritiesResponse proto.InternalMessageInfo
+
+func (m *ListCertificateAuthoritiesResponse) GetNextPageToken() string {
+	if m != nil {
+		return m.NextPageToken
+	}
+	return ""
+}
 
 func (m *ListCertificateAuthoritiesResponse) GetTypeMeta() *TypeMeta {
 	if m != nil {
@@ -221,6 +246,7 @@ func (m *ListCertificateAuthoritiesResponse) GetItems() []*CertificateAuthority 
 }
 
 type UpdateCertificateAuthorityRequest struct {
+	Name                 string                `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	CertificateAuthority *CertificateAuthority `protobuf:"bytes,1,opt,name=certificate_authority,json=certificateAuthority" json:"certificate_authority,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
 	XXX_unrecognized     []byte                `json:"-"`
@@ -231,7 +257,7 @@ func (m *UpdateCertificateAuthorityRequest) Reset()         { *m = UpdateCertifi
 func (m *UpdateCertificateAuthorityRequest) String() string { return proto.CompactTextString(m) }
 func (*UpdateCertificateAuthorityRequest) ProtoMessage()    {}
 func (*UpdateCertificateAuthorityRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_certificate_authority_29a6abb5cfbd2612, []int{5}
+	return fileDescriptor_certificate_authority_cc9d796a42156bc4, []int{5}
 }
 func (m *UpdateCertificateAuthorityRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateCertificateAuthorityRequest.Unmarshal(m, b)
@@ -250,6 +276,13 @@ func (m *UpdateCertificateAuthorityRequest) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_UpdateCertificateAuthorityRequest proto.InternalMessageInfo
+
+func (m *UpdateCertificateAuthorityRequest) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
 
 func (m *UpdateCertificateAuthorityRequest) GetCertificateAuthority() *CertificateAuthority {
 	if m != nil {
@@ -271,7 +304,7 @@ func (m *CertificateAuthority) Reset()         { *m = CertificateAuthority{} }
 func (m *CertificateAuthority) String() string { return proto.CompactTextString(m) }
 func (*CertificateAuthority) ProtoMessage()    {}
 func (*CertificateAuthority) Descriptor() ([]byte, []int) {
-	return fileDescriptor_certificate_authority_29a6abb5cfbd2612, []int{6}
+	return fileDescriptor_certificate_authority_cc9d796a42156bc4, []int{6}
 }
 func (m *CertificateAuthority) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CertificateAuthority.Unmarshal(m, b)
@@ -323,7 +356,7 @@ func (m *CertificateAuthoritySpec) Reset()         { *m = CertificateAuthoritySp
 func (m *CertificateAuthoritySpec) String() string { return proto.CompactTextString(m) }
 func (*CertificateAuthoritySpec) ProtoMessage()    {}
 func (*CertificateAuthoritySpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_certificate_authority_29a6abb5cfbd2612, []int{7}
+	return fileDescriptor_certificate_authority_cc9d796a42156bc4, []int{7}
 }
 func (m *CertificateAuthoritySpec) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CertificateAuthoritySpec.Unmarshal(m, b)
@@ -372,11 +405,11 @@ const _ = grpc.SupportPackageIsVersion4
 // Client API for CertificateAuthorityService service
 
 type CertificateAuthorityServiceClient interface {
-	CreateCertificateAuthority(ctx context.Context, in *CreateCertificateAuthorityRequest, opts ...grpc.CallOption) (*CertificateAuthority, error)
-	DeleteCertificateAuthority(ctx context.Context, in *DeleteCertificateAuthorityRequest, opts ...grpc.CallOption) (*types.Empty, error)
-	GetCertificateAuthority(ctx context.Context, in *GetCertificateAuthorityRequest, opts ...grpc.CallOption) (*CertificateAuthority, error)
-	ListCertificateAuthorities(ctx context.Context, in *ListCertificateAuthoritiesRequest, opts ...grpc.CallOption) (*ListCertificateAuthoritiesResponse, error)
-	UpdateCertificateAuthority(ctx context.Context, in *UpdateCertificateAuthorityRequest, opts ...grpc.CallOption) (*CertificateAuthority, error)
+	Create(ctx context.Context, in *CreateCertificateAuthorityRequest, opts ...grpc.CallOption) (*CertificateAuthority, error)
+	Delete(ctx context.Context, in *DeleteCertificateAuthorityRequest, opts ...grpc.CallOption) (*types.Empty, error)
+	Get(ctx context.Context, in *GetCertificateAuthorityRequest, opts ...grpc.CallOption) (*CertificateAuthority, error)
+	List(ctx context.Context, in *ListCertificateAuthoritiesRequest, opts ...grpc.CallOption) (*ListCertificateAuthoritiesResponse, error)
+	Update(ctx context.Context, in *UpdateCertificateAuthorityRequest, opts ...grpc.CallOption) (*CertificateAuthority, error)
 }
 
 type certificateAuthorityServiceClient struct {
@@ -387,45 +420,45 @@ func NewCertificateAuthorityServiceClient(cc *grpc.ClientConn) CertificateAuthor
 	return &certificateAuthorityServiceClient{cc}
 }
 
-func (c *certificateAuthorityServiceClient) CreateCertificateAuthority(ctx context.Context, in *CreateCertificateAuthorityRequest, opts ...grpc.CallOption) (*CertificateAuthority, error) {
+func (c *certificateAuthorityServiceClient) Create(ctx context.Context, in *CreateCertificateAuthorityRequest, opts ...grpc.CallOption) (*CertificateAuthority, error) {
 	out := new(CertificateAuthority)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateAuthorityService/CreateCertificateAuthority", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateAuthorityService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *certificateAuthorityServiceClient) DeleteCertificateAuthority(ctx context.Context, in *DeleteCertificateAuthorityRequest, opts ...grpc.CallOption) (*types.Empty, error) {
+func (c *certificateAuthorityServiceClient) Delete(ctx context.Context, in *DeleteCertificateAuthorityRequest, opts ...grpc.CallOption) (*types.Empty, error) {
 	out := new(types.Empty)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateAuthorityService/DeleteCertificateAuthority", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateAuthorityService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *certificateAuthorityServiceClient) GetCertificateAuthority(ctx context.Context, in *GetCertificateAuthorityRequest, opts ...grpc.CallOption) (*CertificateAuthority, error) {
+func (c *certificateAuthorityServiceClient) Get(ctx context.Context, in *GetCertificateAuthorityRequest, opts ...grpc.CallOption) (*CertificateAuthority, error) {
 	out := new(CertificateAuthority)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateAuthorityService/GetCertificateAuthority", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateAuthorityService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *certificateAuthorityServiceClient) ListCertificateAuthorities(ctx context.Context, in *ListCertificateAuthoritiesRequest, opts ...grpc.CallOption) (*ListCertificateAuthoritiesResponse, error) {
+func (c *certificateAuthorityServiceClient) List(ctx context.Context, in *ListCertificateAuthoritiesRequest, opts ...grpc.CallOption) (*ListCertificateAuthoritiesResponse, error) {
 	out := new(ListCertificateAuthoritiesResponse)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateAuthorityService/ListCertificateAuthorities", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateAuthorityService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *certificateAuthorityServiceClient) UpdateCertificateAuthority(ctx context.Context, in *UpdateCertificateAuthorityRequest, opts ...grpc.CallOption) (*CertificateAuthority, error) {
+func (c *certificateAuthorityServiceClient) Update(ctx context.Context, in *UpdateCertificateAuthorityRequest, opts ...grpc.CallOption) (*CertificateAuthority, error) {
 	out := new(CertificateAuthority)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateAuthorityService/UpdateCertificateAuthority", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateAuthorityService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -435,103 +468,103 @@ func (c *certificateAuthorityServiceClient) UpdateCertificateAuthority(ctx conte
 // Server API for CertificateAuthorityService service
 
 type CertificateAuthorityServiceServer interface {
-	CreateCertificateAuthority(context.Context, *CreateCertificateAuthorityRequest) (*CertificateAuthority, error)
-	DeleteCertificateAuthority(context.Context, *DeleteCertificateAuthorityRequest) (*types.Empty, error)
-	GetCertificateAuthority(context.Context, *GetCertificateAuthorityRequest) (*CertificateAuthority, error)
-	ListCertificateAuthorities(context.Context, *ListCertificateAuthoritiesRequest) (*ListCertificateAuthoritiesResponse, error)
-	UpdateCertificateAuthority(context.Context, *UpdateCertificateAuthorityRequest) (*CertificateAuthority, error)
+	Create(context.Context, *CreateCertificateAuthorityRequest) (*CertificateAuthority, error)
+	Delete(context.Context, *DeleteCertificateAuthorityRequest) (*types.Empty, error)
+	Get(context.Context, *GetCertificateAuthorityRequest) (*CertificateAuthority, error)
+	List(context.Context, *ListCertificateAuthoritiesRequest) (*ListCertificateAuthoritiesResponse, error)
+	Update(context.Context, *UpdateCertificateAuthorityRequest) (*CertificateAuthority, error)
 }
 
 func RegisterCertificateAuthorityServiceServer(s *grpc.Server, srv CertificateAuthorityServiceServer) {
 	s.RegisterService(&_CertificateAuthorityService_serviceDesc, srv)
 }
 
-func _CertificateAuthorityService_CreateCertificateAuthority_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CertificateAuthorityService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateCertificateAuthorityRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CertificateAuthorityServiceServer).CreateCertificateAuthority(ctx, in)
+		return srv.(CertificateAuthorityServiceServer).Create(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateAuthorityService/CreateCertificateAuthority",
+		FullMethod: "/powerssl.api.v1.CertificateAuthorityService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CertificateAuthorityServiceServer).CreateCertificateAuthority(ctx, req.(*CreateCertificateAuthorityRequest))
+		return srv.(CertificateAuthorityServiceServer).Create(ctx, req.(*CreateCertificateAuthorityRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CertificateAuthorityService_DeleteCertificateAuthority_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CertificateAuthorityService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteCertificateAuthorityRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CertificateAuthorityServiceServer).DeleteCertificateAuthority(ctx, in)
+		return srv.(CertificateAuthorityServiceServer).Delete(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateAuthorityService/DeleteCertificateAuthority",
+		FullMethod: "/powerssl.api.v1.CertificateAuthorityService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CertificateAuthorityServiceServer).DeleteCertificateAuthority(ctx, req.(*DeleteCertificateAuthorityRequest))
+		return srv.(CertificateAuthorityServiceServer).Delete(ctx, req.(*DeleteCertificateAuthorityRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CertificateAuthorityService_GetCertificateAuthority_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CertificateAuthorityService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetCertificateAuthorityRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CertificateAuthorityServiceServer).GetCertificateAuthority(ctx, in)
+		return srv.(CertificateAuthorityServiceServer).Get(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateAuthorityService/GetCertificateAuthority",
+		FullMethod: "/powerssl.api.v1.CertificateAuthorityService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CertificateAuthorityServiceServer).GetCertificateAuthority(ctx, req.(*GetCertificateAuthorityRequest))
+		return srv.(CertificateAuthorityServiceServer).Get(ctx, req.(*GetCertificateAuthorityRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CertificateAuthorityService_ListCertificateAuthorities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CertificateAuthorityService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListCertificateAuthoritiesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CertificateAuthorityServiceServer).ListCertificateAuthorities(ctx, in)
+		return srv.(CertificateAuthorityServiceServer).List(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateAuthorityService/ListCertificateAuthorities",
+		FullMethod: "/powerssl.api.v1.CertificateAuthorityService/List",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CertificateAuthorityServiceServer).ListCertificateAuthorities(ctx, req.(*ListCertificateAuthoritiesRequest))
+		return srv.(CertificateAuthorityServiceServer).List(ctx, req.(*ListCertificateAuthoritiesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CertificateAuthorityService_UpdateCertificateAuthority_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CertificateAuthorityService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateCertificateAuthorityRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CertificateAuthorityServiceServer).UpdateCertificateAuthority(ctx, in)
+		return srv.(CertificateAuthorityServiceServer).Update(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateAuthorityService/UpdateCertificateAuthority",
+		FullMethod: "/powerssl.api.v1.CertificateAuthorityService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CertificateAuthorityServiceServer).UpdateCertificateAuthority(ctx, req.(*UpdateCertificateAuthorityRequest))
+		return srv.(CertificateAuthorityServiceServer).Update(ctx, req.(*UpdateCertificateAuthorityRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -541,24 +574,24 @@ var _CertificateAuthorityService_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*CertificateAuthorityServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateCertificateAuthority",
-			Handler:    _CertificateAuthorityService_CreateCertificateAuthority_Handler,
+			MethodName: "Create",
+			Handler:    _CertificateAuthorityService_Create_Handler,
 		},
 		{
-			MethodName: "DeleteCertificateAuthority",
-			Handler:    _CertificateAuthorityService_DeleteCertificateAuthority_Handler,
+			MethodName: "Delete",
+			Handler:    _CertificateAuthorityService_Delete_Handler,
 		},
 		{
-			MethodName: "GetCertificateAuthority",
-			Handler:    _CertificateAuthorityService_GetCertificateAuthority_Handler,
+			MethodName: "Get",
+			Handler:    _CertificateAuthorityService_Get_Handler,
 		},
 		{
-			MethodName: "ListCertificateAuthorities",
-			Handler:    _CertificateAuthorityService_ListCertificateAuthorities_Handler,
+			MethodName: "List",
+			Handler:    _CertificateAuthorityService_List_Handler,
 		},
 		{
-			MethodName: "UpdateCertificateAuthority",
-			Handler:    _CertificateAuthorityService_UpdateCertificateAuthority_Handler,
+			MethodName: "Update",
+			Handler:    _CertificateAuthorityService_Update_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -566,39 +599,49 @@ var _CertificateAuthorityService_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("api/v1/certificate_authority.proto", fileDescriptor_certificate_authority_29a6abb5cfbd2612)
+	proto.RegisterFile("api/v1/certificate_authority.proto", fileDescriptor_certificate_authority_cc9d796a42156bc4)
 }
 
-var fileDescriptor_certificate_authority_29a6abb5cfbd2612 = []byte{
-	// 477 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x95, 0x41, 0x6f, 0xd3, 0x30,
-	0x14, 0xc7, 0x1b, 0x5a, 0x26, 0xf6, 0x76, 0x40, 0x58, 0x63, 0x14, 0x17, 0xa1, 0xd5, 0x08, 0x09,
-	0x2e, 0x8e, 0xd6, 0x21, 0x38, 0x0c, 0x0e, 0x30, 0x10, 0x17, 0x10, 0x52, 0x81, 0xcb, 0x2e, 0x93,
-	0x9b, 0xbd, 0x15, 0x8f, 0xa4, 0x36, 0xb1, 0x1b, 0x94, 0x13, 0x47, 0x3e, 0x1c, 0x27, 0xbe, 0x10,
-	0x42, 0x71, 0xd2, 0x21, 0x88, 0xd3, 0x64, 0x5c, 0x76, 0x7b, 0x75, 0xdf, 0xcf, 0xef, 0xf9, 0xff,
-	0xfa, 0x7f, 0x05, 0x26, 0xb4, 0x0c, 0xb3, 0xbd, 0x30, 0xc2, 0xd4, 0xca, 0x53, 0x19, 0x09, 0x8b,
-	0xc7, 0x62, 0x69, 0x3f, 0xa9, 0x54, 0xda, 0x9c, 0xeb, 0x54, 0x59, 0x45, 0xae, 0x6b, 0xf5, 0x15,
-	0x53, 0x63, 0x62, 0x2e, 0xb4, 0xe4, 0xd9, 0x1e, 0x1d, 0xcd, 0x95, 0x9a, 0xc7, 0x18, 0xba, 0xaf,
-	0x67, 0xcb, 0xd3, 0x10, 0x13, 0xbd, 0xca, 0xa6, 0x37, 0xaa, 0x1b, 0x13, 0xb4, 0xa2, 0x3c, 0x62,
-	0xdf, 0x60, 0x7c, 0x98, 0xa2, 0xb0, 0x78, 0xf8, 0xa7, 0xca, 0xf3, 0x55, 0x91, 0x29, 0x7e, 0x59,
-	0xa2, 0xb1, 0xe4, 0x08, 0x6e, 0x7a, 0x9b, 0x18, 0x06, 0xbb, 0xc1, 0x83, 0xad, 0xc9, 0x7d, 0xfe,
-	0x4f, 0x17, 0xdc, 0x7b, 0xd9, 0x76, 0xe4, 0x39, 0x65, 0x4f, 0x60, 0xfc, 0x12, 0x63, 0x5c, 0xdf,
-	0x00, 0x81, 0xc1, 0x42, 0x24, 0xe8, 0xea, 0x6d, 0x4e, 0x5d, 0xcc, 0x1e, 0xc1, 0xdd, 0xd7, 0x68,
-	0x2f, 0x4a, 0xdd, 0x83, 0xf1, 0x1b, 0x69, 0x7c, 0x98, 0x44, 0x53, 0x81, 0xec, 0x67, 0x00, 0x6c,
-	0x5d, 0x96, 0xd1, 0x6a, 0x61, 0x90, 0x3c, 0x86, 0x4d, 0x9b, 0x6b, 0x3c, 0x2e, 0xe4, 0xac, 0xa4,
-	0xb8, 0x5d, 0x93, 0xe2, 0x43, 0xae, 0xf1, 0x2d, 0x5a, 0x31, 0xbd, 0x66, 0xab, 0xa8, 0xe0, 0x62,
-	0x69, 0x6c, 0xc9, 0x5d, 0x69, 0xe0, 0x8a, 0xfa, 0x25, 0x17, 0x57, 0x11, 0x39, 0x80, 0xab, 0xd2,
-	0x62, 0x62, 0x86, 0xfd, 0xdd, 0x7e, 0x77, 0xd9, 0x4b, 0xa6, 0x18, 0xf4, 0x47, 0x7d, 0x72, 0x89,
-	0x83, 0xfe, 0x11, 0xc0, 0xb6, 0x2f, 0xfd, 0xbf, 0x65, 0x7c, 0x0a, 0x5b, 0x6a, 0x76, 0x86, 0xd1,
-	0x5f, 0x42, 0x8e, 0x6a, 0xe4, 0x3b, 0x97, 0xe3, 0x58, 0x50, 0xe7, 0x31, 0x79, 0x06, 0x03, 0xa3,
-	0x31, 0x1a, 0xf6, 0x1d, 0xf6, 0xb0, 0xd3, 0xcb, 0xde, 0x6b, 0x8c, 0xa6, 0x0e, 0x63, 0x13, 0x18,
-	0x36, 0x65, 0x90, 0x1d, 0xd8, 0xc8, 0x70, 0x71, 0xa2, 0xd2, 0xea, 0x97, 0x57, 0x7d, 0x9a, 0xfc,
-	0x1a, 0xc0, 0xc8, 0x0b, 0x61, 0x9a, 0xc9, 0x08, 0x49, 0x0e, 0xb4, 0xd9, 0x8b, 0x64, 0x52, 0x6f,
-	0xb1, 0xcd, 0xb8, 0xb4, 0xdb, 0xc0, 0x58, 0x8f, 0x9c, 0x01, 0x6d, 0x76, 0xa1, 0xa7, 0x74, 0xab,
-	0x65, 0xe9, 0x0e, 0x2f, 0x37, 0x11, 0x5f, 0x6d, 0x22, 0xfe, 0xaa, 0xd8, 0x44, 0xac, 0x47, 0x0c,
-	0xdc, 0x6a, 0x30, 0x2e, 0x09, 0x6b, 0x85, 0xd6, 0x5b, 0xbc, 0xfb, 0x03, 0xbf, 0x07, 0x40, 0x9b,
-	0x2d, 0xed, 0x79, 0x61, 0xeb, 0x96, 0xa0, 0xfb, 0x17, 0x62, 0xca, 0x9d, 0xc1, 0x7a, 0xc5, 0x94,
-	0x9b, 0x8d, 0xe8, 0x69, 0xa4, 0xd5, 0xb5, 0x9d, 0x45, 0x78, 0x71, 0xe7, 0x88, 0x9e, 0x67, 0x4a,
-	0x15, 0xea, 0xcf, 0xf3, 0xb0, 0xfc, 0x47, 0x38, 0x10, 0x5a, 0xce, 0x36, 0xdc, 0xa4, 0xf6, 0x7f,
-	0x07, 0x00, 0x00, 0xff, 0xff, 0xe2, 0x7d, 0xd4, 0x7f, 0x78, 0x06, 0x00, 0x00,
+var fileDescriptor_certificate_authority_cc9d796a42156bc4 = []byte{
+	// 625 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x95, 0xc1, 0x4f, 0x13, 0x4f,
+	0x14, 0xc7, 0xb3, 0x6d, 0xd9, 0xc0, 0x23, 0xbf, 0x90, 0xdf, 0x04, 0x48, 0xdd, 0x82, 0xa1, 0xa3,
+	0x12, 0x25, 0xba, 0x1b, 0x0a, 0xd1, 0x04, 0xe4, 0xa0, 0x68, 0xb8, 0x68, 0x34, 0x05, 0x2f, 0x5c,
+	0x9a, 0x61, 0x79, 0xd4, 0x91, 0x76, 0x67, 0xdc, 0x19, 0xaa, 0xc5, 0x18, 0x13, 0xae, 0x1e, 0xe1,
+	0xee, 0xd5, 0xff, 0xc5, 0xa3, 0xff, 0x82, 0xff, 0x84, 0x37, 0xb3, 0x33, 0x5b, 0x50, 0xba, 0x6d,
+	0x17, 0x13, 0x6f, 0xb3, 0x6f, 0xdf, 0xf7, 0xcd, 0xa7, 0xef, 0xbd, 0xfd, 0x16, 0x28, 0x93, 0x3c,
+	0xe8, 0x2c, 0x07, 0x21, 0xc6, 0x9a, 0x1f, 0xf0, 0x90, 0x69, 0x6c, 0xb0, 0x23, 0xfd, 0x5a, 0xc4,
+	0x5c, 0x77, 0x7d, 0x19, 0x0b, 0x2d, 0xc8, 0x94, 0x14, 0xef, 0x30, 0x56, 0xaa, 0xe5, 0x33, 0xc9,
+	0xfd, 0xce, 0xb2, 0x37, 0xd7, 0x14, 0xa2, 0xd9, 0xc2, 0x20, 0xd1, 0xb2, 0x28, 0x12, 0x9a, 0x69,
+	0x2e, 0x22, 0x65, 0xd3, 0xbd, 0x4a, 0xfa, 0xd6, 0x3c, 0xed, 0x1d, 0x1d, 0x04, 0xd8, 0x96, 0xbd,
+	0x5a, 0xde, 0xff, 0xe9, 0x7d, 0x6d, 0xd4, 0xcc, 0x86, 0xe8, 0x27, 0xa8, 0x6e, 0xc6, 0xc8, 0x34,
+	0x6e, 0x5e, 0x30, 0x3c, 0xea, 0x21, 0xd4, 0xf1, 0xed, 0x11, 0x2a, 0x4d, 0x76, 0x61, 0x26, 0x13,
+	0xb1, 0xec, 0x2c, 0x38, 0xb7, 0x27, 0x6b, 0xb7, 0xfc, 0x4b, 0x8c, 0x7e, 0x66, 0xb1, 0xe9, 0x30,
+	0x23, 0x4a, 0x1f, 0x40, 0xf5, 0x09, 0xb6, 0x70, 0x38, 0x00, 0x81, 0x52, 0xc4, 0xda, 0x68, 0xee,
+	0x9b, 0xa8, 0x9b, 0x33, 0x5d, 0x85, 0xeb, 0x5b, 0xa8, 0xaf, 0xaa, 0x6a, 0x40, 0xf5, 0x19, 0x57,
+	0x59, 0x32, 0x8e, 0xaa, 0x27, 0xac, 0xc0, 0x84, 0x64, 0x4d, 0x6c, 0x28, 0x7e, 0x6c, 0xd5, 0x63,
+	0xf5, 0xf1, 0x24, 0xb0, 0xcd, 0x8f, 0x91, 0xcc, 0x03, 0x98, 0x97, 0x5a, 0x1c, 0x62, 0x54, 0x2e,
+	0x98, 0xda, 0x26, 0x7d, 0x27, 0x09, 0xd0, 0x9f, 0x0e, 0xd0, 0x61, 0x37, 0x28, 0x29, 0x22, 0x85,
+	0x64, 0x11, 0xa6, 0x22, 0x7c, 0xaf, 0x1b, 0xbf, 0x95, 0x2a, 0x99, 0x52, 0xff, 0x25, 0xe1, 0x97,
+	0xbd, 0x72, 0xe4, 0x3e, 0x4c, 0xe8, 0xae, 0xc4, 0x46, 0x32, 0xb2, 0xb4, 0xdd, 0xd7, 0xfa, 0xda,
+	0xbd, 0xd3, 0x95, 0xf8, 0x1c, 0x35, 0xab, 0x8f, 0xeb, 0xf4, 0x94, 0xe8, 0x5a, 0x5c, 0x69, 0xab,
+	0x2b, 0x0c, 0xd0, 0x25, 0x9c, 0x56, 0xd7, 0x4a, 0x4f, 0x64, 0x1d, 0xc6, 0xb8, 0xc6, 0xb6, 0x2a,
+	0x17, 0x17, 0x8a, 0xf9, 0x47, 0x6b, 0x35, 0xf4, 0xd4, 0x81, 0xea, 0x2b, 0xb9, 0xcf, 0xf2, 0x0d,
+	0xb3, 0x70, 0x31, 0x96, 0x7f, 0xba, 0x61, 0xdf, 0x1c, 0x98, 0xce, 0x4a, 0xff, 0xeb, 0xde, 0x3e,
+	0x84, 0x49, 0xb1, 0xf7, 0x06, 0xc3, 0x3f, 0xba, 0x5b, 0xe9, 0x53, 0xbe, 0x30, 0x39, 0x46, 0x0b,
+	0xe2, 0xfc, 0x4c, 0x36, 0xa0, 0xa4, 0x24, 0x86, 0xe5, 0xa2, 0x91, 0xdd, 0xc9, 0xf5, 0xcb, 0xb6,
+	0x25, 0x86, 0x75, 0x23, 0xa3, 0x35, 0x28, 0x0f, 0xca, 0x20, 0xb3, 0xe0, 0x76, 0x30, 0xda, 0x17,
+	0x71, 0xba, 0xf2, 0xe9, 0x53, 0xed, 0xcc, 0x85, 0x4a, 0xa6, 0x08, 0xe3, 0x0e, 0x0f, 0x91, 0x7c,
+	0x71, 0xc0, 0xb5, 0x2e, 0x40, 0x6a, 0xfd, 0x3c, 0xa3, 0xec, 0xc1, 0xcb, 0x37, 0x1d, 0xba, 0x76,
+	0xf2, 0xfd, 0xc7, 0x69, 0x61, 0x95, 0x56, 0x2e, 0x59, 0xde, 0x3d, 0x76, 0xf1, 0x7d, 0xac, 0xcd,
+	0x64, 0xbd, 0xe8, 0x92, 0x13, 0x07, 0x5c, 0x6b, 0x13, 0x19, 0x84, 0x23, 0xfd, 0xc3, 0x9b, 0xf5,
+	0xad, 0x2d, 0xfa, 0x3d, 0x5b, 0xf4, 0x9f, 0x26, 0xb6, 0x48, 0xef, 0x1a, 0xa4, 0xc5, 0xa5, 0x9b,
+	0x09, 0xd2, 0x87, 0x64, 0x13, 0x37, 0x06, 0x80, 0x05, 0x4b, 0x1f, 0xc9, 0x67, 0x07, 0x8a, 0x5b,
+	0xa8, 0x49, 0xd0, 0x47, 0x30, 0xdc, 0x88, 0xf2, 0x36, 0x28, 0xa5, 0x21, 0xf9, 0x68, 0xce, 0x1c,
+	0x28, 0x25, 0x1f, 0x70, 0x46, 0x43, 0x46, 0x3a, 0x9c, 0xb7, 0x72, 0x25, 0x8d, 0xf5, 0x2c, 0x7a,
+	0xc3, 0xf0, 0xcd, 0x93, 0x61, 0x03, 0x24, 0x5f, 0x1d, 0x70, 0xad, 0x07, 0x64, 0x80, 0x8d, 0x34,
+	0x87, 0xbc, 0xad, 0xda, 0x34, 0x28, 0x1b, 0x5e, 0xae, 0x56, 0x0d, 0x58, 0xaa, 0xc7, 0x73, 0xbb,
+	0xde, 0xf9, 0x65, 0x5c, 0x04, 0xf2, 0xb0, 0x19, 0xd8, 0x3f, 0xc8, 0x75, 0x26, 0xf9, 0x9e, 0x6b,
+	0x76, 0x65, 0xe5, 0x57, 0x00, 0x00, 0x00, 0xff, 0xff, 0x8c, 0x37, 0xd7, 0xe5, 0xa5, 0x07, 0x00,
+	0x00,
 }
