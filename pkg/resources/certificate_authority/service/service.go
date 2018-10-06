@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/go-kit/kit/log"
+
 	"powerssl.io/pkg/api"
 )
 
@@ -15,17 +17,18 @@ type Service interface {
 	Update(ctx context.Context, ca *api.CertificateAuthority) (*api.CertificateAuthority, error)
 }
 
-func New() Service {
+func New(logger log.Logger) Service {
 	var svc Service
 	{
-		svc = newBasicService()
+		svc = NewBasicService()
+		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
 }
 
 type basicService struct{}
 
-func newBasicService() Service {
+func NewBasicService() Service {
 	return basicService{}
 }
 
