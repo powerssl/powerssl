@@ -51,10 +51,10 @@ bin/protoc-gen-grpc-web:
 	# --js_out=import_style=commonjs:js --grpc-web_out=import_style=commonjs,mode=grpcwebtext:js \
 
 bin/powerssl-apiserver: .ALWAYS_REBUILD
-	go build -o bin/powerssl-apiserver ./cmd/powerssl-apiserver
+	go build -o bin/powerssl-apiserver powerssl.io/cmd/powerssl-apiserver
 
 bin/powerctl: .ALWAYS_REBUILD
-	go build -o bin/powerctl ./cmd/powerctl
+	go build -o bin/powerctl powerssl.io/cmd/powerctl
 
 .PHONY: build
 build: bin/powerssl-apiserver bin/powerctl
