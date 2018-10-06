@@ -1,15 +1,24 @@
 package cmd
 
 import (
-	"log"
+	"context"
+	"fmt"
+	"os"
 	"time"
 
+	"github.com/go-kit/kit/log"
+	// "github.com/gogo/protobuf/types"
 	"github.com/spf13/cobra"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	apiv1 "powerssl.io/pkg/api/v1"
+	// apiv1 "powerssl.io/pkg/api/v1"
+	"powerssl.io/pkg/api"
+
+	client "powerssl.io/pkg/client"
 )
+
+// TODO
+const grpcAddr = "localhost:8080"
 
 // createCmd represents the create command
 var createCmd = &cobra.Command{
@@ -21,51 +30,53 @@ Available Commands:
   certificateauthority Create a CertificateAuthority`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		address := "localhost:8080"
-		conn, err := grpc.Dial(address, grpc.WithInsecure())
+		conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure(), grpc.WithTimeout(time.Second))
 		if err != nil {
-			log.Fatalf("did not connect: %v", err)
+			fmt.Fprintf(os.Stderr, "error: %v", err)
+			os.Exit(1)
 		}
 		defer conn.Close()
-		c := apiv1.NewCertificateAuthorityServiceClient(conn)
-		log.Println(c)
+		c := client.NewGRPCClient(conn, log.NewNopLogger())
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-		defer cancel()
+		v, err := c.CertificateAuthority.Create(context.Background(), &api.CertificateAuthority{})
+		fmt.Printf("%+v\n", err)
+		fmt.Printf("%+v\n", v)
+		fmt.Printf("%#v\n", v)
 
-		certificateAuthority := &apiv1.CertificateAuthority{
-			TypeMeta: &apiv1.TypeMeta{
-				ApiVersion: "v1",
-				Kind:       "CertificateAuthority",
-			},
-			ObjectMeta: &apiv1.ObjectMeta{
-				Labels: map[string]string{
-					"foo": "bar",
-					"baz": "boo",
-				},
-			},
-			Spec: &apiv1.CertificateAuthoritySpec{
-				Vendor: "rofl",
-			},
-		}
-		n := 10000
-		done := make(chan bool)
-		for i := 1; i <= n; i++ {
-			go func() {
-				_, err := c.CreateCertificateAuthority(ctx, &apiv1.CreateCertificateAuthorityRequest{
-					CertificateAuthority: certificateAuthority,
-				})
-				if err != nil {
-					log.Fatalf("could not list: %v", err)
-				}
-				//log.Println("RESPONSE:")
-				//log.Println(response)
-				done <- true
-			}()
-		}
-		for i := 0; i < n; i++ {
-			<-done
-		}
+		// certificateAuthority := &apiv1.CertificateAuthority{
+		// 	TypeMeta: &apiv1.TypeMeta{
+		// 		ApiVersion: "v1",
+		// 		Kind:       "CertificateAuthority",
+		// 	},
+		// 	ObjectMeta: &apiv1.ObjectMeta{
+		// 		Labels: map[string]string{
+		// 			"foo": "bar",
+		// 			"baz": "boo",
+		// 		},
+		// 		CreationTimestamp: types.TimestampNow(),
+		// 	},
+		// 	Spec: &apiv1.CertificateAuthoritySpec{
+		// 		Vendor: "rofl",
+		// 	},
+		// }
+		// n := 1
+		// done := make(chan bool)
+		// for i := 1; i <= n; i++ {
+		// 	go func() {
+		// 		response, err := c.CreateCertificateAuthority(ctx, &apiv1.CreateCertificateAuthorityRequest{
+		// 			CertificateAuthority: certificateAuthority,
+		// 		})
+		// 		if err != nil {
+		// 			fmt.Fatalf("could not list: %v", err)
+		// 		}
+		// 		fmt.Println("RESPONSE:")
+		// 		fmt.Println(response)
+		// 		done <- true
+		// 	}()
+		// }
+		// for i := 0; i < n; i++ {
+		// 	<-done
+		// }
 	},
 }
 
