@@ -2,6 +2,9 @@ package endpoints
 
 import (
 	"context"
+	//"fmt"
+	//"reflect"
+	//"strings"
 
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
@@ -13,12 +16,14 @@ import (
 )
 
 type Endpoints struct {
-	CreateEndpoint endpoint.Endpoint
-	DeleteEndpoint endpoint.Endpoint
-	GetEndpoint    endpoint.Endpoint
-	ListEndpoint   endpoint.Endpoint
-	UpdateEndpoint endpoint.Endpoint
+	CreateEndpoint endpoint.Endpoint `endpoint:"Create,logging,instrumenting"`
+	DeleteEndpoint endpoint.Endpoint `endpoint:"Delete,logging,instrumenting"`
+	GetEndpoint    endpoint.Endpoint `endpoint:"Get,logging,instrumenting"`
+	ListEndpoint   endpoint.Endpoint `endpoint:"List,logging,instrumenting"`
+	UpdateEndpoint endpoint.Endpoint `endpoint:"Update,logging,instrumenting"`
 }
+
+const tagName = "endpoint"
 
 func New(svc service.Service, logger log.Logger, duration metrics.Histogram) Endpoints {
 	var createEndpoint endpoint.Endpoint
@@ -56,21 +61,49 @@ func New(svc service.Service, logger log.Logger, duration metrics.Histogram) End
 		updateEndpoint = endpoints.InstrumentingMiddleware(duration.With("method", "Update"))(updateEndpoint)
 	}
 
-	return Endpoints{
+	endpointss := Endpoints{
 		CreateEndpoint: createEndpoint,
 		DeleteEndpoint: deleteEndpoint,
 		GetEndpoint:    getEndpoint,
 		ListEndpoint:   listEndpoint,
 		UpdateEndpoint: updateEndpoint,
 	}
+
+	//v := reflect.ValueOf(endpointss)
+	//for i := 0; i < v.NumField(); i++ {
+	//	tag := v.Type().Field(i).Tag.Get(tagName)
+	//	value := v.Field(i).Interface().(endpoint.Endpoint)
+
+	//	if tag == "" || tag == "-" {
+	//		continue
+	//	}
+
+	//	args := strings.Split(tag, ",")
+	//	name := args[0]
+	//	fmt.Println(name)
+	//	if len(args) > 1 {
+	//		for ii := 1; ii < len(args); ii++ {
+	//			switch args[ii] {
+	//			case "logging":
+	//				//value = endpoints.LoggingMiddleware(log.With(logger, "method", name))(value)
+	//				fmt.Println("LOGGING")
+	//			case "instrumenting":
+	//				//value = endpoints.InstrumentingMiddleware(duration.With("method", name))(value)
+	//				fmt.Println("INST")
+	//			}
+	//		}
+	//	}
+	//}
+
+	return endpointss
 }
 
 type CreateRequest struct {
-	CertificateAuthority api.CertificateAuthority
+	CertificateAuthority *api.CertificateAuthority
 }
 
 type CreateResponse struct {
-	CertificateAuthority api.CertificateAuthority
+	CertificateAuthority *api.CertificateAuthority
 }
 
 func makeCreateEndpoint(s service.Service) endpoint.Endpoint {
@@ -108,7 +141,7 @@ type GetRequest struct {
 }
 
 type GetResponse struct {
-	CertificateAuthority api.CertificateAuthority
+	CertificateAuthority *api.CertificateAuthority
 }
 
 func makeGetEndpoint(s service.Service) endpoint.Endpoint {
@@ -127,7 +160,7 @@ func makeGetEndpoint(s service.Service) endpoint.Endpoint {
 type ListRequest struct{}
 
 type ListResponse struct {
-	CertificateAuthorities []api.CertificateAuthority
+	CertificateAuthorities []*api.CertificateAuthority
 }
 
 func makeListEndpoint(s service.Service) endpoint.Endpoint {
@@ -143,11 +176,11 @@ func makeListEndpoint(s service.Service) endpoint.Endpoint {
 }
 
 type UpdateRequest struct {
-	CertificateAuthority api.CertificateAuthority
+	CertificateAuthority *api.CertificateAuthority
 }
 
 type UpdateResponse struct {
-	CertificateAuthority api.CertificateAuthority
+	CertificateAuthority *api.CertificateAuthority
 }
 
 func makeUpdateEndpoint(s service.Service) endpoint.Endpoint {

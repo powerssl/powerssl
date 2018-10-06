@@ -32,7 +32,10 @@ func DecodeGRPCTypeMeta(typeMeta *apiv1.TypeMeta) api.TypeMeta {
 // TODO: Error handling
 func EncodeGRPCObjectMeta(objectMeta api.ObjectMeta) *apiv1.ObjectMeta {
 	creationTimestamp, _ := types.TimestampProto(objectMeta.CreationTimestamp)
-	deletionTimestamp, _ := types.TimestampProto(*objectMeta.DeletionTimestamp)
+	var deletionTimestamp *types.Timestamp
+	if objectMeta.DeletionTimestamp != nil {
+		deletionTimestamp, _ = types.TimestampProto(*objectMeta.DeletionTimestamp)
+	}
 
 	return &apiv1.ObjectMeta{
 		CreationTimestamp: creationTimestamp,

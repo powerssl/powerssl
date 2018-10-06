@@ -1,51 +1,36 @@
 package certificate_authority
 
 import (
-	"google.golang.org/grpc"
-
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
-
 	"github.com/jinzhu/gorm"
+	"google.golang.org/grpc"
 
 	apiv1 "powerssl.io/pkg/api/v1"
-	model "powerssl.io/pkg/db"
-
 	"powerssl.io/pkg/resources"
-	endpoints "powerssl.io/pkg/resources/certificate_authority/endpoints"
+	"powerssl.io/pkg/resources/certificate_authority/endpoints"
 	"powerssl.io/pkg/resources/certificate_authority/service"
 	"powerssl.io/pkg/resources/certificate_authority/transport"
 )
 
-type CertificateAuthority struct {
-	db     *gorm.DB
-	logger log.Logger
-
-	Model *model.CertificateAuthority
-
+type certificateAuthority struct {
+	db        *gorm.DB
 	endpoints endpoints.Endpoints
-	service   *service.Service
+	logger    log.Logger
 }
 
 func New(db *gorm.DB, logger log.Logger, duration metrics.Histogram) resources.Resource {
 	svc := service.New()
 	ep := endpoints.New(svc, logger, duration)
 
-	return &CertificateAuthority{
-		db:     db,
-		logger: logger,
-
-		Model: &model.CertificateAuthority{},
-
+	return &certificateAuthority{
+		db:        db,
 		endpoints: ep,
-		service:   &svc,
+		logger:    logger,
 	}
 }
 
-func (ca CertificateAuthority) RegisterGRPCServer(baseServer *grpc.Server) {
-	apiv1.RegisterCertificateAuthorityServiceServer(baseServer, ca.grpcServer())
-}
-
-func (ca CertificateAuthority) grpcServer() apiv1.CertificateAuthorityServiceServer {
-	return transport.NewGRPCServer(ca.endpoints, ca.logger)
+func (ca *certificateAuthority) RegisterGRPCServer(baseServer *grpc.Server) {
+	grpcServer := transport.NewGRPCServer(ca.endpoints, ca.logger)
+	apiv1.RegisterCertificateAuthorityServiceServer(baseServer, grpcServer)
 }
