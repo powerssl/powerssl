@@ -39,8 +39,10 @@ bin/.go_protobuf_sources: bin/protoc-gen-gogo bin/protoc-gen-gotemplate
 			--gotemplate_out=$(PKG_PATH)/resource/generated \
 			$$dir/*.proto; \
 	done
+	gofmt -s -w $(PKG_PATH)/resource/generated
+	find pkg/resource/generated -type d -depth 1 | cut -d '/' -f 4 | xargs -I '{}' sh -c "eval $$(echo mv -n $(PKG_PATH)/resource/generated/'{}'/service/\* $(PKG_PATH)/resource/'{}'/)"
+	rm -rf pkg/resource/generated/*/service
 	gofmt -s -w $(GO_SOURCES)
-	gofmt -s -w pkg/resource/generated
 	touch $@
 
 bin/protoc-gen-gotemplate:
