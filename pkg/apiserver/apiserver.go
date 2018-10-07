@@ -19,8 +19,10 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 
-	"powerssl.io/pkg/resources"
-	"powerssl.io/pkg/resources/certificate_authority"
+	resource "powerssl.io/pkg/resource"
+	"powerssl.io/pkg/resource/generated/certificate"
+	"powerssl.io/pkg/resource/generated/certificateauthority"
+	"powerssl.io/pkg/resource/generated/certificateissue"
 )
 
 func Run(grpcAddr string) {
@@ -52,8 +54,10 @@ func Run(grpcAddr string) {
 		defer db.Close()
 	}
 
-	resources := []resources.Resource{
-		certificate_authority.New(db, logger, duration),
+	resources := []resource.Resource{
+		certificate.New(db, logger, duration),
+		certificateauthority.New(db, logger, duration),
+		certificateissue.New(db, logger, duration),
 	}
 
 	var g group.Group

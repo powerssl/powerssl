@@ -4,7 +4,7 @@
 {{- if (regexMatch "y$" $resourceName)}}
 {{- $resourceNamePlural = concat ($resourceName | trimSuffix "y") "ies" }}
 {{- end}}
-package transport // import "powerssl.io/pkg/gen/{{$resourceName | lower}}/transport"
+package transport // import "powerssl.io/pkg/resource/generated/{{$resourceName | lower}}/transport"
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	types "github.com/gogo/protobuf/types"
 
 	apiv1 "powerssl.io/pkg/api/v1"
-	"powerssl.io/pkg/gen/{{$resourceName | lower}}/endpoint"
+	"powerssl.io/pkg/resource/generated/{{$resourceName | lower}}/endpoint"
 )
 
 type grpcServer struct {

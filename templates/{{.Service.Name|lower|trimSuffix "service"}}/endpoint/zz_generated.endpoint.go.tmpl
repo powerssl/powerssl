@@ -4,7 +4,7 @@
 {{- if (regexMatch "y$" $resourceName)}}
 {{- $resourceNamePlural = concat ($resourceName | trimSuffix "y") "ies" }}
 {{- end}}
-package endpoint // import "powerssl.io/pkg/gen/{{$resourceName | lower}}/endpoint"
+package endpoint // import "powerssl.io/pkg/resource/generated/{{$resourceName | lower}}/endpoint"
 
 import (
 	"context"
@@ -14,8 +14,8 @@ import (
 	"github.com/go-kit/kit/metrics"
 
 	"powerssl.io/pkg/api"
-	"powerssl.io/pkg/gen/{{$resourceName | lower}}/service"
-	"powerssl.io/pkg/resources/endpoints"
+	resource "powerssl.io/pkg/resource"
+	"powerssl.io/pkg/resource/generated/{{$resourceName | lower}}/service"
 )
 
 type Endpoints struct {
@@ -29,8 +29,8 @@ func New(svc service.Service, logger log.Logger, duration metrics.Histogram) End
 	var {{.Name | lowerCamelCase}}Endpoint endpoint.Endpoint
 	{
 		{{.Name | lowerCamelCase}}Endpoint = make{{.Name}}Endpoint(svc)
-		{{.Name | lowerCamelCase}}Endpoint = endpoints.LoggingMiddleware(log.With(logger, "method", "{{.Name}}"))({{.Name | lowerCamelCase }}Endpoint)
-		{{.Name | lowerCamelCase}}Endpoint = endpoints.InstrumentingMiddleware(duration.With("method", "{{.Name}}"))({{.Name | lowerCamelCase}}Endpoint)
+		{{.Name | lowerCamelCase}}Endpoint = resource.LoggingMiddleware(log.With(logger, "method", "{{.Name}}"))({{.Name | lowerCamelCase }}Endpoint)
+		{{.Name | lowerCamelCase}}Endpoint = resource.InstrumentingMiddleware(duration.With("method", "{{.Name}}"))({{.Name | lowerCamelCase}}Endpoint)
 	}
 {{end}}
 	return Endpoints{

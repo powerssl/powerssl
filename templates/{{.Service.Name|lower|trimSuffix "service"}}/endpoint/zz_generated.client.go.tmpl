@@ -4,7 +4,7 @@
 {{- if (regexMatch "y$" $resourceName)}}
 {{- $resourceNamePlural = concat ($resourceName | trimSuffix "y") "ies" }}
 {{- end}}
-package endpoint // import "powerssl.io/pkg/gen/{{$resourceName | lower}}/endpoint"
+package endpoint // import "powerssl.io/pkg/resource/gen/{{$resourceName | lower}}/endpoint"
 
 import (
 	"context"

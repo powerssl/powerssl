@@ -4,15 +4,15 @@
 {{- if (regexMatch "y$" $resourceName)}}
 {{- $resourceNamePlural = concat ($resourceName | trimSuffix "y") "ies" }}
 {{- end}}
-package transport // import "powerssl.io/pkg/gen/{{$resourceName | lower}}/transport"
+package transport // import "powerssl.io/pkg/resource/generated/{{$resourceName | lower}}/transport"
 
 import (
 	"context"
 
 	"powerssl.io/pkg/api"
 	apiv1 "powerssl.io/pkg/api/v1"
-	"powerssl.io/pkg/gen/{{$resourceName | lower}}/endpoint"
-	"powerssl.io/pkg/resources/transport"
+	resource "powerssl.io/pkg/resource"
+	"powerssl.io/pkg/resource/generated/{{$resourceName | lower}}/endpoint"
 )
 
 func decodeGRPC{{$resourceNamePlural}}({{$resourceNamePlural | lowerCamelCase}} []*apiv1.{{$resourceName}}) []*api.{{$resourceName}} {
@@ -25,8 +25,8 @@ func decodeGRPC{{$resourceNamePlural}}({{$resourceNamePlural | lowerCamelCase}} 
 
 func decodeGRPC{{$resourceName}}({{$resourceName | lowerCamelCase}} *apiv1.{{$resourceName}}) *api.{{$resourceName}} {
 	return &api.{{$resourceName}}{
-		TypeMeta:   transport.DecodeGRPCTypeMeta({{$resourceName | lowerCamelCase}}.GetTypeMeta()),
-		ObjectMeta: transport.DecodeGRPCObjectMeta({{$resourceName | lowerCamelCase}}.GetObjectMeta()),
+		TypeMeta:   resource.DecodeGRPCTypeMeta({{$resourceName | lowerCamelCase}}.GetTypeMeta()),
+		ObjectMeta: resource.DecodeGRPCObjectMeta({{$resourceName | lowerCamelCase}}.GetObjectMeta()),
 		// TODO
 	}
 }
@@ -41,8 +41,8 @@ func encodeGRPC{{$resourceNamePlural}}({{$resourceNamePlural | lowerCamelCase}} 
 
 func encodeGRPC{{$resourceName}}({{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) *apiv1.{{$resourceName}} {
 	return &apiv1.{{$resourceName}}{
-		TypeMeta:   transport.EncodeGRPCTypeMeta({{$resourceName | lowerCamelCase}}.TypeMeta),
-		ObjectMeta: transport.EncodeGRPCObjectMeta({{$resourceName | lowerCamelCase}}.ObjectMeta),
+		TypeMeta:   resource.EncodeGRPCTypeMeta({{$resourceName | lowerCamelCase}}.TypeMeta),
+		ObjectMeta: resource.EncodeGRPCObjectMeta({{$resourceName | lowerCamelCase}}.ObjectMeta),
 		// TODO
 	}
 }

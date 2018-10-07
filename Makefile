@@ -36,11 +36,11 @@ bin/.go_protobuf_sources: bin/protoc-gen-gogo bin/protoc-gen-gotemplate
 		$(PROTOC) \
 			-I$(PKG_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
 			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src \
-			--gotemplate_out=$(PKG_PATH)/gen \
+			--gotemplate_out=$(PKG_PATH)/resource/generated \
 			$$dir/*.proto; \
 	done
 	gofmt -s -w $(GO_SOURCES)
-	gofmt -s -w pkg/gen
+	gofmt -s -w pkg/resource/generated
 	touch $@
 
 bin/protoc-gen-gotemplate:

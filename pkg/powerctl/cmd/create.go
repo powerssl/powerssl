@@ -14,7 +14,7 @@ import (
 	// apiv1 "powerssl.io/pkg/api/v1"
 	"powerssl.io/pkg/api"
 
-	client "powerssl.io/pkg/client"
+	"powerssl.io/pkg/powerctl"
 )
 
 // TODO
@@ -36,7 +36,7 @@ Available Commands:
 			os.Exit(1)
 		}
 		defer conn.Close()
-		c := client.NewGRPCClient(conn, log.NewNopLogger())
+		c := powerctl.NewGRPCClient(conn, log.NewNopLogger())
 
 		v, err := c.CertificateAuthority.Create(context.Background(), &api.CertificateAuthority{})
 		fmt.Printf("%+v\n", err)
