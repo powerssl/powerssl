@@ -23,7 +23,9 @@ func decodeGRPCCertificateAuthority(certificateAuthority *apiv1.CertificateAutho
 	return &api.CertificateAuthority{
 		TypeMeta:   resource.DecodeGRPCTypeMeta(certificateAuthority.GetTypeMeta()),
 		ObjectMeta: resource.DecodeGRPCObjectMeta(certificateAuthority.GetObjectMeta()),
-		// TODO
+		Spec: api.CertificateAuthoritySpec{
+			Vendor: certificateAuthority.GetSpec().GetVendor(),
+		},
 	}
 }
 
@@ -39,7 +41,9 @@ func encodeGRPCCertificateAuthority(certificateAuthority *api.CertificateAuthori
 	return &apiv1.CertificateAuthority{
 		TypeMeta:   resource.EncodeGRPCTypeMeta(certificateAuthority.TypeMeta),
 		ObjectMeta: resource.EncodeGRPCObjectMeta(certificateAuthority.ObjectMeta),
-		// TODO
+		Spec: &apiv1.CertificateAuthoritySpec{
+			Vendor: certificateAuthority.Spec.Vendor,
+		},
 	}
 }
 

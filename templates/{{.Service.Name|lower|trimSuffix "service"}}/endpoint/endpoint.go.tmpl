@@ -14,8 +14,8 @@ import (
 	"github.com/go-kit/kit/metrics"
 
 	"powerssl.io/pkg/api"
+	service "powerssl.io/pkg/resource/{{$resourceName | lower}}"
 	resource "powerssl.io/pkg/resource"
-	"powerssl.io/pkg/resource/generated/{{$resourceName | lower}}/service"
 )
 
 type Endpoints struct {

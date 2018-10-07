@@ -7,22 +7,15 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/oklog/oklog/pkg/group"
-	"google.golang.org/grpc"
-
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
 	"github.com/go-kit/kit/metrics/prometheus"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
-	stdprometheus "github.com/prometheus/client_golang/prometheus"
-
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-
-	resource "powerssl.io/pkg/resource"
-	"powerssl.io/pkg/resource/generated/certificate"
-	"powerssl.io/pkg/resource/generated/certificateauthority"
-	"powerssl.io/pkg/resource/generated/certificateissue"
+	"github.com/oklog/oklog/pkg/group"
+	stdprometheus "github.com/prometheus/client_golang/prometheus"
+	"google.golang.org/grpc"
 )
 
 func Run(grpcAddr string) {
@@ -35,7 +28,6 @@ func Run(grpcAddr string) {
 
 	var duration metrics.Histogram
 	{
-		// Endpoint-level metrics.
 		duration = prometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
 			Namespace: "powerssl_io",
 			Subsystem: "api",
@@ -54,11 +46,7 @@ func Run(grpcAddr string) {
 		defer db.Close()
 	}
 
-	resources := []resource.Resource{
-		certificate.New(db, logger, duration),
-		certificateauthority.New(db, logger, duration),
-		certificateissue.New(db, logger, duration),
-	}
+	resources := makeResources(db, logger, duration)
 
 	var g group.Group
 	{

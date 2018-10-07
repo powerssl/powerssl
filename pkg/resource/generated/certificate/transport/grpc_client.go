@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc"
 
 	apiv1 "powerssl.io/pkg/api/v1"
+	service "powerssl.io/pkg/resource/certificate"
 	"powerssl.io/pkg/resource/generated/certificate/endpoint"
-	"powerssl.io/pkg/resource/generated/certificate/service"
 )
 
 const serviceName = "powerssl.api.v1.CertificateService"

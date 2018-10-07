@@ -10,8 +10,8 @@ import (
 
 	apiv1 "powerssl.io/pkg/api/v1"
 	resource "powerssl.io/pkg/resource"
+	service "powerssl.io/pkg/resource/certificate"
 	"powerssl.io/pkg/resource/generated/certificate/endpoint"
-	"powerssl.io/pkg/resource/generated/certificate/service"
 	"powerssl.io/pkg/resource/generated/certificate/transport"
 )
 

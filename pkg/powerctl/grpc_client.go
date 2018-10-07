@@ -4,11 +4,11 @@ import (
 	"github.com/go-kit/kit/log"
 	"google.golang.org/grpc"
 
-	certificateservice "powerssl.io/pkg/resource/generated/certificate/service"
+	certificateservice "powerssl.io/pkg/resource/certificate"
+	certificateauthorityservice "powerssl.io/pkg/resource/certificateauthority"
+	certificateissueservice "powerssl.io/pkg/resource/certificateissue"
 	certificatetransport "powerssl.io/pkg/resource/generated/certificate/transport"
-	certificateauthorityservice "powerssl.io/pkg/resource/generated/certificateauthority/service"
 	certificateauthoritytransport "powerssl.io/pkg/resource/generated/certificateauthority/transport"
-	certificateissueservice "powerssl.io/pkg/resource/generated/certificateissue/service"
 	certificateissuetransport "powerssl.io/pkg/resource/generated/certificateissue/transport"
 )
 
