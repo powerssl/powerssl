@@ -1,6 +1,9 @@
 package powerctl
 
 import (
+	"os"
+	"time"
+
 	"github.com/go-kit/kit/log"
 	"google.golang.org/grpc"
 
@@ -18,7 +21,24 @@ type grpcClient struct {
 	CertificateIssue     certificateissueservice.Service
 }
 
-func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) *grpcClient {
+func NewGRPCClient(grpcAddr string) *grpcClient {
+	var logger log.Logger
+	{
+		logger = log.NewLogfmtLogger(os.Stderr)
+		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
+		logger = log.With(logger, "caller", log.DefaultCaller)
+	}
+
+	var conn *grpc.ClientConn
+	{
+		var err error
+		conn, err = grpc.Dial(grpcAddr, grpc.WithInsecure(), grpc.WithTimeout(time.Second))
+		if err != nil {
+			logger.Log("error: %v", err)
+			os.Exit(1)
+		}
+	}
+
 	return &grpcClient{
 		Certificate:          certificatetransport.NewGRPCClient(conn, logger),
 		CertificateAuthority: certificateauthoritytransport.NewGRPCClient(conn, logger),

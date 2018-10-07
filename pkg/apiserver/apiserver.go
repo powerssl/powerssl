@@ -58,11 +58,9 @@ func Run(grpcAddr string) {
 		g.Add(func() error {
 			logger.Log("transport", "gRPC", "addr", grpcAddr)
 			baseServer := grpc.NewServer(grpc.UnaryInterceptor(kitgrpc.Interceptor))
-
-			for _, r := range resources {
-				r.RegisterGRPCServer(baseServer)
+			for _, resource := range resources {
+				resource.RegisterGRPCServer(baseServer)
 			}
-
 			return baseServer.Serve(grpcListener)
 		}, func(error) {
 			grpcListener.Close()
