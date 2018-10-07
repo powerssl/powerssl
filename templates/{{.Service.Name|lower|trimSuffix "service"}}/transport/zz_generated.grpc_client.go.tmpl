@@ -4,7 +4,7 @@
 {{- if (regexMatch "y$" $resourceName)}}
 {{- $resourceNamePlural = concat ($resourceName | trimSuffix "y") "ies" }}
 {{- end}}
-package transport
+package transport // import "powerssl.io/pkg/gen/{{$resourceName | lower}}/transport"
 
 import (
 	kitendpoint "github.com/go-kit/kit/endpoint"
@@ -24,9 +24,9 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 	options := []grpctransport.ClientOption{}
 {{range .Service.Method}}
 
-	var {{.Name | lower}}Endpoint kitendpoint.Endpoint
+	var {{.Name | lowerCamelCase}}Endpoint kitendpoint.Endpoint
 	{
-		{{.Name | lower}}Endpoint = grpctransport.NewClient(
+		{{.Name | lowerCamelCase}}Endpoint = grpctransport.NewClient(
 			conn,
 			serviceName,
 			"{{.Name}}",
@@ -46,7 +46,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 
 	return endpoint.Endpoints{
 {{- range .Service.Method}}
-		{{.Name}}Endpoint: {{.Name | lower}}Endpoint,
+		{{.Name}}Endpoint: {{.Name | lowerCamelCase}}Endpoint,
 {{- end}}
 	}
 }

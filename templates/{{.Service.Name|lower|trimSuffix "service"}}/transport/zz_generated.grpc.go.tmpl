@@ -4,7 +4,7 @@
 {{- if (regexMatch "y$" $resourceName)}}
 {{- $resourceNamePlural = concat ($resourceName | trimSuffix "y") "ies" }}
 {{- end}}
-package transport
+package transport // import "powerssl.io/pkg/gen/{{$resourceName | lower}}/transport"
 
 import (
 	"context"
@@ -50,7 +50,7 @@ func encodeGRPC{{$resourceName}}({{$resourceName | lowerCamelCase}} *api.{{$reso
 {{range .Service.Method}}
 func decodeGRPC{{.Name}}Request(_ context.Context, grpcReq interface{}) (interface{}, error) {
 {{- if eq (.Name | concat) "List"}}
-	// req := grpcReq.(*apiv1.{{.Name}}{{$resourceNamePlural}}Request)
+	// req := grpcReq.(*apiv1.List{{$resourceNamePlural}}Request)
 {{- else}}
 	req := grpcReq.(*apiv1.{{.Name}}{{$resourceName}}Request)
 {{- end}}
@@ -120,7 +120,7 @@ func encodeGRPC{{.Name}}Response(_ context.Context, response interface{}) (inter
 
 func encodeGRPC{{.Name}}Request(_ context.Context, request interface{}) (interface{}, error) {
 {{- if eq (.Name | concat) "List"}}
-	return &apiv1.{{.Name}}{{$resourceNamePlural}}Request{
+	return &apiv1.List{{$resourceNamePlural}}Request{
 {{- else}}
 	req := request.(endpoint.{{.Name}}Request)
 

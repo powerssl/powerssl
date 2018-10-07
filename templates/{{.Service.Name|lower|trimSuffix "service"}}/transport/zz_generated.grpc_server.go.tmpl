@@ -4,7 +4,7 @@
 {{- if (regexMatch "y$" $resourceName)}}
 {{- $resourceNamePlural = concat ($resourceName | trimSuffix "y") "ies" }}
 {{- end}}
-package transport
+package transport // import "powerssl.io/pkg/gen/{{$resourceName | lower}}/transport"
 
 import (
 	"context"
@@ -19,7 +19,7 @@ import (
 
 type grpcServer struct {
 {{- range .Service.Method}}
-	{{.Name | lower}} grpctransport.Handler
+	{{.Name | lowerCamelCase}} grpctransport.Handler
 {{- end}}
 }
 
@@ -30,7 +30,7 @@ func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger) apiv1.{{$res
 
 	return &grpcServer{
 {{- range .Service.Method}}
-		{{.Name | lower}}: grpctransport.NewServer(
+		{{.Name | lowerCamelCase}}: grpctransport.NewServer(
 			endpoints.{{.Name}}Endpoint,
 			decodeGRPC{{.Name}}Request,
 			encodeGRPC{{.Name}}Response,
@@ -42,13 +42,13 @@ func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger) apiv1.{{$res
 
 {{range .Service.Method}}
 {{- if eq (.Name | concat) "Delete"}}
-func (s *grpcServer) {{.Name}}(ctx context.Context, req *apiv1.{{.Name}}{{$resourceName}}Request) (*types.Empty, error) {
+func (s *grpcServer) Delete(ctx context.Context, req *apiv1.Delete{{$resourceName}}Request) (*types.Empty, error) {
 {{- else if eq (.Name | concat) "List"}}
-func (s *grpcServer) {{.Name}}(ctx context.Context, req *apiv1.{{.Name}}{{$resourceNamePlural}}Request) (*apiv1.List{{$resourceNamePlural}}Response, error) {
+func (s *grpcServer) List(ctx context.Context, req *apiv1.List{{$resourceNamePlural}}Request) (*apiv1.List{{$resourceNamePlural}}Response, error) {
 {{- else}}
 func (s *grpcServer) {{.Name}}(ctx context.Context, req *apiv1.{{.Name}}{{$resourceName}}Request) (*apiv1.{{$resourceName}}, error) {
 {{- end}}
-	_, rep, err := s.{{.Name | lower }}.ServeGRPC(ctx, req)
+	_, rep, err := s.{{.Name | lowerCamelCase}}.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
