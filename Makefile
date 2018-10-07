@@ -30,13 +30,21 @@ PROTOBUF_TARGETS := bin/.go_protobuf_sources
 .DEFAULT_GOAL := all
 all: build
 
-bin/.go_protobuf_sources: bin/protoc-gen-gogo
+bin/.go_protobuf_sources: bin/protoc-gen-gogo bin/protoc-gen-gotemplate
 	$(FIND_RELEVANT) -type f -name '*.pb.go' -exec rm {} +
 	set -e; for dir in $(sort $(dir $(GO_PROTOS))); do \
-		$(PROTOC) -I$(PKG_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) --gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src $$dir/*.proto; \
+		$(PROTOC) \
+			-I$(PKG_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
+			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src \
+			--gotemplate_out=$(PKG_PATH)/gen \
+			$$dir/*.proto; \
 	done
 	gofmt -s -w $(GO_SOURCES)
+	gofmt -s -w pkg/gen
 	touch $@
+
+bin/protoc-gen-gotemplate:
+	go build -o bin/protoc-gen-gotemplate $$(go mod download -json moul.io/protoc-gen-gotemplate | $(JQ) -r '.Dir')
 
 bin/protoc-gen-gogo:
 	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | $(JQ) -r '.Dir')/protoc-gen-gogo

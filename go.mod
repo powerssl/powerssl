@@ -7,7 +7,6 @@ require (
 	github.com/denisenkom/go-mssqldb v0.0.0-20180901172138-1eb28afdf9b6 // indirect
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/go-kit/kit v0.7.0
-	github.com/go-logfmt/logfmt v0.3.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gogo/googleapis v1.1.0
@@ -17,7 +16,6 @@ require (
 	github.com/jinzhu/gorm v1.9.1
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
 	github.com/jinzhu/now v0.0.0-20180511015916-ed742868f2ae // indirect
-	github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515 // indirect
 	github.com/lib/pq v1.0.0 // indirect
 	github.com/mattn/go-sqlite3 v1.9.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
@@ -35,4 +33,5 @@ require (
 	golang.org/x/crypto v0.0.0-20181001203147-e3636079e1a4 // indirect
 	golang.org/x/net v0.0.0-20181003013248-f5e5bdd77824
 	google.golang.org/grpc v1.15.0
+	moul.io/protoc-gen-gotemplate v1.6.0
 )
