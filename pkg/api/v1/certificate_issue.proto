@@ -11,7 +11,7 @@ service CertificateIssueService {
   rpc Create(CreateCertificateIssueRequest)
       returns (CertificateIssue) {
   }
-  rpc Delete(DeleteCertificatIssueRequest)
+  rpc Delete(DeleteCertificateIssueRequest)
       returns (google.protobuf.Empty) {
   }
   rpc Get(GetCertificateIssueRequest)
@@ -26,10 +26,10 @@ service CertificateIssueService {
 }
 
 message CreateCertificateIssueRequest {
-  CertificateIssue certificate_authority = 1;
+  CertificateIssue certificate_issue = 1;
 }
 
-message DeleteCertificatIssueRequest {
+message DeleteCertificateIssueRequest {
   string name = 1;
 }
 
@@ -48,7 +48,7 @@ message ListCertificateIssuesResponse {
 }
 
 message UpdateCertificateIssueRequest {
-  CertificateIssue certificate_authority = 1;
+  CertificateIssue certificate_issue = 1;
 }
 
 message CertificateIssue {

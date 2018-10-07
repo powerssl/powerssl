@@ -10,23 +10,23 @@ option go_package = "powerssl.io/pkg/api/v1;api";
 service CertificateService {
   rpc Create(CreateCertificateRequest) returns (Certificate) {
   }
-  rpc Delete(DeleteCertificatRequest)
+  rpc Delete(DeleteCertificateRequest)
       returns (google.protobuf.Empty) {
   }
   rpc Get(GetCertificateRequest) returns (Certificate) {
   }
-  rpc List(ListCertificateRequest)
-      returns (ListCertificateResponse) {
+  rpc List(ListCertificatesRequest)
+      returns (ListCertificatesResponse) {
   }
   rpc Update(UpdateCertificateRequest) returns (Certificate) {
   }
 }
 
 message CreateCertificateRequest {
-  Certificate certificate_authority = 1;
+  Certificate certificate = 1;
 }
 
-message DeleteCertificatRequest {
+message DeleteCertificateRequest {
   string name = 1;
 }
 
@@ -34,10 +34,10 @@ message GetCertificateRequest {
   string name = 1;
 }
 
-message ListCertificateRequest {
+message ListCertificatesRequest {
 }
 
-message ListCertificateResponse {
+message ListCertificatesResponse {
   TypeMeta type_meta = 1;
   ListMeta list_meta = 2;
 
@@ -45,7 +45,7 @@ message ListCertificateResponse {
 }
 
 message UpdateCertificateRequest {
-  Certificate certificate_authority = 1;
+  Certificate certificate = 1;
 }
 
 message Certificate {
