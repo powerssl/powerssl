@@ -1,13 +1,12 @@
-package db
+package certificateissue
 
 import "github.com/jinzhu/gorm"
 
-type Certificate struct {
+type CertificateIssue struct {
 	gorm.Model
 
 	CommonName          string
 	EncryptionAlgorithm string
 	KeySize             int
 	SignatureAlgorithm  string
-	AutoRenew           bool
 }

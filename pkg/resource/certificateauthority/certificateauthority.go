@@ -1,4 +1,4 @@
-package db
+package certificateauthority
 
 import "github.com/jinzhu/gorm"
 
