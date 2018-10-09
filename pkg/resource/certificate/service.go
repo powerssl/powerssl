@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kit/kit/log"
+	"github.com/jinzhu/gorm"
 
 	"powerssl.io/pkg/api"
 )
@@ -16,19 +17,25 @@ type Service interface {
 	Update(ctx context.Context, certificate *api.Certificate) (*api.Certificate, error)
 }
 
-func New(logger log.Logger) Service {
+func New(db *gorm.DB, logger log.Logger) Service {
+	db.AutoMigrate(&Certificate{})
+
 	var svc Service
 	{
-		svc = NewBasicService()
+		svc = NewBasicService(db)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
 }
 
-type basicService struct{}
+type basicService struct {
+	db *gorm.DB
+}
 
-func NewBasicService() Service {
-	return basicService{}
+func NewBasicService(db *gorm.DB) Service {
+	return basicService{
+		db: db,
+	}
 }
 
 func (bs basicService) Create(_ context.Context, certificate *api.Certificate) (*api.Certificate, error) {
