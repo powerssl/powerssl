@@ -30,13 +30,15 @@ PROTOBUF_TARGETS := bin/.go_protobuf_sources
 .DEFAULT_GOAL := all
 all: build
 
-bin/.go_protobuf_sources: bin/protoc-gen-gogo bin/protoc-gen-gotemplate
+bin/.go_protobuf_sources: bin/protoc-gen-gogo bin/protoc-gen-gotemplate bin/protoc-gen-grpc-web
 	$(FIND_RELEVANT) -type f -name '*.pb.go' -exec rm {} +
 	set -e; for dir in $(sort $(dir $(GO_PROTOS))); do \
 		$(PROTOC) \
 			-I$(PKG_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
 			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src \
 			--gotemplate_out=$(PKG_PATH)/resource/generated \
+			--js_out=import_style=commonjs:javascript \
+			--grpc-web_out=import_style=commonjs,mode=grpcwebtext:javascript \
 			$$dir/*.proto; \
 	done
 	gofmt -s -w $(PKG_PATH)/resource/generated
@@ -58,7 +60,6 @@ bin/protoc-gen-grpc-web:
 	cd /tmp/grpc-web/javascript/net/grpc/web && \
 		make protoc-gen-grpc-web && \
 		install protoc-gen-grpc-web $(BIN_PATH)/protoc-gen-grpc-web
-	# --js_out=import_style=commonjs:js --grpc-web_out=import_style=commonjs,mode=grpcwebtext:js \
 
 bin/powerssl-apiserver: .ALWAYS_REBUILD
 	go build -o bin/powerssl-apiserver powerssl.io/cmd/powerssl-apiserver
