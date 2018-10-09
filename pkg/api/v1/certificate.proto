@@ -56,11 +56,22 @@ message Certificate {
   CertificateStatus status = 4;
 }
 
+enum KeyAlgorithm {
+  KeyAlgorithmUnknown = 0;
+  RSA = 1;
+}
+
+enum DigestAlgorithm {
+  DigestAlgorithmUnknown = 0;
+  SHA1 = 1;
+  SHA256 = 2;
+}
+
 message CertificateSpec {
-  string common_name = 1;
-  string encryption_algorithm = 2;
+  repeated string dnsnames = 1;
+  KeyAlgorithm key_algorithm = 2;
   int32 key_size = 3;
-  string signature_algorithm = 4;
+  DigestAlgorithm digest_algorithm = 4;
   bool auto_renew = 5;
 }
 
