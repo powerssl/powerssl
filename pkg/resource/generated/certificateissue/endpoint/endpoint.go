@@ -22,7 +22,7 @@ type Endpoints struct {
 	UpdateEndpoint endpoint.Endpoint
 }
 
-func New(svc service.Service, logger log.Logger, duration metrics.Histogram) Endpoints {
+func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histogram) Endpoints {
 	var createEndpoint endpoint.Endpoint
 	{
 		createEndpoint = makeCreateEndpoint(svc)
@@ -65,6 +65,58 @@ func New(svc service.Service, logger log.Logger, duration metrics.Histogram) End
 		ListEndpoint:   listEndpoint,
 		UpdateEndpoint: updateEndpoint,
 	}
+}
+
+func (e Endpoints) Create(ctx context.Context, certificateIssue *api.CertificateIssue) (*api.CertificateIssue, error) {
+	resp, err := e.CreateEndpoint(ctx, CreateRequest{
+		CertificateIssue: certificateIssue,
+	})
+	if err != nil {
+		return nil, err
+	}
+	response := resp.(CreateResponse)
+	return response.CertificateIssue, nil
+}
+
+func (e Endpoints) Delete(ctx context.Context, name string) error {
+	_, err := e.DeleteEndpoint(ctx, DeleteRequest{
+		Name: name,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (e Endpoints) Get(ctx context.Context, name string) (*api.CertificateIssue, error) {
+	resp, err := e.GetEndpoint(ctx, GetRequest{
+		Name: name,
+	})
+	if err != nil {
+		return nil, err
+	}
+	response := resp.(GetResponse)
+	return response.CertificateIssue, nil
+}
+
+func (e Endpoints) List(ctx context.Context) ([]*api.CertificateIssue, error) {
+	resp, err := e.ListEndpoint(ctx, ListRequest{})
+	if err != nil {
+		return nil, err
+	}
+	response := resp.(ListResponse)
+	return response.CertificateIssues, nil
+}
+
+func (e Endpoints) Update(ctx context.Context, certificateIssue *api.CertificateIssue) (*api.CertificateIssue, error) {
+	resp, err := e.UpdateEndpoint(ctx, UpdateRequest{
+		CertificateIssue: certificateIssue,
+	})
+	if err != nil {
+		return nil, err
+	}
+	response := resp.(UpdateResponse)
+	return response.CertificateIssue, nil
 }
 
 type CreateRequest struct {

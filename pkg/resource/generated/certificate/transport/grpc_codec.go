@@ -11,62 +11,97 @@ import (
 	"powerssl.io/pkg/resource/generated/certificate/endpoint"
 )
 
-func decodeGRPCCertificates(certificates []*apiv1.Certificate) []*api.Certificate {
+func decodeGRPCCertificates(certificates []*apiv1.Certificate) ([]*api.Certificate, error) {
 	items := make([]*api.Certificate, len(certificates))
 	for i, certificate := range certificates {
-		items[i] = decodeGRPCCertificate(certificate)
+		item, err := decodeGRPCCertificate(certificate)
+		if err != nil {
+			return nil, err
+		}
+		items[i] = item
 	}
-	return items
+	return items, nil
 }
 
-func decodeGRPCCertificate(certificate *apiv1.Certificate) *api.Certificate {
+func decodeGRPCCertificate(certificate *apiv1.Certificate) (*api.Certificate, error) {
+	typeMeta, err := resource.DecodeGRPCTypeMeta(certificate.GetTypeMeta())
+	if err != nil {
+		return nil, err
+	}
+	objectMeta, err := resource.DecodeGRPCObjectMeta(certificate.GetObjectMeta())
+	if err != nil {
+		return nil, err
+	}
 	return &api.Certificate{
-		TypeMeta:   resource.DecodeGRPCTypeMeta(certificate.GetTypeMeta()),
-		ObjectMeta: resource.DecodeGRPCObjectMeta(certificate.GetObjectMeta()),
+		TypeMeta:   typeMeta,
+		ObjectMeta: objectMeta,
 		// TODO
-	}
+	}, nil
 }
 
-func encodeGRPCCertificates(certificates []*api.Certificate) []*apiv1.Certificate {
+func encodeGRPCCertificates(certificates []*api.Certificate) ([]*apiv1.Certificate, error) {
 	items := make([]*apiv1.Certificate, len(certificates))
 	for i, certificate := range certificates {
-		items[i] = encodeGRPCCertificate(certificate)
+		item, err := encodeGRPCCertificate(certificate)
+		if err != nil {
+			return nil, err
+		}
+		items[i] = item
 	}
-	return items
+	return items, nil
 }
 
-func encodeGRPCCertificate(certificate *api.Certificate) *apiv1.Certificate {
-	return &apiv1.Certificate{
-		TypeMeta:   resource.EncodeGRPCTypeMeta(certificate.TypeMeta),
-		ObjectMeta: resource.EncodeGRPCObjectMeta(certificate.ObjectMeta),
-		// TODO
+func encodeGRPCCertificate(certificate *api.Certificate) (*apiv1.Certificate, error) {
+	typeMeta, err := resource.EncodeGRPCTypeMeta(certificate.TypeMeta)
+	if err != nil {
+		return nil, err
 	}
+	objectMeta, err := resource.EncodeGRPCObjectMeta(certificate.ObjectMeta)
+	if err != nil {
+		return nil, err
+	}
+	return &apiv1.Certificate{
+		TypeMeta:   typeMeta,
+		ObjectMeta: objectMeta,
+		// TODO
+	}, nil
 }
 
 func decodeGRPCCreateRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*apiv1.CreateCertificateRequest)
+	certificate, err := decodeGRPCCertificate(req.GetCertificate())
+	if err != nil {
+		return nil, err
+	}
 	return endpoint.CreateRequest{
-		Certificate: decodeGRPCCertificate(req.GetCertificate()),
+		Certificate: certificate,
 	}, nil
 }
 
 func decodeGRPCCreateResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
 	reply := grpcReply.(*apiv1.Certificate)
+	certificate, err := decodeGRPCCertificate(reply)
+	if err != nil {
+		return nil, err
+	}
 	return endpoint.CreateResponse{
-		Certificate: decodeGRPCCertificate(reply),
+		Certificate: certificate,
 	}, nil
 }
 
 func encodeGRPCCreateResponse(_ context.Context, response interface{}) (interface{}, error) {
 	resp := response.(endpoint.CreateResponse)
-	return encodeGRPCCertificate(resp.Certificate), nil
+	return encodeGRPCCertificate(resp.Certificate)
 }
 
 func encodeGRPCCreateRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(endpoint.CreateRequest)
-
+	certificate, err := encodeGRPCCertificate(req.Certificate)
+	if err != nil {
+		return nil, err
+	}
 	return &apiv1.CreateCertificateRequest{
-		Certificate: encodeGRPCCertificate(req.Certificate),
+		Certificate: certificate,
 	}, nil
 }
 
@@ -102,14 +137,18 @@ func decodeGRPCGetRequest(_ context.Context, grpcReq interface{}) (interface{}, 
 
 func decodeGRPCGetResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
 	reply := grpcReply.(*apiv1.Certificate)
+	certificate, err := decodeGRPCCertificate(reply)
+	if err != nil {
+		return nil, err
+	}
 	return endpoint.GetResponse{
-		Certificate: decodeGRPCCertificate(reply),
+		Certificate: certificate,
 	}, nil
 }
 
 func encodeGRPCGetResponse(_ context.Context, response interface{}) (interface{}, error) {
 	resp := response.(endpoint.GetResponse)
-	return encodeGRPCCertificate(resp.Certificate), nil
+	return encodeGRPCCertificate(resp.Certificate)
 }
 
 func encodeGRPCGetRequest(_ context.Context, request interface{}) (interface{}, error) {
@@ -121,20 +160,29 @@ func encodeGRPCGetRequest(_ context.Context, request interface{}) (interface{}, 
 }
 
 func decodeGRPCListRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	// req := grpcReq.(*apiv1.ListCertificatesRequest)
 	return endpoint.ListRequest{}, nil
 }
 
 func decodeGRPCListResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
 	reply := grpcReply.(*apiv1.ListCertificatesResponse)
+	certificates, err := decodeGRPCCertificates(reply.GetItems())
+	if err != nil {
+		return nil, err
+	}
 	return endpoint.ListResponse{
-		Certificates: decodeGRPCCertificates(reply.GetItems()),
+		Certificates: certificates,
 	}, nil
 }
 
 func encodeGRPCListResponse(_ context.Context, response interface{}) (interface{}, error) {
 	resp := response.(endpoint.ListResponse)
-	return encodeGRPCCertificates(resp.Certificates), nil
+	items, err := encodeGRPCCertificates(resp.Certificates)
+	if err != nil {
+		return nil, err
+	}
+	return &apiv1.ListCertificatesResponse{
+		Items: items,
+	}, nil
 }
 
 func encodeGRPCListRequest(_ context.Context, request interface{}) (interface{}, error) {
@@ -143,27 +191,38 @@ func encodeGRPCListRequest(_ context.Context, request interface{}) (interface{},
 
 func decodeGRPCUpdateRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*apiv1.UpdateCertificateRequest)
+	certificate, err := decodeGRPCCertificate(req.GetCertificate())
+	if err != nil {
+		return nil, err
+	}
 	return endpoint.UpdateRequest{
-		Certificate: decodeGRPCCertificate(req.GetCertificate()),
+		Certificate: certificate,
 	}, nil
 }
 
 func decodeGRPCUpdateResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
 	reply := grpcReply.(*apiv1.Certificate)
+	certificate, err := decodeGRPCCertificate(reply)
+	if err != nil {
+		return nil, err
+	}
 	return endpoint.UpdateResponse{
-		Certificate: decodeGRPCCertificate(reply),
+		Certificate: certificate,
 	}, nil
 }
 
 func encodeGRPCUpdateResponse(_ context.Context, response interface{}) (interface{}, error) {
 	resp := response.(endpoint.UpdateResponse)
-	return encodeGRPCCertificate(resp.Certificate), nil
+	return encodeGRPCCertificate(resp.Certificate)
 }
 
 func encodeGRPCUpdateRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(endpoint.UpdateRequest)
-
+	certificate, err := encodeGRPCCertificate(req.Certificate)
+	if err != nil {
+		return nil, err
+	}
 	return &apiv1.UpdateCertificateRequest{
-		Certificate: encodeGRPCCertificate(req.Certificate),
+		Certificate: certificate,
 	}, nil
 }

@@ -22,8 +22,8 @@ type CertificateAuthority struct {
 }
 
 func New(db *gorm.DB, logger log.Logger, duration metrics.Histogram) resource.Resource {
-	svc := service.New(logger)
-	endpoints := endpoint.New(svc, logger, duration)
+	svc := service.New(db, logger)
+	endpoints := endpoint.NewEndpoints(svc, logger, duration)
 
 	return &CertificateAuthority{
 		db:        db,

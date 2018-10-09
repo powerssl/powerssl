@@ -11,66 +11,97 @@ import (
 	"powerssl.io/pkg/resource/generated/certificateauthority/endpoint"
 )
 
-func decodeGRPCCertificateAuthorities(certificateAuthorities []*apiv1.CertificateAuthority) []*api.CertificateAuthority {
+func decodeGRPCCertificateAuthorities(certificateAuthorities []*apiv1.CertificateAuthority) ([]*api.CertificateAuthority, error) {
 	items := make([]*api.CertificateAuthority, len(certificateAuthorities))
 	for i, certificateAuthority := range certificateAuthorities {
-		items[i] = decodeGRPCCertificateAuthority(certificateAuthority)
+		item, err := decodeGRPCCertificateAuthority(certificateAuthority)
+		if err != nil {
+			return nil, err
+		}
+		items[i] = item
 	}
-	return items
+	return items, nil
 }
 
-func decodeGRPCCertificateAuthority(certificateAuthority *apiv1.CertificateAuthority) *api.CertificateAuthority {
+func decodeGRPCCertificateAuthority(certificateAuthority *apiv1.CertificateAuthority) (*api.CertificateAuthority, error) {
+	typeMeta, err := resource.DecodeGRPCTypeMeta(certificateAuthority.GetTypeMeta())
+	if err != nil {
+		return nil, err
+	}
+	objectMeta, err := resource.DecodeGRPCObjectMeta(certificateAuthority.GetObjectMeta())
+	if err != nil {
+		return nil, err
+	}
 	return &api.CertificateAuthority{
-		TypeMeta:   resource.DecodeGRPCTypeMeta(certificateAuthority.GetTypeMeta()),
-		ObjectMeta: resource.DecodeGRPCObjectMeta(certificateAuthority.GetObjectMeta()),
-		Spec: api.CertificateAuthoritySpec{
-			Vendor: certificateAuthority.GetSpec().GetVendor(),
-		},
-	}
+		TypeMeta:   typeMeta,
+		ObjectMeta: objectMeta,
+		// TODO
+	}, nil
 }
 
-func encodeGRPCCertificateAuthorities(certificateAuthorities []*api.CertificateAuthority) []*apiv1.CertificateAuthority {
+func encodeGRPCCertificateAuthorities(certificateAuthorities []*api.CertificateAuthority) ([]*apiv1.CertificateAuthority, error) {
 	items := make([]*apiv1.CertificateAuthority, len(certificateAuthorities))
 	for i, certificateAuthority := range certificateAuthorities {
-		items[i] = encodeGRPCCertificateAuthority(certificateAuthority)
+		item, err := encodeGRPCCertificateAuthority(certificateAuthority)
+		if err != nil {
+			return nil, err
+		}
+		items[i] = item
 	}
-	return items
+	return items, nil
 }
 
-func encodeGRPCCertificateAuthority(certificateAuthority *api.CertificateAuthority) *apiv1.CertificateAuthority {
-	return &apiv1.CertificateAuthority{
-		TypeMeta:   resource.EncodeGRPCTypeMeta(certificateAuthority.TypeMeta),
-		ObjectMeta: resource.EncodeGRPCObjectMeta(certificateAuthority.ObjectMeta),
-		Spec: &apiv1.CertificateAuthoritySpec{
-			Vendor: certificateAuthority.Spec.Vendor,
-		},
+func encodeGRPCCertificateAuthority(certificateAuthority *api.CertificateAuthority) (*apiv1.CertificateAuthority, error) {
+	typeMeta, err := resource.EncodeGRPCTypeMeta(certificateAuthority.TypeMeta)
+	if err != nil {
+		return nil, err
 	}
+	objectMeta, err := resource.EncodeGRPCObjectMeta(certificateAuthority.ObjectMeta)
+	if err != nil {
+		return nil, err
+	}
+	return &apiv1.CertificateAuthority{
+		TypeMeta:   typeMeta,
+		ObjectMeta: objectMeta,
+		// TODO
+	}, nil
 }
 
 func decodeGRPCCreateRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*apiv1.CreateCertificateAuthorityRequest)
+	certificateAuthority, err := decodeGRPCCertificateAuthority(req.GetCertificateAuthority())
+	if err != nil {
+		return nil, err
+	}
 	return endpoint.CreateRequest{
-		CertificateAuthority: decodeGRPCCertificateAuthority(req.GetCertificateAuthority()),
+		CertificateAuthority: certificateAuthority,
 	}, nil
 }
 
 func decodeGRPCCreateResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
 	reply := grpcReply.(*apiv1.CertificateAuthority)
+	certificateAuthority, err := decodeGRPCCertificateAuthority(reply)
+	if err != nil {
+		return nil, err
+	}
 	return endpoint.CreateResponse{
-		CertificateAuthority: decodeGRPCCertificateAuthority(reply),
+		CertificateAuthority: certificateAuthority,
 	}, nil
 }
 
 func encodeGRPCCreateResponse(_ context.Context, response interface{}) (interface{}, error) {
 	resp := response.(endpoint.CreateResponse)
-	return encodeGRPCCertificateAuthority(resp.CertificateAuthority), nil
+	return encodeGRPCCertificateAuthority(resp.CertificateAuthority)
 }
 
 func encodeGRPCCreateRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(endpoint.CreateRequest)
-
+	certificateAuthority, err := encodeGRPCCertificateAuthority(req.CertificateAuthority)
+	if err != nil {
+		return nil, err
+	}
 	return &apiv1.CreateCertificateAuthorityRequest{
-		CertificateAuthority: encodeGRPCCertificateAuthority(req.CertificateAuthority),
+		CertificateAuthority: certificateAuthority,
 	}, nil
 }
 
@@ -106,14 +137,18 @@ func decodeGRPCGetRequest(_ context.Context, grpcReq interface{}) (interface{}, 
 
 func decodeGRPCGetResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
 	reply := grpcReply.(*apiv1.CertificateAuthority)
+	certificateAuthority, err := decodeGRPCCertificateAuthority(reply)
+	if err != nil {
+		return nil, err
+	}
 	return endpoint.GetResponse{
-		CertificateAuthority: decodeGRPCCertificateAuthority(reply),
+		CertificateAuthority: certificateAuthority,
 	}, nil
 }
 
 func encodeGRPCGetResponse(_ context.Context, response interface{}) (interface{}, error) {
 	resp := response.(endpoint.GetResponse)
-	return encodeGRPCCertificateAuthority(resp.CertificateAuthority), nil
+	return encodeGRPCCertificateAuthority(resp.CertificateAuthority)
 }
 
 func encodeGRPCGetRequest(_ context.Context, request interface{}) (interface{}, error) {
@@ -125,20 +160,29 @@ func encodeGRPCGetRequest(_ context.Context, request interface{}) (interface{}, 
 }
 
 func decodeGRPCListRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	// req := grpcReq.(*apiv1.ListCertificateAuthoritiesRequest)
 	return endpoint.ListRequest{}, nil
 }
 
 func decodeGRPCListResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
 	reply := grpcReply.(*apiv1.ListCertificateAuthoritiesResponse)
+	certificateAuthorities, err := decodeGRPCCertificateAuthorities(reply.GetItems())
+	if err != nil {
+		return nil, err
+	}
 	return endpoint.ListResponse{
-		CertificateAuthorities: decodeGRPCCertificateAuthorities(reply.GetItems()),
+		CertificateAuthorities: certificateAuthorities,
 	}, nil
 }
 
 func encodeGRPCListResponse(_ context.Context, response interface{}) (interface{}, error) {
 	resp := response.(endpoint.ListResponse)
-	return encodeGRPCCertificateAuthorities(resp.CertificateAuthorities), nil
+	items, err := encodeGRPCCertificateAuthorities(resp.CertificateAuthorities)
+	if err != nil {
+		return nil, err
+	}
+	return &apiv1.ListCertificateAuthoritiesResponse{
+		Items: items,
+	}, nil
 }
 
 func encodeGRPCListRequest(_ context.Context, request interface{}) (interface{}, error) {
@@ -147,27 +191,38 @@ func encodeGRPCListRequest(_ context.Context, request interface{}) (interface{},
 
 func decodeGRPCUpdateRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*apiv1.UpdateCertificateAuthorityRequest)
+	certificateAuthority, err := decodeGRPCCertificateAuthority(req.GetCertificateAuthority())
+	if err != nil {
+		return nil, err
+	}
 	return endpoint.UpdateRequest{
-		CertificateAuthority: decodeGRPCCertificateAuthority(req.GetCertificateAuthority()),
+		CertificateAuthority: certificateAuthority,
 	}, nil
 }
 
 func decodeGRPCUpdateResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
 	reply := grpcReply.(*apiv1.CertificateAuthority)
+	certificateAuthority, err := decodeGRPCCertificateAuthority(reply)
+	if err != nil {
+		return nil, err
+	}
 	return endpoint.UpdateResponse{
-		CertificateAuthority: decodeGRPCCertificateAuthority(reply),
+		CertificateAuthority: certificateAuthority,
 	}, nil
 }
 
 func encodeGRPCUpdateResponse(_ context.Context, response interface{}) (interface{}, error) {
 	resp := response.(endpoint.UpdateResponse)
-	return encodeGRPCCertificateAuthority(resp.CertificateAuthority), nil
+	return encodeGRPCCertificateAuthority(resp.CertificateAuthority)
 }
 
 func encodeGRPCUpdateRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(endpoint.UpdateRequest)
-
+	certificateAuthority, err := encodeGRPCCertificateAuthority(req.CertificateAuthority)
+	if err != nil {
+		return nil, err
+	}
 	return &apiv1.UpdateCertificateAuthorityRequest{
-		CertificateAuthority: encodeGRPCCertificateAuthority(req.CertificateAuthority),
+		CertificateAuthority: certificateAuthority,
 	}, nil
 }
