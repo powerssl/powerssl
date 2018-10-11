@@ -18,7 +18,9 @@ var serveCmd = &cobra.Command{
 }
 
 func init() {
-	viper.SetDefault("grpcAddr", ":8080")
+	serveCmd.Flags().StringP("grpc-addr", "", ":8080", "GRPC Addr")
+
+	viper.BindPFlag("grpcAddr", serveCmd.Flags().Lookup("grpc-addr"))
 
 	rootCmd.AddCommand(serveCmd)
 }
