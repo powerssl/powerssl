@@ -52,7 +52,7 @@ func (mw loggingMiddleware) List(ctx context.Context, pageSize int, pageToken st
 
 func (mw loggingMiddleware) Update(ctx context.Context, name string, certificate *api.Certificate) (*api.Certificate, error) {
 	defer func() {
-		mw.logger.Log("method", "Update", "certificate", fmt.Sprintf("%+v", certificate))
+		mw.logger.Log("method", "Update", "name", name, "certificate", fmt.Sprintf("%+v", certificate))
 	}()
 	return mw.next.Update(ctx, name, certificate)
 }
