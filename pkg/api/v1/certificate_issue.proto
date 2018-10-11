@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package powerssl.api.v1;
 
+import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "api/v1/meta.proto";
 
@@ -10,18 +11,35 @@ option go_package = "powerssl.io/pkg/api/v1;api";
 service CertificateIssueService {
   rpc Create(CreateCertificateIssueRequest)
       returns (CertificateIssue) {
+    option (google.api.http) = {
+      post: "/v1/certificate-issues"
+      body: "certificate-issues"
+    };
   }
   rpc Delete(DeleteCertificateIssueRequest)
       returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/{name=certificate-issues/*}"
+    };
   }
   rpc Get(GetCertificateIssueRequest)
       returns (CertificateIssue) {
+    option (google.api.http) = {
+      get: "/v1/{name=certificate-issues/*}"
+    };
   }
   rpc List(ListCertificateIssuesRequest)
       returns (ListCertificateIssuesResponse) {
+    option (google.api.http) = {
+      get: "/v1/certificate-issues"
+    };
   }
   rpc Update(UpdateCertificateIssueRequest)
       returns (CertificateIssue) {
+    option (google.api.http) = {
+      put: "/v1/{name=certificate-issues/*}",
+      body: "certificate-issues"
+    };
   }
 }
 
@@ -44,7 +62,7 @@ message ListCertificateIssuesResponse {
   TypeMeta type_meta = 1;
   ListMeta list_meta = 2;
 
-  repeated CertificateIssue items = 3;
+  repeated CertificateIssue certificate_issues = 3;
 }
 
 message UpdateCertificateIssueRequest {
@@ -52,20 +70,4 @@ message UpdateCertificateIssueRequest {
 }
 
 message CertificateIssue {
-  TypeMeta type_meta = 1;
-  ObjectMeta object_meta = 2;
-
-  CertificateIssueSpec spec = 3;
-  CertificateIssueStatus status = 4;
-}
-
-message CertificateIssueSpec {
-  string common_name = 1;
-  string encryption_algorithm = 2;
-  int32 key_size = 3;
-  string signature_algorithm = 4;
-}
-
-message CertificateIssueStatus {
-  string phase = 1;
 }

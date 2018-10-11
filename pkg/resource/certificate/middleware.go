@@ -24,7 +24,7 @@ type loggingMiddleware struct {
 
 func (mw loggingMiddleware) Create(ctx context.Context, certificate *api.Certificate) (*api.Certificate, error) {
 	defer func() {
-		mw.logger.Log("method", "Create", "certificate", fmt.Sprintf("%+v", certificate))
+		mw.logger.Log("method", "Create", "certificate", certificate.Name)
 	}()
 	return mw.next.Create(ctx, certificate)
 }

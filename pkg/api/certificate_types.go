@@ -1,34 +1,18 @@
-package api
+package api // import "powerssl.io/pkg/api"
+
+import "time"
 
 type Certificate struct {
-	ObjectMeta
-	TypeMeta
-
-	Spec   CertificateSpec   `json:"spec,omitempty"`
-	Status CertificateStatus `json:"status,omitempty"`
+	Name            string
+	CreateTime      time.Time
+	UpdateTime      time.Time
+	DisplayName     string
+	Title           string
+	Description     string
+	Labels          map[string]string
+	Dnsnames        []string
+	KeyAlgorithm    string
+	KeySize         int32
+	DigestAlgorithm string
+	AutoRenew       bool
 }
-
-type CertificateList struct {
-	ListMeta
-	TypeMeta
-
-	Items []Certificate `json:"items,omitempty"`
-}
-
-type CertificateSpec struct {
-	CommonName          string `json:"commonName,omitempty"`
-	EncryptionAlgorithm string `json:"encryptionAlgorithm,omitempty"`
-	KeySize             int    `json:"keySize,omitempty"`
-	SignatureAlgorithm  string `json:"signatureAlgorithm,omitempty"`
-	AutoRenew           bool   `json:"autoRenew,omitempty"`
-}
-
-type CertificateStatus struct {
-	Phase CertificatePhase `json:"phase,omitempty"`
-}
-
-type CertificatePhase string
-
-const (
-	CertificateActive CertificatePhase = "Active"
-)

@@ -65,7 +65,7 @@ message ListCertificateAuthoritiesResponse {
   TypeMeta type_meta = 1;
   ListMeta list_meta = 2;
 
-  repeated CertificateAuthority items = 3;
+  repeated CertificateAuthority certificate_authorities = 3;
 }
 
 message UpdateCertificateAuthorityRequest {
@@ -74,12 +74,4 @@ message UpdateCertificateAuthorityRequest {
 }
 
 message CertificateAuthority {
-  TypeMeta type_meta = 1;
-  ObjectMeta object_meta = 2;
-
-  CertificateAuthoritySpec spec = 3;
-}
-
-message CertificateAuthoritySpec {
-  string vendor = 1;
 }

@@ -11,11 +11,10 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = Function('return this')();
 
+var google_api_annotations_pb = require('../../google/api/annotations_pb.js');
 var google_protobuf_empty_pb = require('google-protobuf/google/protobuf/empty_pb.js');
 var api_v1_meta_pb = require('../../api/v1/meta_pb.js');
 goog.exportSymbol('proto.powerssl.api.v1.CertificateIssue', null, global);
-goog.exportSymbol('proto.powerssl.api.v1.CertificateIssueSpec', null, global);
-goog.exportSymbol('proto.powerssl.api.v1.CertificateIssueStatus', null, global);
 goog.exportSymbol('proto.powerssl.api.v1.CreateCertificateIssueRequest', null, global);
 goog.exportSymbol('proto.powerssl.api.v1.DeleteCertificateIssueRequest', null, global);
 goog.exportSymbol('proto.powerssl.api.v1.GetCertificateIssueRequest', null, global);
@@ -637,7 +636,7 @@ proto.powerssl.api.v1.ListCertificateIssuesResponse.toObject = function(includeI
   var f, obj = {
     typeMeta: (f = msg.getTypeMeta()) && api_v1_meta_pb.TypeMeta.toObject(includeInstance, f),
     listMeta: (f = msg.getListMeta()) && api_v1_meta_pb.ListMeta.toObject(includeInstance, f),
-    itemsList: jspb.Message.toObjectList(msg.getItemsList(),
+    certificateIssuesList: jspb.Message.toObjectList(msg.getCertificateIssuesList(),
     proto.powerssl.api.v1.CertificateIssue.toObject, includeInstance)
   };
 
@@ -688,7 +687,7 @@ proto.powerssl.api.v1.ListCertificateIssuesResponse.deserializeBinaryFromReader 
     case 3:
       var value = new proto.powerssl.api.v1.CertificateIssue;
       reader.readMessage(value,proto.powerssl.api.v1.CertificateIssue.deserializeBinaryFromReader);
-      msg.addItems(value);
+      msg.addCertificateIssues(value);
       break;
     default:
       reader.skipField();
@@ -735,7 +734,7 @@ proto.powerssl.api.v1.ListCertificateIssuesResponse.serializeBinaryToWriter = fu
       api_v1_meta_pb.ListMeta.serializeBinaryToWriter
     );
   }
-  f = message.getItemsList();
+  f = message.getCertificateIssuesList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
       3,
@@ -807,17 +806,17 @@ proto.powerssl.api.v1.ListCertificateIssuesResponse.prototype.hasListMeta = func
 
 
 /**
- * repeated CertificateIssue items = 3;
+ * repeated CertificateIssue certificate_issues = 3;
  * @return {!Array<!proto.powerssl.api.v1.CertificateIssue>}
  */
-proto.powerssl.api.v1.ListCertificateIssuesResponse.prototype.getItemsList = function() {
+proto.powerssl.api.v1.ListCertificateIssuesResponse.prototype.getCertificateIssuesList = function() {
   return /** @type{!Array<!proto.powerssl.api.v1.CertificateIssue>} */ (
     jspb.Message.getRepeatedWrapperField(this, proto.powerssl.api.v1.CertificateIssue, 3));
 };
 
 
 /** @param {!Array<!proto.powerssl.api.v1.CertificateIssue>} value */
-proto.powerssl.api.v1.ListCertificateIssuesResponse.prototype.setItemsList = function(value) {
+proto.powerssl.api.v1.ListCertificateIssuesResponse.prototype.setCertificateIssuesList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 3, value);
 };
 
@@ -827,13 +826,13 @@ proto.powerssl.api.v1.ListCertificateIssuesResponse.prototype.setItemsList = fun
  * @param {number=} opt_index
  * @return {!proto.powerssl.api.v1.CertificateIssue}
  */
-proto.powerssl.api.v1.ListCertificateIssuesResponse.prototype.addItems = function(opt_value, opt_index) {
+proto.powerssl.api.v1.ListCertificateIssuesResponse.prototype.addCertificateIssues = function(opt_value, opt_index) {
   return jspb.Message.addToRepeatedWrapperField(this, 3, opt_value, proto.powerssl.api.v1.CertificateIssue, opt_index);
 };
 
 
-proto.powerssl.api.v1.ListCertificateIssuesResponse.prototype.clearItemsList = function() {
-  this.setItemsList([]);
+proto.powerssl.api.v1.ListCertificateIssuesResponse.prototype.clearCertificateIssuesList = function() {
+  this.setCertificateIssuesList([]);
 };
 
 
@@ -1043,10 +1042,7 @@ proto.powerssl.api.v1.CertificateIssue.prototype.toObject = function(opt_include
  */
 proto.powerssl.api.v1.CertificateIssue.toObject = function(includeInstance, msg) {
   var f, obj = {
-    typeMeta: (f = msg.getTypeMeta()) && api_v1_meta_pb.TypeMeta.toObject(includeInstance, f),
-    objectMeta: (f = msg.getObjectMeta()) && api_v1_meta_pb.ObjectMeta.toObject(includeInstance, f),
-    spec: (f = msg.getSpec()) && proto.powerssl.api.v1.CertificateIssueSpec.toObject(includeInstance, f),
-    status: (f = msg.getStatus()) && proto.powerssl.api.v1.CertificateIssueStatus.toObject(includeInstance, f)
+
   };
 
   if (includeInstance) {
@@ -1083,26 +1079,6 @@ proto.powerssl.api.v1.CertificateIssue.deserializeBinaryFromReader = function(ms
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = new api_v1_meta_pb.TypeMeta;
-      reader.readMessage(value,api_v1_meta_pb.TypeMeta.deserializeBinaryFromReader);
-      msg.setTypeMeta(value);
-      break;
-    case 2:
-      var value = new api_v1_meta_pb.ObjectMeta;
-      reader.readMessage(value,api_v1_meta_pb.ObjectMeta.deserializeBinaryFromReader);
-      msg.setObjectMeta(value);
-      break;
-    case 3:
-      var value = new proto.powerssl.api.v1.CertificateIssueSpec;
-      reader.readMessage(value,proto.powerssl.api.v1.CertificateIssueSpec.deserializeBinaryFromReader);
-      msg.setSpec(value);
-      break;
-    case 4:
-      var value = new proto.powerssl.api.v1.CertificateIssueStatus;
-      reader.readMessage(value,proto.powerssl.api.v1.CertificateIssueStatus.deserializeBinaryFromReader);
-      msg.setStatus(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -1132,523 +1108,6 @@ proto.powerssl.api.v1.CertificateIssue.prototype.serializeBinary = function() {
  */
 proto.powerssl.api.v1.CertificateIssue.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getTypeMeta();
-  if (f != null) {
-    writer.writeMessage(
-      1,
-      f,
-      api_v1_meta_pb.TypeMeta.serializeBinaryToWriter
-    );
-  }
-  f = message.getObjectMeta();
-  if (f != null) {
-    writer.writeMessage(
-      2,
-      f,
-      api_v1_meta_pb.ObjectMeta.serializeBinaryToWriter
-    );
-  }
-  f = message.getSpec();
-  if (f != null) {
-    writer.writeMessage(
-      3,
-      f,
-      proto.powerssl.api.v1.CertificateIssueSpec.serializeBinaryToWriter
-    );
-  }
-  f = message.getStatus();
-  if (f != null) {
-    writer.writeMessage(
-      4,
-      f,
-      proto.powerssl.api.v1.CertificateIssueStatus.serializeBinaryToWriter
-    );
-  }
-};
-
-
-/**
- * optional TypeMeta type_meta = 1;
- * @return {?proto.powerssl.api.v1.TypeMeta}
- */
-proto.powerssl.api.v1.CertificateIssue.prototype.getTypeMeta = function() {
-  return /** @type{?proto.powerssl.api.v1.TypeMeta} */ (
-    jspb.Message.getWrapperField(this, api_v1_meta_pb.TypeMeta, 1));
-};
-
-
-/** @param {?proto.powerssl.api.v1.TypeMeta|undefined} value */
-proto.powerssl.api.v1.CertificateIssue.prototype.setTypeMeta = function(value) {
-  jspb.Message.setWrapperField(this, 1, value);
-};
-
-
-proto.powerssl.api.v1.CertificateIssue.prototype.clearTypeMeta = function() {
-  this.setTypeMeta(undefined);
-};
-
-
-/**
- * Returns whether this field is set.
- * @return {!boolean}
- */
-proto.powerssl.api.v1.CertificateIssue.prototype.hasTypeMeta = function() {
-  return jspb.Message.getField(this, 1) != null;
-};
-
-
-/**
- * optional ObjectMeta object_meta = 2;
- * @return {?proto.powerssl.api.v1.ObjectMeta}
- */
-proto.powerssl.api.v1.CertificateIssue.prototype.getObjectMeta = function() {
-  return /** @type{?proto.powerssl.api.v1.ObjectMeta} */ (
-    jspb.Message.getWrapperField(this, api_v1_meta_pb.ObjectMeta, 2));
-};
-
-
-/** @param {?proto.powerssl.api.v1.ObjectMeta|undefined} value */
-proto.powerssl.api.v1.CertificateIssue.prototype.setObjectMeta = function(value) {
-  jspb.Message.setWrapperField(this, 2, value);
-};
-
-
-proto.powerssl.api.v1.CertificateIssue.prototype.clearObjectMeta = function() {
-  this.setObjectMeta(undefined);
-};
-
-
-/**
- * Returns whether this field is set.
- * @return {!boolean}
- */
-proto.powerssl.api.v1.CertificateIssue.prototype.hasObjectMeta = function() {
-  return jspb.Message.getField(this, 2) != null;
-};
-
-
-/**
- * optional CertificateIssueSpec spec = 3;
- * @return {?proto.powerssl.api.v1.CertificateIssueSpec}
- */
-proto.powerssl.api.v1.CertificateIssue.prototype.getSpec = function() {
-  return /** @type{?proto.powerssl.api.v1.CertificateIssueSpec} */ (
-    jspb.Message.getWrapperField(this, proto.powerssl.api.v1.CertificateIssueSpec, 3));
-};
-
-
-/** @param {?proto.powerssl.api.v1.CertificateIssueSpec|undefined} value */
-proto.powerssl.api.v1.CertificateIssue.prototype.setSpec = function(value) {
-  jspb.Message.setWrapperField(this, 3, value);
-};
-
-
-proto.powerssl.api.v1.CertificateIssue.prototype.clearSpec = function() {
-  this.setSpec(undefined);
-};
-
-
-/**
- * Returns whether this field is set.
- * @return {!boolean}
- */
-proto.powerssl.api.v1.CertificateIssue.prototype.hasSpec = function() {
-  return jspb.Message.getField(this, 3) != null;
-};
-
-
-/**
- * optional CertificateIssueStatus status = 4;
- * @return {?proto.powerssl.api.v1.CertificateIssueStatus}
- */
-proto.powerssl.api.v1.CertificateIssue.prototype.getStatus = function() {
-  return /** @type{?proto.powerssl.api.v1.CertificateIssueStatus} */ (
-    jspb.Message.getWrapperField(this, proto.powerssl.api.v1.CertificateIssueStatus, 4));
-};
-
-
-/** @param {?proto.powerssl.api.v1.CertificateIssueStatus|undefined} value */
-proto.powerssl.api.v1.CertificateIssue.prototype.setStatus = function(value) {
-  jspb.Message.setWrapperField(this, 4, value);
-};
-
-
-proto.powerssl.api.v1.CertificateIssue.prototype.clearStatus = function() {
-  this.setStatus(undefined);
-};
-
-
-/**
- * Returns whether this field is set.
- * @return {!boolean}
- */
-proto.powerssl.api.v1.CertificateIssue.prototype.hasStatus = function() {
-  return jspb.Message.getField(this, 4) != null;
-};
-
-
-
-/**
- * Generated by JsPbCodeGenerator.
- * @param {Array=} opt_data Optional initial data array, typically from a
- * server response, or constructed directly in Javascript. The array is used
- * in place and becomes part of the constructed object. It is not cloned.
- * If no data is provided, the constructed object will be empty, but still
- * valid.
- * @extends {jspb.Message}
- * @constructor
- */
-proto.powerssl.api.v1.CertificateIssueSpec = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
-};
-goog.inherits(proto.powerssl.api.v1.CertificateIssueSpec, jspb.Message);
-if (goog.DEBUG && !COMPILED) {
-  proto.powerssl.api.v1.CertificateIssueSpec.displayName = 'proto.powerssl.api.v1.CertificateIssueSpec';
-}
-
-
-if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto suitable for use in Soy templates.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
- * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
- *     for transitional soy proto support: http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.powerssl.api.v1.CertificateIssueSpec.prototype.toObject = function(opt_includeInstance) {
-  return proto.powerssl.api.v1.CertificateIssueSpec.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Whether to include the JSPB
- *     instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.powerssl.api.v1.CertificateIssueSpec} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.powerssl.api.v1.CertificateIssueSpec.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    commonName: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    encryptionAlgorithm: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    keySize: jspb.Message.getFieldWithDefault(msg, 3, 0),
-    signatureAlgorithm: jspb.Message.getFieldWithDefault(msg, 4, "")
-  };
-
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
-
-
-/**
- * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.powerssl.api.v1.CertificateIssueSpec}
- */
-proto.powerssl.api.v1.CertificateIssueSpec.deserializeBinary = function(bytes) {
-  var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.powerssl.api.v1.CertificateIssueSpec;
-  return proto.powerssl.api.v1.CertificateIssueSpec.deserializeBinaryFromReader(msg, reader);
-};
-
-
-/**
- * Deserializes binary data (in protobuf wire format) from the
- * given reader into the given message object.
- * @param {!proto.powerssl.api.v1.CertificateIssueSpec} msg The message object to deserialize into.
- * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.powerssl.api.v1.CertificateIssueSpec}
- */
-proto.powerssl.api.v1.CertificateIssueSpec.deserializeBinaryFromReader = function(msg, reader) {
-  while (reader.nextField()) {
-    if (reader.isEndGroup()) {
-      break;
-    }
-    var field = reader.getFieldNumber();
-    switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setCommonName(value);
-      break;
-    case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setEncryptionAlgorithm(value);
-      break;
-    case 3:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setKeySize(value);
-      break;
-    case 4:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setSignatureAlgorithm(value);
-      break;
-    default:
-      reader.skipField();
-      break;
-    }
-  }
-  return msg;
-};
-
-
-/**
- * Serializes the message to binary data (in protobuf wire format).
- * @return {!Uint8Array}
- */
-proto.powerssl.api.v1.CertificateIssueSpec.prototype.serializeBinary = function() {
-  var writer = new jspb.BinaryWriter();
-  proto.powerssl.api.v1.CertificateIssueSpec.serializeBinaryToWriter(this, writer);
-  return writer.getResultBuffer();
-};
-
-
-/**
- * Serializes the given message to binary data (in protobuf wire
- * format), writing to the given BinaryWriter.
- * @param {!proto.powerssl.api.v1.CertificateIssueSpec} message
- * @param {!jspb.BinaryWriter} writer
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.powerssl.api.v1.CertificateIssueSpec.serializeBinaryToWriter = function(message, writer) {
-  var f = undefined;
-  f = message.getCommonName();
-  if (f.length > 0) {
-    writer.writeString(
-      1,
-      f
-    );
-  }
-  f = message.getEncryptionAlgorithm();
-  if (f.length > 0) {
-    writer.writeString(
-      2,
-      f
-    );
-  }
-  f = message.getKeySize();
-  if (f !== 0) {
-    writer.writeInt32(
-      3,
-      f
-    );
-  }
-  f = message.getSignatureAlgorithm();
-  if (f.length > 0) {
-    writer.writeString(
-      4,
-      f
-    );
-  }
-};
-
-
-/**
- * optional string common_name = 1;
- * @return {string}
- */
-proto.powerssl.api.v1.CertificateIssueSpec.prototype.getCommonName = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
-};
-
-
-/** @param {string} value */
-proto.powerssl.api.v1.CertificateIssueSpec.prototype.setCommonName = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
-};
-
-
-/**
- * optional string encryption_algorithm = 2;
- * @return {string}
- */
-proto.powerssl.api.v1.CertificateIssueSpec.prototype.getEncryptionAlgorithm = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
-};
-
-
-/** @param {string} value */
-proto.powerssl.api.v1.CertificateIssueSpec.prototype.setEncryptionAlgorithm = function(value) {
-  jspb.Message.setProto3StringField(this, 2, value);
-};
-
-
-/**
- * optional int32 key_size = 3;
- * @return {number}
- */
-proto.powerssl.api.v1.CertificateIssueSpec.prototype.getKeySize = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
-};
-
-
-/** @param {number} value */
-proto.powerssl.api.v1.CertificateIssueSpec.prototype.setKeySize = function(value) {
-  jspb.Message.setProto3IntField(this, 3, value);
-};
-
-
-/**
- * optional string signature_algorithm = 4;
- * @return {string}
- */
-proto.powerssl.api.v1.CertificateIssueSpec.prototype.getSignatureAlgorithm = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
-};
-
-
-/** @param {string} value */
-proto.powerssl.api.v1.CertificateIssueSpec.prototype.setSignatureAlgorithm = function(value) {
-  jspb.Message.setProto3StringField(this, 4, value);
-};
-
-
-
-/**
- * Generated by JsPbCodeGenerator.
- * @param {Array=} opt_data Optional initial data array, typically from a
- * server response, or constructed directly in Javascript. The array is used
- * in place and becomes part of the constructed object. It is not cloned.
- * If no data is provided, the constructed object will be empty, but still
- * valid.
- * @extends {jspb.Message}
- * @constructor
- */
-proto.powerssl.api.v1.CertificateIssueStatus = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
-};
-goog.inherits(proto.powerssl.api.v1.CertificateIssueStatus, jspb.Message);
-if (goog.DEBUG && !COMPILED) {
-  proto.powerssl.api.v1.CertificateIssueStatus.displayName = 'proto.powerssl.api.v1.CertificateIssueStatus';
-}
-
-
-if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto suitable for use in Soy templates.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
- * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
- *     for transitional soy proto support: http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.powerssl.api.v1.CertificateIssueStatus.prototype.toObject = function(opt_includeInstance) {
-  return proto.powerssl.api.v1.CertificateIssueStatus.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Whether to include the JSPB
- *     instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.powerssl.api.v1.CertificateIssueStatus} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.powerssl.api.v1.CertificateIssueStatus.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    phase: jspb.Message.getFieldWithDefault(msg, 1, "")
-  };
-
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
-
-
-/**
- * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.powerssl.api.v1.CertificateIssueStatus}
- */
-proto.powerssl.api.v1.CertificateIssueStatus.deserializeBinary = function(bytes) {
-  var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.powerssl.api.v1.CertificateIssueStatus;
-  return proto.powerssl.api.v1.CertificateIssueStatus.deserializeBinaryFromReader(msg, reader);
-};
-
-
-/**
- * Deserializes binary data (in protobuf wire format) from the
- * given reader into the given message object.
- * @param {!proto.powerssl.api.v1.CertificateIssueStatus} msg The message object to deserialize into.
- * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.powerssl.api.v1.CertificateIssueStatus}
- */
-proto.powerssl.api.v1.CertificateIssueStatus.deserializeBinaryFromReader = function(msg, reader) {
-  while (reader.nextField()) {
-    if (reader.isEndGroup()) {
-      break;
-    }
-    var field = reader.getFieldNumber();
-    switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setPhase(value);
-      break;
-    default:
-      reader.skipField();
-      break;
-    }
-  }
-  return msg;
-};
-
-
-/**
- * Serializes the message to binary data (in protobuf wire format).
- * @return {!Uint8Array}
- */
-proto.powerssl.api.v1.CertificateIssueStatus.prototype.serializeBinary = function() {
-  var writer = new jspb.BinaryWriter();
-  proto.powerssl.api.v1.CertificateIssueStatus.serializeBinaryToWriter(this, writer);
-  return writer.getResultBuffer();
-};
-
-
-/**
- * Serializes the given message to binary data (in protobuf wire
- * format), writing to the given BinaryWriter.
- * @param {!proto.powerssl.api.v1.CertificateIssueStatus} message
- * @param {!jspb.BinaryWriter} writer
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.powerssl.api.v1.CertificateIssueStatus.serializeBinaryToWriter = function(message, writer) {
-  var f = undefined;
-  f = message.getPhase();
-  if (f.length > 0) {
-    writer.writeString(
-      1,
-      f
-    );
-  }
-};
-
-
-/**
- * optional string phase = 1;
- * @return {string}
- */
-proto.powerssl.api.v1.CertificateIssueStatus.prototype.getPhase = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
-};
-
-
-/** @param {string} value */
-proto.powerssl.api.v1.CertificateIssueStatus.prototype.setPhase = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 

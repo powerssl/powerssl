@@ -2,24 +2,72 @@ syntax = "proto3";
 
 package powerssl.api.v1;
 
+import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
-import "api/v1/meta.proto";
+import "google/protobuf/timestamp.proto";
 
 option go_package = "powerssl.io/pkg/api/v1;api";
 
 service CertificateService {
-  rpc Create(CreateCertificateRequest) returns (Certificate) {
+  rpc Create(CreateCertificateRequest)
+      returns (Certificate) {
+    option (google.api.http) = {
+      post: "/v1/certificates"
+      body: "certificate"
+    };
   }
   rpc Delete(DeleteCertificateRequest)
       returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/{name=certificates/*}"
+    };
   }
-  rpc Get(GetCertificateRequest) returns (Certificate) {
+  rpc Get(GetCertificateRequest)
+      returns (Certificate) {
+    option (google.api.http) = {
+      get: "/v1/{name=certificates/*}"
+    };
   }
   rpc List(ListCertificatesRequest)
       returns (ListCertificatesResponse) {
+    option (google.api.http) = {
+      get: "/v1/certificates"
+    };
   }
-  rpc Update(UpdateCertificateRequest) returns (Certificate) {
+  rpc Update(UpdateCertificateRequest)
+      returns (Certificate) {
+    option (google.api.http) = {
+      put: "/v1/{name=certificates/*}",
+      body: "certificate"
+    };
   }
+}
+
+enum DigestAlgorithm {
+  DIGEST_ALGORITHM_UNSPECIFIED = 0;
+  SHA1 = 1;
+  SHA256 = 2;
+}
+
+enum KeyAlgorithm {
+  KEY_ALGORITHM_UNSPECIFIED = 0;
+  RSA = 1;
+}
+
+message Certificate {
+  string name = 1;
+  google.protobuf.Timestamp create_time = 2;
+  google.protobuf.Timestamp update_time = 3;
+  string display_name = 4;
+  string title = 5;
+  string description = 6;
+  map<string, string> labels = 7;
+
+  repeated string dnsnames = 8;
+  KeyAlgorithm key_algorithm = 9;
+  int32 key_size = 10;
+  DigestAlgorithm digest_algorithm = 11;
+  bool auto_renew = 12;
 }
 
 message CreateCertificateRequest {
@@ -35,46 +83,15 @@ message GetCertificateRequest {
 }
 
 message ListCertificatesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
 }
 
 message ListCertificatesResponse {
-  TypeMeta type_meta = 1;
-  ListMeta list_meta = 2;
-
-  repeated Certificate items = 3;
+  repeated Certificate certificates = 1;
+  string next_page_token = 2;
 }
 
 message UpdateCertificateRequest {
   Certificate certificate = 1;
-}
-
-message Certificate {
-  TypeMeta type_meta = 1;
-  ObjectMeta object_meta = 2;
-
-  CertificateSpec spec = 3;
-  CertificateStatus status = 4;
-}
-
-enum KeyAlgorithm {
-  KeyAlgorithmUnknown = 0;
-  RSA = 1;
-}
-
-enum DigestAlgorithm {
-  DigestAlgorithmUnknown = 0;
-  SHA1 = 1;
-  SHA256 = 2;
-}
-
-message CertificateSpec {
-  repeated string dnsnames = 1;
-  KeyAlgorithm key_algorithm = 2;
-  int32 key_size = 3;
-  DigestAlgorithm digest_algorithm = 4;
-  bool auto_renew = 5;
-}
-
-message CertificateStatus {
-  string phase = 1;
 }

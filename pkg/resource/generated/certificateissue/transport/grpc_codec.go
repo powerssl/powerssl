@@ -5,66 +5,45 @@ package transport // import "powerssl.io/pkg/resource/generated/certificateissue
 import (
 	"context"
 
+	"github.com/gogo/protobuf/types"
+
 	"powerssl.io/pkg/api"
 	apiv1 "powerssl.io/pkg/api/v1"
-	resource "powerssl.io/pkg/resource"
 	"powerssl.io/pkg/resource/generated/certificateissue/endpoint"
 )
 
-func decodeGRPCCertificateIssues(certificateIssues []*apiv1.CertificateIssue) ([]*api.CertificateIssue, error) {
-	items := make([]*api.CertificateIssue, len(certificateIssues))
-	for i, certificateIssue := range certificateIssues {
-		item, err := decodeGRPCCertificateIssue(certificateIssue)
-		if err != nil {
-			return nil, err
-		}
-		items[i] = item
-	}
-	return items, nil
-}
+var _ = types.Timestamp{}
 
 func decodeGRPCCertificateIssue(certificateIssue *apiv1.CertificateIssue) (*api.CertificateIssue, error) {
-	typeMeta, err := resource.DecodeGRPCTypeMeta(certificateIssue.GetTypeMeta())
-	if err != nil {
-		return nil, err
-	}
-	objectMeta, err := resource.DecodeGRPCObjectMeta(certificateIssue.GetObjectMeta())
-	if err != nil {
-		return nil, err
-	}
-	return &api.CertificateIssue{
-		TypeMeta:   typeMeta,
-		ObjectMeta: objectMeta,
-		// TODO
-	}, nil
-}
-
-func encodeGRPCCertificateIssues(certificateIssues []*api.CertificateIssue) ([]*apiv1.CertificateIssue, error) {
-	items := make([]*apiv1.CertificateIssue, len(certificateIssues))
-	for i, certificateIssue := range certificateIssues {
-		item, err := encodeGRPCCertificateIssue(certificateIssue)
-		if err != nil {
-			return nil, err
-		}
-		items[i] = item
-	}
-	return items, nil
+	return &api.CertificateIssue{}, nil
 }
 
 func encodeGRPCCertificateIssue(certificateIssue *api.CertificateIssue) (*apiv1.CertificateIssue, error) {
-	typeMeta, err := resource.EncodeGRPCTypeMeta(certificateIssue.TypeMeta)
-	if err != nil {
-		return nil, err
+	return &apiv1.CertificateIssue{}, nil
+}
+
+func decodeGRPCCertificateIssues(grpcCertificateIssues []*apiv1.CertificateIssue) ([]*api.CertificateIssue, error) {
+	certificateIssues := make([]*api.CertificateIssue, len(grpcCertificateIssues))
+	for i, grpcCertificateIssue := range grpcCertificateIssues {
+		certificateIssue, err := decodeGRPCCertificateIssue(grpcCertificateIssue)
+		if err != nil {
+			return nil, err
+		}
+		certificateIssues[i] = certificateIssue
 	}
-	objectMeta, err := resource.EncodeGRPCObjectMeta(certificateIssue.ObjectMeta)
-	if err != nil {
-		return nil, err
+	return certificateIssues, nil
+}
+
+func encodeGRPCCertificateIssues(certificateIssues []*api.CertificateIssue) ([]*apiv1.CertificateIssue, error) {
+	grpcCertificateIssues := make([]*apiv1.CertificateIssue, len(certificateIssues))
+	for i, certificateIssue := range certificateIssues {
+		grpcCertificateIssue, err := encodeGRPCCertificateIssue(certificateIssue)
+		if err != nil {
+			return nil, err
+		}
+		grpcCertificateIssues[i] = grpcCertificateIssue
 	}
-	return &apiv1.CertificateIssue{
-		TypeMeta:   typeMeta,
-		ObjectMeta: objectMeta,
-		// TODO
-	}, nil
+	return grpcCertificateIssues, nil
 }
 
 func decodeGRPCCreateRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
@@ -165,7 +144,7 @@ func decodeGRPCListRequest(_ context.Context, grpcReq interface{}) (interface{},
 
 func decodeGRPCListResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
 	reply := grpcReply.(*apiv1.ListCertificateIssuesResponse)
-	certificateIssues, err := decodeGRPCCertificateIssues(reply.GetItems())
+	certificateIssues, err := decodeGRPCCertificateIssues(reply.GetCertificateIssues())
 	if err != nil {
 		return nil, err
 	}
@@ -176,12 +155,12 @@ func decodeGRPCListResponse(_ context.Context, grpcReply interface{}) (interface
 
 func encodeGRPCListResponse(_ context.Context, response interface{}) (interface{}, error) {
 	resp := response.(endpoint.ListResponse)
-	items, err := encodeGRPCCertificateIssues(resp.CertificateIssues)
+	certificateIssues, err := encodeGRPCCertificateIssues(resp.CertificateIssues)
 	if err != nil {
 		return nil, err
 	}
 	return &apiv1.ListCertificateIssuesResponse{
-		Items: items,
+		CertificateIssues: certificateIssues,
 	}, nil
 }
 

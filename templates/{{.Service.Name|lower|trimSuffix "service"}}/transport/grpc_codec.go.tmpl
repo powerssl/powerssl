@@ -4,71 +4,120 @@
 {{- if (regexMatch "y$" $resourceName)}}
 {{- $resourceNamePlural = concat ($resourceName | trimSuffix "y") "ies" }}
 {{- end}}
+{{- $File := .File}}
 package transport // import "powerssl.io/pkg/resource/generated/{{$resourceName | lower}}/transport"
 
 import (
 	"context"
 
+	"github.com/gogo/protobuf/types"
+
 	"powerssl.io/pkg/api"
 	apiv1 "powerssl.io/pkg/api/v1"
-	resource "powerssl.io/pkg/resource"
 	"powerssl.io/pkg/resource/generated/{{$resourceName | lower}}/endpoint"
 )
 
-func decodeGRPC{{$resourceNamePlural}}({{$resourceNamePlural | lowerCamelCase}} []*apiv1.{{$resourceName}}) ([]*api.{{$resourceName}}, error) {
-	items := make([]*api.{{$resourceName}}, len({{$resourceNamePlural | lowerCamelCase}}))
-	for i, {{$resourceName | lowerCamelCase}} := range {{$resourceNamePlural | lowerCamelCase}} {
-		item, err := decodeGRPC{{$resourceName}}({{$resourceName | lowerCamelCase}})
-		if err != nil {
-			return nil, err
-		}
-		items[i] = item
-	}
-	return items, nil
-}
+// Avoid import errors
+var _ = types.Timestamp{}
 
 func decodeGRPC{{$resourceName}}({{$resourceName | lowerCamelCase}} *apiv1.{{$resourceName}}) (*api.{{$resourceName}}, error) {
-	typeMeta, err := resource.DecodeGRPCTypeMeta({{$resourceName | lowerCamelCase}}.GetTypeMeta())
+{{- range .File.MessageType}}
+  {{- if eq (.Name | concat) $resourceName}}
+    {{- range .Field}}
+      {{- if isFieldMessageTimeStamp .}}
+	{{.Name | lowerCamelCase}}, err := types.TimestampFromProto({{$resourceName | lowerCamelCase}}.Get{{.Name | camelCase}}())
 	if err != nil {
 		return nil, err
 	}
-	objectMeta, err := resource.DecodeGRPCObjectMeta({{$resourceName | lowerCamelCase}}.GetObjectMeta())
-	if err != nil {
-		return nil, err
-	}
+      {{- end}}
+    {{- end}}
+  {{- end}}
+{{- end}}
 	return &api.{{$resourceName}}{
-		TypeMeta:   typeMeta,
-		ObjectMeta: objectMeta,
-		// TODO
+{{- range .File.MessageType}}
+  {{- $MessageType := .Name | concat}}
+  {{- if eq $MessageType $resourceName}}
+    {{- range .Field}}
+      {{- $FieldName := .Name | concat}}
+      {{- $IsEnum := false}}
+      {{- range $File.EnumType}}
+	{{- if eq (.Name | concat) ($FieldName | camelCase)}}
+          {{- $IsEnum = true}}
+	{{- end}}
+      {{- end}}
+      {{- if $IsEnum}}
+		{{.Name | camelCase}}: {{$resourceName | lowerCamelCase}}.Get{{.Name | camelCase}}().String(),
+      {{- else if isFieldMessageTimeStamp .}}
+		{{.Name | camelCase}}: {{.Name | lowerCamelCase}},
+      {{- else}}
+		{{.Name | camelCase}}: {{$resourceName | lowerCamelCase}}.Get{{.Name | camelCase}}(),
+      {{- end}}
+    {{- end}}
+  {{- end}}
+{{- end}}
 	}, nil
-}
-
-func encodeGRPC{{$resourceNamePlural}}({{$resourceNamePlural | lowerCamelCase}} []*api.{{$resourceName}}) ([]*apiv1.{{$resourceName}}, error) {
-	items := make([]*apiv1.{{$resourceName}}, len({{$resourceNamePlural | lowerCamelCase}}))
-	for i, {{$resourceName | lowerCamelCase}} := range {{$resourceNamePlural | lowerCamelCase}} {
-		item, err := encodeGRPC{{$resourceName}}({{$resourceName | lowerCamelCase}})
-		if err != nil {
-			return nil, err
-		}
-		items[i] = item
-	}
-	return items, nil
 }
 
 func encodeGRPC{{$resourceName}}({{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*apiv1.{{$resourceName}}, error) {
-	typeMeta, err := resource.EncodeGRPCTypeMeta({{$resourceName | lowerCamelCase}}.TypeMeta)
+{{- range .File.MessageType}}
+  {{- if eq (.Name | concat) $resourceName}}
+    {{- range .Field}}
+      {{- if isFieldMessageTimeStamp .}}
+	{{.Name | lowerCamelCase}}, err := types.TimestampProto({{$resourceName | lowerCamelCase}}.{{.Name | camelCase}})
 	if err != nil {
 		return nil, err
 	}
-	objectMeta, err := resource.EncodeGRPCObjectMeta({{$resourceName | lowerCamelCase}}.ObjectMeta)
-	if err != nil {
-		return nil, err
-	}
+      {{- end}}
+    {{- end}}
+  {{- end}}
+{{- end}}
 	return &apiv1.{{$resourceName}}{
-		TypeMeta:   typeMeta,
-		ObjectMeta: objectMeta,
-		// TODO
+{{- range .File.MessageType}}
+  {{- $MessageType := .Name | concat}}
+  {{- if eq $MessageType $resourceName}}
+    {{- range .Field}}
+      {{- $FieldName := .Name | concat}}
+      {{- $IsEnum := false}}
+      {{- range $File.EnumType}}
+	{{- if eq (.Name | concat) ($FieldName | camelCase)}}
+          {{- $IsEnum = true}}
+	{{- end}}
+      {{- end}}
+      {{- if $IsEnum}}
+		{{.Name | camelCase}}: apiv1.{{.Name | camelCase}}(apiv1.{{.Name | camelCase}}_value[{{$resourceName | lowerCamelCase}}.{{.Name | camelCase}}]),
+      {{- else if isFieldMessageTimeStamp .}}
+		{{.Name | camelCase}}: {{.Name | lowerCamelCase}},
+      {{- else}}
+		{{.Name | camelCase}}: {{$resourceName | lowerCamelCase}}.{{.Name | camelCase}},
+      {{- end}}
+    {{- end}}
+  {{- end}}
+{{- end}}
 	}, nil
+}
+
+func decodeGRPC{{$resourceNamePlural}}(grpc{{$resourceNamePlural}} []*apiv1.{{$resourceName}}) ([]*api.{{$resourceName}}, error) {
+	{{$resourceNamePlural | lowerCamelCase}} := make([]*api.{{$resourceName}}, len(grpc{{$resourceNamePlural}}))
+	for i, grpc{{$resourceName}} := range grpc{{$resourceNamePlural}} {
+		{{$resourceName | lowerCamelCase}}, err := decodeGRPC{{$resourceName}}(grpc{{$resourceName}})
+		if err != nil {
+			return nil, err
+		}
+		{{$resourceNamePlural | lowerCamelCase}}[i] = {{$resourceName | lowerCamelCase}}
+	}
+	return {{$resourceNamePlural | lowerCamelCase}}, nil
+}
+
+func encodeGRPC{{$resourceNamePlural}}({{$resourceNamePlural | lowerCamelCase}} []*api.{{$resourceName}}) ([]*apiv1.{{$resourceName}}, error) {
+	grpc{{$resourceNamePlural}} := make([]*apiv1.{{$resourceName}}, len({{$resourceNamePlural | lowerCamelCase}}))
+	for i, {{$resourceName | lowerCamelCase}} := range {{$resourceNamePlural | lowerCamelCase}} {
+		grpc{{$resourceName}}, err := encodeGRPC{{$resourceName}}({{$resourceName | lowerCamelCase}})
+		if err != nil {
+			return nil, err
+		}
+		grpc{{$resourceNamePlural}}[i] = grpc{{$resourceName}}
+	}
+	return grpc{{$resourceNamePlural}}, nil
 }
 
 {{range .Service.Method}}
@@ -132,7 +181,7 @@ func decodeGRPC{{.Name}}Response(_ context.Context, grpcReply interface{}) (inte
 	}, nil
 {{- else if eq (.Name | concat) "List"}}
 	reply := grpcReply.(*apiv1.List{{$resourceNamePlural}}Response)
-	{{$resourceNamePlural | lowerCamelCase}}, err := decodeGRPC{{$resourceNamePlural}}(reply.GetItems())
+	{{$resourceNamePlural | lowerCamelCase}}, err := decodeGRPC{{$resourceNamePlural}}(reply.Get{{$resourceNamePlural}}())
 	if err != nil {
 		return nil, err
 	}
@@ -165,12 +214,12 @@ func encodeGRPC{{.Name}}Response(_ context.Context, response interface{}) (inter
 	return encodeGRPC{{$resourceName}}(resp.{{$resourceName}})
 {{- else if eq (.Name | concat) "List"}}
 	resp := response.(endpoint.{{.Name}}Response)
-	items, err := encodeGRPC{{$resourceNamePlural}}(resp.{{$resourceNamePlural}})
+	{{$resourceNamePlural | lowerCamelCase}}, err := encodeGRPC{{$resourceNamePlural}}(resp.{{$resourceNamePlural}})
 	if err != nil {
 		return nil, err
 	}
 	return &apiv1.List{{$resourceNamePlural}}Response{
-		Items: items,
+		{{$resourceNamePlural}}: {{$resourceNamePlural | lowerCamelCase}},
 	}, nil
 {{- else if eq (.Name | concat) "Update"}}
 	resp := response.(endpoint.{{.Name}}Response)
