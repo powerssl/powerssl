@@ -1,5 +1,4 @@
 PROTOC := $(shell which protoc)
-JQ := $(shell which jq)
 
 BIN_PATH := $(abspath bin)
 PKG_PATH := $(abspath pkg)
@@ -8,8 +7,8 @@ export PATH := $(BIN_PATH):$(PATH)
 
 FIND_RELEVANT := find $(PKG_PATH)
 
-GOGO_GOOGLEAPIS_PATH := $(shell go mod download -json github.com/gogo/googleapis | $(JQ) -r '.Dir')
-GOGO_PROTOBUF_PATH := $(shell go mod download -json github.com/gogo/protobuf | $(JQ) -r '.Dir')
+GOGO_GOOGLEAPIS_PATH := $(shell go mod download -json github.com/gogo/googleapis | grep '"Dir"' | cut -d '"' -f 4)
+GOGO_PROTOBUF_PATH := $(shell go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)
 PROTOBUF_PATH := $(GOGO_PROTOBUF_PATH)/protobuf
 
 PROTO_MAPPINGS :=
@@ -48,10 +47,10 @@ bin/.go_protobuf_sources: bin/protoc-gen-gogo bin/protoc-gen-gotemplate bin/prot
 	touch $@
 
 bin/protoc-gen-gotemplate:
-	go build -o bin/protoc-gen-gotemplate $$(go mod download -json moul.io/protoc-gen-gotemplate | $(JQ) -r '.Dir')
+	go build -o bin/protoc-gen-gotemplate $$(go mod download -json moul.io/protoc-gen-gotemplate | grep '"Dir"' | cut -d '"' -f 4)
 
 bin/protoc-gen-gogo:
-	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | $(JQ) -r '.Dir')/protoc-gen-gogo
+	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)/protoc-gen-gogo
 
 # Not used just as a reference
 bin/protoc-gen-grpc-web:

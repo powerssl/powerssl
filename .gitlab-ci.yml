@@ -3,9 +3,6 @@ image: golang:1.11
 variables:
   GOPATH: "$CI_PROJECT_DIR/go"
 
-before_script:
-  - apt-get update && apt-get install -y jq
-
 stages:
     - build
 
