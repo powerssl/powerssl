@@ -220,7 +220,7 @@ func encodeGRPC{{.Name}}Response(_ context.Context, response interface{}) (inter
 	resp := response.(endpoint.CreateResponse)
 	return encodeGRPC{{$resourceName}}(resp.{{$resourceName}})
 {{- else if eq (.Name | concat) "Delete"}}
-	return nil, nil
+	return &types.Empty{}, nil
 {{- else if eq (.Name | concat) "Get"}}
 	resp := response.(endpoint.GetResponse)
 	return encodeGRPC{{$resourceName}}(resp.{{$resourceName}})

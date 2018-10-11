@@ -145,7 +145,7 @@ func decodeGRPCDeleteResponse(_ context.Context, grpcReply interface{}) (interfa
 }
 
 func encodeGRPCDeleteResponse(_ context.Context, response interface{}) (interface{}, error) {
-	return nil, nil
+	return &types.Empty{}, nil
 }
 
 func encodeGRPCDeleteRequest(_ context.Context, request interface{}) (interface{}, error) {
