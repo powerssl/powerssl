@@ -55,7 +55,7 @@ func (mw loggingMiddleware) {{.Name}}(ctx context.Context, pageSize int, pageTok
 {{- else if eq (.Name | concat) "Update"}}
 func (mw loggingMiddleware) {{.Name}}(ctx context.Context, name string, {{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*api.{{$resourceName}}, error) {
 	defer func() {
-		mw.logger.Log("method", "{{.Name}}", "{{$resourceName | lowerCamelCase}}", fmt.Sprintf("%+v", {{$resourceName | lowerCamelCase}}))
+		mw.logger.Log("method", "{{.Name}}", "name", name, "{{$resourceName | lowerCamelCase}}", fmt.Sprintf("%+v", {{$resourceName | lowerCamelCase}}))
 	}()
 	return mw.next.{{.Name}}(ctx, name, {{$resourceName | lowerCamelCase}})
 {{- else}}

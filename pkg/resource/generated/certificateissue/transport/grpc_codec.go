@@ -4,6 +4,7 @@ package transport // import "powerssl.io/pkg/resource/generated/certificateissue
 
 import (
 	"context"
+	"errors"
 
 	"github.com/gogo/protobuf/types"
 
@@ -15,11 +16,16 @@ import (
 // Avoid import errors
 var _ = types.Timestamp{}
 
+var UnknownError = errors.New("Unknown Error")
+
 func decodeGRPCCertificateIssue(certificateIssue *apiv1.CertificateIssue) (*api.CertificateIssue, error) {
 	return &api.CertificateIssue{}, nil
 }
 
 func encodeGRPCCertificateIssue(certificateIssue *api.CertificateIssue) (*apiv1.CertificateIssue, error) {
+	if certificateIssue == nil {
+		return nil, UnknownError
+	}
 	return &apiv1.CertificateIssue{}, nil
 }
 

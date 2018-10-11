@@ -9,6 +9,7 @@ package transport // import "powerssl.io/pkg/resource/generated/{{$resourceName 
 
 import (
 	"context"
+	"errors"
 
 	"github.com/gogo/protobuf/types"
 
@@ -19,6 +20,8 @@ import (
 
 // Avoid import errors
 var _ = types.Timestamp{}
+
+var UnknownError = errors.New("Unknown Error")
 
 func decodeGRPC{{$resourceName}}({{$resourceName | lowerCamelCase}} *apiv1.{{$resourceName}}) (*api.{{$resourceName}}, error) {
 {{- range .File.MessageType}}
@@ -59,6 +62,9 @@ func decodeGRPC{{$resourceName}}({{$resourceName | lowerCamelCase}} *apiv1.{{$re
 }
 
 func encodeGRPC{{$resourceName}}({{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*apiv1.{{$resourceName}}, error) {
+	if {{$resourceName | lowerCamelCase}} == nil {
+		return nil, UnknownError
+	}
 {{- range .File.MessageType}}
   {{- if eq (.Name | concat) $resourceName}}
     {{- range .Field}}

@@ -4,6 +4,7 @@ package transport // import "powerssl.io/pkg/resource/generated/certificate/tran
 
 import (
 	"context"
+	"errors"
 
 	"github.com/gogo/protobuf/types"
 
@@ -14,6 +15,8 @@ import (
 
 // Avoid import errors
 var _ = types.Timestamp{}
+
+var UnknownError = errors.New("Unknown Error")
 
 func decodeGRPCCertificate(certificate *apiv1.Certificate) (*api.Certificate, error) {
 	createTime, err := types.TimestampFromProto(certificate.GetCreateTime())
@@ -41,6 +44,9 @@ func decodeGRPCCertificate(certificate *apiv1.Certificate) (*api.Certificate, er
 }
 
 func encodeGRPCCertificate(certificate *api.Certificate) (*apiv1.Certificate, error) {
+	if certificate == nil {
+		return nil, UnknownError
+	}
 	createTime, err := types.TimestampProto(certificate.CreateTime)
 	if err != nil {
 		return nil, err
