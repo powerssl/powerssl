@@ -99,17 +99,21 @@ func (e Endpoints) Get(ctx context.Context, name string) (*api.CertificateAuthor
 	return response.CertificateAuthority, nil
 }
 
-func (e Endpoints) List(ctx context.Context) ([]*api.CertificateAuthority, error) {
-	resp, err := e.ListEndpoint(ctx, ListRequest{})
+func (e Endpoints) List(ctx context.Context, pageSize int, pageToken string) ([]*api.CertificateAuthority, string, error) {
+	resp, err := e.ListEndpoint(ctx, ListRequest{
+		PageSize:  pageSize,
+		PageToken: pageToken,
+	})
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	response := resp.(ListResponse)
-	return response.CertificateAuthorities, nil
+	return response.CertificateAuthorities, response.NextPageToken, nil
 }
 
-func (e Endpoints) Update(ctx context.Context, certificateAuthority *api.CertificateAuthority) (*api.CertificateAuthority, error) {
+func (e Endpoints) Update(ctx context.Context, name string, certificateAuthority *api.CertificateAuthority) (*api.CertificateAuthority, error) {
 	resp, err := e.UpdateEndpoint(ctx, UpdateRequest{
+		Name:                 name,
 		CertificateAuthority: certificateAuthority,
 	})
 	if err != nil {
@@ -177,25 +181,32 @@ func makeGetEndpoint(s service.Service) endpoint.Endpoint {
 	}
 }
 
-type ListRequest struct{}
+type ListRequest struct {
+	PageSize  int
+	PageToken string
+}
 
 type ListResponse struct {
 	CertificateAuthorities []*api.CertificateAuthority
+	NextPageToken          string
 }
 
 func makeListEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		certificateAuthorities, err := s.List(ctx)
+		req := request.(ListRequest)
+		certificateAuthorities, nextPageToken, err := s.List(ctx, req.PageSize, req.PageToken)
 		if err != nil {
 			return nil, err
 		}
 		return ListResponse{
 			CertificateAuthorities: certificateAuthorities,
+			NextPageToken:          nextPageToken,
 		}, nil
 	}
 }
 
 type UpdateRequest struct {
+	Name                 string
 	CertificateAuthority *api.CertificateAuthority
 }
 
@@ -206,7 +217,7 @@ type UpdateResponse struct {
 func makeUpdateEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(UpdateRequest)
-		certificateAuthority, err := s.Update(ctx, req.CertificateAuthority)
+		certificateAuthority, err := s.Update(ctx, req.Name, req.CertificateAuthority)
 		if err != nil {
 			return nil, err
 		}

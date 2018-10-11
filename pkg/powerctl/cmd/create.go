@@ -29,22 +29,17 @@ var createCertificateCmd = &cobra.Command{
 		c := powerctl.NewGRPCClient(grpcAddr)
 
 		certificate, err := c.Certificate.Create(context.Background(), &api.Certificate{
-			TypeMeta: api.TypeMeta{
-				APIVersion: "v1",
-				Kind:       "Certificate",
-			},
-			ObjectMeta: api.ObjectMeta{
-				Labels: map[string]string{
-					"foo": "bar",
-					"baz": "boo",
-				},
-			},
-			Spec: api.CertificateSpec{
-				CommonName: "rofl",
-			},
+			Dnsnames:        []string{"example.com"},
+			DigestAlgorithm: "SHA1",
 		})
 		fmt.Printf("err: %#v\n", err)
 		fmt.Printf("certificate: %#v\n", certificate)
+
+		certificates, nextPageToken, _ := c.Certificate.List(context.Background(), 0, "")
+		fmt.Printf("nextPageToken: %q", nextPageToken)
+		for _, certificate := range certificates {
+			fmt.Printf("%#v\n", certificate.Name)
+		}
 	},
 }
 

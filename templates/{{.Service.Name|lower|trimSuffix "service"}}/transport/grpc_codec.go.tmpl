@@ -123,33 +123,38 @@ func encodeGRPC{{$resourceNamePlural}}({{$resourceNamePlural | lowerCamelCase}} 
 {{range .Service.Method}}
 func decodeGRPC{{.Name}}Request(_ context.Context, grpcReq interface{}) (interface{}, error) {
 {{- if eq (.Name | concat) "Create"}}
-	req := grpcReq.(*apiv1.{{.Name}}{{$resourceName}}Request)
+	req := grpcReq.(*apiv1.Create{{$resourceName}}Request)
 	{{$resourceName | lowerCamelCase}}, err := decodeGRPC{{$resourceName}}(req.Get{{$resourceName}}())
 	if err != nil {
 		return nil, err
 	}
-	return endpoint.{{.Name}}Request{
+	return endpoint.CreateRequest{
 		{{$resourceName}}: {{$resourceName | lowerCamelCase}},
 	}, nil
 {{- else if eq (.Name | concat) "Delete"}}
-	req := grpcReq.(*apiv1.{{.Name}}{{$resourceName}}Request)
-	return endpoint.{{.Name}}Request{
+	req := grpcReq.(*apiv1.Delete{{$resourceName}}Request)
+	return endpoint.DeleteRequest{
 		Name: req.GetName(),
 	}, nil
 {{- else if eq (.Name | concat) "Get"}}
-	req := grpcReq.(*apiv1.{{.Name}}{{$resourceName}}Request)
-	return endpoint.{{.Name}}Request{
+	req := grpcReq.(*apiv1.Get{{$resourceName}}Request)
+	return endpoint.GetRequest{
 		Name: req.GetName(),
 	}, nil
 {{- else if eq (.Name | concat) "List"}}
-	return endpoint.{{.Name}}Request{}, nil
+	req := grpcReq.(*apiv1.List{{$resourceNamePlural}}Request)
+	return endpoint.ListRequest{
+		PageSize:  int(req.GetPageSize()),
+		PageToken: req.GetPageToken(),
+	}, nil
 {{- else if eq (.Name | concat) "Update"}}
-	req := grpcReq.(*apiv1.{{.Name}}{{$resourceName}}Request)
+	req := grpcReq.(*apiv1.Update{{$resourceName}}Request)
 	{{$resourceName | lowerCamelCase}}, err := decodeGRPC{{$resourceName}}(req.Get{{$resourceName}}())
 	if err != nil {
 		return nil, err
 	}
-	return endpoint.{{.Name}}Request{
+	return endpoint.UpdateRequest{
+		Name: req.GetName(),
 		{{$resourceName}}: {{$resourceName | lowerCamelCase}},
 	}, nil
 {{- else}}
@@ -165,18 +170,18 @@ func decodeGRPC{{.Name}}Response(_ context.Context, grpcReply interface{}) (inte
 	if err != nil {
 		return nil, err
 	}
-	return endpoint.{{.Name}}Response{
+	return endpoint.CreateResponse{
 		{{$resourceName}}: {{$resourceName | lowerCamelCase}},
 	}, nil
 {{- else if eq (.Name | concat) "Delete"}}
-	return endpoint.{{.Name}}Response{}, nil
+	return endpoint.DeleteResponse{}, nil
 {{- else if eq (.Name | concat) "Get"}}
 	reply := grpcReply.(*apiv1.{{$resourceName}})
 	{{$resourceName | lowerCamelCase}}, err := decodeGRPC{{$resourceName}}(reply)
 	if err != nil {
 		return nil, err
 	}
-	return endpoint.{{.Name}}Response{
+	return endpoint.GetResponse{
 		{{$resourceName}}: {{$resourceName | lowerCamelCase}},
 	}, nil
 {{- else if eq (.Name | concat) "List"}}
@@ -185,8 +190,9 @@ func decodeGRPC{{.Name}}Response(_ context.Context, grpcReply interface{}) (inte
 	if err != nil {
 		return nil, err
 	}
-	return endpoint.{{.Name}}Response{
+	return endpoint.ListResponse{
 		{{$resourceNamePlural}}: {{$resourceNamePlural | lowerCamelCase}},
+		NextPageToken: reply.GetNextPageToken(),
 	}, nil
 {{- else if eq (.Name | concat) "Update"}}
 	reply := grpcReply.(*apiv1.{{$resourceName}})
@@ -194,7 +200,7 @@ func decodeGRPC{{.Name}}Response(_ context.Context, grpcReply interface{}) (inte
 	if err != nil {
 		return nil, err
 	}
-	return endpoint.{{.Name}}Response{
+	return endpoint.UpdateResponse{
 		{{$resourceName}}: {{$resourceName | lowerCamelCase}},
 	}, nil
 {{- else}}
@@ -205,24 +211,25 @@ func decodeGRPC{{.Name}}Response(_ context.Context, grpcReply interface{}) (inte
 
 func encodeGRPC{{.Name}}Response(_ context.Context, response interface{}) (interface{}, error) {
 {{- if eq (.Name | concat) "Create"}}
-	resp := response.(endpoint.{{.Name}}Response)
+	resp := response.(endpoint.CreateResponse)
 	return encodeGRPC{{$resourceName}}(resp.{{$resourceName}})
 {{- else if eq (.Name | concat) "Delete"}}
 	return nil, nil
 {{- else if eq (.Name | concat) "Get"}}
-	resp := response.(endpoint.{{.Name}}Response)
+	resp := response.(endpoint.GetResponse)
 	return encodeGRPC{{$resourceName}}(resp.{{$resourceName}})
 {{- else if eq (.Name | concat) "List"}}
-	resp := response.(endpoint.{{.Name}}Response)
+	resp := response.(endpoint.ListResponse)
 	{{$resourceNamePlural | lowerCamelCase}}, err := encodeGRPC{{$resourceNamePlural}}(resp.{{$resourceNamePlural}})
 	if err != nil {
 		return nil, err
 	}
 	return &apiv1.List{{$resourceNamePlural}}Response{
 		{{$resourceNamePlural}}: {{$resourceNamePlural | lowerCamelCase}},
+		NextPageToken: resp.NextPageToken,
 	}, nil
 {{- else if eq (.Name | concat) "Update"}}
-	resp := response.(endpoint.{{.Name}}Response)
+	resp := response.(endpoint.UpdateResponse)
 	return encodeGRPC{{$resourceName}}(resp.{{$resourceName}})
 {{- else}}
 	// TODO
@@ -232,35 +239,38 @@ func encodeGRPC{{.Name}}Response(_ context.Context, response interface{}) (inter
 
 func encodeGRPC{{.Name}}Request(_ context.Context, request interface{}) (interface{}, error) {
 {{- if eq (.Name | concat) "Create"}}
-	req := request.(endpoint.{{.Name}}Request)
+	req := request.(endpoint.CreateRequest)
 	{{$resourceName | lowerCamelCase}}, err := encodeGRPC{{$resourceName}}(req.{{$resourceName}})
 	if err != nil {
 		return nil, err
 	}
-	return &apiv1.{{.Name}}{{$resourceName}}Request{
+	return &apiv1.Create{{$resourceName}}Request{
 		{{$resourceName}}: {{$resourceName |lowerCamelCase}},
 	}, nil
 {{- else if eq (.Name | concat) "Delete"}}
-	req := request.(endpoint.{{.Name}}Request)
-
-	return &apiv1.{{.Name}}{{$resourceName}}Request{
+	req := request.(endpoint.DeleteRequest)
+	return &apiv1.Delete{{$resourceName}}Request{
 		Name: req.Name,
 	}, nil
 {{- else if eq (.Name | concat) "Get"}}
-	req := request.(endpoint.{{.Name}}Request)
-
-	return &apiv1.{{.Name}}{{$resourceName}}Request{
+	req := request.(endpoint.GetRequest)
+	return &apiv1.Get{{$resourceName}}Request{
 		Name: req.Name,
 	}, nil
 {{- else if eq (.Name | concat) "List"}}
-	return &apiv1.List{{$resourceNamePlural}}Request{}, nil
+	req := request.(endpoint.ListRequest)
+	return &apiv1.List{{$resourceNamePlural}}Request{
+		PageSize:  int32(req.PageSize),
+		PageToken: req.PageToken,
+	}, nil
 {{- else if eq (.Name | concat) "Update"}}
-	req := request.(endpoint.{{.Name}}Request)
+	req := request.(endpoint.UpdateRequest)
 	{{$resourceName | lowerCamelCase}}, err := encodeGRPC{{$resourceName}}(req.{{$resourceName}})
 	if err != nil {
 		return nil, err
 	}
-	return &apiv1.{{.Name}}{{$resourceName}}Request{
+	return &apiv1.Update{{$resourceName}}Request{
+		Name: req.Name,
 		{{$resourceName}}: {{$resourceName |lowerCamelCase}},
 	}, nil
 {{- else}}

@@ -12,6 +12,7 @@ import (
 	"powerssl.io/pkg/resource/generated/certificateissue/endpoint"
 )
 
+// Avoid import errors
 var _ = types.Timestamp{}
 
 func decodeGRPCCertificateIssue(certificateIssue *apiv1.CertificateIssue) (*api.CertificateIssue, error) {
@@ -101,7 +102,6 @@ func encodeGRPCDeleteResponse(_ context.Context, response interface{}) (interfac
 
 func encodeGRPCDeleteRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(endpoint.DeleteRequest)
-
 	return &apiv1.DeleteCertificateIssueRequest{
 		Name: req.Name,
 	}, nil
@@ -132,14 +132,17 @@ func encodeGRPCGetResponse(_ context.Context, response interface{}) (interface{}
 
 func encodeGRPCGetRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(endpoint.GetRequest)
-
 	return &apiv1.GetCertificateIssueRequest{
 		Name: req.Name,
 	}, nil
 }
 
 func decodeGRPCListRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	return endpoint.ListRequest{}, nil
+	req := grpcReq.(*apiv1.ListCertificateIssuesRequest)
+	return endpoint.ListRequest{
+		PageSize:  int(req.GetPageSize()),
+		PageToken: req.GetPageToken(),
+	}, nil
 }
 
 func decodeGRPCListResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
@@ -150,6 +153,7 @@ func decodeGRPCListResponse(_ context.Context, grpcReply interface{}) (interface
 	}
 	return endpoint.ListResponse{
 		CertificateIssues: certificateIssues,
+		NextPageToken:     reply.GetNextPageToken(),
 	}, nil
 }
 
@@ -161,11 +165,16 @@ func encodeGRPCListResponse(_ context.Context, response interface{}) (interface{
 	}
 	return &apiv1.ListCertificateIssuesResponse{
 		CertificateIssues: certificateIssues,
+		NextPageToken:     resp.NextPageToken,
 	}, nil
 }
 
 func encodeGRPCListRequest(_ context.Context, request interface{}) (interface{}, error) {
-	return &apiv1.ListCertificateIssuesRequest{}, nil
+	req := request.(endpoint.ListRequest)
+	return &apiv1.ListCertificateIssuesRequest{
+		PageSize:  int32(req.PageSize),
+		PageToken: req.PageToken,
+	}, nil
 }
 
 func decodeGRPCUpdateRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
@@ -175,6 +184,7 @@ func decodeGRPCUpdateRequest(_ context.Context, grpcReq interface{}) (interface{
 		return nil, err
 	}
 	return endpoint.UpdateRequest{
+		Name:             req.GetName(),
 		CertificateIssue: certificateIssue,
 	}, nil
 }
@@ -202,6 +212,7 @@ func encodeGRPCUpdateRequest(_ context.Context, request interface{}) (interface{
 		return nil, err
 	}
 	return &apiv1.UpdateCertificateIssueRequest{
+		Name:             req.Name,
 		CertificateIssue: certificateIssue,
 	}, nil
 }

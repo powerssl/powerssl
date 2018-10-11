@@ -75,18 +75,21 @@ func (e Endpoints) Get(ctx context.Context, name string) (*api.{{$resourceName}}
 	return response.{{$resourceName}}, nil
 }
 {{- else if eq (.Name | concat) "List"}}
-func (e Endpoints) List(ctx context.Context) ([]*api.{{$resourceName}}, error) {
+func (e Endpoints) List(ctx context.Context, pageSize int, pageToken string) ([]*api.{{$resourceName}}, string, error) {
 	resp, err := e.ListEndpoint(ctx, ListRequest{
+		PageSize:  pageSize,
+		PageToken: pageToken,
 	})
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	response := resp.(ListResponse)
-	return response.{{$resourceNamePlural}}, nil
+	return response.{{$resourceNamePlural}}, response.NextPageToken, nil
 }
 {{- else if eq (.Name | concat) "Update"}}
-func (e Endpoints) Update(ctx context.Context, {{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*api.{{$resourceName}}, error) {
+func (e Endpoints) Update(ctx context.Context, name string, {{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*api.{{$resourceName}}, error) {
 	resp, err := e.UpdateEndpoint(ctx, UpdateRequest{
+		Name: name,
 		{{$resourceName}}: {{$resourceName | lowerCamelCase}},
 	})
 	if err != nil {
@@ -112,9 +115,13 @@ type GetRequest struct {
 	Name string
 }
 {{- else if eq (.Name | concat) "List"}}
-type ListRequest struct {}
+type ListRequest struct {
+	PageSize  int
+	PageToken string
+}
 {{- else if eq (.Name | concat) "Update"}}
 type UpdateRequest struct {
+	Name string
 	{{$resourceName}} *api.{{$resourceName}}
 }
 {{- end}}
@@ -132,6 +139,7 @@ type GetResponse struct {
 {{- else if eq (.Name | concat) "List"}}
 type ListResponse struct {
 	{{$resourceNamePlural}} []*api.{{$resourceName}}
+	NextPageToken string
 }
 {{- else if eq (.Name | concat) "Update"}}
 type UpdateResponse struct {
@@ -178,12 +186,14 @@ func makeGetEndpoint(s service.Service) endpoint.Endpoint {
 {{- else if eq (.Name | concat) "List"}}
 func makeListEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		{{$resourceNamePlural | lowerCamelCase}}, err := s.List(ctx)
+		req := request.(ListRequest)
+		{{$resourceNamePlural | lowerCamelCase}}, nextPageToken, err := s.List(ctx, req.PageSize, req.PageToken)
 		if err != nil {
 			return nil, err
 		}
 		return ListResponse{
 			{{$resourceNamePlural}}: {{$resourceNamePlural | lowerCamelCase}},
+			NextPageToken: nextPageToken,
 		}, nil
 	}
 }
@@ -191,7 +201,7 @@ func makeListEndpoint(s service.Service) endpoint.Endpoint {
 func makeUpdateEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(UpdateRequest)
-		{{$resourceName | lowerCamelCase}}, err := s.Update(ctx, req.{{$resourceName}})
+		{{$resourceName | lowerCamelCase}}, err := s.Update(ctx, req.Name, req.{{$resourceName}})
 		if err != nil {
 			return nil, err
 		}

@@ -24,7 +24,7 @@ type loggingMiddleware struct {
 
 func (mw loggingMiddleware) Create(ctx context.Context, certificate *api.Certificate) (*api.Certificate, error) {
 	defer func() {
-		mw.logger.Log("method", "Create", "certificate", certificate.Name)
+		mw.logger.Log("method", "Create", "certificate", fmt.Sprintf("%+v", certificate))
 	}()
 	return mw.next.Create(ctx, certificate)
 }
@@ -43,16 +43,16 @@ func (mw loggingMiddleware) Get(ctx context.Context, name string) (*api.Certific
 	return mw.next.Get(ctx, name)
 }
 
-func (mw loggingMiddleware) List(ctx context.Context) ([]*api.Certificate, error) {
+func (mw loggingMiddleware) List(ctx context.Context, pageSize int, pageToken string) ([]*api.Certificate, string, error) {
 	defer func() {
-		mw.logger.Log("method", "List")
+		mw.logger.Log("method", "List", "pageSize", pageSize, "pageToken", pageToken)
 	}()
-	return mw.next.List(ctx)
+	return mw.next.List(ctx, pageSize, pageToken)
 }
 
-func (mw loggingMiddleware) Update(ctx context.Context, certificate *api.Certificate) (*api.Certificate, error) {
+func (mw loggingMiddleware) Update(ctx context.Context, name string, certificate *api.Certificate) (*api.Certificate, error) {
 	defer func() {
 		mw.logger.Log("method", "Update", "certificate", fmt.Sprintf("%+v", certificate))
 	}()
-	return mw.next.Update(ctx, certificate)
+	return mw.next.Update(ctx, name, certificate)
 }

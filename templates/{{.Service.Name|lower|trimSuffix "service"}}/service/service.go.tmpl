@@ -23,9 +23,9 @@ type Service interface {
 {{- else if eq (.Name | concat) "Get"}}
 	{{.Name}}(ctx context.Context, name string) (*api.{{$resourceName}}, error)
 {{- else if eq (.Name | concat) "List"}}
-	{{.Name}}(ctx context.Context) ([]*api.{{$resourceName}}, error)
+	{{.Name}}(ctx context.Context, pageSize int, pageToken string) ([]*api.{{$resourceName}}, string, error)
 {{- else if eq (.Name | concat) "Update"}}
-	{{.Name}}(ctx context.Context, {{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*api.{{$resourceName}}, error)
+	{{.Name}}(ctx context.Context, name string, {{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*api.{{$resourceName}}, error)
 {{- else}}
 	{{.Name}}(ctx context.Context) error
 {{- end}}
@@ -62,10 +62,10 @@ func (bs basicService) {{.Name}}(_ context.Context, name string) error {
 func (bs basicService) {{.Name}}(_ context.Context, name string) (*api.{{$resourceName}}, error) {
 	return nil, nil
 {{- else if eq (.Name | concat) "List"}}
-func (bs basicService) {{.Name}}(_ context.Context) ([]*api.{{$resourceName}}, error) {
-	return nil, nil
+func (bs basicService) {{.Name}}(_ context.Context, pageSize int, pageToken string) ([]*api.{{$resourceName}}, string, error) {
+	return nil, "", nil
 {{- else if eq (.Name | concat) "Update"}}
-func (bs basicService) {{.Name}}(_ context.Context, {{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*api.{{$resourceName}}, error) {
+func (bs basicService) {{.Name}}(_ context.Context, name string, {{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*api.{{$resourceName}}, error) {
 	return nil, nil
 {{- else}}
 func (bs basicService) {{.Name}}(_ context.Context) error {

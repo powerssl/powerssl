@@ -4,7 +4,6 @@ package powerssl.api.v1;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
-import "api/v1/meta.proto";
 
 option go_package = "powerssl.io/pkg/api/v1;api";
 
@@ -43,6 +42,8 @@ service CertificateAuthorityService {
   }
 }
 
+message CertificateAuthority {}
+
 message CreateCertificateAuthorityRequest {
   CertificateAuthority certificate_authority = 1;
 }
@@ -61,17 +62,11 @@ message ListCertificateAuthoritiesRequest {
 }
 
 message ListCertificateAuthoritiesResponse {
-  string next_page_token = 4;
-  TypeMeta type_meta = 1;
-  ListMeta list_meta = 2;
-
-  repeated CertificateAuthority certificate_authorities = 3;
+  repeated CertificateAuthority certificate_authorities = 1;
+  string next_page_token = 2;
 }
 
 message UpdateCertificateAuthorityRequest {
-  string name = 2;
-  CertificateAuthority certificate_authority = 1;
-}
-
-message CertificateAuthority {
+  string name = 1;
+  CertificateAuthority certificate_authority = 2;
 }

@@ -8,38 +8,33 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "powerssl.io/pkg/api/v1;api";
 
+// The CertificateService ...
 service CertificateService {
-  rpc Create(CreateCertificateRequest)
-      returns (Certificate) {
-    option (google.api.http) = {
-      post: "/v1/certificates"
-      body: "certificate"
-    };
+  // Creates a certificate, and returns the new Certificate.
+  rpc Create(CreateCertificateRequest) returns (Certificate) {
+    option (google.api.http) = { post: "/v1/certificates" body: "certificate" };
   }
-  rpc Delete(DeleteCertificateRequest)
-      returns (google.protobuf.Empty) {
-    option (google.api.http) = {
-      delete: "/v1/{name=certificates/*}"
-    };
+
+  // Deletes a certificate. Returns NOT_FOUND if the certificate does not exist.
+  rpc Delete(DeleteCertificateRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = { delete: "/v1/{name=certificates/*}" };
   }
-  rpc Get(GetCertificateRequest)
-      returns (Certificate) {
-    option (google.api.http) = {
-      get: "/v1/{name=certificates/*}"
-    };
+
+  // Gets a certificate. Returns NOT_FOUND if the certificate does not exist.
+  rpc Get(GetCertificateRequest) returns (Certificate) {
+    option (google.api.http) = { get: "/v1/{name=certificates/*}" };
   }
-  rpc List(ListCertificatesRequest)
-      returns (ListCertificatesResponse) {
-    option (google.api.http) = {
-      get: "/v1/certificates"
-    };
+
+  // Lists certificates. The order is unspecified but deterministic. Newly created
+  // certificates will not necessarily be added to the end of this list.
+  rpc List(ListCertificatesRequest) returns (ListCertificatesResponse) {
+    option (google.api.http) = { get: "/v1/certificates" };
   }
-  rpc Update(UpdateCertificateRequest)
-      returns (Certificate) {
-    option (google.api.http) = {
-      put: "/v1/{name=certificates/*}",
-      body: "certificate"
-    };
+
+  // Updates a certificate. Returns INVALID_ARGUMENT if the name of the certificate
+  // is non-empty and does equal the previous name.
+  rpc Update(UpdateCertificateRequest) returns (Certificate) {
+    option (google.api.http) = { put: "/v1/{name=certificates/*}" body: "certificate" };
   }
 }
 
@@ -54,8 +49,13 @@ enum KeyAlgorithm {
   RSA = 1;
 }
 
+// A Certificate ...
 message Certificate {
+  // The resource name of the certificate.
+  // Certificate names have the form `certificates/{certificate_id}`.
+  // The name is ignored when creating a certificate.
   string name = 1;
+
   google.protobuf.Timestamp create_time = 2;
   google.protobuf.Timestamp update_time = 3;
   string display_name = 4;
@@ -70,28 +70,55 @@ message Certificate {
   bool auto_renew = 12;
 }
 
+// Request message for CertificateService.Create.
 message CreateCertificateRequest {
+  // The certificate to create.
   Certificate certificate = 1;
 }
 
+// Request message for CertificateService.Delete.
 message DeleteCertificateRequest {
+  // The name of the certificate to delete.
   string name = 1;
 }
 
+// Request message for CertificateService.Get.
 message GetCertificateRequest {
+  // The name of the certificate to retrieve.
   string name = 1;
 }
 
+// Request message for CertificateService.List.
 message ListCertificatesRequest {
+  // Requested page size. Server may return fewer certificates than requested.
+  // If unspecified, server will pick an appropriate default.
   int32 page_size = 1;
+
+  // A token identifying a page of results the server should return.
+  // Typically, this is the value of
+  // [ListCertificatesResponse.next_page_token][powerssl.api.v1.ListCertificatesResponse.next_page_token].
+  // returned from the previous call to `List` method.
   string page_token = 2;
 }
 
+// Response message for CertificateService.List.
 message ListCertificatesResponse {
+  // The list of certificates.
   repeated Certificate certificates = 1;
+
+  // A token to retrieve next page of results.
+  // Pass this value in the
+  // [ListCertificatesRequest.page_token][powerssl.api.v1.ListCertificatesRequest.page_token]
+  // field in the subsequent call to `List` method to retrieve the next
+  // page of results.
   string next_page_token = 2;
 }
 
+// Request message for CertificateService.Update.
 message UpdateCertificateRequest {
-  Certificate certificate = 1;
+  // The name of the certificate to update.
+  string name = 1;
+
+  // The certificate to update with. The name must match or be empty.
+  Certificate certificate = 2;
 }

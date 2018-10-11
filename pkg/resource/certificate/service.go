@@ -13,8 +13,8 @@ type Service interface {
 	Create(ctx context.Context, certificate *api.Certificate) (*api.Certificate, error)
 	Delete(ctx context.Context, name string) error
 	Get(ctx context.Context, name string) (*api.Certificate, error)
-	List(ctx context.Context) ([]*api.Certificate, error)
-	Update(ctx context.Context, certificate *api.Certificate) (*api.Certificate, error)
+	List(ctx context.Context, pageSize int, pageToken string) ([]*api.Certificate, string, error)
+	Update(ctx context.Context, name string, certificate *api.Certificate) (*api.Certificate, error)
 }
 
 func New(db *gorm.DB, logger log.Logger) Service {
@@ -50,10 +50,10 @@ func (bs basicService) Get(_ context.Context, name string) (*api.Certificate, er
 	return nil, nil
 }
 
-func (bs basicService) List(_ context.Context) ([]*api.Certificate, error) {
-	return nil, nil
+func (bs basicService) List(_ context.Context, pageSize int, pageToken string) ([]*api.Certificate, string, error) {
+	return nil, "", nil
 }
 
-func (bs basicService) Update(_ context.Context, certificate *api.Certificate) (*api.Certificate, error) {
+func (bs basicService) Update(_ context.Context, name string, certificate *api.Certificate) (*api.Certificate, error) {
 	return nil, nil
 }

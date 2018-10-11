@@ -47,17 +47,17 @@ func (mw loggingMiddleware) {{.Name}}(ctx context.Context, name string) (*api.{{
 	}()
 	return mw.next.{{.Name}}(ctx, name)
 {{- else if eq (.Name | concat) "List"}}
-func (mw loggingMiddleware) {{.Name}}(ctx context.Context) ([]*api.{{$resourceName}}, error) {
+func (mw loggingMiddleware) {{.Name}}(ctx context.Context, pageSize int, pageToken string) ([]*api.{{$resourceName}}, string, error) {
 	defer func() {
 		mw.logger.Log("method", "{{.Name}}")
 	}()
-	return mw.next.{{.Name}}(ctx)
+	return mw.next.{{.Name}}(ctx, pageSize, pageToken)
 {{- else if eq (.Name | concat) "Update"}}
-func (mw loggingMiddleware) {{.Name}}(ctx context.Context, {{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*api.{{$resourceName}}, error) {
+func (mw loggingMiddleware) {{.Name}}(ctx context.Context, name string, {{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*api.{{$resourceName}}, error) {
 	defer func() {
 		mw.logger.Log("method", "{{.Name}}", "{{$resourceName | lowerCamelCase}}", fmt.Sprintf("%+v", {{$resourceName | lowerCamelCase}}))
 	}()
-	return mw.next.{{.Name}}(ctx, {{$resourceName | lowerCamelCase}})
+	return mw.next.{{.Name}}(ctx, name, {{$resourceName | lowerCamelCase}})
 {{- else}}
 func (mw loggingMiddleware) {{.Name}}(ctx context.Context) error {
 	defer func() {

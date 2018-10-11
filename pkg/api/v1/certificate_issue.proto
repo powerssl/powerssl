@@ -4,7 +4,6 @@ package powerssl.api.v1;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
-import "api/v1/meta.proto";
 
 option go_package = "powerssl.io/pkg/api/v1;api";
 
@@ -43,6 +42,8 @@ service CertificateIssueService {
   }
 }
 
+message CertificateIssue {}
+
 message CreateCertificateIssueRequest {
   CertificateIssue certificate_issue = 1;
 }
@@ -56,18 +57,16 @@ message GetCertificateIssueRequest {
 }
 
 message ListCertificateIssuesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
 }
 
 message ListCertificateIssuesResponse {
-  TypeMeta type_meta = 1;
-  ListMeta list_meta = 2;
-
-  repeated CertificateIssue certificate_issues = 3;
+  repeated CertificateIssue certificate_issues = 1;
+  string next_page_token = 2;
 }
 
 message UpdateCertificateIssueRequest {
-  CertificateIssue certificate_issue = 1;
-}
-
-message CertificateIssue {
+  string name = 1;
+  CertificateIssue certificate_issue = 2;
 }

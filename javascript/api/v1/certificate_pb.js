@@ -1375,6 +1375,7 @@ proto.powerssl.api.v1.UpdateCertificateRequest.prototype.toObject = function(opt
  */
 proto.powerssl.api.v1.UpdateCertificateRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
+    name: jspb.Message.getFieldWithDefault(msg, 1, ""),
     certificate: (f = msg.getCertificate()) && proto.powerssl.api.v1.Certificate.toObject(includeInstance, f)
   };
 
@@ -1413,6 +1414,10 @@ proto.powerssl.api.v1.UpdateCertificateRequest.deserializeBinaryFromReader = fun
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setName(value);
+      break;
+    case 2:
       var value = new proto.powerssl.api.v1.Certificate;
       reader.readMessage(value,proto.powerssl.api.v1.Certificate.deserializeBinaryFromReader);
       msg.setCertificate(value);
@@ -1446,10 +1451,17 @@ proto.powerssl.api.v1.UpdateCertificateRequest.prototype.serializeBinary = funct
  */
 proto.powerssl.api.v1.UpdateCertificateRequest.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
+  f = message.getName();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
   f = message.getCertificate();
   if (f != null) {
     writer.writeMessage(
-      1,
+      2,
       f,
       proto.powerssl.api.v1.Certificate.serializeBinaryToWriter
     );
@@ -1458,18 +1470,33 @@ proto.powerssl.api.v1.UpdateCertificateRequest.serializeBinaryToWriter = functio
 
 
 /**
- * optional Certificate certificate = 1;
+ * optional string name = 1;
+ * @return {string}
+ */
+proto.powerssl.api.v1.UpdateCertificateRequest.prototype.getName = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/** @param {string} value */
+proto.powerssl.api.v1.UpdateCertificateRequest.prototype.setName = function(value) {
+  jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional Certificate certificate = 2;
  * @return {?proto.powerssl.api.v1.Certificate}
  */
 proto.powerssl.api.v1.UpdateCertificateRequest.prototype.getCertificate = function() {
   return /** @type{?proto.powerssl.api.v1.Certificate} */ (
-    jspb.Message.getWrapperField(this, proto.powerssl.api.v1.Certificate, 1));
+    jspb.Message.getWrapperField(this, proto.powerssl.api.v1.Certificate, 2));
 };
 
 
 /** @param {?proto.powerssl.api.v1.Certificate|undefined} value */
 proto.powerssl.api.v1.UpdateCertificateRequest.prototype.setCertificate = function(value) {
-  jspb.Message.setWrapperField(this, 1, value);
+  jspb.Message.setWrapperField(this, 2, value);
 };
 
 
@@ -1483,7 +1510,7 @@ proto.powerssl.api.v1.UpdateCertificateRequest.prototype.clearCertificate = func
  * @return {!boolean}
  */
 proto.powerssl.api.v1.UpdateCertificateRequest.prototype.hasCertificate = function() {
-  return jspb.Message.getField(this, 1) != null;
+  return jspb.Message.getField(this, 2) != null;
 };
 
 

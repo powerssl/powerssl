@@ -43,16 +43,16 @@ func (mw loggingMiddleware) Get(ctx context.Context, name string) (*api.Certific
 	return mw.next.Get(ctx, name)
 }
 
-func (mw loggingMiddleware) List(ctx context.Context) ([]*api.CertificateIssue, error) {
+func (mw loggingMiddleware) List(ctx context.Context, pageSize int, pageToken string) ([]*api.CertificateIssue, string, error) {
 	defer func() {
 		mw.logger.Log("method", "List")
 	}()
-	return mw.next.List(ctx)
+	return mw.next.List(ctx, pageSize, pageToken)
 }
 
-func (mw loggingMiddleware) Update(ctx context.Context, certificateIssue *api.CertificateIssue) (*api.CertificateIssue, error) {
+func (mw loggingMiddleware) Update(ctx context.Context, name string, certificateIssue *api.CertificateIssue) (*api.CertificateIssue, error) {
 	defer func() {
 		mw.logger.Log("method", "Update", "certificateIssue", fmt.Sprintf("%+v", certificateIssue))
 	}()
-	return mw.next.Update(ctx, certificateIssue)
+	return mw.next.Update(ctx, name, certificateIssue)
 }
