@@ -18,7 +18,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func Run(grpcAddr string) {
+func Run(grpcAddr, dbDialect, dbConnection string) {
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(os.Stderr)
@@ -39,7 +39,7 @@ func Run(grpcAddr string) {
 	var db *gorm.DB
 	{
 		var err error
-		if db, err = gorm.Open("sqlite3", "/tmp/gorm.db"); err != nil {
+		if db, err = gorm.Open(dbDialect, dbConnection); err != nil {
 			logger.Log("database", "sqlite3", "during", "Open", "err", err)
 			os.Exit(1)
 		}
