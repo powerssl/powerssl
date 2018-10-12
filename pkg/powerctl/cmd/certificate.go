@@ -2,36 +2,12 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
 
 	"powerssl.io/pkg/api"
-	"powerssl.io/pkg/powerctl"
 )
-
-func newGRPCClient() *powerctl.GrpcClient {
-	grpcAddr := viper.GetString("grpcAddr")
-	return powerctl.NewGRPCClient(grpcAddr)
-}
-
-// certificateCmd represents the certificate command
-var certificateCmd = &cobra.Command{
-	Use:   "certificate",
-	Short: "Certificate resource",
-	Long:  `Certificate resource.`,
-}
-
-func printResource(resource interface{}) {
-	byt, err := yaml.Marshal(resource)
-	if err != nil {
-		er(err)
-	}
-	fmt.Println(string(byt))
-}
 
 var (
 	AutoRenew       bool
@@ -42,6 +18,13 @@ var (
 	Name            string
 	PageSize        int
 )
+
+// certificateCmd represents the certificate command
+var certificateCmd = &cobra.Command{
+	Use:   "certificate",
+	Short: "Certificate resource",
+	Long:  `Certificate resource.`,
+}
 
 var createCertificateCmd = &cobra.Command{
 	Use:   "create",
@@ -58,7 +41,7 @@ var createCertificateCmd = &cobra.Command{
 		if err != nil {
 			er(err)
 		}
-		printResource(certificate)
+		pr(certificate)
 	},
 }
 
@@ -82,7 +65,7 @@ var getCertificateCmd = &cobra.Command{
 		if err != nil {
 			er(err)
 		}
-		printResource(certificate)
+		pr(certificate)
 	},
 }
 
@@ -109,7 +92,7 @@ var listCertificateCmd = &cobra.Command{
 				pageToken = nextPageToken
 			}
 		}
-		printResource(certificates)
+		pr(certificates)
 	},
 }
 
@@ -128,7 +111,7 @@ var updateCertificateCmd = &cobra.Command{
 		if err != nil {
 			er(err)
 		}
-		printResource(certificate)
+		pr(certificate)
 	},
 }
 
@@ -149,7 +132,7 @@ func init() {
 	getCertificateCmd.Flags().StringVarP(&Name, "name", "", "", "Name ...")
 	getCertificateCmd.MarkFlagRequired("name")
 
-	listCertificateCmd.Flags().IntVarP(&PageSize, "page-size", "", 0, "Page size ...")
+	listCertificateCmd.Flags().IntVarP(&PageSize, "page-size", "", 20, "Page size")
 
 	updateCertificateCmd.Flags().StringVarP(&Name, "name", "", "", "Name ...")
 	updateCertificateCmd.Flags().StringVarP(&DNSNames, "dns-names", "", "", "DNS name for the certificate (seperated by \",\")")
