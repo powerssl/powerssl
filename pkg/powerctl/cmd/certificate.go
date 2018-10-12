@@ -41,7 +41,6 @@ var (
 	KeySize         int
 	Name            string
 	PageSize        int
-	PageToken       string
 )
 
 var createCertificateCmd = &cobra.Command{
@@ -91,15 +90,26 @@ var listCertificateCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List Certificates.",
 	Run: func(cmd *cobra.Command, args []string) {
+		var (
+			certificates []*api.Certificate
+			pageToken    string
+		)
 		client := newGRPCClient()
-		certificates, nextPageToken, err := client.Certificate.List(context.Background(), PageSize, PageToken)
-		if err != nil {
-			er(err)
+		for {
+			certs, nextPageToken, err := client.Certificate.List(context.Background(), PageSize, pageToken)
+			if err != nil {
+				er(err)
+			}
+			for _, cert := range certs {
+				certificates = append(certificates, cert)
+			}
+			if nextPageToken == "" {
+				break
+			} else {
+				pageToken = nextPageToken
+			}
 		}
 		printResource(certificates)
-		if nextPageToken != "" {
-			fmt.Printf("NextPageToken: %s\n", nextPageToken)
-		}
 	},
 }
 
@@ -140,7 +150,6 @@ func init() {
 	getCertificateCmd.MarkFlagRequired("name")
 
 	listCertificateCmd.Flags().IntVarP(&PageSize, "page-size", "", 0, "Page size ...")
-	listCertificateCmd.Flags().StringVarP(&PageToken, "page-token", "", "", "Page token ...")
 
 	updateCertificateCmd.Flags().StringVarP(&Name, "name", "", "", "Name ...")
 	updateCertificateCmd.Flags().StringVarP(&DNSNames, "dns-names", "", "", "DNS name for the certificate (seperated by \",\")")
