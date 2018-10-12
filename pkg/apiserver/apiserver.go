@@ -12,6 +12,7 @@ import (
 	"github.com/go-kit/kit/metrics/prometheus"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/oklog/oklog/pkg/group"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
@@ -40,7 +41,7 @@ func Run(grpcAddr, dbDialect, dbConnection string) {
 	{
 		var err error
 		if db, err = gorm.Open(dbDialect, dbConnection); err != nil {
-			logger.Log("database", "sqlite3", "during", "Open", "err", err)
+			logger.Log("database", dbDialect, "during", "Open", "err", err)
 			os.Exit(1)
 		}
 		defer db.Close()
