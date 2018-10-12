@@ -23,14 +23,6 @@ type Certificate struct {
 	AutoRenew       bool
 }
 
-func FindCertificates(db *gorm.DB) (Certificates, error) {
-	var certificates Certificates
-	if err := db.Find(&certificates).Error; err != nil {
-		return nil, err
-	}
-	return certificates, nil
-}
-
 func FindCertificateByName(name string, db *gorm.DB) (*Certificate, error) {
 	s := strings.Split(name, "/")
 	if len(s) != 2 {

@@ -2,6 +2,8 @@ package certificate
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 
 	"github.com/go-kit/kit/log"
 	"github.com/jinzhu/gorm"
@@ -19,7 +21,6 @@ type Service interface {
 
 func New(db *gorm.DB, logger log.Logger) Service {
 	db.AutoMigrate(&Certificate{})
-
 	var svc Service
 	{
 		svc = NewBasicService(db)
@@ -63,11 +64,35 @@ func (bs basicService) Get(_ context.Context, name string) (*api.Certificate, er
 }
 
 func (bs basicService) List(_ context.Context, pageSize int, pageToken string) ([]*api.Certificate, string, error) {
-	certificates, err := FindCertificates(bs.db)
-	if err != nil {
+	var (
+		certificates  Certificates
+		nextPageToken string
+	)
+	offset := -1
+	if pageSize < 1 {
+		pageSize = 10
+	} else if pageSize > 20 {
+		pageSize = 20
+	}
+	if pageToken != "" {
+		var err error
+		offset, err = strconv.Atoi(pageToken)
+		if err != nil {
+			return nil, "", fmt.Errorf("Invalid page token")
+		}
+	}
+	if err := bs.db.Limit(pageSize + 1).Offset(offset).Find(&certificates).Error; err != nil {
 		return nil, "", err
 	}
-	return certificates.ToAPI(), "", nil
+	if len(certificates) > pageSize {
+		certificates = certificates[:len(certificates)-1]
+		if offset == -1 {
+			nextPageToken = strconv.Itoa(pageSize)
+		} else {
+			nextPageToken = strconv.Itoa(offset + pageSize)
+		}
+	}
+	return certificates.ToAPI(), nextPageToken, nil
 }
 
 func (bs basicService) Update(_ context.Context, name string, certificate *api.Certificate) (*api.Certificate, error) {
