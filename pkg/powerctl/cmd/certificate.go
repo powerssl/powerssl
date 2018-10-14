@@ -15,105 +15,48 @@ var (
 	DigestAlgorithm string
 	KeyAlgorithm    string
 	KeySize         int
-	Name            string
-	PageSize        int
+
+	certificateCmd = &cobra.Command{
+		Use:   "certificate",
+		Short: "Certificate resource",
+		Long:  `Certificate resource.`,
+	}
+
+	createCertificateCmd = &cobra.Command{
+		Use:   "create",
+		Short: "Create Certificate.",
+		Args:  cobra.NoArgs,
+		Run:   createCertificate,
+	}
+
+	deleteCertificateCmd = &cobra.Command{
+		Use:   "delete",
+		Short: "Delete Certificate.",
+		Args:  validateNameArg,
+		Run:   deleteCertificate,
+	}
+
+	getCertificateCmd = &cobra.Command{
+		Use:   "get",
+		Short: "Get Certificate.",
+		Args:  validateNameArg,
+		Run:   getCertificate,
+	}
+
+	listCertificateCmd = &cobra.Command{
+		Use:   "list",
+		Short: "List Certificates.",
+		Args:  cobra.NoArgs,
+		Run:   listCertificate,
+	}
+
+	updateCertificateCmd = &cobra.Command{
+		Use:   "update",
+		Short: "Update Certificate.",
+		Args:  validateNameArg,
+		Run:   updateCertificate,
+	}
 )
-
-// certificateCmd represents the certificate command
-var certificateCmd = &cobra.Command{
-	Use:   "certificate",
-	Short: "Certificate resource",
-	Long:  `Certificate resource.`,
-}
-
-var createCertificateCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Create a certificate.",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newGRPCClient()
-		certificate, err := client.Certificate.Create(context.Background(), &api.Certificate{
-			Dnsnames:        strings.Split(DNSNames, ","),
-			KeyAlgorithm:    KeyAlgorithm,
-			KeySize:         int32(KeySize),
-			DigestAlgorithm: DigestAlgorithm,
-			AutoRenew:       AutoRenew,
-		})
-		if err != nil {
-			er(err)
-		}
-		pr(certificate)
-	},
-}
-
-var deleteCertificateCmd = &cobra.Command{
-	Use:   "delete",
-	Short: "Delete Certificate.",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newGRPCClient()
-		if err := client.Certificate.Delete(context.Background(), Name); err != nil {
-			er(err)
-		}
-	},
-}
-
-var getCertificateCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get Certificate.",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newGRPCClient()
-		certificate, err := client.Certificate.Get(context.Background(), Name)
-		if err != nil {
-			er(err)
-		}
-		pr(certificate)
-	},
-}
-
-var listCertificateCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List Certificates.",
-	Run: func(cmd *cobra.Command, args []string) {
-		var (
-			certificates []*api.Certificate
-			pageToken    string
-		)
-		client := newGRPCClient()
-		for {
-			certs, nextPageToken, err := client.Certificate.List(context.Background(), PageSize, pageToken)
-			if err != nil {
-				er(err)
-			}
-			for _, cert := range certs {
-				certificates = append(certificates, cert)
-			}
-			if nextPageToken == "" {
-				break
-			} else {
-				pageToken = nextPageToken
-			}
-		}
-		pr(certificates)
-	},
-}
-
-var updateCertificateCmd = &cobra.Command{
-	Use:   "update",
-	Short: "Update Certificate.",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newGRPCClient()
-		certificate, err := client.Certificate.Update(context.Background(), Name, &api.Certificate{
-			Dnsnames:        strings.Split(DNSNames, ","),
-			KeyAlgorithm:    KeyAlgorithm,
-			KeySize:         int32(KeySize),
-			DigestAlgorithm: DigestAlgorithm,
-			AutoRenew:       AutoRenew,
-		})
-		if err != nil {
-			er(err)
-		}
-		pr(certificate)
-	},
-}
 
 func init() {
 	createCertificateCmd.Flags().StringVarP(&DNSNames, "dns-names", "", "", "DNS name for the certificate (seperated by \",\")")
@@ -126,21 +69,11 @@ func init() {
 	createCertificateCmd.MarkFlagRequired("key-size")
 	createCertificateCmd.MarkFlagRequired("digest-algorithm")
 
-	deleteCertificateCmd.Flags().StringVarP(&Name, "name", "", "", "Name ...")
-	deleteCertificateCmd.MarkFlagRequired("name")
-
-	getCertificateCmd.Flags().StringVarP(&Name, "name", "", "", "Name ...")
-	getCertificateCmd.MarkFlagRequired("name")
-
-	listCertificateCmd.Flags().IntVarP(&PageSize, "page-size", "", 20, "Page size")
-
-	updateCertificateCmd.Flags().StringVarP(&Name, "name", "", "", "Name ...")
 	updateCertificateCmd.Flags().StringVarP(&DNSNames, "dns-names", "", "", "DNS name for the certificate (seperated by \",\")")
 	updateCertificateCmd.Flags().StringVarP(&KeyAlgorithm, "key-algorithm", "", "", "Key algorithm ...")
 	updateCertificateCmd.Flags().IntVarP(&KeySize, "key-size", "", 0, "Key size ...")
 	updateCertificateCmd.Flags().StringVarP(&DigestAlgorithm, "digest-algorithm", "", "", "Digest algorithm ...")
 	updateCertificateCmd.Flags().BoolVarP(&AutoRenew, "auto-renew", "", false, "Auto renew ...")
-	updateCertificateCmd.MarkFlagRequired("name")
 
 	rootCmd.AddCommand(certificateCmd)
 	certificateCmd.AddCommand(
@@ -149,4 +82,52 @@ func init() {
 		getCertificateCmd,
 		listCertificateCmd,
 		updateCertificateCmd)
+}
+
+func createCertificate(cmd *cobra.Command, args []string) {
+	client := newGRPCClient()
+	createResource(func() (interface{}, error) {
+		return client.Certificate.Create(context.Background(), makeCertificate())
+	})
+}
+
+func deleteCertificate(cmd *cobra.Command, args []string) {
+	name := args[0]
+	client := newGRPCClient()
+	deleteResource(func() error {
+		return client.Certificate.Delete(context.Background(), name)
+	})
+}
+
+func getCertificate(cmd *cobra.Command, args []string) {
+	name := args[0]
+	client := newGRPCClient()
+	getResource(func() (interface{}, error) {
+		return client.Certificate.Get(context.Background(), name)
+	})
+}
+
+func listCertificate(cmd *cobra.Command, args []string) {
+	client := newGRPCClient()
+	listResource(func(pageToken string) (interface{}, string, error) {
+		return client.Certificate.List(context.Background(), 0, pageToken)
+	})
+}
+
+func updateCertificate(cmd *cobra.Command, args []string) {
+	name := args[0]
+	client := newGRPCClient()
+	updateResource(func() (interface{}, error) {
+		return client.Certificate.Update(context.Background(), name, makeCertificate())
+	})
+}
+
+func makeCertificate() *api.Certificate {
+	return &api.Certificate{
+		Dnsnames:        strings.Split(DNSNames, ","),
+		KeyAlgorithm:    KeyAlgorithm,
+		KeySize:         int32(KeySize),
+		DigestAlgorithm: DigestAlgorithm,
+		AutoRenew:       AutoRenew,
+	}
 }

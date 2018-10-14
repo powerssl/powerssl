@@ -15,13 +15,13 @@ import (
 	certificateissuetransport "powerssl.io/pkg/resource/generated/certificateissue/transport"
 )
 
-type GrpcClient struct {
+type GRPCClient struct {
 	Certificate          certificateservice.Service
 	CertificateAuthority certificateauthorityservice.Service
 	CertificateIssue     certificateissueservice.Service
 }
 
-func NewGRPCClient(grpcAddr string) *GrpcClient {
+func NewGRPCClient(grpcAddr string) *GRPCClient {
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(os.Stderr)
@@ -39,7 +39,7 @@ func NewGRPCClient(grpcAddr string) *GrpcClient {
 		}
 	}
 
-	return &GrpcClient{
+	return &GRPCClient{
 		Certificate:          certificatetransport.NewGRPCClient(conn, logger),
 		CertificateAuthority: certificateauthoritytransport.NewGRPCClient(conn, logger),
 		CertificateIssue:     certificateissuetransport.NewGRPCClient(conn, logger),

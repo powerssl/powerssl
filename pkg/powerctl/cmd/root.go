@@ -21,6 +21,7 @@ var rootCmd = &cobra.Command{
 	Long: `powerctl controls PowerSSL.
 
 Find more information at: https://powerssl.io`,
+	Version: "0.1.0",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -60,7 +61,10 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed(), "\n")
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Println("Can't read config:", err)
+		os.Exit(1)
+	} else if Verbose {
+		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 }
