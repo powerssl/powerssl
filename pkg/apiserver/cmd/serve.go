@@ -7,7 +7,6 @@ import (
 	"powerssl.io/pkg/apiserver"
 )
 
-// serveCmd represents the serve command
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Serve the API",
