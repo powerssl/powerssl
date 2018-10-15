@@ -38,15 +38,18 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.powerctl.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "Verbose output")
 	rootCmd.PersistentFlags().StringVarP(&Output, "output", "o", "yaml", "Output format")
-	rootCmd.PersistentFlags().StringP("grpc-addr", "", "", "GRPC address of API")
-	rootCmd.PersistentFlags().StringP("grpc-ca-file", "", "", "GRPC CA file")
-	rootCmd.PersistentFlags().StringP("grpc-host-override", "", "", "GRPC CA file")
-	rootCmd.PersistentFlags().BoolP("insecure", "", false, "Use insecure communication")
 
-	viper.BindPFlag("grpc.addr", rootCmd.PersistentFlags().Lookup("grpc-addr"))
-	viper.BindPFlag("grpc.ca", rootCmd.PersistentFlags().Lookup("grpc-ca-file"))
-	viper.BindPFlag("grpc.host", rootCmd.PersistentFlags().Lookup("grpc-host-override"))
-	viper.BindPFlag("grpc.insecure", rootCmd.PersistentFlags().Lookup("insecure"))
+	rootCmd.PersistentFlags().StringP("ca-file", "", "", "Certificate authority file")
+	rootCmd.PersistentFlags().StringP("grpc-addr", "", "", "GRPC address of API")
+	rootCmd.PersistentFlags().BoolP("insecure", "", false, "Use insecure communication")
+	rootCmd.PersistentFlags().BoolP("insecure-skip-tls-verify", "", false, "Accepts any certificate presented by the server and any host name in that certificate")
+	rootCmd.PersistentFlags().StringP("server-name-override", "", "", "It will override the virtual host name of authority")
+
+	viper.BindPFlag("ca-file", rootCmd.PersistentFlags().Lookup("ca-file"))
+	viper.BindPFlag("grpc-addr", rootCmd.PersistentFlags().Lookup("grpc-addr"))
+	viper.BindPFlag("insecure", rootCmd.PersistentFlags().Lookup("insecure"))
+	viper.BindPFlag("insecure-skip-tls-verify", rootCmd.PersistentFlags().Lookup("insecure-skip-tls-verify"))
+	viper.BindPFlag("server-name-override", rootCmd.PersistentFlags().Lookup("server-name-override"))
 }
 
 func initConfig() {

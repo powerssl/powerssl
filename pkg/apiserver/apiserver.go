@@ -18,7 +18,6 @@ import (
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/testdata"
 )
 
 func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialect, dbConnection string) {
@@ -59,18 +58,14 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialec
 			os.Exit(1)
 		}
 		g.Add(func() error {
-			logger.Log("transport", "gRPC", "addr", grpcAddr)
+			logger.Log("transport", "gRPC", "addr", grpcAddr, "secure", !grpcInsecure)
 			options := []grpc.ServerOption{
 				grpc.UnaryInterceptor(kitgrpc.Interceptor),
 			}
 			if !grpcInsecure {
-				if grpcCertFile == "" && grpcKeyFile == "" {
-					grpcCertFile = testdata.Path("server1.pem")
-					grpcKeyFile = testdata.Path("server1.key")
-				}
 				creds, err := credentials.NewServerTLSFromFile(grpcCertFile, grpcKeyFile)
 				if err != nil {
-					logger.Log("Failed to generate credentials %v", err)
+					logger.Log("transport", "gRPC", "err", fmt.Errorf("Failed to load TLS credentials %v", err))
 					os.Exit(1)
 				}
 				options = append(options, grpc.Creds(creds))
