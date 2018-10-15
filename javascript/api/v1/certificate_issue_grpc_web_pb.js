@@ -15,6 +15,8 @@ grpc.web = require('grpc-web');
 var google_api_annotations_pb = require('../../google/api/annotations_pb.js')
 
 var google_protobuf_empty_pb = require('google-protobuf/google/protobuf/empty_pb.js')
+
+var google_protobuf_timestamp_pb = require('google-protobuf/google/protobuf/timestamp_pb.js')
 const proto = {};
 proto.powerssl = {};
 proto.powerssl.api = {};

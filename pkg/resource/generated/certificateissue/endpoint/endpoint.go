@@ -67,8 +67,9 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	}
 }
 
-func (e Endpoints) Create(ctx context.Context, certificateIssue *api.CertificateIssue) (*api.CertificateIssue, error) {
+func (e Endpoints) Create(ctx context.Context, parent string, certificateIssue *api.CertificateIssue) (*api.CertificateIssue, error) {
 	resp, err := e.CreateEndpoint(ctx, CreateRequest{
+		Parent:           parent,
 		CertificateIssue: certificateIssue,
 	})
 	if err != nil {
@@ -99,8 +100,9 @@ func (e Endpoints) Get(ctx context.Context, name string) (*api.CertificateIssue,
 	return response.CertificateIssue, nil
 }
 
-func (e Endpoints) List(ctx context.Context, pageSize int, pageToken string) ([]*api.CertificateIssue, string, error) {
+func (e Endpoints) List(ctx context.Context, parent string, pageSize int, pageToken string) ([]*api.CertificateIssue, string, error) {
 	resp, err := e.ListEndpoint(ctx, ListRequest{
+		Parent:    parent,
 		PageSize:  pageSize,
 		PageToken: pageToken,
 	})
@@ -124,6 +126,7 @@ func (e Endpoints) Update(ctx context.Context, name string, certificateIssue *ap
 }
 
 type CreateRequest struct {
+	Parent           string
 	CertificateIssue *api.CertificateIssue
 }
 
@@ -134,7 +137,7 @@ type CreateResponse struct {
 func makeCreateEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(CreateRequest)
-		certificateIssue, err := s.Create(ctx, req.CertificateIssue)
+		certificateIssue, err := s.Create(ctx, req.Parent, req.CertificateIssue)
 		if err != nil {
 			return nil, err
 		}
@@ -182,6 +185,7 @@ func makeGetEndpoint(s service.Service) endpoint.Endpoint {
 }
 
 type ListRequest struct {
+	Parent    string
 	PageSize  int
 	PageToken string
 }
@@ -194,7 +198,7 @@ type ListResponse struct {
 func makeListEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(ListRequest)
-		certificateIssues, nextPageToken, err := s.List(ctx, req.PageSize, req.PageToken)
+		certificateIssues, nextPageToken, err := s.List(ctx, req.Parent, req.PageSize, req.PageToken)
 		if err != nil {
 			return nil, err
 		}

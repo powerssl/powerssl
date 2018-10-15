@@ -19,14 +19,56 @@ var _ = types.Timestamp{}
 var UnknownError = errors.New("Unknown Error")
 
 func decodeGRPCCertificateIssue(certificateIssue *apiv1.CertificateIssue) (*api.CertificateIssue, error) {
-	return &api.CertificateIssue{}, nil
+	createTime, err := types.TimestampFromProto(certificateIssue.GetCreateTime())
+	if err != nil {
+		return nil, err
+	}
+	updateTime, err := types.TimestampFromProto(certificateIssue.GetUpdateTime())
+	if err != nil {
+		return nil, err
+	}
+	return &api.CertificateIssue{
+		Name:            certificateIssue.GetName(),
+		CreateTime:      createTime,
+		UpdateTime:      updateTime,
+		DisplayName:     certificateIssue.GetDisplayName(),
+		Title:           certificateIssue.GetTitle(),
+		Description:     certificateIssue.GetDescription(),
+		Labels:          certificateIssue.GetLabels(),
+		Dnsnames:        certificateIssue.GetDnsnames(),
+		KeyAlgorithm:    certificateIssue.GetKeyAlgorithm(),
+		KeySize:         certificateIssue.GetKeySize(),
+		DigestAlgorithm: certificateIssue.GetDigestAlgorithm(),
+		AutoRenew:       certificateIssue.GetAutoRenew(),
+	}, nil
 }
 
 func encodeGRPCCertificateIssue(certificateIssue *api.CertificateIssue) (*apiv1.CertificateIssue, error) {
 	if certificateIssue == nil {
 		return nil, UnknownError
 	}
-	return &apiv1.CertificateIssue{}, nil
+	createTime, err := types.TimestampProto(certificateIssue.CreateTime)
+	if err != nil {
+		return nil, err
+	}
+	updateTime, err := types.TimestampProto(certificateIssue.UpdateTime)
+	if err != nil {
+		return nil, err
+	}
+	return &apiv1.CertificateIssue{
+		Name:            certificateIssue.Name,
+		CreateTime:      createTime,
+		UpdateTime:      updateTime,
+		DisplayName:     certificateIssue.DisplayName,
+		Title:           certificateIssue.Title,
+		Description:     certificateIssue.Description,
+		Labels:          certificateIssue.Labels,
+		Dnsnames:        certificateIssue.Dnsnames,
+		KeyAlgorithm:    certificateIssue.KeyAlgorithm,
+		KeySize:         certificateIssue.KeySize,
+		DigestAlgorithm: certificateIssue.DigestAlgorithm,
+		AutoRenew:       certificateIssue.AutoRenew,
+	}, nil
 }
 
 func decodeGRPCCertificateIssues(grpcCertificateIssues []*apiv1.CertificateIssue) ([]*api.CertificateIssue, error) {
@@ -60,6 +102,7 @@ func decodeGRPCCreateRequest(_ context.Context, grpcReq interface{}) (interface{
 		return nil, err
 	}
 	return endpoint.CreateRequest{
+		Parent:           req.GetParent(),
 		CertificateIssue: certificateIssue,
 	}, nil
 }
@@ -87,6 +130,7 @@ func encodeGRPCCreateRequest(_ context.Context, request interface{}) (interface{
 		return nil, err
 	}
 	return &apiv1.CreateCertificateIssueRequest{
+		Parent:           req.Parent,
 		CertificateIssue: certificateIssue,
 	}, nil
 }
@@ -146,6 +190,7 @@ func encodeGRPCGetRequest(_ context.Context, request interface{}) (interface{}, 
 func decodeGRPCListRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*apiv1.ListCertificateIssuesRequest)
 	return endpoint.ListRequest{
+		Parent:    req.GetParent(),
 		PageSize:  int(req.GetPageSize()),
 		PageToken: req.GetPageToken(),
 	}, nil
@@ -178,6 +223,7 @@ func encodeGRPCListResponse(_ context.Context, response interface{}) (interface{
 func encodeGRPCListRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(endpoint.ListRequest)
 	return &apiv1.ListCertificateIssuesRequest{
+		Parent:    req.Parent,
 		PageSize:  int32(req.PageSize),
 		PageToken: req.PageToken,
 	}, nil

@@ -3,6 +3,7 @@
 {{- if (regexMatch "y$" $resourceName)}}
 {{- $resourceNamePlural = concat ($resourceName | trimSuffix "y") "ies" }}
 {{- end}}
+{{- $File := .File}}
 package {{$resourceName | lower}}
 
 import (
@@ -16,14 +17,31 @@ import (
 
 type Service interface {
 {{- range .Service.Method}}
+{{- $Parent := false}}
+{{- $Name := (.Name | concat)}}
+{{- range $File.MessageType}}
+  {{- if eq (.Name | concat) (concat $Name $resourceName "Request")}}
+    {{- range .Field}}
+      {{- if eq (.Name | concat) "parent"}}
+        {{- $Parent = true}}
+      {{- end}}
+    {{- end}}
+  {{- else if eq (.Name | concat) (concat $Name $resourceNamePlural "Request")}}
+    {{- range .Field}}
+      {{- if eq (.Name | concat) "parent"}}
+        {{- $Parent = true}}
+      {{- end}}
+    {{- end}}
+  {{- end}}
+{{- end}}
 {{- if eq (.Name | concat) "Create"}}
-	{{.Name}}(ctx context.Context, {{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*api.{{$resourceName}}, error)
+	{{.Name}}(ctx context.Context, {{if $Parent}}parent string, {{end}}{{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*api.{{$resourceName}}, error)
 {{- else if eq (.Name | concat) "Delete"}}
 	{{.Name}}(ctx context.Context, name string) error
 {{- else if eq (.Name | concat) "Get"}}
 	{{.Name}}(ctx context.Context, name string) (*api.{{$resourceName}}, error)
 {{- else if eq (.Name | concat) "List"}}
-	{{.Name}}(ctx context.Context, pageSize int, pageToken string) ([]*api.{{$resourceName}}, string, error)
+	{{.Name}}(ctx context.Context, {{if $Parent}}parent string, {{end}}pageSize int, pageToken string) ([]*api.{{$resourceName}}, string, error)
 {{- else if eq (.Name | concat) "Update"}}
 	{{.Name}}(ctx context.Context, name string, {{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*api.{{$resourceName}}, error)
 {{- else}}
@@ -51,9 +69,26 @@ func NewBasicService(db *gorm.DB) Service {
 	}
 }
 {{- range .Service.Method}}
+{{- $Parent := false}}
+{{- $Name := (.Name | concat)}}
+{{- range $File.MessageType}}
+  {{- if eq (.Name | concat) (concat $Name $resourceName "Request")}}
+    {{- range .Field}}
+      {{- if eq (.Name | concat) "parent"}}
+        {{- $Parent = true}}
+      {{- end}}
+    {{- end}}
+  {{- else if eq (.Name | concat) (concat $Name $resourceNamePlural "Request")}}
+    {{- range .Field}}
+      {{- if eq (.Name | concat) "parent"}}
+        {{- $Parent = true}}
+      {{- end}}
+    {{- end}}
+  {{- end}}
+{{- end}}
 
 {{if eq (.Name | concat) "Create"}}
-func (bs basicService) {{.Name}}(_ context.Context, {{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*api.{{$resourceName}}, error) {
+func (bs basicService) {{.Name}}(_ context.Context, {{if $Parent}}parent string, {{end}}{{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*api.{{$resourceName}}, error) {
 	return nil, nil
 {{- else if eq (.Name | concat) "Delete"}}
 func (bs basicService) {{.Name}}(_ context.Context, name string) error {
@@ -62,7 +97,7 @@ func (bs basicService) {{.Name}}(_ context.Context, name string) error {
 func (bs basicService) {{.Name}}(_ context.Context, name string) (*api.{{$resourceName}}, error) {
 	return nil, nil
 {{- else if eq (.Name | concat) "List"}}
-func (bs basicService) {{.Name}}(_ context.Context, pageSize int, pageToken string) ([]*api.{{$resourceName}}, string, error) {
+func (bs basicService) {{.Name}}(_ context.Context, {{if $Parent}}parent string, {{end}}pageSize int, pageToken string) ([]*api.{{$resourceName}}, string, error) {
 	return nil, "", nil
 {{- else if eq (.Name | concat) "Update"}}
 func (bs basicService) {{.Name}}(_ context.Context, name string, {{$resourceName | lowerCamelCase}} *api.{{$resourceName}}) (*api.{{$resourceName}}, error) {

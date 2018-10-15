@@ -135,6 +135,15 @@ func decodeGRPC{{.Name}}Request(_ context.Context, grpcReq interface{}) (interfa
 		return nil, err
 	}
 	return endpoint.CreateRequest{
+{{- range $File.MessageType}}
+  {{- if eq (.Name | concat) (concat "Create" $resourceName "Request")}}
+    {{- range .Field}}
+      {{- if eq (.Name | concat) "parent"}}
+		Parent: req.GetParent(),
+      {{- end}}
+    {{- end}}
+  {{- end}}
+{{- end}}
 		{{$resourceName}}: {{$resourceName | lowerCamelCase}},
 	}, nil
 {{- else if eq (.Name | concat) "Delete"}}
@@ -150,6 +159,15 @@ func decodeGRPC{{.Name}}Request(_ context.Context, grpcReq interface{}) (interfa
 {{- else if eq (.Name | concat) "List"}}
 	req := grpcReq.(*apiv1.List{{$resourceNamePlural}}Request)
 	return endpoint.ListRequest{
+{{- range $File.MessageType}}
+  {{- if eq (.Name | concat) (concat "List" $resourceNamePlural "Request")}}
+    {{- range .Field}}
+      {{- if eq (.Name | concat) "parent"}}
+		Parent: req.GetParent(),
+      {{- end}}
+    {{- end}}
+  {{- end}}
+{{- end}}
 		PageSize:  int(req.GetPageSize()),
 		PageToken: req.GetPageToken(),
 	}, nil
@@ -251,6 +269,15 @@ func encodeGRPC{{.Name}}Request(_ context.Context, request interface{}) (interfa
 		return nil, err
 	}
 	return &apiv1.Create{{$resourceName}}Request{
+{{- range $File.MessageType}}
+  {{- if eq (.Name | concat) (concat "Create" $resourceName "Request")}}
+    {{- range .Field}}
+      {{- if eq (.Name | concat) "parent"}}
+		Parent: req.Parent,
+      {{- end}}
+    {{- end}}
+  {{- end}}
+{{- end}}
 		{{$resourceName}}: {{$resourceName |lowerCamelCase}},
 	}, nil
 {{- else if eq (.Name | concat) "Delete"}}
@@ -266,6 +293,15 @@ func encodeGRPC{{.Name}}Request(_ context.Context, request interface{}) (interfa
 {{- else if eq (.Name | concat) "List"}}
 	req := request.(endpoint.ListRequest)
 	return &apiv1.List{{$resourceNamePlural}}Request{
+{{- range $File.MessageType}}
+  {{- if eq (.Name | concat) (concat "List" $resourceNamePlural "Request")}}
+    {{- range .Field}}
+      {{- if eq (.Name | concat) "parent"}}
+		Parent: req.Parent,
+      {{- end}}
+    {{- end}}
+  {{- end}}
+{{- end}}
 		PageSize:  int32(req.PageSize),
 		PageToken: req.PageToken,
 	}, nil

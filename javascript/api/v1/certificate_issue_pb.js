@@ -13,6 +13,7 @@ var global = Function('return this')();
 
 var google_api_annotations_pb = require('../../google/api/annotations_pb.js');
 var google_protobuf_empty_pb = require('google-protobuf/google/protobuf/empty_pb.js');
+var google_protobuf_timestamp_pb = require('google-protobuf/google/protobuf/timestamp_pb.js');
 goog.exportSymbol('proto.powerssl.api.v1.CertificateIssue', null, global);
 goog.exportSymbol('proto.powerssl.api.v1.CreateCertificateIssueRequest', null, global);
 goog.exportSymbol('proto.powerssl.api.v1.DeleteCertificateIssueRequest', null, global);
@@ -32,12 +33,19 @@ goog.exportSymbol('proto.powerssl.api.v1.UpdateCertificateIssueRequest', null, g
  * @constructor
  */
 proto.powerssl.api.v1.CertificateIssue = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.powerssl.api.v1.CertificateIssue.repeatedFields_, null);
 };
 goog.inherits(proto.powerssl.api.v1.CertificateIssue, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
   proto.powerssl.api.v1.CertificateIssue.displayName = 'proto.powerssl.api.v1.CertificateIssue';
 }
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.powerssl.api.v1.CertificateIssue.repeatedFields_ = [8];
+
 
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
@@ -67,7 +75,18 @@ proto.powerssl.api.v1.CertificateIssue.prototype.toObject = function(opt_include
  */
 proto.powerssl.api.v1.CertificateIssue.toObject = function(includeInstance, msg) {
   var f, obj = {
-
+    name: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    createTime: (f = msg.getCreateTime()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
+    updateTime: (f = msg.getUpdateTime()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
+    displayName: jspb.Message.getFieldWithDefault(msg, 4, ""),
+    title: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    description: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
+    dnsnamesList: jspb.Message.getRepeatedField(msg, 8),
+    keyAlgorithm: jspb.Message.getFieldWithDefault(msg, 9, ""),
+    keySize: jspb.Message.getFieldWithDefault(msg, 10, 0),
+    digestAlgorithm: jspb.Message.getFieldWithDefault(msg, 11, ""),
+    autoRenew: jspb.Message.getFieldWithDefault(msg, 12, false)
   };
 
   if (includeInstance) {
@@ -104,6 +123,58 @@ proto.powerssl.api.v1.CertificateIssue.deserializeBinaryFromReader = function(ms
     }
     var field = reader.getFieldNumber();
     switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setName(value);
+      break;
+    case 2:
+      var value = new google_protobuf_timestamp_pb.Timestamp;
+      reader.readMessage(value,google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
+      msg.setCreateTime(value);
+      break;
+    case 3:
+      var value = new google_protobuf_timestamp_pb.Timestamp;
+      reader.readMessage(value,google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
+      msg.setUpdateTime(value);
+      break;
+    case 4:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setDisplayName(value);
+      break;
+    case 5:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setTitle(value);
+      break;
+    case 6:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setDescription(value);
+      break;
+    case 7:
+      var value = msg.getLabelsMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "");
+         });
+      break;
+    case 8:
+      var value = /** @type {string} */ (reader.readString());
+      msg.addDnsnames(value);
+      break;
+    case 9:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setKeyAlgorithm(value);
+      break;
+    case 10:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setKeySize(value);
+      break;
+    case 11:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setDigestAlgorithm(value);
+      break;
+    case 12:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setAutoRenew(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -133,6 +204,318 @@ proto.powerssl.api.v1.CertificateIssue.prototype.serializeBinary = function() {
  */
 proto.powerssl.api.v1.CertificateIssue.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
+  f = message.getName();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getCreateTime();
+  if (f != null) {
+    writer.writeMessage(
+      2,
+      f,
+      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter
+    );
+  }
+  f = message.getUpdateTime();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter
+    );
+  }
+  f = message.getDisplayName();
+  if (f.length > 0) {
+    writer.writeString(
+      4,
+      f
+    );
+  }
+  f = message.getTitle();
+  if (f.length > 0) {
+    writer.writeString(
+      5,
+      f
+    );
+  }
+  f = message.getDescription();
+  if (f.length > 0) {
+    writer.writeString(
+      6,
+      f
+    );
+  }
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(7, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
+  f = message.getDnsnamesList();
+  if (f.length > 0) {
+    writer.writeRepeatedString(
+      8,
+      f
+    );
+  }
+  f = message.getKeyAlgorithm();
+  if (f.length > 0) {
+    writer.writeString(
+      9,
+      f
+    );
+  }
+  f = message.getKeySize();
+  if (f !== 0) {
+    writer.writeInt32(
+      10,
+      f
+    );
+  }
+  f = message.getDigestAlgorithm();
+  if (f.length > 0) {
+    writer.writeString(
+      11,
+      f
+    );
+  }
+  f = message.getAutoRenew();
+  if (f) {
+    writer.writeBool(
+      12,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string name = 1;
+ * @return {string}
+ */
+proto.powerssl.api.v1.CertificateIssue.prototype.getName = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/** @param {string} value */
+proto.powerssl.api.v1.CertificateIssue.prototype.setName = function(value) {
+  jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional google.protobuf.Timestamp create_time = 2;
+ * @return {?proto.google.protobuf.Timestamp}
+ */
+proto.powerssl.api.v1.CertificateIssue.prototype.getCreateTime = function() {
+  return /** @type{?proto.google.protobuf.Timestamp} */ (
+    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 2));
+};
+
+
+/** @param {?proto.google.protobuf.Timestamp|undefined} value */
+proto.powerssl.api.v1.CertificateIssue.prototype.setCreateTime = function(value) {
+  jspb.Message.setWrapperField(this, 2, value);
+};
+
+
+proto.powerssl.api.v1.CertificateIssue.prototype.clearCreateTime = function() {
+  this.setCreateTime(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {!boolean}
+ */
+proto.powerssl.api.v1.CertificateIssue.prototype.hasCreateTime = function() {
+  return jspb.Message.getField(this, 2) != null;
+};
+
+
+/**
+ * optional google.protobuf.Timestamp update_time = 3;
+ * @return {?proto.google.protobuf.Timestamp}
+ */
+proto.powerssl.api.v1.CertificateIssue.prototype.getUpdateTime = function() {
+  return /** @type{?proto.google.protobuf.Timestamp} */ (
+    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 3));
+};
+
+
+/** @param {?proto.google.protobuf.Timestamp|undefined} value */
+proto.powerssl.api.v1.CertificateIssue.prototype.setUpdateTime = function(value) {
+  jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+proto.powerssl.api.v1.CertificateIssue.prototype.clearUpdateTime = function() {
+  this.setUpdateTime(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {!boolean}
+ */
+proto.powerssl.api.v1.CertificateIssue.prototype.hasUpdateTime = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
+/**
+ * optional string display_name = 4;
+ * @return {string}
+ */
+proto.powerssl.api.v1.CertificateIssue.prototype.getDisplayName = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+};
+
+
+/** @param {string} value */
+proto.powerssl.api.v1.CertificateIssue.prototype.setDisplayName = function(value) {
+  jspb.Message.setProto3StringField(this, 4, value);
+};
+
+
+/**
+ * optional string title = 5;
+ * @return {string}
+ */
+proto.powerssl.api.v1.CertificateIssue.prototype.getTitle = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+};
+
+
+/** @param {string} value */
+proto.powerssl.api.v1.CertificateIssue.prototype.setTitle = function(value) {
+  jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional string description = 6;
+ * @return {string}
+ */
+proto.powerssl.api.v1.CertificateIssue.prototype.getDescription = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+};
+
+
+/** @param {string} value */
+proto.powerssl.api.v1.CertificateIssue.prototype.setDescription = function(value) {
+  jspb.Message.setProto3StringField(this, 6, value);
+};
+
+
+/**
+ * map<string, string> labels = 7;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,string>}
+ */
+proto.powerssl.api.v1.CertificateIssue.prototype.getLabelsMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,string>} */ (
+      jspb.Message.getMapField(this, 7, opt_noLazyCreate,
+      null));
+};
+
+
+proto.powerssl.api.v1.CertificateIssue.prototype.clearLabelsMap = function() {
+  this.getLabelsMap().clear();
+};
+
+
+/**
+ * repeated string dnsnames = 8;
+ * @return {!Array<string>}
+ */
+proto.powerssl.api.v1.CertificateIssue.prototype.getDnsnamesList = function() {
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 8));
+};
+
+
+/** @param {!Array<string>} value */
+proto.powerssl.api.v1.CertificateIssue.prototype.setDnsnamesList = function(value) {
+  jspb.Message.setField(this, 8, value || []);
+};
+
+
+/**
+ * @param {!string} value
+ * @param {number=} opt_index
+ */
+proto.powerssl.api.v1.CertificateIssue.prototype.addDnsnames = function(value, opt_index) {
+  jspb.Message.addToRepeatedField(this, 8, value, opt_index);
+};
+
+
+proto.powerssl.api.v1.CertificateIssue.prototype.clearDnsnamesList = function() {
+  this.setDnsnamesList([]);
+};
+
+
+/**
+ * optional string key_algorithm = 9;
+ * @return {string}
+ */
+proto.powerssl.api.v1.CertificateIssue.prototype.getKeyAlgorithm = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 9, ""));
+};
+
+
+/** @param {string} value */
+proto.powerssl.api.v1.CertificateIssue.prototype.setKeyAlgorithm = function(value) {
+  jspb.Message.setProto3StringField(this, 9, value);
+};
+
+
+/**
+ * optional int32 key_size = 10;
+ * @return {number}
+ */
+proto.powerssl.api.v1.CertificateIssue.prototype.getKeySize = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 10, 0));
+};
+
+
+/** @param {number} value */
+proto.powerssl.api.v1.CertificateIssue.prototype.setKeySize = function(value) {
+  jspb.Message.setProto3IntField(this, 10, value);
+};
+
+
+/**
+ * optional string digest_algorithm = 11;
+ * @return {string}
+ */
+proto.powerssl.api.v1.CertificateIssue.prototype.getDigestAlgorithm = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 11, ""));
+};
+
+
+/** @param {string} value */
+proto.powerssl.api.v1.CertificateIssue.prototype.setDigestAlgorithm = function(value) {
+  jspb.Message.setProto3StringField(this, 11, value);
+};
+
+
+/**
+ * optional bool auto_renew = 12;
+ * Note that Boolean fields may be set to 0/1 when serialized from a Java server.
+ * You should avoid comparisons like {@code val === true/false} in those cases.
+ * @return {boolean}
+ */
+proto.powerssl.api.v1.CertificateIssue.prototype.getAutoRenew = function() {
+  return /** @type {boolean} */ (jspb.Message.getFieldWithDefault(this, 12, false));
+};
+
+
+/** @param {boolean} value */
+proto.powerssl.api.v1.CertificateIssue.prototype.setAutoRenew = function(value) {
+  jspb.Message.setProto3BooleanField(this, 12, value);
 };
 
 
@@ -183,6 +566,7 @@ proto.powerssl.api.v1.CreateCertificateIssueRequest.prototype.toObject = functio
  */
 proto.powerssl.api.v1.CreateCertificateIssueRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
+    parent: jspb.Message.getFieldWithDefault(msg, 1, ""),
     certificateIssue: (f = msg.getCertificateIssue()) && proto.powerssl.api.v1.CertificateIssue.toObject(includeInstance, f)
   };
 
@@ -221,6 +605,10 @@ proto.powerssl.api.v1.CreateCertificateIssueRequest.deserializeBinaryFromReader 
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setParent(value);
+      break;
+    case 2:
       var value = new proto.powerssl.api.v1.CertificateIssue;
       reader.readMessage(value,proto.powerssl.api.v1.CertificateIssue.deserializeBinaryFromReader);
       msg.setCertificateIssue(value);
@@ -254,10 +642,17 @@ proto.powerssl.api.v1.CreateCertificateIssueRequest.prototype.serializeBinary = 
  */
 proto.powerssl.api.v1.CreateCertificateIssueRequest.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
+  f = message.getParent();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
   f = message.getCertificateIssue();
   if (f != null) {
     writer.writeMessage(
-      1,
+      2,
       f,
       proto.powerssl.api.v1.CertificateIssue.serializeBinaryToWriter
     );
@@ -266,18 +661,33 @@ proto.powerssl.api.v1.CreateCertificateIssueRequest.serializeBinaryToWriter = fu
 
 
 /**
- * optional CertificateIssue certificate_issue = 1;
+ * optional string parent = 1;
+ * @return {string}
+ */
+proto.powerssl.api.v1.CreateCertificateIssueRequest.prototype.getParent = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/** @param {string} value */
+proto.powerssl.api.v1.CreateCertificateIssueRequest.prototype.setParent = function(value) {
+  jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional CertificateIssue certificate_issue = 2;
  * @return {?proto.powerssl.api.v1.CertificateIssue}
  */
 proto.powerssl.api.v1.CreateCertificateIssueRequest.prototype.getCertificateIssue = function() {
   return /** @type{?proto.powerssl.api.v1.CertificateIssue} */ (
-    jspb.Message.getWrapperField(this, proto.powerssl.api.v1.CertificateIssue, 1));
+    jspb.Message.getWrapperField(this, proto.powerssl.api.v1.CertificateIssue, 2));
 };
 
 
 /** @param {?proto.powerssl.api.v1.CertificateIssue|undefined} value */
 proto.powerssl.api.v1.CreateCertificateIssueRequest.prototype.setCertificateIssue = function(value) {
-  jspb.Message.setWrapperField(this, 1, value);
+  jspb.Message.setWrapperField(this, 2, value);
 };
 
 
@@ -291,7 +701,7 @@ proto.powerssl.api.v1.CreateCertificateIssueRequest.prototype.clearCertificateIs
  * @return {!boolean}
  */
 proto.powerssl.api.v1.CreateCertificateIssueRequest.prototype.hasCertificateIssue = function() {
-  return jspb.Message.getField(this, 1) != null;
+  return jspb.Message.getField(this, 2) != null;
 };
 
 
@@ -626,8 +1036,9 @@ proto.powerssl.api.v1.ListCertificateIssuesRequest.prototype.toObject = function
  */
 proto.powerssl.api.v1.ListCertificateIssuesRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-    pageSize: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    pageToken: jspb.Message.getFieldWithDefault(msg, 2, "")
+    parent: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    pageSize: jspb.Message.getFieldWithDefault(msg, 2, 0),
+    pageToken: jspb.Message.getFieldWithDefault(msg, 3, "")
   };
 
   if (includeInstance) {
@@ -665,10 +1076,14 @@ proto.powerssl.api.v1.ListCertificateIssuesRequest.deserializeBinaryFromReader =
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setParent(value);
+      break;
+    case 2:
       var value = /** @type {number} */ (reader.readInt32());
       msg.setPageSize(value);
       break;
-    case 2:
+    case 3:
       var value = /** @type {string} */ (reader.readString());
       msg.setPageToken(value);
       break;
@@ -701,17 +1116,24 @@ proto.powerssl.api.v1.ListCertificateIssuesRequest.prototype.serializeBinary = f
  */
 proto.powerssl.api.v1.ListCertificateIssuesRequest.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
+  f = message.getParent();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
   f = message.getPageSize();
   if (f !== 0) {
     writer.writeInt32(
-      1,
+      2,
       f
     );
   }
   f = message.getPageToken();
   if (f.length > 0) {
     writer.writeString(
-      2,
+      3,
       f
     );
   }
@@ -719,32 +1141,47 @@ proto.powerssl.api.v1.ListCertificateIssuesRequest.serializeBinaryToWriter = fun
 
 
 /**
- * optional int32 page_size = 1;
+ * optional string parent = 1;
+ * @return {string}
+ */
+proto.powerssl.api.v1.ListCertificateIssuesRequest.prototype.getParent = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/** @param {string} value */
+proto.powerssl.api.v1.ListCertificateIssuesRequest.prototype.setParent = function(value) {
+  jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional int32 page_size = 2;
  * @return {number}
  */
 proto.powerssl.api.v1.ListCertificateIssuesRequest.prototype.getPageSize = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
 };
 
 
 /** @param {number} value */
 proto.powerssl.api.v1.ListCertificateIssuesRequest.prototype.setPageSize = function(value) {
-  jspb.Message.setProto3IntField(this, 1, value);
+  jspb.Message.setProto3IntField(this, 2, value);
 };
 
 
 /**
- * optional string page_token = 2;
+ * optional string page_token = 3;
  * @return {string}
  */
 proto.powerssl.api.v1.ListCertificateIssuesRequest.prototype.getPageToken = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
 };
 
 
 /** @param {string} value */
 proto.powerssl.api.v1.ListCertificateIssuesRequest.prototype.setPageToken = function(value) {
-  jspb.Message.setProto3StringField(this, 2, value);
+  jspb.Message.setProto3StringField(this, 3, value);
 };
 
 

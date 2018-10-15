@@ -10,10 +10,10 @@ import (
 )
 
 type Service interface {
-	Create(ctx context.Context, certificateIssue *api.CertificateIssue) (*api.CertificateIssue, error)
+	Create(ctx context.Context, parent string, certificateIssue *api.CertificateIssue) (*api.CertificateIssue, error)
 	Delete(ctx context.Context, name string) error
 	Get(ctx context.Context, name string) (*api.CertificateIssue, error)
-	List(ctx context.Context, pageSize int, pageToken string) ([]*api.CertificateIssue, string, error)
+	List(ctx context.Context, parent string, pageSize int, pageToken string) ([]*api.CertificateIssue, string, error)
 	Update(ctx context.Context, name string, certificateIssue *api.CertificateIssue) (*api.CertificateIssue, error)
 }
 
@@ -36,7 +36,7 @@ func NewBasicService(db *gorm.DB) Service {
 	}
 }
 
-func (bs basicService) Create(_ context.Context, certificateIssue *api.CertificateIssue) (*api.CertificateIssue, error) {
+func (bs basicService) Create(_ context.Context, parent string, certificateIssue *api.CertificateIssue) (*api.CertificateIssue, error) {
 	return nil, nil
 }
 
@@ -48,7 +48,7 @@ func (bs basicService) Get(_ context.Context, name string) (*api.CertificateIssu
 	return nil, nil
 }
 
-func (bs basicService) List(_ context.Context, pageSize int, pageToken string) ([]*api.CertificateIssue, string, error) {
+func (bs basicService) List(_ context.Context, parent string, pageSize int, pageToken string) ([]*api.CertificateIssue, string, error) {
 	return nil, "", nil
 }
 
