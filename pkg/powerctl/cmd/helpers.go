@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
-	"reflect"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -14,85 +16,51 @@ import (
 	"powerssl.io/pkg/powerctl"
 )
 
-var (
-	Name   string
-	Parent string
-)
+var Filename string
 
 func er(msg interface{}) {
 	fmt.Println(msg)
 	os.Exit(1)
 }
 
-func pr(resource interface{}) {
-	byt, err := yaml.Marshal(resource)
+func loadResource(filename string, resource interface{}) error {
+	in, err := ioutil.ReadFile(filename)
 	if err != nil {
 		er(err)
 	}
-	fmt.Println(string(byt))
+	switch filepath.Ext(filename) {
+	case ".yml", ".yaml":
+		return yaml.Unmarshal(in, resource)
+	case ".json":
+		return json.Unmarshal(in, resource)
+	default:
+		er("Unknown input format")
+	}
+	return nil
+}
+
+func pr(resource interface{}) {
+	var (
+		err error
+		out []byte
+	)
+	switch Output {
+	case "yaml":
+		out, err = yaml.Marshal(resource)
+	case "json":
+		out, err = json.Marshal(resource)
+	default:
+		er("Unknown output format")
+	}
+	if err != nil {
+		er(err)
+	}
+	fmt.Println(string(out))
 }
 
 func newGRPCClient() *powerctl.GRPCClient {
 	grpcAddr := viper.GetString("grpc.addr")
 	return powerctl.NewGRPCClient(grpcAddr)
-}
-
-func createResource(createFunc func() (interface{}, error)) {
-	resource, err := createFunc()
-	if err != nil {
-		er(err)
-	}
-	pr(resource)
-}
-
-func deleteResource(deleteFunc func() error) {
-	if err := deleteFunc(); err != nil {
-		er(err)
-	}
-}
-
-func getResource(getFunc func() (interface{}, error)) {
-	resource, err := getFunc()
-	if err != nil {
-		er(err)
-	}
-	pr(resource)
-}
-
-func listResource(listFunc func(pageToken string) (interface{}, string, error)) {
-	var (
-		pageToken string
-		resources []interface{}
-	)
-	for {
-		t, nextPageToken, err := listFunc(pageToken)
-		if err != nil {
-			er(err)
-		}
-
-		switch reflect.TypeOf(t).Kind() {
-		case reflect.Slice:
-			s := reflect.ValueOf(t)
-
-			for i := 0; i < s.Len(); i++ {
-				resources = append(resources, s.Index(i).Interface())
-			}
-		}
-
-		if nextPageToken == "" {
-			break
-		}
-		pageToken = nextPageToken
-	}
-	pr(resources)
-}
-
-func updateResource(updateFunc func() (interface{}, error)) {
-	resource, err := updateFunc()
-	if err != nil {
-		er(err)
-	}
-	pr(resource)
 }
 
 func nameArg(resourcePlural, arg string) string {

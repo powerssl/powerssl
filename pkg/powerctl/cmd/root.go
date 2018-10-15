@@ -12,6 +12,7 @@ import (
 var (
 	Verbose bool
 	cfgFile string
+	Output  string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -38,6 +39,7 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.powerctl.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "Verbose output")
+	rootCmd.PersistentFlags().StringVarP(&Output, "output", "o", "yaml", "Output format")
 }
 
 // initConfig reads in config file and ENV variables if set.
