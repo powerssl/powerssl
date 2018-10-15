@@ -20,6 +20,7 @@ var rootCmd = &cobra.Command{
 	Long: `powerssl-apiserver provides PowerSSL API.
 
 Find more information at: https://powerssl.io`,
+	Version: "0.1.0",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
