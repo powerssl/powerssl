@@ -39,8 +39,14 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "Verbose output")
 	rootCmd.PersistentFlags().StringVarP(&Output, "output", "o", "yaml", "Output format")
 	rootCmd.PersistentFlags().StringP("grpc-addr", "", "", "GRPC address of API")
+	rootCmd.PersistentFlags().StringP("grpc-ca-file", "", "", "GRPC CA file")
+	rootCmd.PersistentFlags().StringP("grpc-host-override", "", "", "GRPC CA file")
+	rootCmd.PersistentFlags().BoolP("insecure", "", false, "Use insecure communication")
 
 	viper.BindPFlag("grpc.addr", rootCmd.PersistentFlags().Lookup("grpc-addr"))
+	viper.BindPFlag("grpc.ca", rootCmd.PersistentFlags().Lookup("grpc-ca-file"))
+	viper.BindPFlag("grpc.host", rootCmd.PersistentFlags().Lookup("grpc-host-override"))
+	viper.BindPFlag("grpc.insecure", rootCmd.PersistentFlags().Lookup("insecure"))
 }
 
 func initConfig() {

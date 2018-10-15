@@ -6,6 +6,8 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/testdata"
 
 	certificateservice "powerssl.io/pkg/resource/certificate"
 	certificateauthorityservice "powerssl.io/pkg/resource/certificateauthority"
@@ -21,7 +23,7 @@ type GRPCClient struct {
 	CertificateIssue     certificateissueservice.Service
 }
 
-func NewGRPCClient(grpcAddr string) *GRPCClient {
+func NewGRPCClient(grpcAddr, grpcCAFile, grpcHostOverride string, grpcInsecure bool) *GRPCClient {
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(os.Stderr)
@@ -32,7 +34,23 @@ func NewGRPCClient(grpcAddr string) *GRPCClient {
 	var conn *grpc.ClientConn
 	{
 		var err error
-		conn, err = grpc.Dial(grpcAddr, grpc.WithInsecure(), grpc.WithTimeout(time.Second))
+		opts := []grpc.DialOption{
+			grpc.WithTimeout(time.Second),
+		}
+		if grpcInsecure {
+			opts = append(opts, grpc.WithInsecure())
+		} else {
+			if grpcCAFile == "" && grpcHostOverride == "" {
+				grpcCAFile = testdata.Path("ca.pem")
+				grpcHostOverride = "x.test.youtube.com"
+			}
+			creds, err := credentials.NewClientTLSFromFile(grpcCAFile, grpcHostOverride)
+			if err != nil {
+				logger.Log("Failed to create TLS credentials %v", err)
+			}
+			opts = append(opts, grpc.WithTransportCredentials(creds))
+		}
+		conn, err = grpc.Dial(grpcAddr, opts...)
 		if err != nil {
 			logger.Log("error: %v", err)
 			os.Exit(1)

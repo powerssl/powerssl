@@ -60,10 +60,13 @@ func pr(resource interface{}) {
 
 func newGRPCClient() *powerctl.GRPCClient {
 	grpcAddr := viper.GetString("grpc.addr")
+	grpcCAFile := viper.GetString("grpc.ca")
+	grpcHostOverride := viper.GetString("grpc.host")
+	grpcInsecure := viper.GetBool("grpc.insecure")
 	if grpcAddr == "" {
 		er("GRPC Addr missing")
 	}
-	return powerctl.NewGRPCClient(grpcAddr)
+	return powerctl.NewGRPCClient(grpcAddr, grpcCAFile, grpcHostOverride, grpcInsecure)
 }
 
 func nameArg(resourcePlural, arg string) string {
