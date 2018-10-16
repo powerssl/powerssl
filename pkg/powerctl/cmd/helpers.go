@@ -62,8 +62,14 @@ func newGRPCClient() *powerctl.GRPCClient {
 	certFile := viper.GetString("ca-file")
 	grpcAddr := viper.GetString("grpc-addr")
 	insecure := viper.GetBool("insecure")
-	serverNameOverride := viper.GetString("server-name-override")
 	insecureSkipTLSVerify := viper.GetBool("insecure-skip-tls-verify")
+	serverNameOverride := viper.GetString("server-name-override")
+	if grpcAddr == "" {
+		er("Provide grpc-addr")
+	}
+	if !insecure && !insecureSkipTLSVerify && certFile == "" {
+		er("Provide ca-file")
+	}
 	return powerctl.NewGRPCClient(grpcAddr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify)
 }
 

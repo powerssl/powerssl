@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -17,6 +20,31 @@ var serveCmd = &cobra.Command{
 		insecure := viper.GetBool("insecure")
 		tlsCertFile := viper.GetString("tls.cert-file")
 		tlsPrivateKeyFile := viper.GetString("tls.private-key-file")
+
+		ok := true
+		if grpcAddr == "" {
+			ok = false
+			fmt.Println("Provide grpc-addr")
+		}
+		if dbConnection == "" {
+			ok = false
+			fmt.Println("Provide db-connection")
+		}
+		if dbDialect == "" {
+			ok = false
+			fmt.Println("Provide db-dialect")
+		}
+		if !insecure && tlsCertFile == "" {
+			ok = false
+			fmt.Println("Provide tls-cert-file")
+		}
+		if !insecure && tlsPrivateKeyFile == "" {
+			ok = false
+			fmt.Println("Provide tls-private-key-file")
+		}
+		if !ok {
+			os.Exit(1)
+		}
 
 		apiserver.Run(grpcAddr, tlsCertFile, tlsPrivateKeyFile, insecure, dbDialect, dbConnection)
 	},
