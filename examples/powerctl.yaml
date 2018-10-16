@@ -1,2 +1,2 @@
 grpc-addr: localhost:8080
-ca-file: /Users/dspangenberg/src/powerssl.io/examples/certs/ca.pem
+ca-file: /etc/powerssl/ca.pem

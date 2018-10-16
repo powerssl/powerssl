@@ -1,11 +1,14 @@
 controller:
   addr: localhost:8081
 db:
-  dialect: postgres
-  connection: user=dspangenberg dbname=dspangenberg sslmode=disable
+  dialect: sqlite3
+  connection: /tmp/powerssl.sqlite3
+  # dialect: postgres
+  # https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
+  # connection: user=root dbname=powerssl sslmode=disable
 grpc:
   addr: localhost:8080
 tls:
-  cert-file: /Users/dspangenberg/src/powerssl.io/examples/certs/localhost.pem
-  private-key-file: /Users/dspangenberg/src/powerssl.io/examples/certs/localhost-key.pem
+  cert-file: /etc/powerssl/api/cert.pem
+  private-key-file: /etc/powerssl/api/cert-key.pem
 
