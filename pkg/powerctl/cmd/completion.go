@@ -24,32 +24,37 @@ import (
 var completionCmd = &cobra.Command{
 	Hidden: true,
 	Use:    "completion",
-	Short:  "Generates bash completion scripts",
+	Short:  "Generates completion scripts",
+}
+
+var bashCompletionCmd = &cobra.Command{
+	Use:   "bash",
+	Short: "Generates bash completion scripts",
 	Long: `To load completion run
 
-. <(powerctl completion)
+. <(powerctl completion bash)
 
 To configure your bash shell to load completions for each session add to your bashrc
 
 # ~/.bashrc or ~/.profile
-. <(powerctl completion)
+. <(powerctl completion bash)
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		//rootCmd.GenBashCompletion(os.Stdout)
+		rootCmd.GenBashCompletion(os.Stdout)
+	},
+}
+
+var zshCompletionCmd = &cobra.Command{
+	Use:   "zsh",
+	Short: "Generates zsh completion scripts",
+	Run: func(cmd *cobra.Command, args []string) {
 		rootCmd.GenZshCompletion(os.Stdout)
 	},
 }
 
 func init() {
+	completionCmd.AddCommand(bashCompletionCmd)
+	completionCmd.AddCommand(zshCompletionCmd)
+
 	rootCmd.AddCommand(completionCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// completionCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// completionCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
