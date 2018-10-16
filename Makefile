@@ -36,8 +36,8 @@ bin/.go_protobuf_sources: bin/protoc-gen-gogo bin/protoc-gen-gotemplate bin/prot
 			-I$(PKG_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
 			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src \
 			--gotemplate_out=$(PKG_PATH)/resource/generated \
-			--js_out=import_style=commonjs:javascript \
-			--grpc-web_out=import_style=commonjs,mode=grpcwebtext:javascript \
+			--js_out=import_style=commonjs:vendor/javascript \
+			--grpc-web_out=import_style=commonjs,mode=grpcwebtext:vendor/javascript \
 			$$dir/*.proto; \
 	done
 	gofmt -s -w $(PKG_PATH)/resource/generated
