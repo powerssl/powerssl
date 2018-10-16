@@ -1,0 +1,11 @@
+controller:
+  addr: localhost:8081
+db:
+  dialect: postgres
+  connection: user=dspangenberg dbname=dspangenberg sslmode=disable
+grpc:
+  addr: localhost:8080
+tls:
+  cert-file: /Users/dspangenberg/src/powerssl.io/examples/certs/localhost.pem
+  private-key-file: /Users/dspangenberg/src/powerssl.io/examples/certs/localhost-key.pem
+

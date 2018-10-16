@@ -1,0 +1,5 @@
+*
+!.gitignore
+!Makefile
+!README.md
+!csr.json
