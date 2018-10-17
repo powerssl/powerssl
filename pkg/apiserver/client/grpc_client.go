@@ -1,4 +1,4 @@
-package powerctl
+package client
 
 import (
 	"crypto/tls"

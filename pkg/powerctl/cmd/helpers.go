@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 
-	"powerssl.io/pkg/powerctl"
+	apiserverclient "powerssl.io/pkg/apiserver/client"
 )
 
 var Filename string
@@ -58,7 +58,7 @@ func pr(resource interface{}) {
 	fmt.Println(string(out))
 }
 
-func newGRPCClient() *powerctl.GRPCClient {
+func newGRPCClient() *apiserverclient.GRPCClient {
 	certFile := viper.GetString("ca-file")
 	grpcAddr := viper.GetString("grpc-addr")
 	insecure := viper.GetBool("insecure")
@@ -70,7 +70,7 @@ func newGRPCClient() *powerctl.GRPCClient {
 	if !insecure && !insecureSkipTLSVerify && certFile == "" {
 		er("Provide ca-file")
 	}
-	return powerctl.NewGRPCClient(grpcAddr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify)
+	return apiserverclient.NewGRPCClient(grpcAddr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify)
 }
 
 func nameArg(resourcePlural, arg string) string {
