@@ -6,7 +6,7 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/jinzhu/gorm"
 
-	"powerssl.io/pkg/api"
+	"powerssl.io/pkg/apiserver/api"
 )
 
 type Service interface {

@@ -5,7 +5,7 @@ package powerssl.api.v1;
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 
-option go_package = "powerssl.io/pkg/api/v1;api";
+option go_package = "powerssl.io/pkg/apsiserver/api/v1;api";
 
 service CertificateAuthorityService {
   rpc Create(CreateCertificateAuthorityRequest)

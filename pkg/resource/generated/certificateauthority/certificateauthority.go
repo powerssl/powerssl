@@ -8,7 +8,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc"
 
-	apiv1 "powerssl.io/pkg/api/v1"
+	apiv1 "powerssl.io/pkg/apiserver/api/v1"
 	resource "powerssl.io/pkg/resource"
 	service "powerssl.io/pkg/resource/certificateauthority"
 	"powerssl.io/pkg/resource/generated/certificateauthority/endpoint"

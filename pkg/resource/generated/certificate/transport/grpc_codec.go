@@ -8,8 +8,8 @@ import (
 
 	"github.com/gogo/protobuf/types"
 
-	"powerssl.io/pkg/api"
-	apiv1 "powerssl.io/pkg/api/v1"
+	"powerssl.io/pkg/apiserver/api"
+	apiv1 "powerssl.io/pkg/apiserver/api/v1"
 	"powerssl.io/pkg/resource/generated/certificate/endpoint"
 )
 

@@ -9,7 +9,7 @@ import (
 	types "github.com/gogo/protobuf/types"
 	"google.golang.org/grpc"
 
-	apiv1 "powerssl.io/pkg/api/v1"
+	apiv1 "powerssl.io/pkg/apiserver/api/v1"
 	service "powerssl.io/pkg/resource/certificateissue"
 	"powerssl.io/pkg/resource/generated/certificateissue/endpoint"
 )

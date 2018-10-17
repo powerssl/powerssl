@@ -8,7 +8,7 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/jinzhu/gorm"
 
-	"powerssl.io/pkg/api"
+	"powerssl.io/pkg/apiserver/api"
 	controllerclient "powerssl.io/pkg/controller/client"
 )
 

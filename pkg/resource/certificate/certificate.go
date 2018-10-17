@@ -7,7 +7,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 
-	"powerssl.io/pkg/api"
+	"powerssl.io/pkg/apiserver/api"
 )
 
 type Certificate struct {

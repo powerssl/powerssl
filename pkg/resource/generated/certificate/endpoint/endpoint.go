@@ -9,7 +9,7 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
 
-	"powerssl.io/pkg/api"
+	"powerssl.io/pkg/apiserver/api"
 	resource "powerssl.io/pkg/resource"
 	service "powerssl.io/pkg/resource/certificate"
 )

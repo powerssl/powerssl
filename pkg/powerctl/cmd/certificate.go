@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"powerssl.io/pkg/api"
+	"powerssl.io/pkg/apiserver/api"
 )
 
 var (

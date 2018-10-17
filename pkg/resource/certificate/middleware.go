@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 
-	"powerssl.io/pkg/api"
+	"powerssl.io/pkg/apiserver/api"
 )
 
 type Middleware func(Service) Service

@@ -1,8 +1,8 @@
-package api // import "powerssl.io/pkg/api"
+package api // import "powerssl.io/pkg/apiserver/api"
 
 import "time"
 
-type Certificate struct {
+type CertificateIssue struct {
 	Name            string            `json:"name,omitempty"            yaml:"name,omitempty"`
 	CreateTime      time.Time         `json:"createTime,omitempty"      yaml:"createTime,omitempty"`
 	UpdateTime      time.Time         `json:"updateTime,omitempty"      yaml:"updateTime,omitempty"`
