@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"reflect"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -72,14 +71,6 @@ var getCmd = &cobra.Command{
 	},
 }
 
-var typeRegistry = make(map[string]reflect.Type)
-
 func init() {
 	rootCmd.AddCommand(getCmd)
-
-	//	typeRegistry["certificate"] = reflect.TypeOf(certificateservice.Service)
-}
-
-func makeInstance(name string) interface{} {
-	return reflect.New(typeRegistry[name]).Elem().Interface()
 }
