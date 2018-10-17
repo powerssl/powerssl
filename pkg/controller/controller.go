@@ -14,6 +14,8 @@ import (
 	"github.com/oklog/oklog/pkg/group"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
+
+	workflow "powerssl.io/pkg/controller/workflow"
 )
 
 func Run(grpcAddr string) {
@@ -34,7 +36,7 @@ func Run(grpcAddr string) {
 		}, []string{"method", "success"})
 	}
 
-	var _ = duration // TODO
+	workflowservice := workflow.New(logger, duration)
 
 	var g group.Group
 	{
@@ -46,6 +48,7 @@ func Run(grpcAddr string) {
 		g.Add(func() error {
 			logger.Log("transport", "gRPC", "addr", grpcAddr)
 			baseServer := grpc.NewServer(grpc.UnaryInterceptor(kitgrpc.Interceptor))
+			workflowservice.RegisterGRPCServer(baseServer)
 			return baseServer.Serve(grpcListener)
 		}, func(error) {
 			grpcListener.Close()
