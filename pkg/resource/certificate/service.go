@@ -9,6 +9,7 @@ import (
 	"github.com/jinzhu/gorm"
 
 	"powerssl.io/pkg/api"
+	controllerclient "powerssl.io/pkg/controller/client"
 )
 
 type Service interface {
@@ -23,27 +24,58 @@ func New(db *gorm.DB, logger log.Logger) Service {
 	db.AutoMigrate(&Certificate{})
 	var svc Service
 	{
-		svc = NewBasicService(db)
+		svc = NewBasicService(db, logger)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
 }
 
 type basicService struct {
-	db *gorm.DB
+	controllerclient *controllerclient.GRPCClient
+	db               *gorm.DB
+	logger           log.Logger
 }
 
-func NewBasicService(db *gorm.DB) Service {
+func NewBasicService(db *gorm.DB, logger log.Logger) Service {
+	client, err := controllerclient.NewGRPCClient("localhost:8081", "", "", true, true, logger)
+	if err != nil {
+		panic(err)
+	}
+
 	return basicService{
-		db: db,
+		controllerclient: client,
+		db:               db,
+		logger:           logger,
 	}
 }
 
 func (bs basicService) Create(_ context.Context, certificate *api.Certificate) (*api.Certificate, error) {
+	tx := bs.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
 	cert := NewCertificateFromAPI(certificate)
-	if err := bs.db.Create(cert).Error; err != nil {
+	if err := tx.Create(cert).Error; err != nil {
+		tx.Rollback()
 		return nil, err
 	}
+
+	workflow, err := bs.controllerclient.Workflow.Create(context.Background(), fmt.Sprint("certificates/", cert.ID))
+	if err != nil {
+		return nil, err
+	}
+	bs.logger.Log("workflow", workflow.Name)
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
 	return cert.ToAPI(), nil
 }
 
