@@ -39,14 +39,14 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "Verbose output")
 	rootCmd.PersistentFlags().StringVarP(&Output, "output", "o", "yaml", "Output format")
 
-	rootCmd.PersistentFlags().StringP("ca-file", "", "", "Certificate authority file")
-	rootCmd.PersistentFlags().StringP("grpc-addr", "", "", "GRPC address of API")
 	rootCmd.PersistentFlags().BoolP("insecure", "", false, "Use insecure communication")
 	rootCmd.PersistentFlags().BoolP("insecure-skip-tls-verify", "", false, "Accepts any certificate presented by the server and any host name in that certificate")
+	rootCmd.PersistentFlags().StringP("addr", "", "", "GRPC address of API server")
+	rootCmd.PersistentFlags().StringP("ca-file", "", "", "Certificate authority file")
 	rootCmd.PersistentFlags().StringP("server-name-override", "", "", "It will override the virtual host name of authority")
 
+	viper.BindPFlag("addr", rootCmd.PersistentFlags().Lookup("addr"))
 	viper.BindPFlag("ca-file", rootCmd.PersistentFlags().Lookup("ca-file"))
-	viper.BindPFlag("grpc-addr", rootCmd.PersistentFlags().Lookup("grpc-addr"))
 	viper.BindPFlag("insecure", rootCmd.PersistentFlags().Lookup("insecure"))
 	viper.BindPFlag("insecure-skip-tls-verify", rootCmd.PersistentFlags().Lookup("insecure-skip-tls-verify"))
 	viper.BindPFlag("server-name-override", rootCmd.PersistentFlags().Lookup("server-name-override"))

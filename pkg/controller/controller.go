@@ -14,11 +14,12 @@ import (
 	"github.com/oklog/oklog/pkg/group"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	workflow "powerssl.io/pkg/controller/workflow"
 )
 
-func Run(grpcAddr string) {
+func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool) {
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(os.Stderr)
@@ -46,8 +47,19 @@ func Run(grpcAddr string) {
 			os.Exit(1)
 		}
 		g.Add(func() error {
-			logger.Log("transport", "gRPC", "addr", grpcAddr)
-			baseServer := grpc.NewServer(grpc.UnaryInterceptor(kitgrpc.Interceptor))
+			logger.Log("transport", "gRPC", "addr", grpcAddr, "secure", !grpcInsecure)
+			options := []grpc.ServerOption{
+				grpc.UnaryInterceptor(kitgrpc.Interceptor),
+			}
+			if !grpcInsecure {
+				creds, err := credentials.NewServerTLSFromFile(grpcCertFile, grpcKeyFile)
+				if err != nil {
+					logger.Log("transport", "gRPC", "err", fmt.Errorf("Failed to load TLS credentials %v", err))
+					os.Exit(1)
+				}
+				options = append(options, grpc.Creds(creds))
+			}
+			baseServer := grpc.NewServer(options...)
 			workflowservice.RegisterGRPCServer(baseServer)
 			return baseServer.Serve(grpcListener)
 		}, func(error) {

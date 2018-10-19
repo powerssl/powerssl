@@ -1,14 +1,13 @@
+addr: localhost:8080
 controller:
   addr: localhost:8081
+  ca-file: /etc/powerssl/ca.pem
 db:
   dialect: sqlite3
   connection: /tmp/powerssl.sqlite3
   # dialect: postgres
   # https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
   # connection: user=root dbname=powerssl sslmode=disable
-grpc:
-  addr: localhost:8080
 tls:
   cert-file: /etc/powerssl/api/cert.pem
   private-key-file: /etc/powerssl/api/cert-key.pem
-

@@ -60,17 +60,17 @@ func pr(resource interface{}) {
 
 func newGRPCClient() *apiserverclient.GRPCClient {
 	certFile := viper.GetString("ca-file")
-	grpcAddr := viper.GetString("grpc-addr")
+	addr := viper.GetString("addr")
 	insecure := viper.GetBool("insecure")
 	insecureSkipTLSVerify := viper.GetBool("insecure-skip-tls-verify")
 	serverNameOverride := viper.GetString("server-name-override")
-	if grpcAddr == "" {
-		er("Provide grpc-addr")
+	if addr == "" {
+		er("Provide addr")
 	}
 	if !insecure && !insecureSkipTLSVerify && certFile == "" {
 		er("Provide ca-file")
 	}
-	return apiserverclient.NewGRPCClient(grpcAddr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify)
+	return apiserverclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify)
 }
 
 func nameArg(resourcePlural, arg string) string {

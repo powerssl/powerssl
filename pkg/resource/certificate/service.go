@@ -37,7 +37,7 @@ type basicService struct {
 }
 
 func NewBasicService(db *gorm.DB, logger log.Logger) Service {
-	client, err := controllerclient.NewGRPCClient("localhost:8081", "", "", true, true, logger)
+	client, err := controllerclient.NewGRPCClient("localhost:8081", "/etc/powerssl/ca.pem", "", false, false, logger)
 	if err != nil {
 		panic(err)
 	}

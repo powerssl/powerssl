@@ -1,2 +1,7 @@
-grpc:
-  addr: localhost:8081
+addr: localhost:8081
+apiserver:
+  addr: localhost:8080
+  ca-file: /etc/powerssl/ca.pem
+tls:
+  cert-file: /etc/powerssl/controller/cert.pem
+  private-key-file: /etc/powerssl/controller/cert-key.pem
