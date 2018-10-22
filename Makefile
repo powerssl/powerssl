@@ -46,6 +46,17 @@ bin/.go_protobuf_sources: bin/protoc-gen-gogo bin/protoc-gen-gotemplate bin/prot
 	gofmt -s -w $(GO_SOURCES)
 	touch $@
 
+.PHONY: controllerproto
+controllerproto: bin/protoc-gen-gogo
+	# $(FIND_RELEVANT) -type f -name '*.pb.go' -exec rm {} +
+	set -e; for dir in $(sort $(dir $(GO_PROTOS))); do \
+		echo $(PROTOC) \
+			-I$(PKG_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
+			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src \
+			$$dir/*.proto; \
+	done
+	# gofmt -s -w $(GO_SOURCES)
+
 bin/protoc-gen-gotemplate:
 	go build -o bin/protoc-gen-gotemplate $$(go mod download -json moul.io/protoc-gen-gotemplate | grep '"Dir"' | cut -d '"' -f 4)
 
