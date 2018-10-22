@@ -66,6 +66,9 @@ bin/powerssl-apiserver: .ALWAYS_REBUILD
 bin/powerssl-integration-acme: .ALWAYS_REBUILD
 	go build -o bin/powerssl-integration-acme powerssl.io/cmd/powerssl-integration-acme
 
+bin/powerssl-integration-cloudflare: .ALWAYS_REBUILD
+	go build -o bin/powerssl-integration-cloudflare powerssl.io/cmd/powerssl-integration-cloudflare
+
 bin/powerctl: .ALWAYS_REBUILD
 	go build -o bin/powerctl powerssl.io/cmd/powerctl
 
