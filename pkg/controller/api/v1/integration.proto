@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package powerssl.controller.v1;
+
+import "controller/api/v1/meta.proto";
+
+option go_package = "powerssl.io/pkg/controller/api/v1;api";
+
+service IntegrationService {
+  rpc Register(RegisterIntegrationRequest) returns (stream Activity) {};
+}
+
+enum IntegrationKind {
+  INTEGRATION_KIND_UNSPECIFIED = 0;
+  CA = 1;
+  DNS = 2;
+}
+
+message RegisterIntegrationRequest {
+  IntegrationKind kind = 1;
+  string name = 2;
+}

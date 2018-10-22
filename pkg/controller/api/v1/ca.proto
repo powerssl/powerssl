@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package powerssl.controller.v1;
+
+import "google/protobuf/empty.proto";
+import "controller/api/v1/meta.proto";
+
+option go_package = "powerssl.io/pkg/controller/api/v1;api";
+
+service CAService {
+  rpc GetAuthorizeDomainRequest(Activity) returns (GetAuthorizeDomainRequestResponse) {};
+  rpc SetAuthorizeDomainResponse(SetAuthorizeDomainResponseRequest) returns (google.protobuf.Empty) {};
+
+  rpc GetRequestCertificateRequest(Activity) returns (GetRequestCertificateRequestResponse) {};
+  rpc SetRequestCertificateResponse(SetRequestCertificateResponseRequest) returns (google.protobuf.Empty) {};
+
+  rpc GetRevokeCertificateRequest(Activity) returns (GetRevokeCertificateRequestResponse) {};
+  rpc SetRevokeCertificateResponse(SetRevokeCertificateResponseRequest) returns (google.protobuf.Empty) {};
+
+  rpc GetVerifyDomainRequest(Activity) returns (GetVerifyDomainRequestResponse) {};
+  rpc SetVerifyDomainResponse(SetVerifyDomainResponseRequest) returns (google.protobuf.Empty) {};
+}
+
+enum ChallengeType {
+  TYPE_UNSPECIFIED = 0;
+  DNS_01 = 1;
+  HTTP_01 = 2;
+  TLS_SNI_01 = 3;
+}
+
+message Challenge {
+
+  ChallengeType type = 1;
+  map<string, string> details = 2;
+}
+
+message GetAuthorizeDomainRequestResponse {
+  Activity activity = 1;
+
+  string domain = 2;
+}
+
+message SetAuthorizeDomainResponseRequest {
+  Activity activity = 1;
+  Error error = 2;
+
+  repeated Challenge challenges = 3;
+}
+
+message GetRequestCertificateRequestResponse {
+  Activity activity = 1;
+
+  string certificate_signing_request = 2;
+}
+
+message SetRequestCertificateResponseRequest {
+  Activity activity = 1;
+  Error error = 2;
+
+  string certificate = 3;
+}
+
+message GetRevokeCertificateRequestResponse {
+  Activity activity = 1;
+
+  string certificate = 2;
+}
+
+message SetRevokeCertificateResponseRequest {
+  Activity activity = 1;
+  Error error = 2;
+}
+
+message GetVerifyDomainRequestResponse {
+  Activity activity = 1;
+
+  string domain = 2;
+  ChallengeType challenge_type = 3;
+}
+
+message SetVerifyDomainResponseRequest {
+  Activity activity = 1;
+  Error error = 2;
+}

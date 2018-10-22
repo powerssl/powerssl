@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package powerssl.controller.v1;
+
+option go_package = "powerssl.io/pkg/controller/api/v1;api";
+
+message Activity {
+  enum Name {
+    NAME_UNSPECIFIED = 0;
+
+    CA_AUTHORIZE_DOMAIN    = 101;
+    CA_REQUEST_CERTIFICATE = 102;
+    CA_REVOKE_CERTIFICATE  = 103;
+    CA_VERIFY_DOMAIN       = 104;
+
+    DNS_CREATE_RECORD = 201;
+    DNS_DELETE_RECORD = 202;
+    DNS_VERIFY_DOMAIN = 203;
+  }
+
+  message Workflow {
+    repeated string activities = 1;
+  }
+
+  string token = 1;
+  Name name = 2;
+  Workflow workflow = 3;
+  string signature = 4;
+}
+
+message Error {
+  string message = 1;
+}
