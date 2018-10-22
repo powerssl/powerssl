@@ -306,13 +306,13 @@ func (m *UpdateCertificateAuthorityRequest) GetCertificateAuthority() *Certifica
 }
 
 func init() {
-	proto.RegisterType((*CertificateAuthority)(nil), "powerssl.api.v1.CertificateAuthority")
-	proto.RegisterType((*CreateCertificateAuthorityRequest)(nil), "powerssl.api.v1.CreateCertificateAuthorityRequest")
-	proto.RegisterType((*DeleteCertificateAuthorityRequest)(nil), "powerssl.api.v1.DeleteCertificateAuthorityRequest")
-	proto.RegisterType((*GetCertificateAuthorityRequest)(nil), "powerssl.api.v1.GetCertificateAuthorityRequest")
-	proto.RegisterType((*ListCertificateAuthoritiesRequest)(nil), "powerssl.api.v1.ListCertificateAuthoritiesRequest")
-	proto.RegisterType((*ListCertificateAuthoritiesResponse)(nil), "powerssl.api.v1.ListCertificateAuthoritiesResponse")
-	proto.RegisterType((*UpdateCertificateAuthorityRequest)(nil), "powerssl.api.v1.UpdateCertificateAuthorityRequest")
+	proto.RegisterType((*CertificateAuthority)(nil), "powerssl.apiserver.v1.CertificateAuthority")
+	proto.RegisterType((*CreateCertificateAuthorityRequest)(nil), "powerssl.apiserver.v1.CreateCertificateAuthorityRequest")
+	proto.RegisterType((*DeleteCertificateAuthorityRequest)(nil), "powerssl.apiserver.v1.DeleteCertificateAuthorityRequest")
+	proto.RegisterType((*GetCertificateAuthorityRequest)(nil), "powerssl.apiserver.v1.GetCertificateAuthorityRequest")
+	proto.RegisterType((*ListCertificateAuthoritiesRequest)(nil), "powerssl.apiserver.v1.ListCertificateAuthoritiesRequest")
+	proto.RegisterType((*ListCertificateAuthoritiesResponse)(nil), "powerssl.apiserver.v1.ListCertificateAuthoritiesResponse")
+	proto.RegisterType((*UpdateCertificateAuthorityRequest)(nil), "powerssl.apiserver.v1.UpdateCertificateAuthorityRequest")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -343,7 +343,7 @@ func NewCertificateAuthorityServiceClient(cc *grpc.ClientConn) CertificateAuthor
 
 func (c *certificateAuthorityServiceClient) Create(ctx context.Context, in *CreateCertificateAuthorityRequest, opts ...grpc.CallOption) (*CertificateAuthority, error) {
 	out := new(CertificateAuthority)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateAuthorityService/Create", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.apiserver.v1.CertificateAuthorityService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -352,7 +352,7 @@ func (c *certificateAuthorityServiceClient) Create(ctx context.Context, in *Crea
 
 func (c *certificateAuthorityServiceClient) Delete(ctx context.Context, in *DeleteCertificateAuthorityRequest, opts ...grpc.CallOption) (*types.Empty, error) {
 	out := new(types.Empty)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateAuthorityService/Delete", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.apiserver.v1.CertificateAuthorityService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -361,7 +361,7 @@ func (c *certificateAuthorityServiceClient) Delete(ctx context.Context, in *Dele
 
 func (c *certificateAuthorityServiceClient) Get(ctx context.Context, in *GetCertificateAuthorityRequest, opts ...grpc.CallOption) (*CertificateAuthority, error) {
 	out := new(CertificateAuthority)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateAuthorityService/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.apiserver.v1.CertificateAuthorityService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -370,7 +370,7 @@ func (c *certificateAuthorityServiceClient) Get(ctx context.Context, in *GetCert
 
 func (c *certificateAuthorityServiceClient) List(ctx context.Context, in *ListCertificateAuthoritiesRequest, opts ...grpc.CallOption) (*ListCertificateAuthoritiesResponse, error) {
 	out := new(ListCertificateAuthoritiesResponse)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateAuthorityService/List", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.apiserver.v1.CertificateAuthorityService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -379,7 +379,7 @@ func (c *certificateAuthorityServiceClient) List(ctx context.Context, in *ListCe
 
 func (c *certificateAuthorityServiceClient) Update(ctx context.Context, in *UpdateCertificateAuthorityRequest, opts ...grpc.CallOption) (*CertificateAuthority, error) {
 	out := new(CertificateAuthority)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateAuthorityService/Update", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.apiserver.v1.CertificateAuthorityService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -410,7 +410,7 @@ func _CertificateAuthorityService_Create_Handler(srv interface{}, ctx context.Co
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateAuthorityService/Create",
+		FullMethod: "/powerssl.apiserver.v1.CertificateAuthorityService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CertificateAuthorityServiceServer).Create(ctx, req.(*CreateCertificateAuthorityRequest))
@@ -428,7 +428,7 @@ func _CertificateAuthorityService_Delete_Handler(srv interface{}, ctx context.Co
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateAuthorityService/Delete",
+		FullMethod: "/powerssl.apiserver.v1.CertificateAuthorityService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CertificateAuthorityServiceServer).Delete(ctx, req.(*DeleteCertificateAuthorityRequest))
@@ -446,7 +446,7 @@ func _CertificateAuthorityService_Get_Handler(srv interface{}, ctx context.Conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateAuthorityService/Get",
+		FullMethod: "/powerssl.apiserver.v1.CertificateAuthorityService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CertificateAuthorityServiceServer).Get(ctx, req.(*GetCertificateAuthorityRequest))
@@ -464,7 +464,7 @@ func _CertificateAuthorityService_List_Handler(srv interface{}, ctx context.Cont
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateAuthorityService/List",
+		FullMethod: "/powerssl.apiserver.v1.CertificateAuthorityService/List",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CertificateAuthorityServiceServer).List(ctx, req.(*ListCertificateAuthoritiesRequest))
@@ -482,7 +482,7 @@ func _CertificateAuthorityService_Update_Handler(srv interface{}, ctx context.Co
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateAuthorityService/Update",
+		FullMethod: "/powerssl.apiserver.v1.CertificateAuthorityService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CertificateAuthorityServiceServer).Update(ctx, req.(*UpdateCertificateAuthorityRequest))
@@ -491,7 +491,7 @@ func _CertificateAuthorityService_Update_Handler(srv interface{}, ctx context.Co
 }
 
 var _CertificateAuthorityService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "powerssl.api.v1.CertificateAuthorityService",
+	ServiceName: "powerssl.apiserver.v1.CertificateAuthorityService",
 	HandlerType: (*CertificateAuthorityServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

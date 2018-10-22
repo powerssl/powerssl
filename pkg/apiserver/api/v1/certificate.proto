@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package powerssl.api.v1;
+package powerssl.apiserver.v1;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
@@ -96,7 +96,7 @@ message ListCertificatesRequest {
 
   // A token identifying a page of results the server should return.
   // Typically, this is the value of
-  // [ListCertificatesResponse.next_page_token][powerssl.api.v1.ListCertificatesResponse.next_page_token].
+  // [ListCertificatesResponse.next_page_token][powerssl.apiserver.v1.ListCertificatesResponse.next_page_token].
   // returned from the previous call to `List` method.
   string page_token = 2;
 }
@@ -108,7 +108,7 @@ message ListCertificatesResponse {
 
   // A token to retrieve next page of results.
   // Pass this value in the
-  // [ListCertificatesRequest.page_token][powerssl.api.v1.ListCertificatesRequest.page_token]
+  // [ListCertificatesRequest.page_token][powerssl.apiserver.v1.ListCertificatesRequest.page_token]
   // field in the subsequent call to `List` method to retrieve the next
   // page of results.
   string next_page_token = 2;

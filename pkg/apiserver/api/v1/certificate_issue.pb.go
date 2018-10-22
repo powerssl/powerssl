@@ -422,14 +422,14 @@ func (m *UpdateCertificateIssueRequest) GetCertificateIssue() *CertificateIssue 
 }
 
 func init() {
-	proto.RegisterType((*CertificateIssue)(nil), "powerssl.api.v1.CertificateIssue")
-	proto.RegisterMapType((map[string]string)(nil), "powerssl.api.v1.CertificateIssue.LabelsEntry")
-	proto.RegisterType((*CreateCertificateIssueRequest)(nil), "powerssl.api.v1.CreateCertificateIssueRequest")
-	proto.RegisterType((*DeleteCertificateIssueRequest)(nil), "powerssl.api.v1.DeleteCertificateIssueRequest")
-	proto.RegisterType((*GetCertificateIssueRequest)(nil), "powerssl.api.v1.GetCertificateIssueRequest")
-	proto.RegisterType((*ListCertificateIssuesRequest)(nil), "powerssl.api.v1.ListCertificateIssuesRequest")
-	proto.RegisterType((*ListCertificateIssuesResponse)(nil), "powerssl.api.v1.ListCertificateIssuesResponse")
-	proto.RegisterType((*UpdateCertificateIssueRequest)(nil), "powerssl.api.v1.UpdateCertificateIssueRequest")
+	proto.RegisterType((*CertificateIssue)(nil), "powerssl.apiserver.v1.CertificateIssue")
+	proto.RegisterMapType((map[string]string)(nil), "powerssl.apiserver.v1.CertificateIssue.LabelsEntry")
+	proto.RegisterType((*CreateCertificateIssueRequest)(nil), "powerssl.apiserver.v1.CreateCertificateIssueRequest")
+	proto.RegisterType((*DeleteCertificateIssueRequest)(nil), "powerssl.apiserver.v1.DeleteCertificateIssueRequest")
+	proto.RegisterType((*GetCertificateIssueRequest)(nil), "powerssl.apiserver.v1.GetCertificateIssueRequest")
+	proto.RegisterType((*ListCertificateIssuesRequest)(nil), "powerssl.apiserver.v1.ListCertificateIssuesRequest")
+	proto.RegisterType((*ListCertificateIssuesResponse)(nil), "powerssl.apiserver.v1.ListCertificateIssuesResponse")
+	proto.RegisterType((*UpdateCertificateIssueRequest)(nil), "powerssl.apiserver.v1.UpdateCertificateIssueRequest")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -467,7 +467,7 @@ func NewCertificateIssueServiceClient(cc *grpc.ClientConn) CertificateIssueServi
 
 func (c *certificateIssueServiceClient) Create(ctx context.Context, in *CreateCertificateIssueRequest, opts ...grpc.CallOption) (*CertificateIssue, error) {
 	out := new(CertificateIssue)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateIssueService/Create", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.apiserver.v1.CertificateIssueService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -476,7 +476,7 @@ func (c *certificateIssueServiceClient) Create(ctx context.Context, in *CreateCe
 
 func (c *certificateIssueServiceClient) Delete(ctx context.Context, in *DeleteCertificateIssueRequest, opts ...grpc.CallOption) (*types.Empty, error) {
 	out := new(types.Empty)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateIssueService/Delete", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.apiserver.v1.CertificateIssueService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -485,7 +485,7 @@ func (c *certificateIssueServiceClient) Delete(ctx context.Context, in *DeleteCe
 
 func (c *certificateIssueServiceClient) Get(ctx context.Context, in *GetCertificateIssueRequest, opts ...grpc.CallOption) (*CertificateIssue, error) {
 	out := new(CertificateIssue)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateIssueService/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.apiserver.v1.CertificateIssueService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -494,7 +494,7 @@ func (c *certificateIssueServiceClient) Get(ctx context.Context, in *GetCertific
 
 func (c *certificateIssueServiceClient) List(ctx context.Context, in *ListCertificateIssuesRequest, opts ...grpc.CallOption) (*ListCertificateIssuesResponse, error) {
 	out := new(ListCertificateIssuesResponse)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateIssueService/List", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.apiserver.v1.CertificateIssueService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -503,7 +503,7 @@ func (c *certificateIssueServiceClient) List(ctx context.Context, in *ListCertif
 
 func (c *certificateIssueServiceClient) Update(ctx context.Context, in *UpdateCertificateIssueRequest, opts ...grpc.CallOption) (*CertificateIssue, error) {
 	out := new(CertificateIssue)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateIssueService/Update", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.apiserver.v1.CertificateIssueService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -541,7 +541,7 @@ func _CertificateIssueService_Create_Handler(srv interface{}, ctx context.Contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateIssueService/Create",
+		FullMethod: "/powerssl.apiserver.v1.CertificateIssueService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CertificateIssueServiceServer).Create(ctx, req.(*CreateCertificateIssueRequest))
@@ -559,7 +559,7 @@ func _CertificateIssueService_Delete_Handler(srv interface{}, ctx context.Contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateIssueService/Delete",
+		FullMethod: "/powerssl.apiserver.v1.CertificateIssueService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CertificateIssueServiceServer).Delete(ctx, req.(*DeleteCertificateIssueRequest))
@@ -577,7 +577,7 @@ func _CertificateIssueService_Get_Handler(srv interface{}, ctx context.Context, 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateIssueService/Get",
+		FullMethod: "/powerssl.apiserver.v1.CertificateIssueService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CertificateIssueServiceServer).Get(ctx, req.(*GetCertificateIssueRequest))
@@ -595,7 +595,7 @@ func _CertificateIssueService_List_Handler(srv interface{}, ctx context.Context,
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateIssueService/List",
+		FullMethod: "/powerssl.apiserver.v1.CertificateIssueService/List",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CertificateIssueServiceServer).List(ctx, req.(*ListCertificateIssuesRequest))
@@ -613,7 +613,7 @@ func _CertificateIssueService_Update_Handler(srv interface{}, ctx context.Contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateIssueService/Update",
+		FullMethod: "/powerssl.apiserver.v1.CertificateIssueService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CertificateIssueServiceServer).Update(ctx, req.(*UpdateCertificateIssueRequest))
@@ -622,7 +622,7 @@ func _CertificateIssueService_Update_Handler(srv interface{}, ctx context.Contex
 }
 
 var _CertificateIssueService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "powerssl.api.v1.CertificateIssueService",
+	ServiceName: "powerssl.apiserver.v1.CertificateIssueService",
 	HandlerType: (*CertificateIssueServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

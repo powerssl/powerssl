@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package powerssl.api.v1;
+package powerssl.apiserver.v1;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";

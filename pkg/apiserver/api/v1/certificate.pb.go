@@ -85,9 +85,9 @@ type Certificate struct {
 	Description          string            `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
 	Labels               map[string]string `protobuf:"bytes,7,rep,name=labels" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	Dnsnames             []string          `protobuf:"bytes,8,rep,name=dnsnames" json:"dnsnames,omitempty"`
-	KeyAlgorithm         KeyAlgorithm      `protobuf:"varint,9,opt,name=key_algorithm,json=keyAlgorithm,proto3,enum=powerssl.api.v1.KeyAlgorithm" json:"key_algorithm,omitempty"`
+	KeyAlgorithm         KeyAlgorithm      `protobuf:"varint,9,opt,name=key_algorithm,json=keyAlgorithm,proto3,enum=powerssl.apiserver.v1.KeyAlgorithm" json:"key_algorithm,omitempty"`
 	KeySize              int32             `protobuf:"varint,10,opt,name=key_size,json=keySize,proto3" json:"key_size,omitempty"`
-	DigestAlgorithm      DigestAlgorithm   `protobuf:"varint,11,opt,name=digest_algorithm,json=digestAlgorithm,proto3,enum=powerssl.api.v1.DigestAlgorithm" json:"digest_algorithm,omitempty"`
+	DigestAlgorithm      DigestAlgorithm   `protobuf:"varint,11,opt,name=digest_algorithm,json=digestAlgorithm,proto3,enum=powerssl.apiserver.v1.DigestAlgorithm" json:"digest_algorithm,omitempty"`
 	AutoRenew            bool              `protobuf:"varint,12,opt,name=auto_renew,json=autoRenew,proto3" json:"auto_renew,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
@@ -329,7 +329,7 @@ type ListCertificatesRequest struct {
 	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// A token identifying a page of results the server should return.
 	// Typically, this is the value of
-	// [ListCertificatesResponse.next_page_token][powerssl.api.v1.ListCertificatesResponse.next_page_token].
+	// [ListCertificatesResponse.next_page_token][powerssl.apiserver.v1.ListCertificatesResponse.next_page_token].
 	// returned from the previous call to `List` method.
 	PageToken            string   `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -381,7 +381,7 @@ type ListCertificatesResponse struct {
 	Certificates []*Certificate `protobuf:"bytes,1,rep,name=certificates" json:"certificates,omitempty"`
 	// A token to retrieve next page of results.
 	// Pass this value in the
-	// [ListCertificatesRequest.page_token][powerssl.api.v1.ListCertificatesRequest.page_token]
+	// [ListCertificatesRequest.page_token][powerssl.apiserver.v1.ListCertificatesRequest.page_token]
 	// field in the subsequent call to `List` method to retrieve the next
 	// page of results.
 	NextPageToken        string   `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
@@ -478,16 +478,16 @@ func (m *UpdateCertificateRequest) GetCertificate() *Certificate {
 }
 
 func init() {
-	proto.RegisterType((*Certificate)(nil), "powerssl.api.v1.Certificate")
-	proto.RegisterMapType((map[string]string)(nil), "powerssl.api.v1.Certificate.LabelsEntry")
-	proto.RegisterType((*CreateCertificateRequest)(nil), "powerssl.api.v1.CreateCertificateRequest")
-	proto.RegisterType((*DeleteCertificateRequest)(nil), "powerssl.api.v1.DeleteCertificateRequest")
-	proto.RegisterType((*GetCertificateRequest)(nil), "powerssl.api.v1.GetCertificateRequest")
-	proto.RegisterType((*ListCertificatesRequest)(nil), "powerssl.api.v1.ListCertificatesRequest")
-	proto.RegisterType((*ListCertificatesResponse)(nil), "powerssl.api.v1.ListCertificatesResponse")
-	proto.RegisterType((*UpdateCertificateRequest)(nil), "powerssl.api.v1.UpdateCertificateRequest")
-	proto.RegisterEnum("powerssl.api.v1.DigestAlgorithm", DigestAlgorithm_name, DigestAlgorithm_value)
-	proto.RegisterEnum("powerssl.api.v1.KeyAlgorithm", KeyAlgorithm_name, KeyAlgorithm_value)
+	proto.RegisterType((*Certificate)(nil), "powerssl.apiserver.v1.Certificate")
+	proto.RegisterMapType((map[string]string)(nil), "powerssl.apiserver.v1.Certificate.LabelsEntry")
+	proto.RegisterType((*CreateCertificateRequest)(nil), "powerssl.apiserver.v1.CreateCertificateRequest")
+	proto.RegisterType((*DeleteCertificateRequest)(nil), "powerssl.apiserver.v1.DeleteCertificateRequest")
+	proto.RegisterType((*GetCertificateRequest)(nil), "powerssl.apiserver.v1.GetCertificateRequest")
+	proto.RegisterType((*ListCertificatesRequest)(nil), "powerssl.apiserver.v1.ListCertificatesRequest")
+	proto.RegisterType((*ListCertificatesResponse)(nil), "powerssl.apiserver.v1.ListCertificatesResponse")
+	proto.RegisterType((*UpdateCertificateRequest)(nil), "powerssl.apiserver.v1.UpdateCertificateRequest")
+	proto.RegisterEnum("powerssl.apiserver.v1.DigestAlgorithm", DigestAlgorithm_name, DigestAlgorithm_value)
+	proto.RegisterEnum("powerssl.apiserver.v1.KeyAlgorithm", KeyAlgorithm_name, KeyAlgorithm_value)
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -525,7 +525,7 @@ func NewCertificateServiceClient(cc *grpc.ClientConn) CertificateServiceClient {
 
 func (c *certificateServiceClient) Create(ctx context.Context, in *CreateCertificateRequest, opts ...grpc.CallOption) (*Certificate, error) {
 	out := new(Certificate)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateService/Create", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.apiserver.v1.CertificateService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -534,7 +534,7 @@ func (c *certificateServiceClient) Create(ctx context.Context, in *CreateCertifi
 
 func (c *certificateServiceClient) Delete(ctx context.Context, in *DeleteCertificateRequest, opts ...grpc.CallOption) (*types.Empty, error) {
 	out := new(types.Empty)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateService/Delete", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.apiserver.v1.CertificateService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -543,7 +543,7 @@ func (c *certificateServiceClient) Delete(ctx context.Context, in *DeleteCertifi
 
 func (c *certificateServiceClient) Get(ctx context.Context, in *GetCertificateRequest, opts ...grpc.CallOption) (*Certificate, error) {
 	out := new(Certificate)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateService/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.apiserver.v1.CertificateService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -552,7 +552,7 @@ func (c *certificateServiceClient) Get(ctx context.Context, in *GetCertificateRe
 
 func (c *certificateServiceClient) List(ctx context.Context, in *ListCertificatesRequest, opts ...grpc.CallOption) (*ListCertificatesResponse, error) {
 	out := new(ListCertificatesResponse)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateService/List", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.apiserver.v1.CertificateService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -561,7 +561,7 @@ func (c *certificateServiceClient) List(ctx context.Context, in *ListCertificate
 
 func (c *certificateServiceClient) Update(ctx context.Context, in *UpdateCertificateRequest, opts ...grpc.CallOption) (*Certificate, error) {
 	out := new(Certificate)
-	err := c.cc.Invoke(ctx, "/powerssl.api.v1.CertificateService/Update", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/powerssl.apiserver.v1.CertificateService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -599,7 +599,7 @@ func _CertificateService_Create_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateService/Create",
+		FullMethod: "/powerssl.apiserver.v1.CertificateService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CertificateServiceServer).Create(ctx, req.(*CreateCertificateRequest))
@@ -617,7 +617,7 @@ func _CertificateService_Delete_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateService/Delete",
+		FullMethod: "/powerssl.apiserver.v1.CertificateService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CertificateServiceServer).Delete(ctx, req.(*DeleteCertificateRequest))
@@ -635,7 +635,7 @@ func _CertificateService_Get_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateService/Get",
+		FullMethod: "/powerssl.apiserver.v1.CertificateService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CertificateServiceServer).Get(ctx, req.(*GetCertificateRequest))
@@ -653,7 +653,7 @@ func _CertificateService_List_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateService/List",
+		FullMethod: "/powerssl.apiserver.v1.CertificateService/List",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CertificateServiceServer).List(ctx, req.(*ListCertificatesRequest))
@@ -671,7 +671,7 @@ func _CertificateService_Update_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/powerssl.api.v1.CertificateService/Update",
+		FullMethod: "/powerssl.apiserver.v1.CertificateService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CertificateServiceServer).Update(ctx, req.(*UpdateCertificateRequest))
@@ -680,7 +680,7 @@ func _CertificateService_Update_Handler(srv interface{}, ctx context.Context, de
 }
 
 var _CertificateService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "powerssl.api.v1.CertificateService",
+	ServiceName: "powerssl.apiserver.v1.CertificateService",
 	HandlerType: (*CertificateServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

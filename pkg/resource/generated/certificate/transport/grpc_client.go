@@ -14,7 +14,7 @@ import (
 	"powerssl.io/pkg/resource/generated/certificate/endpoint"
 )
 
-const serviceName = "powerssl.api.v1.CertificateService"
+const serviceName = "powerssl.apiserver.v1.CertificateService"
 
 func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 	options := []grpctransport.ClientOption{}
