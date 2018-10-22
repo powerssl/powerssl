@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,6 +15,7 @@ import (
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
 	"github.com/oklog/oklog/pkg/group"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
@@ -23,7 +25,7 @@ import (
 	workflowengine "powerssl.io/pkg/controller/workflow/engine"
 )
 
-func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool) {
+func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, httpAddr string) {
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(os.Stderr)
@@ -84,6 +86,22 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool) {
 		}, func(error) {
 			grpcListener.Close()
 		})
+	}
+	{
+		if httpAddr != "" {
+			http.DefaultServeMux.Handle("/metrics", promhttp.Handler())
+			httpListener, err := net.Listen("tcp", httpAddr)
+			if err != nil {
+				logger.Log("transport", "HTTP", "during", "Listen", "err", err)
+				os.Exit(1)
+			}
+			g.Add(func() error {
+				logger.Log("transport", "HTTP", "addr", httpAddr)
+				return http.Serve(httpListener, nil)
+			}, func(error) {
+				httpListener.Close()
+			})
+		}
 	}
 	{
 		cancelInterrupt := make(chan struct{})

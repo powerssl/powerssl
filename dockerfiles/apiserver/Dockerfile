@@ -9,4 +9,4 @@ RUN apk add --no-cache ca-certificates
 COPY --from=builder /usr/local/bin/powerssl-apiserver /usr/local/bin/powerssl-apiserver
 ENTRYPOINT ["/usr/local/bin/powerssl-apiserver"]
 CMD ["serve"]
-EXPOSE 8080/tcp
+EXPOSE 8080/tcp 9090/tcp
