@@ -7,27 +7,28 @@ import (
 
 	apiv1 "powerssl.io/pkg/controller/api/v1"
 	"powerssl.io/pkg/controller/workflow/endpoint"
+	workflowengine "powerssl.io/pkg/controller/workflow/engine"
 	service "powerssl.io/pkg/controller/workflow/service"
 	"powerssl.io/pkg/controller/workflow/transport"
 	resource "powerssl.io/pkg/resource"
 )
 
-type Controller struct {
+type Workflow struct {
 	endpoints endpoint.Endpoints
 	logger    log.Logger
 }
 
-func New(logger log.Logger, duration metrics.Histogram) resource.Resource {
-	svc := service.New(logger)
+func New(logger log.Logger, duration metrics.Histogram, workflowengine *workflowengine.Engine) resource.Resource {
+	svc := service.New(logger, workflowengine)
 	endpoints := endpoint.NewEndpoints(svc, logger, duration)
 
-	return &Controller{
+	return &Workflow{
 		endpoints: endpoints,
 		logger:    logger,
 	}
 }
 
-func (controller *Controller) RegisterGRPCServer(baseServer *grpc.Server) {
+func (controller *Workflow) RegisterGRPCServer(baseServer *grpc.Server) {
 	grpcServer := transport.NewGRPCServer(controller.endpoints, controller.logger)
 	apiv1.RegisterWorkflowServiceServer(baseServer, grpcServer)
 }

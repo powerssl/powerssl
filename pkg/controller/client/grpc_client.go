@@ -8,12 +8,18 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
+	caservice "powerssl.io/pkg/controller/ca/service"
+	catransport "powerssl.io/pkg/controller/ca/transport"
+	integrationservice "powerssl.io/pkg/controller/integration/service"
+	intregrationtransport "powerssl.io/pkg/controller/integration/transport"
 	workflowservice "powerssl.io/pkg/controller/workflow/service"
 	workflowtransport "powerssl.io/pkg/controller/workflow/transport"
 )
 
 type GRPCClient struct {
-	Workflow workflowservice.Service
+	CA          caservice.Service
+	Integration integrationservice.Service
+	Workflow    workflowservice.Service
 }
 
 func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, logger log.Logger) (*GRPCClient, error) {
@@ -38,6 +44,8 @@ func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, inse
 	}
 
 	return &GRPCClient{
-		Workflow: workflowtransport.NewGRPCClient(conn, logger),
+		CA:          catransport.NewGRPCClient(conn, logger),
+		Integration: intregrationtransport.NewGRPCClient(conn, logger),
+		Workflow:    workflowtransport.NewGRPCClient(conn, logger),
 	}, nil
 }

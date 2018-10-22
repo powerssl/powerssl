@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
@@ -16,7 +17,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	workflow "powerssl.io/pkg/controller/workflow"
+	"powerssl.io/pkg/controller/ca"
+	"powerssl.io/pkg/controller/integration"
+	"powerssl.io/pkg/controller/workflow"
+	workflowengine "powerssl.io/pkg/controller/workflow/engine"
 )
 
 func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool) {
@@ -37,9 +41,22 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool) {
 		}, []string{"method", "success"})
 	}
 
-	workflowservice := workflow.New(logger, duration)
+	integrations := make(integration.Integrations)
+	engine := workflowengine.New(integrations)
+
+	caservice := ca.New(logger, duration, engine)
+	integrationservice := integration.New(logger, duration, integrations)
+	workflowservice := workflow.New(logger, duration, engine)
 
 	var g group.Group
+	{
+		ctx, cancel := context.WithCancel(context.Background())
+		g.Add(func() error {
+			return engine.Run(ctx)
+		}, func(error) {
+			cancel()
+		})
+	}
 	{
 		grpcListener, err := net.Listen("tcp", grpcAddr)
 		if err != nil {
@@ -60,6 +77,8 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool) {
 				options = append(options, grpc.Creds(creds))
 			}
 			baseServer := grpc.NewServer(options...)
+			caservice.RegisterGRPCServer(baseServer)
+			integrationservice.RegisterGRPCServer(baseServer)
 			workflowservice.RegisterGRPCServer(baseServer)
 			return baseServer.Serve(grpcListener)
 		}, func(error) {
