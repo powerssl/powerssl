@@ -2,7 +2,6 @@ package certificate
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-kit/kit/log"
 
@@ -24,7 +23,7 @@ type loggingMiddleware struct {
 
 func (mw loggingMiddleware) Create(ctx context.Context, certificate *api.Certificate) (*api.Certificate, error) {
 	defer func() {
-		mw.logger.Log("method", "Create", "certificate", fmt.Sprintf("%+v", certificate))
+		mw.logger.Log("method", "Create", "certificate", true)
 	}()
 	return mw.next.Create(ctx, certificate)
 }
@@ -52,7 +51,7 @@ func (mw loggingMiddleware) List(ctx context.Context, pageSize int, pageToken st
 
 func (mw loggingMiddleware) Update(ctx context.Context, name string, certificate *api.Certificate) (*api.Certificate, error) {
 	defer func() {
-		mw.logger.Log("method", "Update", "name", name, "certificate", fmt.Sprintf("%+v", certificate))
+		mw.logger.Log("method", "Update", "name", name, "certificate", true)
 	}()
 	return mw.next.Update(ctx, name, certificate)
 }

@@ -1,4 +1,4 @@
-package controller // import "powerssl.io/pkg/controller/workflow"
+package workflow // import "powerssl.io/pkg/controller/workflow"
 
 import (
 	"github.com/go-kit/kit/log"
