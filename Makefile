@@ -63,6 +63,9 @@ bin/protoc-gen-grpc-web:
 bin/powerssl-apiserver: .ALWAYS_REBUILD
 	go build -o bin/powerssl-apiserver powerssl.io/cmd/powerssl-apiserver
 
+bin/powerssl-controller: .ALWAYS_REBUILD
+	go build -o bin/powerssl-controller powerssl.io/cmd/powerssl-controller
+
 bin/powerssl-integration-acme: .ALWAYS_REBUILD
 	go build -o bin/powerssl-integration-acme powerssl.io/cmd/powerssl-integration-acme
 
@@ -73,7 +76,7 @@ bin/powerctl: .ALWAYS_REBUILD
 	go build -o bin/powerctl powerssl.io/cmd/powerctl
 
 .PHONY: build
-build: bin/powerssl-apiserver bin/powerctl
+build: bin/powerssl-apiserver bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerctl
 
 .PHONY: fmt
 fmt:
