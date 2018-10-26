@@ -83,11 +83,14 @@ bin/powerssl-integration-acme: .ALWAYS_REBUILD
 bin/powerssl-integration-cloudflare: .ALWAYS_REBUILD
 	go build -o bin/powerssl-integration-cloudflare powerssl.io/cmd/powerssl-integration-cloudflare
 
+bin/powerssl-signer: .ALWAYS_REBUILD
+	go build -o bin/powerssl-signer powerssl.io/cmd/powerssl-signer
+
 bin/powerctl: .ALWAYS_REBUILD
 	go build -o bin/powerctl powerssl.io/cmd/powerctl
 
 .PHONY: build
-build: bin/powerssl-apiserver bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerctl
+build: bin/powerssl-apiserver bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerctl
 
 .PHONY: fmt
 fmt:

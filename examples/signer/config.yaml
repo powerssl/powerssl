@@ -1,0 +1,4 @@
+addr: localhost:8082
+tls:
+  cert-file: /etc/powerssl/signer/cert.pem
+  private-key-file: /etc/powerssl/signer/cert-key.pem
