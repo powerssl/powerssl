@@ -11,48 +11,17 @@ type Integration interface {
 }
 
 type integration struct {
-	client  acmeservice.Service
 	handler Integration
 }
 
 func (i *integration) dnsCreateRecord(activity *api.Activity) error {
-	handler, ok := i.handler.(DNSIntegration)
-	if !ok {
-		return errorNotImplemented
-	}
-	err := handler.CreateRecord("domain", "recordType", "content")
-	var erro *api.Error
-	if err != nil {
-		erro = &api.Error{Message: err.Error()}
-	}
-	var _ = erro
-	return nil
+	return i.handler.CreateRecord("domain", "recordType", "content")
 }
 
 func (i *integration) dnsDeleteRecord(activity *api.Activity) error {
-	handler, ok := i.handler.(DNSIntegration)
-	if !ok {
-		return errorNotImplemented
-	}
-	err := handler.DeleteRecord("domain", "recordType")
-	var erro *api.Error
-	if err != nil {
-		erro = &api.Error{Message: err.Error()}
-	}
-	var _ = erro
-	return nil
+	return i.handler.DeleteRecord("domain", "recordType")
 }
 
 func (i *integration) dnsVerifyDomain(activity *api.Activity) error {
-	handler, ok := i.handler.(DNSIntegration)
-	if !ok {
-		return errorNotImplemented
-	}
-	err := handler.VerifyDomain("domain")
-	var erro *api.Error
-	if err != nil {
-		erro = &api.Error{Message: err.Error()}
-	}
-	var _ = erro
-	return nil
+	return i.handler.VerifyDomain("domain")
 }

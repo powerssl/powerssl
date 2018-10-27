@@ -1,19 +1,19 @@
 package cloudflare
 
 import (
-	"powerssl.io/pkg/integration"
+	integrationdns "powerssl.io/pkg/integration/dns"
 )
 
-const Name = "Cloudflare"
+type errorConst string
+
+func (e errorConst) Error() string { return string(e) }
+
+const ErrNotImplemented = errorConst("not implemented.")
 
 type Cloudflare struct{}
 
-func New() integration.DNSIntegration {
+func New() integrationdns.Integration {
 	return &Cloudflare{}
-}
-
-func (cloudflare *Cloudflare) GetName() string {
-	return Name
 }
 
 func (cloudflare *Cloudflare) CreateRecord(domain, recordType, content string) (err error) {
