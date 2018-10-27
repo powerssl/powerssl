@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/viper"
 
 	"powerssl.io/pkg/integration"
-	"powerssl.io/pkg/integration/cloudflare"
+	"powerssl.io/pkg/integrations/cloudflare"
 )
 
 var runCmd = &cobra.Command{

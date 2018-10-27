@@ -1,15 +1,18 @@
-package integration
+package dns
 
 import (
 	"powerssl.io/pkg/controller/api"
 )
 
-type DNSIntegration interface {
-	GetName() string
-
+type Integration interface {
 	CreateRecord(domain string, recordType string, content string) (err error)
 	DeleteRecord(domain string, recordType string) (err error)
 	VerifyDomain(domain string) (err error)
+}
+
+type integration struct {
+	client  acmeservice.Service
+	handler Integration
 }
 
 func (i *integration) dnsCreateRecord(activity *api.Activity) error {
