@@ -19,7 +19,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	"powerssl.io/pkg/controller/ca"
+	"powerssl.io/pkg/controller/acme"
 	"powerssl.io/pkg/controller/integration"
 	"powerssl.io/pkg/controller/workflow"
 	workflowengine "powerssl.io/pkg/controller/workflow/engine"
@@ -46,7 +46,7 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, httpAddr
 	integrations := make(integration.Integrations)
 	engine := workflowengine.New(integrations)
 
-	caservice := ca.New(logger, duration, engine)
+	acmeservice := acme.New(logger, duration, engine)
 	integrationservice := integration.New(logger, duration, integrations)
 	workflowservice := workflow.New(logger, duration, engine)
 
@@ -79,7 +79,7 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, httpAddr
 				options = append(options, grpc.Creds(creds))
 			}
 			baseServer := grpc.NewServer(options...)
-			caservice.RegisterGRPCServer(baseServer)
+			acmeservice.RegisterGRPCServer(baseServer)
 			integrationservice.RegisterGRPCServer(baseServer)
 			workflowservice.RegisterGRPCServer(baseServer)
 			return baseServer.Serve(grpcListener)

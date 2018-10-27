@@ -1,19 +1,19 @@
-package ca // import "powerssl.io/pkg/controller/ca"
+package acme // import "powerssl.io/pkg/controller/acme"
 
 import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
 	"google.golang.org/grpc"
 
+	"powerssl.io/pkg/controller/acme/endpoint"
+	service "powerssl.io/pkg/controller/acme/service"
+	"powerssl.io/pkg/controller/acme/transport"
 	apiv1 "powerssl.io/pkg/controller/api/v1"
-	"powerssl.io/pkg/controller/ca/endpoint"
-	service "powerssl.io/pkg/controller/ca/service"
-	"powerssl.io/pkg/controller/ca/transport"
 	workflowengine "powerssl.io/pkg/controller/workflow/engine"
 	resource "powerssl.io/pkg/resource"
 )
 
-type CA struct {
+type ACME struct {
 	endpoints endpoint.Endpoints
 	logger    log.Logger
 }
@@ -22,13 +22,13 @@ func New(logger log.Logger, duration metrics.Histogram, workflowengine *workflow
 	svc := service.New(logger, workflowengine)
 	endpoints := endpoint.NewEndpoints(svc, logger, duration)
 
-	return &CA{
+	return &ACME{
 		endpoints: endpoints,
 		logger:    logger,
 	}
 }
 
-func (controller *CA) RegisterGRPCServer(baseServer *grpc.Server) {
+func (controller *ACME) RegisterGRPCServer(baseServer *grpc.Server) {
 	grpcServer := transport.NewGRPCServer(controller.endpoints, controller.logger)
-	apiv1.RegisterCAServiceServer(baseServer, grpcServer)
+	apiv1.RegisterACMEServiceServer(baseServer, grpcServer)
 }

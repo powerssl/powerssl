@@ -25,18 +25,18 @@ type IntegrationKind int32
 
 const (
 	IntegrationKind_INTEGRATION_KIND_UNSPECIFIED IntegrationKind = 0
-	IntegrationKind_CA                           IntegrationKind = 1
+	IntegrationKind_ACME                         IntegrationKind = 1
 	IntegrationKind_DNS                          IntegrationKind = 2
 )
 
 var IntegrationKind_name = map[int32]string{
 	0: "INTEGRATION_KIND_UNSPECIFIED",
-	1: "CA",
+	1: "ACME",
 	2: "DNS",
 }
 var IntegrationKind_value = map[string]int32{
 	"INTEGRATION_KIND_UNSPECIFIED": 0,
-	"CA":                           1,
+	"ACME":                         1,
 	"DNS":                          2,
 }
 

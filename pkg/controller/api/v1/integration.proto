@@ -12,7 +12,7 @@ service IntegrationService {
 
 enum IntegrationKind {
   INTEGRATION_KIND_UNSPECIFIED = 0;
-  CA = 1;
+  ACME = 1;
   DNS = 2;
 }
 

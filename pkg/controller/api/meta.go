@@ -47,37 +47,6 @@ type Activity struct {
 	Signature string
 }
 
-type ChallengeType int32
-
-const (
-	ChallengeType_TYPE_UNSPECIFIED ChallengeType = 0
-	ChallengeType_DNS_01           ChallengeType = 1
-	ChallengeType_HTTP_01          ChallengeType = 2
-	ChallengeType_TLS_SNI_01       ChallengeType = 3
-)
-
-var ChallengeType_name = map[int32]string{
-	0: "TYPE_UNSPECIFIED",
-	1: "DNS_01",
-	2: "HTTP_01",
-	3: "TLS_SNI_01",
-}
-var ChallengeType_value = map[string]int32{
-	"TYPE_UNSPECIFIED": 0,
-	"DNS_01":           1,
-	"HTTP_01":          2,
-	"TLS_SNI_01":       3,
-}
-
-func (x ChallengeType) String() string {
-	return proto.EnumName(ChallengeType_name, int32(x))
-}
-
-type Challenge struct {
-	Type    ChallengeType
-	Details map[string]string
-}
-
-type Error struct {
-	Message string
+func (a *Activity) String() string {
+	return a.Token
 }
