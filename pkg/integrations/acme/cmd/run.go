@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/viper"
 
 	"powerssl.io/pkg/integration"
-	"powerssl.io/pkg/integration/acme"
+	"powerssl.io/pkg/integrations/acme"
 )
 
 var runCmd = &cobra.Command{
@@ -34,9 +34,8 @@ var runCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		acmeintegration := acme.New()
-		integ := integration.New(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, acmeintegration)
-		integ.Run()
+		integ := integration.New(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, integration.KindACME, "acme")
+		integ.Run(acme.New())
 	},
 }
 

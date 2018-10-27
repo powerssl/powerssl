@@ -1,5 +1,6 @@
 package integration
 
+/*
 import (
 	"context"
 
@@ -94,3 +95,4 @@ func (i *integration) caVerifyDomain(activity *api.Activity) error {
 	}
 	return nil
 }
+*/
