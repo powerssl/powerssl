@@ -14,12 +14,19 @@ import (
 )
 
 var (
-	lock         = sync.Mutex{}
+	lock         = sync.RWMutex{}
 	unknownError = errors.New("Unknown error")
 )
 
+type IntegrationKind string
+
+const (
+	IntegrationKindACME IntegrationKind = "acme"
+	IntegrationKindDNS  IntegrationKind = "dns"
+)
+
 type Integration struct {
-	Kind apiv1.IntegrationKind
+	Kind IntegrationKind
 	Name string
 	UUID uuid.UUID
 
@@ -36,6 +43,17 @@ func (i *Integration) Send(activity *apiv1.Activity) {
 }
 
 type Integrations map[uuid.UUID]Integration
+
+func (integrations Integrations) GetByKind(kind IntegrationKind) (*Integration, error) {
+	lock.RLock()
+	defer lock.RUnlock()
+	for _, integration := range integrations {
+		if integration.Kind == kind {
+			return &integration, nil
+		}
+	}
+	return nil, errors.New("no integration of that type found")
+}
 
 type integrationServiceServer struct {
 	integrations Integrations
@@ -55,10 +73,20 @@ func (s *integrationServiceServer) RegisterGRPCServer(baseServer *grpc.Server) {
 }
 
 func (s *integrationServiceServer) Register(request *apiv1.RegisterIntegrationRequest, stream apiv1.IntegrationService_RegisterServer) error {
+	var kind IntegrationKind
+	switch request.GetKind() {
+	case apiv1.IntegrationKind_ACME:
+		kind = IntegrationKindACME
+	case apiv1.IntegrationKind_DNS:
+		kind = IntegrationKindDNS
+	default:
+		return errors.New("integration kind not found")
+	}
+
 	integration := Integration{
 		activity:   make(chan *apiv1.Activity),
 		disconnect: make(chan error),
-		Kind:       request.GetKind(),
+		Kind:       kind,
 		Name:       request.GetName(),
 		UUID:       uuid.New(),
 	}

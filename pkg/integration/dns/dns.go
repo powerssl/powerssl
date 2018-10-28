@@ -11,17 +11,31 @@ type Integration interface {
 }
 
 type integration struct {
+	client  interface{} // TODO
 	handler Integration
 }
 
+func New(client interface{}, handler Integration) *integration {
+	return &integration{
+		client:  client,
+		handler: handler,
+	}
+}
+
 func (i *integration) dnsCreateRecord(activity *api.Activity) error {
-	return i.handler.CreateRecord("domain", "recordType", "content")
+	i.handler.CreateRecord("domain", "recordType", "content")
+
+	return nil
 }
 
 func (i *integration) dnsDeleteRecord(activity *api.Activity) error {
-	return i.handler.DeleteRecord("domain", "recordType")
+	i.handler.DeleteRecord("domain", "recordType")
+
+	return nil
 }
 
 func (i *integration) dnsVerifyDomain(activity *api.Activity) error {
-	return i.handler.VerifyDomain("domain")
+	i.handler.VerifyDomain("domain")
+
+	return nil
 }

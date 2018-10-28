@@ -34,8 +34,8 @@ var runCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		integ := integration.New(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, integration.KindDNS, "cloudflare")
-		integ.Run(cloudflare.New())
+		integ := integration.New(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, integration.KindDNS, "cloudflare", cloudflare.New())
+		integ.Run()
 	},
 }
 

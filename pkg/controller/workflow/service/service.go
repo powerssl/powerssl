@@ -5,10 +5,11 @@ import (
 	"fmt"
 
 	"github.com/go-kit/kit/log"
-	"github.com/google/uuid"
 
 	"powerssl.io/pkg/controller/api"
 	workflowengine "powerssl.io/pkg/controller/workflow/engine"
+	"powerssl.io/pkg/controller/workflow/engine/activity"
+	"powerssl.io/pkg/controller/workflow/engine/workflow"
 )
 
 type Service interface {
@@ -37,6 +38,21 @@ func NewBasicService(logger log.Logger, workflowengine *workflowengine.Engine) S
 }
 
 func (bs basicService) Create(_ context.Context, kind string) (*api.Workflow, error) {
-	bs.workflowengine.Create(kind)
-	return &api.Workflow{Name: fmt.Sprintf("workflows/%s", uuid.New()), Kind: kind}, nil
+	// TODO: Decide which workflow
+	workflow := workflow.New(kind)
+	bs.workflowengine.AddWorkflow(workflow)
+
+	activity := activity.New(api.Activity_ACME_CREATE_ACCOUNT)
+	activity.GetRequest = func(activity *api.Activity) (*api.Activity, string, bool, []string, error) {
+		return activity, "example.com", true, []string{"foo"}, nil
+	}
+	activity.SetResponse = func(account *api.Account, erro *api.Error) {
+		fmt.Printf("Activity: %#v\n", activity)
+		fmt.Printf("Account: %#v\n", account)
+		fmt.Println("Status: ", account.Status)
+	}
+	workflow.AddActivity(activity)
+	bs.workflowengine.AddActivity(activity)
+
+	return workflow.API(), nil
 }

@@ -34,8 +34,8 @@ var runCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		integ := integration.New(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, integration.KindACME, "acme")
-		integ.Run(acme.New())
+		integ := integration.New(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, integration.KindACME, "acme", acme.New())
+		integ.Run()
 	},
 }
 

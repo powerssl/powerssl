@@ -3,6 +3,7 @@ package acme
 import (
 	"context"
 	"crypto/x509"
+	"fmt"
 	"time"
 
 	acmeservice "powerssl.io/pkg/controller/acme/service"
@@ -149,6 +150,40 @@ type Integration interface {
 type integration struct {
 	client  acmeservice.Service
 	handler Integration
+}
+
+func New(client acmeservice.Service, handler Integration) *integration {
+	return &integration{
+		client:  client,
+		handler: handler,
+	}
+}
+
+func (i *integration) HandleActivity(activity *api.Activity) error {
+	var err error
+	switch activity.Name {
+	case api.Activity_ACME_CREATE_ACCOUNT:
+		err = i.createAccount(activity)
+	default:
+		err = fmt.Errorf("Activity %s not implemented", activity.Name)
+	}
+	return err
+}
+
+func (i *integration) createAccount(activity *api.Activity) error {
+	activity, directoryURL, termsOfServiceAgreed, contacts, err := i.client.GetCreateAccountRequest(context.Background(), activity)
+	if err != nil {
+		return err
+	}
+	account, err := i.handler.CreateAccount(directoryURL, termsOfServiceAgreed, contacts)
+	var erro *api.Error
+	if err != nil {
+		erro = &api.Error{Message: err.Error()}
+	}
+	if err := i.client.SetCreateAccountResponse(context.Background(), activity, account, erro); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (i *integration) createOrder(activity *api.Activity) error {

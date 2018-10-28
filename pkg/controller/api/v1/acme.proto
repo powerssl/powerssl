@@ -53,10 +53,15 @@ service ACMEService {
 
 message GetCreateAccountRequestResponse {
   Activity activity = 1;
+  string directory_url = 2;
+  bool terms_of_service_agreed = 3;
+  repeated string contacts = 4;
 }
 
 message SetCreateAccountResponseRequest {
   Activity activity = 1;
+  Account account = 2;
+  Error error = 3;
 }
 
 message GetDeactivateAccountRequestResponse {
@@ -211,7 +216,7 @@ message Account {
   }
 
   Status status = 1;
-  repeated string contact = 2;
+  repeated string contacts = 2;
   bool terms_of_service_agreed = 3;
   string orders = 4;
 

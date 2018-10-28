@@ -34,20 +34,38 @@ func EncodeGRPCActivity(activity *api.Activity) (*apiv1.Activity, error) {
 	}, nil
 }
 
-// func decodeGRPCError(erro *apiv1.Error) (*api.Error, error) {
-// 	return &api.Error{
-// 		Message: erro.GetMessage(),
-// 	}, nil
-// }
+func decodeGRPCError(erro *apiv1.Error) (*api.Error, error) {
+	return &api.Error{
+		Message: erro.GetMessage(),
+	}, nil
+}
 
-// func encodeGRPCError(erro *api.Error) (*apiv1.Error, error) {
-// 	if erro == nil {
-// 		erro = &api.Error{}
-// 	}
-// 	return &apiv1.Error{
-// 		Message: erro.Message,
-// 	}, nil
-// }
+func encodeGRPCError(erro *api.Error) (*apiv1.Error, error) {
+	if erro == nil {
+		erro = &api.Error{}
+	}
+	return &apiv1.Error{
+		Message: erro.Message,
+	}, nil
+}
+
+func decodeGRPCAccount(account *apiv1.Account) (*api.Account, error) {
+	return &api.Account{
+		Status:               api.AccountStatus(account.GetStatus()),
+		Contacts:             account.GetContacts(),
+		TermsOfServiceAgreed: account.GetTermsOfServiceAgreed(),
+		URL:                  account.GetUrl(),
+	}, nil
+}
+
+func encodeGRPCAccount(account *api.Account) (*apiv1.Account, error) {
+	return &apiv1.Account{
+		Status:               apiv1.Account_Status(account.Status),
+		Contacts:             account.Contacts,
+		TermsOfServiceAgreed: account.TermsOfServiceAgreed,
+		Url:                  account.URL,
+	}, nil
+}
 
 // func decodeGRPCChallenge(challenge *apiv1.Challenge) (*api.Challenge, error) {
 // 	return &api.Challenge{
@@ -106,8 +124,10 @@ func decodeGRPCGetCreateAccountRequestResponse(_ context.Context, grpcReply inte
 		return nil, err
 	}
 	return endpoint.GetCreateAccountRequestResponse{
-		Activity: activity,
-		// Domain:   reply.GetDomain(), // TODO
+		Activity:             activity,
+		DirectoryURL:         reply.GetDirectoryUrl(),
+		TermsOfServiceAgreed: reply.GetTermsOfServiceAgreed(),
+		Contacts:             reply.GetContacts(),
 	}, nil
 }
 
@@ -118,8 +138,10 @@ func encodeGRPCGetCreateAccountRequestResponse(_ context.Context, response inter
 		return nil, err
 	}
 	return &apiv1.GetCreateAccountRequestResponse{
-		Activity: activity,
-		// Domain:   resp.Domain, // TODO
+		Activity:             activity,
+		DirectoryUrl:         resp.DirectoryURL,
+		TermsOfServiceAgreed: resp.TermsOfServiceAgreed,
+		Contacts:             resp.Contacts,
 	}, nil
 }
 
@@ -138,20 +160,18 @@ func decodeGRPCSetCreateAccountResponseRequest(_ context.Context, grpcReq interf
 	if err != nil {
 		return nil, err
 	}
-	// TODO
-	// erro, err := decodeGRPCError(req.GetError())
-	// if err != nil {
-	//   return nil, err
-	// }
-	// TODO
-	// challenges, err := decodeGRPCChallenges(req.GetChallenges())
-	// if err != nil {
-	//   return nil, err
-	// }
+	account, err := decodeGRPCAccount(req.GetAccount())
+	if err != nil {
+		return nil, err
+	}
+	erro, err := decodeGRPCError(req.GetError())
+	if err != nil {
+		return nil, err
+	}
 	return endpoint.SetCreateAccountResponseRequest{
-		Activity:   activity,
-		// Error:      erro, // TODO
-		// Challenges: challenges, // TODO
+		Activity: activity,
+		Account:  account,
+		Error:    erro,
 	}, nil
 }
 
@@ -169,20 +189,18 @@ func encodeGRPCSetCreateAccountResponseRequest(_ context.Context, request interf
 	if err != nil {
 		return nil, err
 	}
-	// TODO
-	// erro, err := encodeGRPCError(req.Error)
-	// if err != nil {
-	//   return nil, err
-	// }
-	// TODO
-	// challenges, err := encodeGRPCChallenges(req.Challenges)
-	// if err != nil {
-	//   return nil, err
-	// }
+	account, err := encodeGRPCAccount(req.Account)
+	if err != nil {
+		return nil, err
+	}
+	erro, err := encodeGRPCError(req.Error)
+	if err != nil {
+		return nil, err
+	}
 	return &apiv1.SetCreateAccountResponseRequest{
-		Activity:   activity,
-		// Error:      erro, // TODO
-		// Challenges: challenges, // TODO
+		Activity: activity,
+		Account:  account,
+		Error:    erro,
 	}, nil
 }
 
@@ -247,7 +265,7 @@ func decodeGRPCSetDeactivateAccountResponseRequest(_ context.Context, grpcReq in
 	//   return nil, err
 	// }
 	return endpoint.SetDeactivateAccountResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -278,7 +296,7 @@ func encodeGRPCSetDeactivateAccountResponseRequest(_ context.Context, request in
 	//   return nil, err
 	// }
 	return &apiv1.SetDeactivateAccountResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -345,7 +363,7 @@ func decodeGRPCSetRekeyAccountResponseRequest(_ context.Context, grpcReq interfa
 	//   return nil, err
 	// }
 	return endpoint.SetRekeyAccountResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -376,7 +394,7 @@ func encodeGRPCSetRekeyAccountResponseRequest(_ context.Context, request interfa
 	//   return nil, err
 	// }
 	return &apiv1.SetRekeyAccountResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -443,7 +461,7 @@ func decodeGRPCSetUpdateAccountResponseRequest(_ context.Context, grpcReq interf
 	//   return nil, err
 	// }
 	return endpoint.SetUpdateAccountResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -474,7 +492,7 @@ func encodeGRPCSetUpdateAccountResponseRequest(_ context.Context, request interf
 	//   return nil, err
 	// }
 	return &apiv1.SetUpdateAccountResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -541,7 +559,7 @@ func decodeGRPCSetCreateOrderResponseRequest(_ context.Context, grpcReq interfac
 	//   return nil, err
 	// }
 	return endpoint.SetCreateOrderResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -572,7 +590,7 @@ func encodeGRPCSetCreateOrderResponseRequest(_ context.Context, request interfac
 	//   return nil, err
 	// }
 	return &apiv1.SetCreateOrderResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -639,7 +657,7 @@ func decodeGRPCSetFinalizeOrderResponseRequest(_ context.Context, grpcReq interf
 	//   return nil, err
 	// }
 	return endpoint.SetFinalizeOrderResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -670,7 +688,7 @@ func encodeGRPCSetFinalizeOrderResponseRequest(_ context.Context, request interf
 	//   return nil, err
 	// }
 	return &apiv1.SetFinalizeOrderResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -737,7 +755,7 @@ func decodeGRPCSetGetOrderResponseRequest(_ context.Context, grpcReq interface{}
 	//   return nil, err
 	// }
 	return endpoint.SetGetOrderResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -768,7 +786,7 @@ func encodeGRPCSetGetOrderResponseRequest(_ context.Context, request interface{}
 	//   return nil, err
 	// }
 	return &apiv1.SetGetOrderResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -835,7 +853,7 @@ func decodeGRPCSetCreateAuthorizationResponseRequest(_ context.Context, grpcReq 
 	//   return nil, err
 	// }
 	return endpoint.SetCreateAuthorizationResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -866,7 +884,7 @@ func encodeGRPCSetCreateAuthorizationResponseRequest(_ context.Context, request 
 	//   return nil, err
 	// }
 	return &apiv1.SetCreateAuthorizationResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -933,7 +951,7 @@ func decodeGRPCSetDeactivateAuthorizationResponseRequest(_ context.Context, grpc
 	//   return nil, err
 	// }
 	return endpoint.SetDeactivateAuthorizationResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -964,7 +982,7 @@ func encodeGRPCSetDeactivateAuthorizationResponseRequest(_ context.Context, requ
 	//   return nil, err
 	// }
 	return &apiv1.SetDeactivateAuthorizationResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -1031,7 +1049,7 @@ func decodeGRPCSetGetAuthorizationResponseRequest(_ context.Context, grpcReq int
 	//   return nil, err
 	// }
 	return endpoint.SetGetAuthorizationResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -1062,7 +1080,7 @@ func encodeGRPCSetGetAuthorizationResponseRequest(_ context.Context, request int
 	//   return nil, err
 	// }
 	return &apiv1.SetGetAuthorizationResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -1129,7 +1147,7 @@ func decodeGRPCSetGetChallengeResponseRequest(_ context.Context, grpcReq interfa
 	//   return nil, err
 	// }
 	return endpoint.SetGetChallengeResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -1160,7 +1178,7 @@ func encodeGRPCSetGetChallengeResponseRequest(_ context.Context, request interfa
 	//   return nil, err
 	// }
 	return &apiv1.SetGetChallengeResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -1227,7 +1245,7 @@ func decodeGRPCSetValidateChallengeResponseRequest(_ context.Context, grpcReq in
 	//   return nil, err
 	// }
 	return endpoint.SetValidateChallengeResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -1258,7 +1276,7 @@ func encodeGRPCSetValidateChallengeResponseRequest(_ context.Context, request in
 	//   return nil, err
 	// }
 	return &apiv1.SetValidateChallengeResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -1325,7 +1343,7 @@ func decodeGRPCSetGetCertificateResponseRequest(_ context.Context, grpcReq inter
 	//   return nil, err
 	// }
 	return endpoint.SetGetCertificateResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -1356,7 +1374,7 @@ func encodeGRPCSetGetCertificateResponseRequest(_ context.Context, request inter
 	//   return nil, err
 	// }
 	return &apiv1.SetGetCertificateResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -1423,7 +1441,7 @@ func decodeGRPCSetRevokeCertificateResponseRequest(_ context.Context, grpcReq in
 	//   return nil, err
 	// }
 	return endpoint.SetRevokeCertificateResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil
@@ -1454,7 +1472,7 @@ func encodeGRPCSetRevokeCertificateResponseRequest(_ context.Context, request in
 	//   return nil, err
 	// }
 	return &apiv1.SetRevokeCertificateResponseRequest{
-		Activity:   activity,
+		Activity: activity,
 		// Error:      erro, // TODO
 		// Challenges: challenges, // TODO
 	}, nil

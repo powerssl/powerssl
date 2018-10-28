@@ -114,3 +114,11 @@ protobuf: $(PROTOBUF_TARGETS)
 # 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/powerctl -v ./cmd/powerctl
 # docker-build:
 # 	docker run --rm -it -e GO111MODULE=on -v $$(pwd):/go/src -v $$(pwd)/bin:/go/bin -w /go/src golang:1.11rc1 go build -o /go/bin/powerctl -v ./cmd/powerctl
+#
+
+.PHONY: tools
+tools:
+	GO111MODULE=off go get golang.org/x/tools/cmd/stringer
+
+generate:
+	go generate $$(go list ./...)

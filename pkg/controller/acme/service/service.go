@@ -76,10 +76,19 @@ func NewBasicService(logger log.Logger, workflowengine *workflowengine.Engine) S
 }
 
 func (bs basicService) GetCreateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, bool, []string, error) {
-	return nil, "", false, nil, nil
+	a, err := bs.workflowengine.GetActivity(activity)
+	if err != nil {
+		return nil, "", false, nil, err
+	}
+	return a.GetRequest.(func(*api.Activity) (*api.Activity, string, bool, []string, error))(activity)
 }
 
 func (bs basicService) SetCreateAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error {
+	a, err := bs.workflowengine.GetActivity(activity)
+	if err != nil {
+		return err
+	}
+	a.SetResponse.(func(*api.Account, *api.Error))(account, erro)
 	return nil
 }
 

@@ -2,7 +2,6 @@ package integration
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"time"
@@ -13,6 +12,8 @@ import (
 	"powerssl.io/pkg/controller/api"
 	apiv1 "powerssl.io/pkg/controller/api/v1"
 	controllerclient "powerssl.io/pkg/controller/client"
+	integrationacme "powerssl.io/pkg/integration/acme"
+	// integrationdns "powerssl.io/pkg/integration/dns"
 )
 
 type kind uint
@@ -23,17 +24,18 @@ const (
 )
 
 type Integration interface {
-	HandleActivity(activity *apiv1.Activity) error
+	HandleActivity(activity *api.Activity) error
 }
 
 type integration struct {
-	client *controllerclient.GRPCClient
-	logger log.Logger
-	kind   kind
-	name   string
+	client  *controllerclient.GRPCClient
+	logger  log.Logger
+	kind    kind
+	name    string
+	handler Integration
 }
 
-func New(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, kind kind, name string) *integration {
+func New(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, kind kind, name string, handler interface{}) *integration {
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(os.Stderr)
@@ -43,18 +45,30 @@ func New(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVer
 
 	client, err := controllerclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, logger)
 	if err != nil {
-		panic(err)
+		logger.Log("transport", "gRPC", "err", err)
+		os.Exit(1)
+	}
+
+	var integrationhandler Integration
+	switch kind {
+	case KindACME:
+		integrationhandler = integrationacme.New(client.ACME, handler.(integrationacme.Integration))
+	case KindDNS:
+		logger.Log("kind", "DNS", "err", "Not yet supported")
+		os.Exit(1)
+		// integrationhandler = integrationdns.New(client.DNS, handler.(integrationdns.Integration))
 	}
 
 	return &integration{
-		client: client,
-		logger: logger,
-		kind:   kind,
-		name:   name,
+		client:  client,
+		logger:  logger,
+		kind:    kind,
+		name:    name,
+		handler: integrationhandler,
 	}
 }
 
-func (i *integration) Run(handler interface{}) {
+func (i *integration) Run() {
 	for {
 		i.logger.Log("err", i.run())
 		time.Sleep(time.Second)
@@ -90,7 +104,7 @@ func (i *integration) run() error {
 		{
 			activity, err := acmetransport.DecodeGRPCActivity(activity)
 			if err != nil {
-				panic(err)
+				return err
 			}
 			go i.handleActivity(activity)
 		}
@@ -100,24 +114,6 @@ func (i *integration) run() error {
 
 func (i *integration) handleActivity(activity *api.Activity) {
 	i.logger.Log("activity", activity.Token, "name", activity.Name)
-	var err error
-	switch activity.Name {
-	// case api.Activity_CA_AUTHORIZE_DOMAIN:
-	// 	err = i.caAuthorizeDomain(activity)
-	// case api.Activity_CA_REQUEST_CERTIFICATE:
-	// 	err = i.caRequestCertificate(activity)
-	// case api.Activity_CA_REVOKE_CERTIFICATE:
-	// 	err = i.caRevokeCertificate(activity)
-	// case api.Activity_CA_VERIFY_DOMAIN:
-	// 	err = i.caVerifyDomain(activity)
-	// case api.Activity_DNS_CREATE_RECORD:
-	// 	err = i.dnsCreateRecord(activity)
-	// case api.Activity_DNS_DELETE_RECORD:
-	// 	err = i.dnsDeleteRecord(activity)
-	// case api.Activity_DNS_VERIFY_DOMAIN:
-	// 	err = i.dnsVerifyDomain(activity)
-	default:
-		err = fmt.Errorf("Activity %s not implemented", activity.Name)
-	}
+	err := i.handler.HandleActivity(activity)
 	i.logger.Log("activity", activity.Token, "err", err)
 }
