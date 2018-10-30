@@ -13,8 +13,56 @@ import (
 	resource "powerssl.io/pkg/resource"
 )
 
+var ErrNotFound = errors.New("integration not found")
+
+type integrations struct {
+	m map[uuid.UUID]*Integration
+	sync.RWMutex
+}
+
+func (i *integrations) Delete(uuid uuid.UUID) error {
+	i.RLock()
+	_, ok := i.m[uuid]
+	i.RUnlock()
+	if !ok {
+		return ErrNotFound
+	}
+	i.Lock()
+	delete(i.m, uuid)
+	i.Unlock()
+	return nil
+}
+
+func (i *integrations) Get(uuid uuid.UUID) (*Integration, error) {
+	i.RLock()
+	integration, ok := i.m[uuid]
+	i.RUnlock()
+	if !ok {
+		return nil, ErrNotFound
+	}
+	return integration, nil
+}
+
+func (i *integrations) GetByKind(kind IntegrationKind) (*Integration, error) {
+	i.RLock()
+	defer i.RUnlock()
+	for _, integration := range i.m {
+		if integration.Kind == kind {
+			return integration, nil
+		}
+	}
+	return nil, errors.New("no integration of that type found")
+}
+
+func (i *integrations) Put(integration *Integration) {
+	i.Lock()
+	i.m[integration.UUID] = integration
+	i.Unlock()
+}
+
+var Integrations = integrations{m: make(map[uuid.UUID]*Integration)}
+
 var (
-	lock         = sync.RWMutex{}
 	unknownError = errors.New("Unknown error")
 )
 
@@ -42,28 +90,13 @@ func (i *Integration) Send(activity *apiv1.Activity) {
 	i.activity <- activity
 }
 
-type Integrations map[uuid.UUID]Integration
-
-func (integrations Integrations) GetByKind(kind IntegrationKind) (*Integration, error) {
-	lock.RLock()
-	defer lock.RUnlock()
-	for _, integration := range integrations {
-		if integration.Kind == kind {
-			return &integration, nil
-		}
-	}
-	return nil, errors.New("no integration of that type found")
-}
-
 type integrationServiceServer struct {
-	integrations Integrations
-	logger       log.Logger
+	logger log.Logger
 }
 
-func New(logger log.Logger, duration metrics.Histogram, integrations Integrations) resource.Resource {
+func New(logger log.Logger, duration metrics.Histogram) resource.Resource {
 	return &integrationServiceServer{
-		integrations: integrations,
-		logger:       logger,
+		logger: logger,
 	}
 
 }
@@ -83,28 +116,28 @@ func (s *integrationServiceServer) Register(request *apiv1.RegisterIntegrationRe
 		return errors.New("integration kind not found")
 	}
 
-	integration := Integration{
+	integration := &Integration{
 		activity:   make(chan *apiv1.Activity),
 		disconnect: make(chan error),
 		Kind:       kind,
 		Name:       request.GetName(),
 		UUID:       uuid.New(),
 	}
-	s.register(&integration)
+	s.register(integration)
 
 	for {
 		select {
 		case <-stream.Context().Done():
-			s.unregister(&integration)
+			s.unregister(integration)
 			return stream.Context().Err()
 		case activity := <-integration.activity:
 			if err := stream.Send(activity); err != nil {
 				s.logger.Log("err", err)
-				s.unregister(&integration)
+				s.unregister(integration)
 				return unknownError
 			}
 		case err := <-integration.disconnect:
-			s.unregister(&integration)
+			s.unregister(integration)
 			return err
 		}
 	}
@@ -113,15 +146,11 @@ func (s *integrationServiceServer) Register(request *apiv1.RegisterIntegrationRe
 func (s *integrationServiceServer) register(integration *Integration) {
 	s.logger.Log("interation", integration.UUID, "action", "connect", "name", integration.Name, "kind", integration.Kind)
 
-	lock.Lock()
-	s.integrations[integration.UUID] = *integration
-	lock.Unlock()
+	Integrations.Put(integration)
 }
 
 func (s *integrationServiceServer) unregister(integration *Integration) {
 	s.logger.Log("integration", integration.UUID, "action", "disconnect")
 
-	lock.Lock()
-	delete(s.integrations, integration.UUID)
-	lock.Unlock()
+	Integrations.Delete(integration.UUID)
 }

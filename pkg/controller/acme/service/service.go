@@ -8,6 +8,7 @@ import (
 
 	"powerssl.io/pkg/controller/api"
 	workflowengine "powerssl.io/pkg/controller/workflow/engine"
+	engineactivity "powerssl.io/pkg/controller/workflow/engine/activity"
 )
 
 type Service interface {
@@ -76,7 +77,7 @@ func NewBasicService(logger log.Logger, workflowengine *workflowengine.Engine) S
 }
 
 func (bs basicService) GetCreateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, bool, []string, error) {
-	a, err := bs.workflowengine.GetActivity(activity)
+	a, err := engineactivity.Activities.GetByAPIActivity(activity)
 	if err != nil {
 		return nil, "", false, nil, err
 	}
@@ -84,7 +85,7 @@ func (bs basicService) GetCreateAccountRequest(ctx context.Context, activity *ap
 }
 
 func (bs basicService) SetCreateAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error {
-	a, err := bs.workflowengine.GetActivity(activity)
+	a, err := engineactivity.Activities.GetByAPIActivity(activity)
 	if err != nil {
 		return err
 	}

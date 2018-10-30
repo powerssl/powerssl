@@ -7,6 +7,7 @@ import (
 	"github.com/go-kit/kit/log"
 
 	"powerssl.io/pkg/controller/api"
+	"powerssl.io/pkg/controller/integration"
 	workflowengine "powerssl.io/pkg/controller/workflow/engine"
 	"powerssl.io/pkg/controller/workflow/engine/activity"
 	"powerssl.io/pkg/controller/workflow/engine/workflow"
@@ -40,19 +41,28 @@ func NewBasicService(logger log.Logger, workflowengine *workflowengine.Engine) S
 func (bs basicService) Create(_ context.Context, kind string) (*api.Workflow, error) {
 	// TODO: Decide which workflow
 	workflow := workflow.New(kind)
-	bs.workflowengine.AddWorkflow(workflow)
 
-	activity := activity.New(api.Activity_ACME_CREATE_ACCOUNT)
-	activity.GetRequest = func(activity *api.Activity) (*api.Activity, string, bool, []string, error) {
+	a := activity.New(api.Activity_ACME_CREATE_ACCOUNT)
+	a.GetRequest = func(activity *api.Activity) (*api.Activity, string, bool, []string, error) {
 		return activity, "example.com", true, []string{"foo"}, nil
 	}
-	activity.SetResponse = func(account *api.Account, erro *api.Error) {
-		fmt.Printf("Activity: %#v\n", activity)
+	a.SetResponse = func(account *api.Account, erro *api.Error) {
+		fmt.Printf("Activity: %#v\n", a)
 		fmt.Printf("Account: %#v\n", account)
 		fmt.Println("Status: ", account.Status)
 	}
-	workflow.AddActivity(activity)
-	bs.workflowengine.AddActivity(activity)
+	workflow.AddActivity(a)
+	integ, err := integration.Integrations.GetByKind(a.IntegrationKind())
+	if err != nil {
+		panic(err) // TODO
+	}
+	a.Execute(integ)
+	fmt.Println(activity.Activities)
+	b, err := activity.Activities.Get(a.UUID)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%#v", b)
 
 	return workflow.API(), nil
 }

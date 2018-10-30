@@ -43,11 +43,10 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, httpAddr
 		}, []string{"method", "success"})
 	}
 
-	integrations := make(integration.Integrations)
-	engine := workflowengine.New(integrations)
+	engine := workflowengine.New()
 
 	acmeservice := acme.New(logger, duration, engine)
-	integrationservice := integration.New(logger, duration, integrations)
+	integrationservice := integration.New(logger, duration)
 	workflowservice := workflow.New(logger, duration, engine)
 
 	var g group.Group
