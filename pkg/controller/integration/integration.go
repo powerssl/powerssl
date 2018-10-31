@@ -2,7 +2,6 @@ package integration
 
 import (
 	"errors"
-	"sync"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
@@ -13,69 +12,7 @@ import (
 	resource "powerssl.io/pkg/resource"
 )
 
-var ErrNotFound = errors.New("integration not found")
-
-type integrations struct {
-	m map[uuid.UUID]*Integration
-	sync.Once
-	sync.RWMutex
-}
-
-func (i *integrations) Delete(uuid uuid.UUID) error {
-	i.RLock()
-	_, ok := i.m[uuid]
-	i.RUnlock()
-	if !ok {
-		return ErrNotFound
-	}
-	i.Lock()
-	delete(i.m, uuid)
-	i.Unlock()
-	return nil
-}
-
-func (i *integrations) Get(uuid uuid.UUID) (*Integration, error) {
-	i.RLock()
-	integration, ok := i.m[uuid]
-	i.RUnlock()
-	if !ok {
-		return nil, ErrNotFound
-	}
-	return integration, nil
-}
-
-func (i *integrations) GetByKind(kind IntegrationKind) (*Integration, error) {
-	i.RLock()
-	defer i.RUnlock()
-	for _, integration := range i.m {
-		if integration.Kind == kind {
-			return integration, nil
-		}
-	}
-	return nil, errors.New("no integration of that type found")
-}
-
-func (i *integrations) Init() {
-	i.Do(func() {
-		i.m = make(map[uuid.UUID]*Integration)
-	})
-}
-
-func (i *integrations) Put(integration *Integration) {
-	i.Lock()
-	i.m[integration.UUID] = integration
-	i.Unlock()
-}
-
-var Integrations integrations
-
-func init() {
-	Integrations.Init()
-}
-
-var (
-	unknownError = errors.New("Unknown error")
-)
+var errUnknown = errors.New("Unknown error")
 
 type IntegrationKind string
 
@@ -145,7 +82,7 @@ func (s *integrationServiceServer) Register(request *apiv1.RegisterIntegrationRe
 			if err := stream.Send(activity); err != nil {
 				s.logger.Log("err", err)
 				s.unregister(integration)
-				return unknownError
+				return errUnknown
 			}
 		case err := <-integration.disconnect:
 			s.unregister(integration)
