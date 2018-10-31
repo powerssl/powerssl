@@ -46,10 +46,11 @@ func (bs basicService) Create(_ context.Context, kind string) (*api.Workflow, er
 	a.GetRequest = func(activity *api.Activity) (*api.Activity, string, bool, []string, error) {
 		return activity, "example.com", true, []string{"foo"}, nil
 	}
-	a.SetResponse = func(account *api.Account, erro *api.Error) {
+	a.SetResponse = func(account *api.Account, erro *api.Error) error {
 		fmt.Printf("Activity: %#v\n", a)
 		fmt.Printf("Account: %#v\n", account)
 		fmt.Println("Status: ", account.Status)
+		return nil
 	}
 	workflow.AddActivity(a)
 	integ, err := integration.Integrations.GetByKind(a.IntegrationKind())

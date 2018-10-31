@@ -89,8 +89,7 @@ func (bs basicService) SetCreateAccountResponse(ctx context.Context, activity *a
 	if err != nil {
 		return err
 	}
-	a.SetResponse.(func(*api.Account, *api.Error))(account, erro)
-	return nil
+	return a.SetResponse.(func(*api.Account, *api.Error) error)(account, erro)
 }
 
 func (bs basicService) GetDeactivateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, error) {
