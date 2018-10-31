@@ -44,7 +44,7 @@ func (w *workflows) Get(uuid uuid.UUID) (*Workflow, error) {
 }
 
 func (w *workflows) Init() {
-	a.Do(func() {
+	w.Do(func() {
 		w.m = make(map[uuid.UUID]*Workflow)
 	})
 }

@@ -56,7 +56,7 @@ func (i *integrations) GetByKind(kind IntegrationKind) (*Integration, error) {
 }
 
 func (i *integrations) Init() {
-	a.Do(func() {
+	i.Do(func() {
 		i.m = make(map[uuid.UUID]*Integration)
 	})
 }
