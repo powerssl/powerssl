@@ -7,7 +7,6 @@ import (
 	"github.com/go-kit/kit/log"
 
 	"powerssl.io/pkg/controller/api"
-	workflowengine "powerssl.io/pkg/controller/workflow/engine"
 	engineactivity "powerssl.io/pkg/controller/workflow/engine/activity"
 )
 
@@ -55,24 +54,22 @@ type Service interface {
 	SetRevokeCertificateResponse(ctx context.Context, activity *api.Activity, erro *api.Error) error
 }
 
-func New(logger log.Logger, workflowengine *workflowengine.Engine) Service {
+func New(logger log.Logger) Service {
 	var svc Service
 	{
-		svc = NewBasicService(logger, workflowengine)
+		svc = NewBasicService(logger)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
 }
 
 type basicService struct {
-	logger         log.Logger
-	workflowengine *workflowengine.Engine
+	logger log.Logger
 }
 
-func NewBasicService(logger log.Logger, workflowengine *workflowengine.Engine) Service {
+func NewBasicService(logger log.Logger) Service {
 	return basicService{
-		logger:         logger,
-		workflowengine: workflowengine,
+		logger: logger,
 	}
 }
 

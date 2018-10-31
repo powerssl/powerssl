@@ -45,9 +45,9 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, httpAddr
 
 	engine := workflowengine.New()
 
-	acmeservice := acme.New(logger, duration, engine)
+	acmeservice := acme.New(logger, duration)
 	integrationservice := integration.New(logger, duration)
-	workflowservice := workflow.New(logger, duration, engine)
+	workflowservice := workflow.New(logger, duration)
 
 	var g group.Group
 	{

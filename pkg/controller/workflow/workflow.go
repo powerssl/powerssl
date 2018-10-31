@@ -7,7 +7,6 @@ import (
 
 	apiv1 "powerssl.io/pkg/controller/api/v1"
 	"powerssl.io/pkg/controller/workflow/endpoint"
-	workflowengine "powerssl.io/pkg/controller/workflow/engine"
 	service "powerssl.io/pkg/controller/workflow/service"
 	"powerssl.io/pkg/controller/workflow/transport"
 	resource "powerssl.io/pkg/resource"
@@ -18,8 +17,8 @@ type Workflow struct {
 	logger    log.Logger
 }
 
-func New(logger log.Logger, duration metrics.Histogram, workflowengine *workflowengine.Engine) resource.Resource {
-	svc := service.New(logger, workflowengine)
+func New(logger log.Logger, duration metrics.Histogram) resource.Resource {
+	svc := service.New(logger)
 	endpoints := endpoint.NewEndpoints(svc, logger, duration)
 
 	return &Workflow{

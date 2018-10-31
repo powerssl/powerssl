@@ -8,7 +8,6 @@ import (
 
 	"powerssl.io/pkg/controller/api"
 	"powerssl.io/pkg/controller/integration"
-	workflowengine "powerssl.io/pkg/controller/workflow/engine"
 	"powerssl.io/pkg/controller/workflow/engine/activity"
 	"powerssl.io/pkg/controller/workflow/engine/workflow"
 )
@@ -17,24 +16,22 @@ type Service interface {
 	Create(ctx context.Context, kind string) (*api.Workflow, error)
 }
 
-func New(logger log.Logger, workflowengine *workflowengine.Engine) Service {
+func New(logger log.Logger) Service {
 	var svc Service
 	{
-		svc = NewBasicService(logger, workflowengine)
+		svc = NewBasicService(logger)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
 }
 
 type basicService struct {
-	logger         log.Logger
-	workflowengine *workflowengine.Engine
+	logger log.Logger
 }
 
-func NewBasicService(logger log.Logger, workflowengine *workflowengine.Engine) Service {
+func NewBasicService(logger log.Logger) Service {
 	return basicService{
-		logger:         logger,
-		workflowengine: workflowengine,
+		logger: logger,
 	}
 }
 
