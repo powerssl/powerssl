@@ -42,13 +42,21 @@ func (w *workflows) Get(uuid uuid.UUID) (*Workflow, error) {
 	return workflow, nil
 }
 
+func (w *workflows) Init() {
+	w.m = make(map[uuid.UUID]*Workflow)
+}
+
 func (w *workflows) Put(workflow *Workflow) {
 	w.Lock()
 	w.m[workflow.UUID] = workflow
 	w.Unlock()
 }
 
-var Workflows = workflows{m: make(map[uuid.UUID]*Workflow)}
+var Workflows workflows
+
+func init() {
+	Workflows.Init()
+}
 
 type WorkflowInterface interface {
 	Run()

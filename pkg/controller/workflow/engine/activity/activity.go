@@ -49,13 +49,21 @@ func (a *activities) GetByAPIActivity(apiactivity *api.Activity) (*Activity, err
 	return a.Get(uuid)
 }
 
+func (a *activities) Init() {
+	a.m = make(map[uuid.UUID]*Activity)
+}
+
 func (a *activities) Put(activity *Activity) {
 	a.Lock()
 	a.m[activity.UUID] = activity
 	a.Unlock()
 }
 
-var Activities = activities{m: make(map[uuid.UUID]*Activity)}
+var Activities activities
+
+func init() {
+	Activities.Init()
+}
 
 type Activity struct {
 	GetRequest   interface{}

@@ -54,13 +54,21 @@ func (i *integrations) GetByKind(kind IntegrationKind) (*Integration, error) {
 	return nil, errors.New("no integration of that type found")
 }
 
+func (i *integrations) Init() {
+	i.m = make(map[uuid.UUID]*Integration)
+}
+
 func (i *integrations) Put(integration *Integration) {
 	i.Lock()
 	i.m[integration.UUID] = integration
 	i.Unlock()
 }
 
-var Integrations = integrations{m: make(map[uuid.UUID]*Integration)}
+var Integrations integrations
+
+func init() {
+	Integrations.Init()
+}
 
 var (
 	unknownError = errors.New("Unknown error")
