@@ -17,6 +17,7 @@ var ErrNotFound = errors.New("integration not found")
 
 type integrations struct {
 	m map[uuid.UUID]*Integration
+	sync.Once
 	sync.RWMutex
 }
 
@@ -55,7 +56,9 @@ func (i *integrations) GetByKind(kind IntegrationKind) (*Integration, error) {
 }
 
 func (i *integrations) Init() {
-	i.m = make(map[uuid.UUID]*Integration)
+	a.Do(func() {
+		i.m = make(map[uuid.UUID]*Integration)
+	})
 }
 
 func (i *integrations) Put(integration *Integration) {

@@ -15,6 +15,7 @@ var ErrNotFound = errors.New("activity not found")
 
 type activities struct {
 	m map[uuid.UUID]*Activity
+	sync.Once
 	sync.RWMutex
 }
 
@@ -50,7 +51,9 @@ func (a *activities) GetByAPIActivity(apiactivity *api.Activity) (*Activity, err
 }
 
 func (a *activities) Init() {
-	a.m = make(map[uuid.UUID]*Activity)
+	a.Do(func() {
+		a.m = make(map[uuid.UUID]*Activity)
+	})
 }
 
 func (a *activities) Put(activity *Activity) {

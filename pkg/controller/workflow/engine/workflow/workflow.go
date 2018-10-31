@@ -16,6 +16,7 @@ var ErrNotFound = errors.New("workflow not found")
 
 type workflows struct {
 	m map[uuid.UUID]*Workflow
+	sync.Once
 	sync.RWMutex
 }
 
@@ -43,7 +44,9 @@ func (w *workflows) Get(uuid uuid.UUID) (*Workflow, error) {
 }
 
 func (w *workflows) Init() {
-	w.m = make(map[uuid.UUID]*Workflow)
+	a.Do(func() {
+		w.m = make(map[uuid.UUID]*Workflow)
+	})
 }
 
 func (w *workflows) Put(workflow *Workflow) {
