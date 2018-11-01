@@ -42,8 +42,8 @@ func (a *activities) Get(uuid uuid.UUID) (*Activity, error) {
 	return activity, nil
 }
 
-func (a *activities) GetByAPIActivity(apiactivity *api.Activity) (*Activity, error) {
-	uuid, err := apiactivity.UUID()
+func (a *activities) GetByAPIActivity(activity *api.Activity) (*Activity, error) {
+	uuid, err := activity.UUID()
 	if err != nil {
 		return nil, err
 	}

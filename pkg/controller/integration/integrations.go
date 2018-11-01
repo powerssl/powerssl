@@ -12,9 +12,20 @@ var ErrNotFound = errors.New("integration not found")
 var Integrations integrations
 
 type integrations struct {
-	m map[uuid.UUID]*Integration
+	m         map[uuid.UUID]*Integration
+	c         chan struct{}
+	listeners struct {
+		s []chan struct{}
+
+		sync.Mutex
+	}
+
 	sync.Once
 	sync.RWMutex
+}
+
+func (i *integrations) notify() {
+	i.c <- struct{}{}
 }
 
 func (i *integrations) Delete(uuid uuid.UUID) error {
@@ -27,6 +38,7 @@ func (i *integrations) Delete(uuid uuid.UUID) error {
 	i.Lock()
 	delete(i.m, uuid)
 	i.Unlock()
+	i.notify()
 	return nil
 }
 
@@ -48,12 +60,26 @@ func (i *integrations) GetByKind(kind IntegrationKind) (*Integration, error) {
 			return integration, nil
 		}
 	}
-	return nil, errors.New("no integration of that type found")
+	return nil, ErrNotFound
 }
 
 func (i *integrations) Init() {
 	i.Do(func() {
 		i.m = make(map[uuid.UUID]*Integration)
+		i.c = make(chan struct{})
+		i.listeners.s = []chan struct{}{}
+
+		go func() {
+			for {
+				<-i.c
+				i.listeners.Lock()
+				for _, c := range i.listeners.s {
+					close(c)
+				}
+				i.listeners.s = nil
+				i.listeners.Unlock()
+			}
+		}()
 	})
 }
 
@@ -61,6 +87,29 @@ func (i *integrations) Put(integration *Integration) {
 	i.Lock()
 	i.m[integration.UUID] = integration
 	i.Unlock()
+	i.notify()
+}
+
+func (i *integrations) Wait() {
+	c := make(chan struct{})
+	i.listeners.Lock()
+	i.listeners.s = append(i.listeners.s, c)
+	i.listeners.Unlock()
+	<-c
+}
+
+func (i *integrations) WaitByKind(kind IntegrationKind) (*Integration, error) {
+	for {
+		integration, err := i.GetByKind(kind)
+		if err != nil && err != ErrNotFound {
+			return nil, err
+		}
+		if err == ErrNotFound {
+			i.Wait()
+			continue
+		}
+		return integration, nil
+	}
 }
 
 func init() {
