@@ -2,11 +2,14 @@ package acme
 
 import (
 	"fmt"
+	"time"
 
 	"powerssl.io/pkg/controller/api"
 )
 
 func (acme *ACME) CreateAccount(directoryURL string, termsOfServiceAgreed bool, contacts []string) (*api.Account, error) {
+	time.Sleep(1 * time.Second)
+
 	fmt.Printf("directoryURL: %#v\n", directoryURL)
 	fmt.Printf("termsOfServiceAgreed: %#v\n", termsOfServiceAgreed)
 	fmt.Printf("contacts: %#v\n", contacts)
@@ -27,13 +30,19 @@ func (acme *ACME) CreateAccount(directoryURL string, termsOfServiceAgreed bool, 
 }
 
 func (acme *ACME) DeactivateAccount(accountURL string) (*api.Account, error) {
+	time.Sleep(1 * time.Second)
+
 	return nil, ErrNotImplemented
 }
 
 func (acme *ACME) RekeyAccount(accountURL string, directoryURL string) (*api.Account, error) {
+	time.Sleep(1 * time.Second)
+
 	return nil, ErrNotImplemented
 }
 
 func (acme *ACME) UpdateAccount(accountURL string, contacts []string) (*api.Account, error) {
+	time.Sleep(1 * time.Second)
+
 	return nil, ErrNotImplemented
 }
