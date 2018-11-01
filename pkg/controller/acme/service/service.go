@@ -74,11 +74,7 @@ func NewBasicService(logger log.Logger) Service {
 }
 
 func (bs basicService) GetCreateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, bool, []string, error) {
-	a, err := engineactivity.Activities.GetByAPIActivity(activity)
-	if err != nil {
-		return nil, "", false, nil, err
-	}
-	f, err := a.GetRequest()
+	f, err := engineactivity.GetRequest(activity)
 	if err != nil {
 		return nil, "", false, nil, err
 	}
@@ -86,11 +82,7 @@ func (bs basicService) GetCreateAccountRequest(ctx context.Context, activity *ap
 }
 
 func (bs basicService) SetCreateAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error {
-	a, err := engineactivity.Activities.GetByAPIActivity(activity)
-	if err != nil {
-		return err
-	}
-	f, err := a.SetResponse()
+	f, err := engineactivity.SetResponse(activity)
 	if err != nil {
 		return err
 	}
@@ -98,105 +90,209 @@ func (bs basicService) SetCreateAccountResponse(ctx context.Context, activity *a
 }
 
 func (bs basicService) GetDeactivateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, error) {
-	return nil, "", nil
+	f, err := engineactivity.GetRequest(activity)
+	if err != nil {
+		return nil, "", err
+	}
+	return f.(func(*api.Activity) (*api.Activity, string, error))(activity)
 }
 
 func (bs basicService) SetDeactivateAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error {
-	return nil
+	f, err := engineactivity.SetResponse(activity)
+	if err != nil {
+		return err
+	}
+	return f.(func(*api.Account, *api.Error) error)(account, erro)
 }
 
 func (bs basicService) GetRekeyAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
-	return nil, "", "", nil
+	f, err := engineactivity.GetRequest(activity)
+	if err != nil {
+		return nil, "", "", err
+	}
+	return f.(func(*api.Activity) (*api.Activity, string, string, error))(activity)
 }
 
 func (bs basicService) SetRekeyAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error {
-	return nil
+	f, err := engineactivity.SetResponse(activity)
+	if err != nil {
+		return err
+	}
+	return f.(func(*api.Account, *api.Error) error)(account, erro)
 }
 
 func (bs basicService) GetUpdateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, []string, error) {
-	return nil, "", nil, nil
+	f, err := engineactivity.GetRequest(activity)
+	if err != nil {
+		return nil, "", nil, err
+	}
+	return f.(func(*api.Activity) (*api.Activity, string, []string, error))(activity)
 }
 
 func (bs basicService) SetUpdateAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error {
-	return nil
+	f, err := engineactivity.SetResponse(activity)
+	if err != nil {
+		return err
+	}
+	return f.(func(*api.Account, *api.Error) error)(account, erro)
 }
 
 func (bs basicService) GetCreateOrderRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, []*api.Identifier, string, string, error) {
-	return nil, "", "", nil, "", "", nil
+	f, err := engineactivity.GetRequest(activity)
+	if err != nil {
+		return nil, "", "", nil, "", "", err
+	}
+	return f.(func(*api.Activity) (*api.Activity, string, string, []*api.Identifier, string, string, error))(activity)
 }
 
 func (bs basicService) SetCreateOrderResponse(ctx context.Context, activity *api.Activity, order *api.Order, erro *api.Error) error {
-	return nil
+	f, err := engineactivity.SetResponse(activity)
+	if err != nil {
+		return err
+	}
+	return f.(func(*api.Order, *api.Error) error)(order, erro)
 }
 
 func (bs basicService) GetFinalizeOrderRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, *x509.CertificateRequest, error) {
-	return nil, "", "", nil, nil
+	f, err := engineactivity.GetRequest(activity)
+	if err != nil {
+		return nil, "", "", nil, err
+	}
+	return f.(func(*api.Activity) (*api.Activity, string, string, *x509.CertificateRequest, error))(activity)
 }
 
 func (bs basicService) SetFinalizeOrderResponse(ctx context.Context, activity *api.Activity, order *api.Order, erro *api.Error) error {
-	return nil
+	f, err := engineactivity.SetResponse(activity)
+	if err != nil {
+		return err
+	}
+	return f.(func(*api.Order, *api.Error) error)(order, erro)
 }
 
 func (bs basicService) GetGetOrderRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
-	return nil, "", "", nil
+	f, err := engineactivity.GetRequest(activity)
+	if err != nil {
+		return nil, "", "", err
+	}
+	return f.(func(*api.Activity) (*api.Activity, string, string, error))(activity)
 }
 
 func (bs basicService) SetGetOrderResponse(ctx context.Context, activity *api.Activity, order *api.Order, erro *api.Error) error {
-	return nil
+	f, err := engineactivity.SetResponse(activity)
+	if err != nil {
+		return err
+	}
+	return f.(func(*api.Order, *api.Error) error)(order, erro)
 }
 
 func (bs basicService) GetCreateAuthorizationRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, *api.Identifier, error) {
-	return nil, "", "", nil, nil
+	f, err := engineactivity.GetRequest(activity)
+	if err != nil {
+		return nil, "", "", nil, err
+	}
+	return f.(func(*api.Activity) (*api.Activity, string, string, *api.Identifier, error))(activity)
 }
 
 func (bs basicService) SetCreateAuthorizationResponse(ctx context.Context, activity *api.Activity, authorization *api.Authorization, erro *api.Error) error {
-	return nil
+	f, err := engineactivity.SetResponse(activity)
+	if err != nil {
+		return err
+	}
+	return f.(func(*api.Authorization, *api.Error) error)(authorization, erro)
 }
 
 func (bs basicService) GetDeactivateAuthorizationRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
-	return nil, "", "", nil
+	f, err := engineactivity.GetRequest(activity)
+	if err != nil {
+		return nil, "", "", err
+	}
+	return f.(func(*api.Activity) (*api.Activity, string, string, error))(activity)
 }
 
 func (bs basicService) SetDeactivateAuthorizationResponse(ctx context.Context, activity *api.Activity, authorization *api.Authorization, erro *api.Error) error {
-	return nil
+	f, err := engineactivity.SetResponse(activity)
+	if err != nil {
+		return err
+	}
+	return f.(func(*api.Authorization, *api.Error) error)(authorization, erro)
 }
 
 func (bs basicService) GetGetAuthorizationRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
-	return nil, "", "", nil
+	f, err := engineactivity.GetRequest(activity)
+	if err != nil {
+		return nil, "", "", err
+	}
+	return f.(func(*api.Activity) (*api.Activity, string, string, error))(activity)
 }
 
 func (bs basicService) SetGetAuthorizationResponse(ctx context.Context, activity *api.Activity, authorization *api.Authorization, erro *api.Error) error {
-	return nil
+	f, err := engineactivity.SetResponse(activity)
+	if err != nil {
+		return err
+	}
+	return f.(func(*api.Authorization, *api.Error) error)(authorization, erro)
 }
 
 func (bs basicService) GetGetChallengeRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
-	return nil, "", "", nil
+	f, err := engineactivity.GetRequest(activity)
+	if err != nil {
+		return nil, "", "", err
+	}
+	return f.(func(*api.Activity) (*api.Activity, string, string, error))(activity)
 }
 
 func (bs basicService) SetGetChallengeResponse(ctx context.Context, activity *api.Activity, challenge *api.Challenge, erro *api.Error) error {
-	return nil
+	f, err := engineactivity.SetResponse(activity)
+	if err != nil {
+		return err
+	}
+	return f.(func(*api.Challenge, *api.Error) error)(challenge, erro)
 }
 
 func (bs basicService) GetValidateChallengeRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
-	return nil, "", "", nil
+	f, err := engineactivity.GetRequest(activity)
+	if err != nil {
+		return nil, "", "", err
+	}
+	return f.(func(*api.Activity) (*api.Activity, string, string, error))(activity)
 }
 
 func (bs basicService) SetValidateChallengeResponse(ctx context.Context, activity *api.Activity, challenge *api.Challenge, erro *api.Error) error {
-	return nil
+	f, err := engineactivity.SetResponse(activity)
+	if err != nil {
+		return err
+	}
+	return f.(func(*api.Challenge, *api.Error) error)(challenge, erro)
 }
 
 func (bs basicService) GetGetCertificateRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
-	return nil, "", "", nil
+	f, err := engineactivity.GetRequest(activity)
+	if err != nil {
+		return nil, "", "", err
+	}
+	return f.(func(*api.Activity) (*api.Activity, string, string, error))(activity)
 }
 
 func (bs basicService) SetGetCertificateResponse(ctx context.Context, activity *api.Activity, certificates []*x509.Certificate, erro *api.Error) error {
-	return nil
+	f, err := engineactivity.SetResponse(activity)
+	if err != nil {
+		return err
+	}
+	return f.(func([]*x509.Certificate, *api.Error) error)(certificates, erro)
 }
 
 func (bs basicService) GetRevokeCertificateRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, *x509.Certificate, *api.RevocationReason, error) {
-	return nil, "", "", nil, nil, nil
+	f, err := engineactivity.GetRequest(activity)
+	if err != nil {
+		return nil, "", "", nil, nil, err
+	}
+	return f.(func(*api.Activity) (*api.Activity, string, string, *x509.Certificate, *api.RevocationReason, error))(activity)
 }
 
 func (bs basicService) SetRevokeCertificateResponse(ctx context.Context, activity *api.Activity, erro *api.Error) error {
-	return nil
+	f, err := engineactivity.SetResponse(activity)
+	if err != nil {
+		return err
+	}
+	return f.(func(*api.Error) error)(erro)
 }
