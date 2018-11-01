@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"context"
 	"errors"
 	"sync"
 
@@ -90,23 +91,27 @@ func (i *integrations) Put(integration *Integration) {
 	i.notify()
 }
 
-func (i *integrations) Wait() {
+func (i *integrations) Wait() chan struct{} {
 	c := make(chan struct{})
 	i.listeners.Lock()
 	i.listeners.s = append(i.listeners.s, c)
 	i.listeners.Unlock()
-	<-c
+	return c
 }
 
-func (i *integrations) WaitByKind(kind IntegrationKind) (*Integration, error) {
+func (i *integrations) WaitByKind(ctx context.Context, kind IntegrationKind) (*Integration, error) {
 	for {
 		integration, err := i.GetByKind(kind)
 		if err != nil && err != ErrNotFound {
 			return nil, err
 		}
 		if err == ErrNotFound {
-			i.Wait()
-			continue
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			case <-i.Wait():
+				continue
+			}
 		}
 		return integration, nil
 	}

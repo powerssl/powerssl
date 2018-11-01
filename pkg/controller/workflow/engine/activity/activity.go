@@ -1,6 +1,8 @@
 package activity
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 	"github.com/looplab/fsm"
 
@@ -64,7 +66,7 @@ func (a *Activity) Execute() {
 }
 
 func (a *Activity) execute() {
-	integ, err := integration.Integrations.WaitByKind(a.IntegrationKind())
+	integ, err := integration.Integrations.WaitByKind(context.Background(), a.IntegrationKind())
 	if err != nil {
 		panic(err) // TODO
 	}
