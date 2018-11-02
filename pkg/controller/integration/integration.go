@@ -9,7 +9,6 @@ import (
 	"google.golang.org/grpc"
 
 	apiv1 "powerssl.io/pkg/controller/api/v1"
-	resource "powerssl.io/pkg/resource"
 )
 
 var errUnknown = errors.New("Unknown error")
@@ -42,7 +41,7 @@ type integrationServiceServer struct {
 	logger log.Logger
 }
 
-func New(logger log.Logger, duration metrics.Histogram) resource.Resource {
+func New(logger log.Logger, duration metrics.Histogram) *integrationServiceServer {
 	return &integrationServiceServer{
 		logger: logger,
 	}

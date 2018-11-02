@@ -6,7 +6,7 @@ import (
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
-	types "github.com/gogo/protobuf/types"
+	"github.com/gogo/protobuf/types"
 	"google.golang.org/grpc"
 
 	apiv1 "powerssl.io/pkg/apiserver/api/v1"

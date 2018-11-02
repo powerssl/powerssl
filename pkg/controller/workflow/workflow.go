@@ -9,7 +9,6 @@ import (
 	"powerssl.io/pkg/controller/workflow/endpoint"
 	service "powerssl.io/pkg/controller/workflow/service"
 	"powerssl.io/pkg/controller/workflow/transport"
-	resource "powerssl.io/pkg/resource"
 )
 
 type Workflow struct {
@@ -17,7 +16,7 @@ type Workflow struct {
 	logger    log.Logger
 }
 
-func New(logger log.Logger, duration metrics.Histogram) resource.Resource {
+func New(logger log.Logger, duration metrics.Histogram) *Workflow {
 	svc := service.New(logger)
 	endpoints := endpoint.NewEndpoints(svc, logger, duration)
 

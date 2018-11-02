@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
-	types "github.com/gogo/protobuf/types"
+	"github.com/gogo/protobuf/types"
 
 	apiv1 "powerssl.io/pkg/apiserver/api/v1"
 	"powerssl.io/pkg/resource/generated/certificate/endpoint"

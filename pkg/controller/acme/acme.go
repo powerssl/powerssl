@@ -9,7 +9,6 @@ import (
 	service "powerssl.io/pkg/controller/acme/service"
 	"powerssl.io/pkg/controller/acme/transport"
 	apiv1 "powerssl.io/pkg/controller/api/v1"
-	resource "powerssl.io/pkg/resource"
 )
 
 type ACME struct {
@@ -17,7 +16,7 @@ type ACME struct {
 	logger    log.Logger
 }
 
-func New(logger log.Logger, duration metrics.Histogram) resource.Resource {
+func New(logger log.Logger, duration metrics.Histogram) *ACME {
 	svc := service.New(logger)
 	endpoints := endpoint.NewEndpoints(svc, logger, duration)
 
