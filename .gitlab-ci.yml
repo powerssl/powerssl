@@ -27,27 +27,27 @@ build apiserver:
 build controller:
   <<: *build_template
   variables:
-    component: controller
+    COMPONENT: controller
 
 build acme integration:
   <<: *build_template
   variables:
-    component: integration-acme
+    COMPONENT: integration-acme
 
 build cloudflare integration:
   <<: *build_template
   variables:
-    component: integration-cloudflare
+    COMPONENT: integration-cloudflare
 
 build powerctl:
   <<: *build_template
   variables:
-    component: powerctl
+    COMPONENT: powerctl
 
 build signer:
   <<: *build_template
   variables:
-    component: signer
+    COMPONENT: signer
 
 code_quality:
   stage: test
@@ -166,27 +166,27 @@ release apiserver:
 release controller:
   <<: *release_template
   variables:
-    component: controller
+    COMPONENT: controller
 
 release acme integration:
   <<: *release_template
   variables:
-    component: integration-acme
+    COMPONENT: integration-acme
 
 release cloudflare integration:
   <<: *release_template
   variables:
-    component: integration-cloudflare
+    COMPONENT: integration-cloudflare
 
 release powerctl:
   <<: *release_template
   variables:
-    component: powerctl
+    COMPONENT: powerctl
 
 release signer:
   <<: *release_template
   variables:
-    component: signer
+    COMPONENT: signer
 
 # ---------------------------------------------------------------------------
 
