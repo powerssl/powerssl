@@ -24,7 +24,7 @@ import (
 	controllerclient "powerssl.io/pkg/controller/client"
 )
 
-func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialect, dbConnection, httpAddr string, controllerAddr, controllerCertFile, controllerServerNameOverride string, controllerInsecure, controllerInsecureSkipTLSVerify bool) {
+func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialect, dbConnection, httpAddr, controllerAddr, controllerCertFile, controllerServerNameOverride string, controllerInsecure, controllerInsecureSkipTLSVerify bool) {
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(os.Stderr)

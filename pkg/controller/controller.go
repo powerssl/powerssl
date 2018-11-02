@@ -19,13 +19,14 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
+	apiserverclient "powerssl.io/pkg/apiserver/client"
 	"powerssl.io/pkg/controller/acme"
 	"powerssl.io/pkg/controller/integration"
 	"powerssl.io/pkg/controller/workflow"
 	workflowengine "powerssl.io/pkg/controller/workflow/engine"
 )
 
-func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, httpAddr string) {
+func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, httpAddr, apiserverAddr, apiserverCertFile, apiserverServerNameOverride string, apiserverInsecure, apiserverInsecureSkipTLSVerify bool) {
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(os.Stderr)
@@ -42,6 +43,13 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, httpAddr
 			Help:      "Request duration in seconds.",
 		}, []string{"method", "success"})
 	}
+
+	var client *apiserverclient.GRPCClient
+	{
+		client = apiserverclient.NewGRPCClient(apiserverAddr, apiserverCertFile, apiserverServerNameOverride, apiserverInsecure, apiserverInsecureSkipTLSVerify)
+		// TODO: Add error handling
+	}
+	var _ = client // TODO
 
 	engine := workflowengine.New()
 
