@@ -19,7 +19,7 @@ var serveCmd = &cobra.Command{
 		controllerCertFile := viper.GetString("controller.ca-file")
 		controllerInsecure := viper.GetBool("controller.insecure")
 		controllerInsecureSkipTLSVerify := viper.GetBool("controller.insecure-skip-tls-verify")
-		// controllerServerNameOverride := viper.GetString("controller.server-name-override")
+		controllerServerNameOverride := viper.GetString("controller.server-name-override")
 		dbConnection := viper.GetString("db.connection")
 		dbDialect := viper.GetString("db.dialect")
 		var httpAddr string
@@ -64,7 +64,7 @@ var serveCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		apiserver.Run(addr, tlsCertFile, tlsPrivateKeyFile, insecure, dbDialect, dbConnection, httpAddr)
+		apiserver.Run(addr, tlsCertFile, tlsPrivateKeyFile, insecure, dbDialect, dbConnection, httpAddr, controllerAddr, controllerCertFile, controllerServerNameOverride, controllerInsecure, controllerInsecureSkipTLSVerify)
 	},
 }
 

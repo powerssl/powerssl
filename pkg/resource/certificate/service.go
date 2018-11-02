@@ -20,11 +20,11 @@ type Service interface {
 	Update(ctx context.Context, name string, certificate *api.Certificate) (*api.Certificate, error)
 }
 
-func New(db *gorm.DB, logger log.Logger) Service {
+func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) Service {
 	db.AutoMigrate(&Certificate{})
 	var svc Service
 	{
-		svc = NewBasicService(db, logger)
+		svc = NewBasicService(db, logger, client)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
@@ -36,12 +36,7 @@ type basicService struct {
 	logger           log.Logger
 }
 
-func NewBasicService(db *gorm.DB, logger log.Logger) Service {
-	client, err := controllerclient.NewGRPCClient("localhost:8081", "/etc/powerssl/ca.pem", "", false, false, logger)
-	if err != nil {
-		panic(err)
-	}
-
+func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) Service {
 	return basicService{
 		controllerclient: client,
 		db:               db,

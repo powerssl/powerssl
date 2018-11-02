@@ -20,9 +20,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+
+	controllerclient "powerssl.io/pkg/controller/client"
 )
 
-func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialect, dbConnection, httpAddr string) {
+func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialect, dbConnection, httpAddr string, controllerAddr, controllerCertFile, controllerServerNameOverride string, controllerInsecure, controllerInsecureSkipTLSVerify bool) {
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(os.Stderr)
@@ -50,7 +52,16 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialec
 		defer db.Close()
 	}
 
-	resources := makeResources(db, logger, duration)
+	var client *controllerclient.GRPCClient
+	{
+		var err error
+		if client, err = controllerclient.NewGRPCClient(controllerAddr, controllerCertFile, controllerServerNameOverride, controllerInsecure, controllerInsecureSkipTLSVerify, logger); err != nil {
+			logger.Log("transport", "gRPC", "during", "Connect", "err", err)
+			os.Exit(1)
+		}
+	}
+
+	resources := makeResources(db, logger, duration, client)
 
 	var g group.Group
 	{
