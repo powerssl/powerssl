@@ -17,7 +17,6 @@ import (
 )
 
 type Certificate struct {
-	db        *gorm.DB
 	endpoints endpoint.Endpoints
 	logger    log.Logger
 }
@@ -27,7 +26,6 @@ func New(db *gorm.DB, logger log.Logger, duration metrics.Histogram, client *con
 	endpoints := endpoint.NewEndpoints(svc, logger, duration)
 
 	return &Certificate{
-		db:        db,
 		endpoints: endpoints,
 		logger:    logger,
 	}

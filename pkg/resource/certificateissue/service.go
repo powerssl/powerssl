@@ -7,6 +7,7 @@ import (
 	"github.com/jinzhu/gorm"
 
 	"powerssl.io/pkg/apiserver/api"
+	controllerclient "powerssl.io/pkg/controller/client"
 )
 
 type Service interface {
@@ -17,7 +18,7 @@ type Service interface {
 	Update(ctx context.Context, name string, certificateIssue *api.CertificateIssue) (*api.CertificateIssue, error)
 }
 
-func New(db *gorm.DB, logger log.Logger) Service {
+func New(db *gorm.DB, logger log.Logger, _ *controllerclient.GRPCClient) Service {
 	var svc Service
 	{
 		svc = NewBasicService(db)

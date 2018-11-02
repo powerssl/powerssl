@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc"
 
 	apiv1 "powerssl.io/pkg/apiserver/api/v1"
+	controllerclient "powerssl.io/pkg/controller/client"
 	resource "powerssl.io/pkg/resource"
 	service "powerssl.io/pkg/resource/certificateauthority"
 	"powerssl.io/pkg/resource/generated/certificateauthority/endpoint"
@@ -16,17 +17,15 @@ import (
 )
 
 type CertificateAuthority struct {
-	db        *gorm.DB
 	endpoints endpoint.Endpoints
 	logger    log.Logger
 }
 
-func New(db *gorm.DB, logger log.Logger, duration metrics.Histogram) resource.Resource {
-	svc := service.New(db, logger)
+func New(db *gorm.DB, logger log.Logger, duration metrics.Histogram, client *controllerclient.GRPCClient) resource.Resource {
+	svc := service.New(db, logger, client)
 	endpoints := endpoint.NewEndpoints(svc, logger, duration)
 
 	return &CertificateAuthority{
-		db:        db,
 		endpoints: endpoints,
 		logger:    logger,
 	}
