@@ -10,7 +10,6 @@ import (
 
 	apiv1 "powerssl.io/pkg/apiserver/api/v1"
 	controllerclient "powerssl.io/pkg/controller/client"
-	resource "powerssl.io/pkg/resource"
 	service "powerssl.io/pkg/resource/certificate"
 	"powerssl.io/pkg/resource/generated/certificate/endpoint"
 	"powerssl.io/pkg/resource/generated/certificate/transport"
@@ -21,7 +20,7 @@ type Certificate struct {
 	logger    log.Logger
 }
 
-func New(db *gorm.DB, logger log.Logger, duration metrics.Histogram, client *controllerclient.GRPCClient) resource.Resource {
+func New(db *gorm.DB, logger log.Logger, duration metrics.Histogram, client *controllerclient.GRPCClient) *Certificate {
 	svc := service.New(db, logger, client)
 	endpoints := endpoint.NewEndpoints(svc, logger, duration)
 
