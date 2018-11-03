@@ -12,8 +12,8 @@ import (
 	stdopentracing "github.com/opentracing/opentracing-go"
 
 	"powerssl.io/pkg/apiserver/api"
-	"powerssl.io/pkg/resource"
 	service "powerssl.io/pkg/resource/certificate"
+	"powerssl.io/pkg/util/middleware"
 )
 
 type Endpoints struct {
@@ -29,40 +29,40 @@ func NewEndpoints(svc service.Service, logger log.Logger, tracer stdopentracing.
 	{
 		createEndpoint = makeCreateEndpoint(svc)
 		createEndpoint = opentracing.TraceServer(tracer, "Create")(createEndpoint)
-		createEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "Create"))(createEndpoint)
-		createEndpoint = resource.InstrumentingMiddleware(duration.With("method", "Create"))(createEndpoint)
+		createEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Create"))(createEndpoint)
+		createEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Create"))(createEndpoint)
 	}
 
 	var deleteEndpoint endpoint.Endpoint
 	{
 		deleteEndpoint = makeDeleteEndpoint(svc)
 		deleteEndpoint = opentracing.TraceServer(tracer, "Delete")(deleteEndpoint)
-		deleteEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "Delete"))(deleteEndpoint)
-		deleteEndpoint = resource.InstrumentingMiddleware(duration.With("method", "Delete"))(deleteEndpoint)
+		deleteEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Delete"))(deleteEndpoint)
+		deleteEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Delete"))(deleteEndpoint)
 	}
 
 	var getEndpoint endpoint.Endpoint
 	{
 		getEndpoint = makeGetEndpoint(svc)
 		getEndpoint = opentracing.TraceServer(tracer, "Get")(getEndpoint)
-		getEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "Get"))(getEndpoint)
-		getEndpoint = resource.InstrumentingMiddleware(duration.With("method", "Get"))(getEndpoint)
+		getEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Get"))(getEndpoint)
+		getEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Get"))(getEndpoint)
 	}
 
 	var listEndpoint endpoint.Endpoint
 	{
 		listEndpoint = makeListEndpoint(svc)
 		listEndpoint = opentracing.TraceServer(tracer, "List")(listEndpoint)
-		listEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "List"))(listEndpoint)
-		listEndpoint = resource.InstrumentingMiddleware(duration.With("method", "List"))(listEndpoint)
+		listEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "List"))(listEndpoint)
+		listEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "List"))(listEndpoint)
 	}
 
 	var updateEndpoint endpoint.Endpoint
 	{
 		updateEndpoint = makeUpdateEndpoint(svc)
 		updateEndpoint = opentracing.TraceServer(tracer, "Update")(updateEndpoint)
-		updateEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "Update"))(updateEndpoint)
-		updateEndpoint = resource.InstrumentingMiddleware(duration.With("method", "Update"))(updateEndpoint)
+		updateEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Update"))(updateEndpoint)
+		updateEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Update"))(updateEndpoint)
 	}
 
 	return Endpoints{

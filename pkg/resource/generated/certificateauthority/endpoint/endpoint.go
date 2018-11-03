@@ -10,8 +10,8 @@ import (
 	"github.com/go-kit/kit/metrics"
 
 	"powerssl.io/pkg/apiserver/api"
-	"powerssl.io/pkg/resource"
 	service "powerssl.io/pkg/resource/certificateauthority"
+	"powerssl.io/pkg/util/middleware"
 )
 
 type Endpoints struct {
@@ -26,36 +26,36 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var createEndpoint endpoint.Endpoint
 	{
 		createEndpoint = makeCreateEndpoint(svc)
-		createEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "Create"))(createEndpoint)
-		createEndpoint = resource.InstrumentingMiddleware(duration.With("method", "Create"))(createEndpoint)
+		createEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Create"))(createEndpoint)
+		createEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Create"))(createEndpoint)
 	}
 
 	var deleteEndpoint endpoint.Endpoint
 	{
 		deleteEndpoint = makeDeleteEndpoint(svc)
-		deleteEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "Delete"))(deleteEndpoint)
-		deleteEndpoint = resource.InstrumentingMiddleware(duration.With("method", "Delete"))(deleteEndpoint)
+		deleteEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Delete"))(deleteEndpoint)
+		deleteEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Delete"))(deleteEndpoint)
 	}
 
 	var getEndpoint endpoint.Endpoint
 	{
 		getEndpoint = makeGetEndpoint(svc)
-		getEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "Get"))(getEndpoint)
-		getEndpoint = resource.InstrumentingMiddleware(duration.With("method", "Get"))(getEndpoint)
+		getEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Get"))(getEndpoint)
+		getEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Get"))(getEndpoint)
 	}
 
 	var listEndpoint endpoint.Endpoint
 	{
 		listEndpoint = makeListEndpoint(svc)
-		listEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "List"))(listEndpoint)
-		listEndpoint = resource.InstrumentingMiddleware(duration.With("method", "List"))(listEndpoint)
+		listEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "List"))(listEndpoint)
+		listEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "List"))(listEndpoint)
 	}
 
 	var updateEndpoint endpoint.Endpoint
 	{
 		updateEndpoint = makeUpdateEndpoint(svc)
-		updateEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "Update"))(updateEndpoint)
-		updateEndpoint = resource.InstrumentingMiddleware(duration.With("method", "Update"))(updateEndpoint)
+		updateEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Update"))(updateEndpoint)
+		updateEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Update"))(updateEndpoint)
 	}
 
 	return Endpoints{
