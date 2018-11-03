@@ -7,6 +7,8 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
 
+	"github.com/go-kit/kit/tracing/opentracing"
+	stdopentracing "github.com/opentracing/opentracing-go"
 	"powerssl.io/pkg/controller/api"
 	service "powerssl.io/pkg/controller/workflow/service"
 	resource "powerssl.io/pkg/resource"
@@ -16,10 +18,11 @@ type Endpoints struct {
 	CreateEndpoint endpoint.Endpoint
 }
 
-func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histogram) Endpoints {
+func NewEndpoints(svc service.Service, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram) Endpoints {
 	var createEndpoint endpoint.Endpoint
 	{
 		createEndpoint = makeCreateEndpoint(svc)
+		createEndpoint = opentracing.TraceServer(tracer, "Create")(createEndpoint)
 		createEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "Create"))(createEndpoint)
 		createEndpoint = resource.InstrumentingMiddleware(duration.With("method", "Create"))(createEndpoint)
 	}

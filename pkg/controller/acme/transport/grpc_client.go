@@ -1,10 +1,14 @@
 package transport // import "powerssl.io/pkg/controller/acme/transport"
 
 import (
+	"fmt"
+
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/tracing/opentracing"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 	"github.com/gogo/protobuf/types"
+	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 
 	"powerssl.io/pkg/controller/acme/endpoint"
@@ -14,8 +18,10 @@ import (
 
 const serviceName = "powerssl.controller.v1.ACMEService"
 
-func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
-	options := []grpctransport.ClientOption{}
+func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentracing.Tracer) service.Service {
+	options := []grpctransport.ClientOption{
+		grpctransport.ClientBefore(opentracing.ContextToGRPC(tracer, logger)),
+	}
 
 	var getCreateAccountRequestEndpoint kitendpoint.Endpoint
 	{
@@ -28,6 +34,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.GetCreateAccountRequestResponse{},
 			options...,
 		).Endpoint()
+		getCreateAccountRequestEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/GetCreateAccountRequest", serviceName))(getCreateAccountRequestEndpoint)
 	}
 
 	var setCreateAccountResponseEndpoint kitendpoint.Endpoint
@@ -41,6 +48,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			types.Empty{},
 			options...,
 		).Endpoint()
+		setCreateAccountResponseEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/SetCreateAccountResponse", serviceName))(setCreateAccountResponseEndpoint)
 	}
 
 	var getDeactivateAccountRequestEndpoint kitendpoint.Endpoint
@@ -54,6 +62,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.GetDeactivateAccountRequestResponse{},
 			options...,
 		).Endpoint()
+		getDeactivateAccountRequestEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/GetDeactivateAccountRequest", serviceName))(getDeactivateAccountRequestEndpoint)
 	}
 
 	var setDeactivateAccountResponseEndpoint kitendpoint.Endpoint
@@ -67,6 +76,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			types.Empty{},
 			options...,
 		).Endpoint()
+		setDeactivateAccountResponseEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/SetDeactivateAccountResponse", serviceName))(setDeactivateAccountResponseEndpoint)
 	}
 
 	var getRekeyAccountRequestEndpoint kitendpoint.Endpoint
@@ -80,6 +90,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.GetRekeyAccountRequestResponse{},
 			options...,
 		).Endpoint()
+		getRekeyAccountRequestEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/GetRekeyAccountRequest", serviceName))(getRekeyAccountRequestEndpoint)
 	}
 
 	var setRekeyAccountResponseEndpoint kitendpoint.Endpoint
@@ -93,6 +104,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			types.Empty{},
 			options...,
 		).Endpoint()
+		setRekeyAccountResponseEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/SetRekeyAccountResponse", serviceName))(setRekeyAccountResponseEndpoint)
 	}
 
 	var getUpdateAccountRequestEndpoint kitendpoint.Endpoint
@@ -106,6 +118,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.GetUpdateAccountRequestResponse{},
 			options...,
 		).Endpoint()
+		getUpdateAccountRequestEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/GetUpdateAccountRequest", serviceName))(getUpdateAccountRequestEndpoint)
 	}
 
 	var setUpdateAccountResponseEndpoint kitendpoint.Endpoint
@@ -119,6 +132,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			types.Empty{},
 			options...,
 		).Endpoint()
+		setUpdateAccountResponseEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/SetUpdateAccountResponse", serviceName))(setUpdateAccountResponseEndpoint)
 	}
 
 	var getCreateOrderRequestEndpoint kitendpoint.Endpoint
@@ -132,6 +146,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.GetCreateOrderRequestResponse{},
 			options...,
 		).Endpoint()
+		getCreateOrderRequestEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/GetCreateOrderRequest", serviceName))(getCreateOrderRequestEndpoint)
 	}
 
 	var setCreateOrderResponseEndpoint kitendpoint.Endpoint
@@ -145,6 +160,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			types.Empty{},
 			options...,
 		).Endpoint()
+		setCreateOrderResponseEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/SetCreateOrderResponse", serviceName))(setCreateOrderResponseEndpoint)
 	}
 
 	var getFinalizeOrderRequestEndpoint kitendpoint.Endpoint
@@ -158,6 +174,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.GetFinalizeOrderRequestResponse{},
 			options...,
 		).Endpoint()
+		getFinalizeOrderRequestEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/GetFinalizeOrderRequest", serviceName))(getFinalizeOrderRequestEndpoint)
 	}
 
 	var setFinalizeOrderResponseEndpoint kitendpoint.Endpoint
@@ -171,6 +188,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			types.Empty{},
 			options...,
 		).Endpoint()
+		setFinalizeOrderResponseEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/SetFinalizeOrderResponse", serviceName))(setFinalizeOrderResponseEndpoint)
 	}
 
 	var getGetOrderRequestEndpoint kitendpoint.Endpoint
@@ -184,6 +202,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.GetGetOrderRequestResponse{},
 			options...,
 		).Endpoint()
+		getGetOrderRequestEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/GetGetOrderRequest", serviceName))(getGetOrderRequestEndpoint)
 	}
 
 	var setGetOrderResponseEndpoint kitendpoint.Endpoint
@@ -197,6 +216,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			types.Empty{},
 			options...,
 		).Endpoint()
+		setGetOrderResponseEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/SetGetOrderResponse", serviceName))(setGetOrderResponseEndpoint)
 	}
 
 	var getCreateAuthorizationRequestEndpoint kitendpoint.Endpoint
@@ -210,6 +230,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.GetCreateAuthorizationRequestResponse{},
 			options...,
 		).Endpoint()
+		getCreateAccountRequestEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/GetCreateAuthorizationRequest", serviceName))(getCreateAccountRequestEndpoint)
 	}
 
 	var setCreateAuthorizationResponseEndpoint kitendpoint.Endpoint
@@ -223,6 +244,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			types.Empty{},
 			options...,
 		).Endpoint()
+		setCreateAuthorizationResponseEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/SetCreateAuthorizationResponse", serviceName))(setCreateAuthorizationResponseEndpoint)
 	}
 
 	var getDeactivateAuthorizationRequestEndpoint kitendpoint.Endpoint
@@ -236,6 +258,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.GetDeactivateAuthorizationRequestResponse{},
 			options...,
 		).Endpoint()
+		getDeactivateAuthorizationRequestEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/GetDeactivateAuthorizationRequest", serviceName))(getDeactivateAuthorizationRequestEndpoint)
 	}
 
 	var setDeactivateAuthorizationResponseEndpoint kitendpoint.Endpoint
@@ -249,6 +272,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			types.Empty{},
 			options...,
 		).Endpoint()
+		setDeactivateAuthorizationResponseEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/SetDeactivateAuthorizationResponse", serviceName))(setDeactivateAuthorizationResponseEndpoint)
 	}
 
 	var getGetAuthorizationRequestEndpoint kitendpoint.Endpoint
@@ -262,6 +286,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.GetGetAuthorizationRequestResponse{},
 			options...,
 		).Endpoint()
+		getGetAuthorizationRequestEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/GetGetAuthorizationRequest", serviceName))(getGetAuthorizationRequestEndpoint)
 	}
 
 	var setGetAuthorizationResponseEndpoint kitendpoint.Endpoint
@@ -275,6 +300,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			types.Empty{},
 			options...,
 		).Endpoint()
+		setGetAuthorizationResponseEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/SetGetAuthorizationResponse", serviceName))(setGetAuthorizationResponseEndpoint)
 	}
 
 	var getGetChallengeRequestEndpoint kitendpoint.Endpoint
@@ -288,6 +314,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.GetGetChallengeRequestResponse{},
 			options...,
 		).Endpoint()
+		getGetChallengeRequestEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/GetGetChallengeRequest", serviceName))(getGetChallengeRequestEndpoint)
 	}
 
 	var setGetChallengeResponseEndpoint kitendpoint.Endpoint
@@ -301,6 +328,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			types.Empty{},
 			options...,
 		).Endpoint()
+		setGetChallengeResponseEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/SetGetChallengeResponse", serviceName))(setGetChallengeResponseEndpoint)
 	}
 
 	var getValidateChallengeRequestEndpoint kitendpoint.Endpoint
@@ -314,6 +342,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.GetValidateChallengeRequestResponse{},
 			options...,
 		).Endpoint()
+		getValidateChallengeRequestEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/GetValidateChallengeRequest", serviceName))(getValidateChallengeRequestEndpoint)
 	}
 
 	var setValidateChallengeResponseEndpoint kitendpoint.Endpoint
@@ -327,6 +356,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			types.Empty{},
 			options...,
 		).Endpoint()
+		setValidateChallengeResponseEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/SetValidateChallengeResponse", serviceName))(setValidateChallengeResponseEndpoint)
 	}
 
 	var getGetCertificateRequestEndpoint kitendpoint.Endpoint
@@ -340,6 +370,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.GetGetCertificateRequestResponse{},
 			options...,
 		).Endpoint()
+		getGetCertificateRequestEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/GetGetCertificateRequest", serviceName))(getGetCertificateRequestEndpoint)
 	}
 
 	var setGetCertificateResponseEndpoint kitendpoint.Endpoint
@@ -353,6 +384,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			types.Empty{},
 			options...,
 		).Endpoint()
+		setGetCertificateResponseEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/SetGetCertificateResponse", serviceName))(setGetCertificateResponseEndpoint)
 	}
 
 	var getRevokeCertificateRequestEndpoint kitendpoint.Endpoint
@@ -366,6 +398,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.GetRevokeCertificateRequestResponse{},
 			options...,
 		).Endpoint()
+		getRevokeCertificateRequestEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/GetRevokeCertificateRequest", serviceName))(getRevokeCertificateRequestEndpoint)
 	}
 
 	var setRevokeCertificateResponseEndpoint kitendpoint.Endpoint
@@ -379,6 +412,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			types.Empty{},
 			options...,
 		).Endpoint()
+		setRevokeCertificateResponseEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/SetRevokeCertificateResponse", serviceName))(setRevokeCertificateResponseEndpoint)
 	}
 
 	return endpoint.Endpoints{

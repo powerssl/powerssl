@@ -3,10 +3,14 @@
 package transport // import "powerssl.io/pkg/resource/generated/certificate/transport"
 
 import (
+	"fmt"
+
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/tracing/opentracing"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 	"github.com/gogo/protobuf/types"
+	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 
 	apiv1 "powerssl.io/pkg/apiserver/api/v1"
@@ -16,8 +20,10 @@ import (
 
 const serviceName = "powerssl.apiserver.v1.CertificateService"
 
-func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
-	options := []grpctransport.ClientOption{}
+func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentracing.Tracer) service.Service {
+	options := []grpctransport.ClientOption{
+		grpctransport.ClientBefore(opentracing.ContextToGRPC(tracer, logger)),
+	}
 
 	var createEndpoint kitendpoint.Endpoint
 	{
@@ -30,6 +36,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.Certificate{},
 			options...,
 		).Endpoint()
+		createEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/Create", serviceName))(createEndpoint)
 	}
 
 	var deleteEndpoint kitendpoint.Endpoint
@@ -43,6 +50,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			types.Empty{},
 			options...,
 		).Endpoint()
+		deleteEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/Delete", serviceName))(deleteEndpoint)
 	}
 
 	var getEndpoint kitendpoint.Endpoint
@@ -56,6 +64,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.Certificate{},
 			options...,
 		).Endpoint()
+		getEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/Get", serviceName))(getEndpoint)
 	}
 
 	var listEndpoint kitendpoint.Endpoint
@@ -69,6 +78,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.ListCertificatesResponse{},
 			options...,
 		).Endpoint()
+		listEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/List", serviceName))(listEndpoint)
 	}
 
 	var updateEndpoint kitendpoint.Endpoint
@@ -82,6 +92,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger) service.Service {
 			apiv1.Certificate{},
 			options...,
 		).Endpoint()
+		updateEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/Update", serviceName))(updateEndpoint)
 	}
 
 	return endpoint.Endpoints{

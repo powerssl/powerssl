@@ -8,6 +8,8 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
 
+	"github.com/go-kit/kit/tracing/opentracing"
+	stdopentracing "github.com/opentracing/opentracing-go"
 	service "powerssl.io/pkg/controller/acme/service"
 	"powerssl.io/pkg/controller/api"
 	resource "powerssl.io/pkg/resource"
@@ -60,10 +62,11 @@ type Endpoints struct {
 	SetRevokeCertificateResponseEndpoint endpoint.Endpoint
 }
 
-func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histogram) Endpoints {
+func NewEndpoints(svc service.Service, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram) Endpoints {
 	var getCreateAccountRequestEndpoint endpoint.Endpoint
 	{
 		getCreateAccountRequestEndpoint = makeGetCreateAccountRequestEndpoint(svc)
+		getCreateAccountRequestEndpoint = opentracing.TraceServer(tracer, "GetCreateAccountRequest")(getCreateAccountRequestEndpoint)
 		getCreateAccountRequestEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "GetCreateAccountRequest"))(getCreateAccountRequestEndpoint)
 		getCreateAccountRequestEndpoint = resource.InstrumentingMiddleware(duration.With("method", "GetCreateAccountRequest"))(getCreateAccountRequestEndpoint)
 	}
@@ -71,6 +74,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var setCreateAccountResponseEndpoint endpoint.Endpoint
 	{
 		setCreateAccountResponseEndpoint = makeSetCreateAccountResponseEndpoint(svc)
+		setCreateAccountResponseEndpoint = opentracing.TraceServer(tracer, "SetCreateAccountResponse")(setCreateAccountResponseEndpoint)
 		setCreateAccountResponseEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "SetCreateAccountResponse"))(setCreateAccountResponseEndpoint)
 		setCreateAccountResponseEndpoint = resource.InstrumentingMiddleware(duration.With("method", "SetCreateAccountResponse"))(setCreateAccountResponseEndpoint)
 	}
@@ -78,6 +82,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var getDeactivateAccountRequestEndpoint endpoint.Endpoint
 	{
 		getDeactivateAccountRequestEndpoint = makeGetDeactivateAccountRequestEndpoint(svc)
+		getDeactivateAccountRequestEndpoint = opentracing.TraceServer(tracer, "GetDeactivateAccountRequest")(getDeactivateAccountRequestEndpoint)
 		getDeactivateAccountRequestEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "GetDeactivateAccountRequest"))(getDeactivateAccountRequestEndpoint)
 		getDeactivateAccountRequestEndpoint = resource.InstrumentingMiddleware(duration.With("method", "GetDeactivateAccountRequest"))(getDeactivateAccountRequestEndpoint)
 	}
@@ -85,6 +90,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var setDeactivateAccountResponseEndpoint endpoint.Endpoint
 	{
 		setDeactivateAccountResponseEndpoint = makeSetDeactivateAccountResponseEndpoint(svc)
+		setDeactivateAccountResponseEndpoint = opentracing.TraceServer(tracer, "SetDeactivateAccountResponse")(setDeactivateAccountResponseEndpoint)
 		setDeactivateAccountResponseEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "SetDeactivateAccountResponse"))(setDeactivateAccountResponseEndpoint)
 		setDeactivateAccountResponseEndpoint = resource.InstrumentingMiddleware(duration.With("method", "SetDeactivateAccountResponse"))(setDeactivateAccountResponseEndpoint)
 	}
@@ -92,6 +98,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var getRekeyAccountRequestEndpoint endpoint.Endpoint
 	{
 		getRekeyAccountRequestEndpoint = makeGetRekeyAccountRequestEndpoint(svc)
+		getRekeyAccountRequestEndpoint = opentracing.TraceServer(tracer, "GetRekeyAccountRequest")(getRekeyAccountRequestEndpoint)
 		getRekeyAccountRequestEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "GetRekeyAccountRequest"))(getRekeyAccountRequestEndpoint)
 		getRekeyAccountRequestEndpoint = resource.InstrumentingMiddleware(duration.With("method", "GetRekeyAccountRequest"))(getRekeyAccountRequestEndpoint)
 	}
@@ -99,6 +106,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var setRekeyAccountResponseEndpoint endpoint.Endpoint
 	{
 		setRekeyAccountResponseEndpoint = makeSetRekeyAccountResponseEndpoint(svc)
+		setRekeyAccountResponseEndpoint = opentracing.TraceServer(tracer, "SetRekeyAccountResponse")(setRekeyAccountResponseEndpoint)
 		setRekeyAccountResponseEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "SetRekeyAccountResponse"))(setRekeyAccountResponseEndpoint)
 		setRekeyAccountResponseEndpoint = resource.InstrumentingMiddleware(duration.With("method", "SetRekeyAccountResponse"))(setRekeyAccountResponseEndpoint)
 	}
@@ -106,6 +114,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var getUpdateAccountRequestEndpoint endpoint.Endpoint
 	{
 		getUpdateAccountRequestEndpoint = makeGetUpdateAccountRequestEndpoint(svc)
+		getUpdateAccountRequestEndpoint = opentracing.TraceServer(tracer, "GetUpdateAccountRequest")(getUpdateAccountRequestEndpoint)
 		getUpdateAccountRequestEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "GetUpdateAccountRequest"))(getUpdateAccountRequestEndpoint)
 		getUpdateAccountRequestEndpoint = resource.InstrumentingMiddleware(duration.With("method", "GetUpdateAccountRequest"))(getUpdateAccountRequestEndpoint)
 	}
@@ -113,6 +122,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var setUpdateAccountResponseEndpoint endpoint.Endpoint
 	{
 		setUpdateAccountResponseEndpoint = makeSetUpdateAccountResponseEndpoint(svc)
+		setUpdateAccountResponseEndpoint = opentracing.TraceServer(tracer, "SetUpdateAccountResponse")(setUpdateAccountResponseEndpoint)
 		setUpdateAccountResponseEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "SetUpdateAccountResponse"))(setUpdateAccountResponseEndpoint)
 		setUpdateAccountResponseEndpoint = resource.InstrumentingMiddleware(duration.With("method", "SetUpdateAccountResponse"))(setUpdateAccountResponseEndpoint)
 	}
@@ -120,6 +130,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var getCreateOrderRequestEndpoint endpoint.Endpoint
 	{
 		getCreateOrderRequestEndpoint = makeGetCreateOrderRequestEndpoint(svc)
+		getCreateOrderRequestEndpoint = opentracing.TraceServer(tracer, "GetCreateOrderRequest")(getCreateOrderRequestEndpoint)
 		getCreateOrderRequestEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "GetCreateOrderRequest"))(getCreateOrderRequestEndpoint)
 		getCreateOrderRequestEndpoint = resource.InstrumentingMiddleware(duration.With("method", "GetCreateOrderRequest"))(getCreateOrderRequestEndpoint)
 	}
@@ -127,6 +138,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var setCreateOrderResponseEndpoint endpoint.Endpoint
 	{
 		setCreateOrderResponseEndpoint = makeSetCreateOrderResponseEndpoint(svc)
+		setCreateOrderResponseEndpoint = opentracing.TraceServer(tracer, "SetCreateOrderResponse")(setCreateOrderResponseEndpoint)
 		setCreateOrderResponseEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "SetCreateOrderResponse"))(setCreateOrderResponseEndpoint)
 		setCreateOrderResponseEndpoint = resource.InstrumentingMiddleware(duration.With("method", "SetCreateOrderResponse"))(setCreateOrderResponseEndpoint)
 	}
@@ -134,6 +146,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var getFinalizeOrderRequestEndpoint endpoint.Endpoint
 	{
 		getFinalizeOrderRequestEndpoint = makeGetFinalizeOrderRequestEndpoint(svc)
+		getFinalizeOrderRequestEndpoint = opentracing.TraceServer(tracer, "GetFinalizeOrderRequest")(getFinalizeOrderRequestEndpoint)
 		getFinalizeOrderRequestEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "GetFinalizeOrderRequest"))(getFinalizeOrderRequestEndpoint)
 		getFinalizeOrderRequestEndpoint = resource.InstrumentingMiddleware(duration.With("method", "GetFinalizeOrderRequest"))(getFinalizeOrderRequestEndpoint)
 	}
@@ -141,6 +154,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var setFinalizeOrderResponseEndpoint endpoint.Endpoint
 	{
 		setFinalizeOrderResponseEndpoint = makeSetFinalizeOrderResponseEndpoint(svc)
+		setFinalizeOrderResponseEndpoint = opentracing.TraceServer(tracer, "SetFinalizeOrderResponse")(setFinalizeOrderResponseEndpoint)
 		setFinalizeOrderResponseEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "SetFinalizeOrderResponse"))(setFinalizeOrderResponseEndpoint)
 		setFinalizeOrderResponseEndpoint = resource.InstrumentingMiddleware(duration.With("method", "SetFinalizeOrderResponse"))(setFinalizeOrderResponseEndpoint)
 	}
@@ -148,6 +162,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var getGetOrderRequestEndpoint endpoint.Endpoint
 	{
 		getGetOrderRequestEndpoint = makeGetGetOrderRequestEndpoint(svc)
+		getGetOrderRequestEndpoint = opentracing.TraceServer(tracer, "GetGetOrderRequest")(getGetOrderRequestEndpoint)
 		getGetOrderRequestEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "GetGetOrderRequest"))(getGetOrderRequestEndpoint)
 		getGetOrderRequestEndpoint = resource.InstrumentingMiddleware(duration.With("method", "GetGetOrderRequest"))(getGetOrderRequestEndpoint)
 	}
@@ -155,6 +170,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var setGetOrderResponseEndpoint endpoint.Endpoint
 	{
 		setGetOrderResponseEndpoint = makeSetGetOrderResponseEndpoint(svc)
+		setGetOrderResponseEndpoint = opentracing.TraceServer(tracer, "SetGetOrderResponse")(setGetOrderResponseEndpoint)
 		setGetOrderResponseEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "SetGetOrderResponse"))(setGetOrderResponseEndpoint)
 		setGetOrderResponseEndpoint = resource.InstrumentingMiddleware(duration.With("method", "SetGetOrderResponse"))(setGetOrderResponseEndpoint)
 	}
@@ -162,6 +178,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var getCreateAuthorizationRequestEndpoint endpoint.Endpoint
 	{
 		getCreateAuthorizationRequestEndpoint = makeGetCreateAuthorizationRequestEndpoint(svc)
+		getCreateAuthorizationRequestEndpoint = opentracing.TraceServer(tracer, "GetCreateAuthorizationRequest")(getCreateAuthorizationRequestEndpoint)
 		getCreateAuthorizationRequestEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "GetCreateAuthorizationRequest"))(getCreateAuthorizationRequestEndpoint)
 		getCreateAuthorizationRequestEndpoint = resource.InstrumentingMiddleware(duration.With("method", "GetCreateAuthorizationRequest"))(getCreateAuthorizationRequestEndpoint)
 	}
@@ -169,6 +186,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var setCreateAuthorizationResponseEndpoint endpoint.Endpoint
 	{
 		setCreateAuthorizationResponseEndpoint = makeSetCreateAuthorizationResponseEndpoint(svc)
+		setCreateAuthorizationResponseEndpoint = opentracing.TraceServer(tracer, "SetCreateAuthorizationResponse")(setCreateAuthorizationResponseEndpoint)
 		setCreateAuthorizationResponseEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "SetCreateAuthorizationResponse"))(setCreateAuthorizationResponseEndpoint)
 		setCreateAuthorizationResponseEndpoint = resource.InstrumentingMiddleware(duration.With("method", "SetCreateAuthorizationResponse"))(setCreateAuthorizationResponseEndpoint)
 	}
@@ -176,6 +194,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var getDeactivateAuthorizationRequestEndpoint endpoint.Endpoint
 	{
 		getDeactivateAuthorizationRequestEndpoint = makeGetDeactivateAuthorizationRequestEndpoint(svc)
+		getDeactivateAuthorizationRequestEndpoint = opentracing.TraceServer(tracer, "GetDeactivateAuthorizationRequest")(getDeactivateAuthorizationRequestEndpoint)
 		getDeactivateAuthorizationRequestEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "GetDeactivateAuthorizationRequest"))(getDeactivateAuthorizationRequestEndpoint)
 		getDeactivateAuthorizationRequestEndpoint = resource.InstrumentingMiddleware(duration.With("method", "GetDeactivateAuthorizationRequest"))(getDeactivateAuthorizationRequestEndpoint)
 	}
@@ -183,6 +202,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var setDeactivateAuthorizationResponseEndpoint endpoint.Endpoint
 	{
 		setDeactivateAuthorizationResponseEndpoint = makeSetDeactivateAuthorizationResponseEndpoint(svc)
+		setDeactivateAuthorizationResponseEndpoint = opentracing.TraceServer(tracer, "SetDeactivateAuthorizationResponse")(setDeactivateAuthorizationResponseEndpoint)
 		setDeactivateAuthorizationResponseEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "SetDeactivateAuthorizationResponse"))(setDeactivateAuthorizationResponseEndpoint)
 		setDeactivateAuthorizationResponseEndpoint = resource.InstrumentingMiddleware(duration.With("method", "SetDeactivateAuthorizationResponse"))(setDeactivateAuthorizationResponseEndpoint)
 	}
@@ -190,6 +210,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var getGetAuthorizationRequestEndpoint endpoint.Endpoint
 	{
 		getGetAuthorizationRequestEndpoint = makeGetGetAuthorizationRequestEndpoint(svc)
+		getGetAuthorizationRequestEndpoint = opentracing.TraceServer(tracer, "GetGetAuthorizationRequest")(getGetAuthorizationRequestEndpoint)
 		getGetAuthorizationRequestEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "GetGetAuthorizationRequest"))(getGetAuthorizationRequestEndpoint)
 		getGetAuthorizationRequestEndpoint = resource.InstrumentingMiddleware(duration.With("method", "GetGetAuthorizationRequest"))(getGetAuthorizationRequestEndpoint)
 	}
@@ -197,6 +218,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var setGetAuthorizationResponseEndpoint endpoint.Endpoint
 	{
 		setGetAuthorizationResponseEndpoint = makeSetGetAuthorizationResponseEndpoint(svc)
+		setGetAuthorizationResponseEndpoint = opentracing.TraceServer(tracer, "SetGetAuthorizationResponse")(setGetAuthorizationResponseEndpoint)
 		setGetAuthorizationResponseEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "SetGetAuthorizationResponse"))(setGetAuthorizationResponseEndpoint)
 		setGetAuthorizationResponseEndpoint = resource.InstrumentingMiddleware(duration.With("method", "SetGetAuthorizationResponse"))(setGetAuthorizationResponseEndpoint)
 	}
@@ -204,6 +226,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var getGetChallengeRequestEndpoint endpoint.Endpoint
 	{
 		getGetChallengeRequestEndpoint = makeGetGetChallengeRequestEndpoint(svc)
+		getGetChallengeRequestEndpoint = opentracing.TraceServer(tracer, "GetGetChallengeRequest")(getGetChallengeRequestEndpoint)
 		getGetChallengeRequestEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "GetGetChallengeRequest"))(getGetChallengeRequestEndpoint)
 		getGetChallengeRequestEndpoint = resource.InstrumentingMiddleware(duration.With("method", "GetGetChallengeRequest"))(getGetChallengeRequestEndpoint)
 	}
@@ -211,6 +234,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var setGetChallengeResponseEndpoint endpoint.Endpoint
 	{
 		setGetChallengeResponseEndpoint = makeSetGetChallengeResponseEndpoint(svc)
+		setGetChallengeResponseEndpoint = opentracing.TraceServer(tracer, "SetGetChallengeResponse")(setGetChallengeResponseEndpoint)
 		setGetChallengeResponseEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "SetGetChallengeResponse"))(setGetChallengeResponseEndpoint)
 		setGetChallengeResponseEndpoint = resource.InstrumentingMiddleware(duration.With("method", "SetGetChallengeResponse"))(setGetChallengeResponseEndpoint)
 	}
@@ -218,6 +242,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var getValidateChallengeRequestEndpoint endpoint.Endpoint
 	{
 		getValidateChallengeRequestEndpoint = makeGetValidateChallengeRequestEndpoint(svc)
+		getValidateChallengeRequestEndpoint = opentracing.TraceServer(tracer, "GetValidateChallengeRequest")(getValidateChallengeRequestEndpoint)
 		getValidateChallengeRequestEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "GetValidateChallengeRequest"))(getValidateChallengeRequestEndpoint)
 		getValidateChallengeRequestEndpoint = resource.InstrumentingMiddleware(duration.With("method", "GetValidateChallengeRequest"))(getValidateChallengeRequestEndpoint)
 	}
@@ -225,6 +250,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var setValidateChallengeResponseEndpoint endpoint.Endpoint
 	{
 		setValidateChallengeResponseEndpoint = makeSetValidateChallengeResponseEndpoint(svc)
+		setValidateChallengeResponseEndpoint = opentracing.TraceServer(tracer, "SetValidateChallengeResponse")(setValidateChallengeResponseEndpoint)
 		setValidateChallengeResponseEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "SetValidateChallengeResponse"))(setValidateChallengeResponseEndpoint)
 		setValidateChallengeResponseEndpoint = resource.InstrumentingMiddleware(duration.With("method", "SetValidateChallengeResponse"))(setValidateChallengeResponseEndpoint)
 	}
@@ -232,6 +258,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var getGetCertificateRequestEndpoint endpoint.Endpoint
 	{
 		getGetCertificateRequestEndpoint = makeGetGetCertificateRequestEndpoint(svc)
+		getGetCertificateRequestEndpoint = opentracing.TraceServer(tracer, "GetGetCertificateRequest")(getGetCertificateRequestEndpoint)
 		getGetCertificateRequestEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "GetGetCertificateRequest"))(getGetCertificateRequestEndpoint)
 		getGetCertificateRequestEndpoint = resource.InstrumentingMiddleware(duration.With("method", "GetGetCertificateRequest"))(getGetCertificateRequestEndpoint)
 	}
@@ -239,6 +266,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var setGetCertificateResponseEndpoint endpoint.Endpoint
 	{
 		setGetCertificateResponseEndpoint = makeSetGetCertificateResponseEndpoint(svc)
+		setGetCertificateResponseEndpoint = opentracing.TraceServer(tracer, "SetGetCertificateResponse")(setGetCertificateResponseEndpoint)
 		setGetCertificateResponseEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "SetGetCertificateResponse"))(setGetCertificateResponseEndpoint)
 		setGetCertificateResponseEndpoint = resource.InstrumentingMiddleware(duration.With("method", "SetGetCertificateResponse"))(setGetCertificateResponseEndpoint)
 	}
@@ -246,6 +274,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var getRevokeCertificateRequestEndpoint endpoint.Endpoint
 	{
 		getRevokeCertificateRequestEndpoint = makeGetRevokeCertificateRequestEndpoint(svc)
+		getRevokeCertificateRequestEndpoint = opentracing.TraceServer(tracer, "GetRevokeCertificateRequest")(getRevokeCertificateRequestEndpoint)
 		getRevokeCertificateRequestEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "GetRevokeCertificateRequest"))(getRevokeCertificateRequestEndpoint)
 		getRevokeCertificateRequestEndpoint = resource.InstrumentingMiddleware(duration.With("method", "GetRevokeCertificateRequest"))(getRevokeCertificateRequestEndpoint)
 	}
@@ -253,6 +282,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var setRevokeCertificateResponseEndpoint endpoint.Endpoint
 	{
 		setRevokeCertificateResponseEndpoint = makeSetRevokeCertificateResponseEndpoint(svc)
+		setRevokeCertificateResponseEndpoint = opentracing.TraceServer(tracer, "SetRevokeCertificateResponse")(setRevokeCertificateResponseEndpoint)
 		setRevokeCertificateResponseEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "SetRevokeCertificateResponse"))(setRevokeCertificateResponseEndpoint)
 		setRevokeCertificateResponseEndpoint = resource.InstrumentingMiddleware(duration.With("method", "SetRevokeCertificateResponse"))(setRevokeCertificateResponseEndpoint)
 	}

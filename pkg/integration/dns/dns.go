@@ -1,13 +1,15 @@
 package dns
 
 import (
+	"context"
+
 	"powerssl.io/pkg/controller/api"
 )
 
 type Integration interface {
-	CreateRecord(domain string, recordType string, content string) (err error)
-	DeleteRecord(domain string, recordType string) (err error)
-	VerifyDomain(domain string) (err error)
+	CreateRecord(ctx context.Context, domain string, recordType string, content string) (err error)
+	DeleteRecord(ctx context.Context, domain string, recordType string) (err error)
+	VerifyDomain(ctx context.Context, domain string) (err error)
 }
 
 type integration struct {
@@ -22,20 +24,20 @@ func New(client interface{}, handler Integration) *integration {
 	}
 }
 
-func (i *integration) dnsCreateRecord(activity *api.Activity) error {
-	i.handler.CreateRecord("domain", "recordType", "content")
+func (i *integration) dnsCreateRecord(ctx context.Context, activity *api.Activity) error {
+	i.handler.CreateRecord(ctx, "domain", "recordType", "content")
 
 	return nil
 }
 
-func (i *integration) dnsDeleteRecord(activity *api.Activity) error {
-	i.handler.DeleteRecord("domain", "recordType")
+func (i *integration) dnsDeleteRecord(ctx context.Context, activity *api.Activity) error {
+	i.handler.DeleteRecord(ctx, "domain", "recordType")
 
 	return nil
 }
 
-func (i *integration) dnsVerifyDomain(activity *api.Activity) error {
-	i.handler.VerifyDomain("domain")
+func (i *integration) dnsVerifyDomain(ctx context.Context, activity *api.Activity) error {
+	i.handler.VerifyDomain(ctx, "domain")
 
 	return nil
 }

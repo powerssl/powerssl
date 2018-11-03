@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"os"
@@ -16,20 +17,36 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/oklog/oklog/pkg/group"
+	stdopentracing "github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
 	controllerclient "powerssl.io/pkg/controller/client"
+	"powerssl.io/pkg/util/logging"
+	"powerssl.io/pkg/util/tracing"
 )
 
 func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialect, dbConnection, httpAddr, controllerAddr, controllerCertFile, controllerServerNameOverride string, controllerInsecure, controllerInsecureSkipTLSVerify bool) {
 	var logger log.Logger
 	{
-		logger = log.NewLogfmtLogger(os.Stderr)
-		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
-		logger = log.With(logger, "caller", log.DefaultCaller)
+		logger = logging.NewLogger()
+	}
+
+	var tracer stdopentracing.Tracer
+	{
+		if true { // TODO
+			var closer io.Closer
+			var err error
+			tracer, closer, err = tracing.NewJaegerTracer("powerssl-apiserver", logger)
+			if err != nil {
+				logger.Log("tracing", "jaeger", "during", "initialize", "err", err)
+			}
+			defer closer.Close()
+		} else {
+			tracer = stdopentracing.GlobalTracer()
+		}
 	}
 
 	var duration metrics.Histogram
@@ -55,13 +72,13 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialec
 	var client *controllerclient.GRPCClient
 	{
 		var err error
-		if client, err = controllerclient.NewGRPCClient(controllerAddr, controllerCertFile, controllerServerNameOverride, controllerInsecure, controllerInsecureSkipTLSVerify, logger); err != nil {
+		if client, err = controllerclient.NewGRPCClient(controllerAddr, controllerCertFile, controllerServerNameOverride, controllerInsecure, controllerInsecureSkipTLSVerify, logger, tracer); err != nil {
 			logger.Log("transport", "gRPC", "during", "Connect", "err", err)
 			os.Exit(1)
 		}
 	}
 
-	resources := makeResources(db, logger, duration, client)
+	resources := makeResources(db, logger, tracer, duration, client)
 
 	var g group.Group
 	{

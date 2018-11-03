@@ -8,6 +8,8 @@ import (
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
+	"github.com/go-kit/kit/tracing/opentracing"
+	stdopentracing "github.com/opentracing/opentracing-go"
 
 	"powerssl.io/pkg/apiserver/api"
 	"powerssl.io/pkg/resource"
@@ -22,10 +24,11 @@ type Endpoints struct {
 	UpdateEndpoint endpoint.Endpoint
 }
 
-func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histogram) Endpoints {
+func NewEndpoints(svc service.Service, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram) Endpoints {
 	var createEndpoint endpoint.Endpoint
 	{
 		createEndpoint = makeCreateEndpoint(svc)
+		createEndpoint = opentracing.TraceServer(tracer, "Create")(createEndpoint)
 		createEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "Create"))(createEndpoint)
 		createEndpoint = resource.InstrumentingMiddleware(duration.With("method", "Create"))(createEndpoint)
 	}
@@ -33,6 +36,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var deleteEndpoint endpoint.Endpoint
 	{
 		deleteEndpoint = makeDeleteEndpoint(svc)
+		deleteEndpoint = opentracing.TraceServer(tracer, "Delete")(deleteEndpoint)
 		deleteEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "Delete"))(deleteEndpoint)
 		deleteEndpoint = resource.InstrumentingMiddleware(duration.With("method", "Delete"))(deleteEndpoint)
 	}
@@ -40,6 +44,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var getEndpoint endpoint.Endpoint
 	{
 		getEndpoint = makeGetEndpoint(svc)
+		getEndpoint = opentracing.TraceServer(tracer, "Get")(getEndpoint)
 		getEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "Get"))(getEndpoint)
 		getEndpoint = resource.InstrumentingMiddleware(duration.With("method", "Get"))(getEndpoint)
 	}
@@ -47,6 +52,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var listEndpoint endpoint.Endpoint
 	{
 		listEndpoint = makeListEndpoint(svc)
+		listEndpoint = opentracing.TraceServer(tracer, "List")(listEndpoint)
 		listEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "List"))(listEndpoint)
 		listEndpoint = resource.InstrumentingMiddleware(duration.With("method", "List"))(listEndpoint)
 	}
@@ -54,6 +60,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, duration metrics.Histo
 	var updateEndpoint endpoint.Endpoint
 	{
 		updateEndpoint = makeUpdateEndpoint(svc)
+		updateEndpoint = opentracing.TraceServer(tracer, "Update")(updateEndpoint)
 		updateEndpoint = resource.LoggingMiddleware(log.With(logger, "method", "Update"))(updateEndpoint)
 		updateEndpoint = resource.InstrumentingMiddleware(duration.With("method", "Update"))(updateEndpoint)
 	}

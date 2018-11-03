@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-kit/kit/log"
+	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
@@ -22,7 +23,7 @@ type GRPCClient struct {
 	Workflow    workflowservice.Service
 }
 
-func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, logger log.Logger) (*GRPCClient, error) {
+func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
 	opts := []grpc.DialOption{
 		grpc.WithTimeout(time.Second),
 	}
@@ -44,8 +45,8 @@ func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, inse
 	}
 
 	return &GRPCClient{
-		ACME:        acmetransport.NewGRPCClient(conn, logger),
+		ACME:        acmetransport.NewGRPCClient(conn, logger, tracer),
 		Integration: intregrationtransport.NewGRPCClient(conn, logger),
-		Workflow:    workflowtransport.NewGRPCClient(conn, logger),
+		Workflow:    workflowtransport.NewGRPCClient(conn, logger, tracer),
 	}, nil
 }

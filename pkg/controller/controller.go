@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"os"
@@ -14,6 +15,7 @@ import (
 	"github.com/go-kit/kit/metrics/prometheus"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
 	"github.com/oklog/oklog/pkg/group"
+	stdopentracing "github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
@@ -24,14 +26,29 @@ import (
 	"powerssl.io/pkg/controller/integration"
 	"powerssl.io/pkg/controller/workflow"
 	workflowengine "powerssl.io/pkg/controller/workflow/engine"
+	"powerssl.io/pkg/util/logging"
+	"powerssl.io/pkg/util/tracing"
 )
 
 func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, httpAddr, apiserverAddr, apiserverCertFile, apiserverServerNameOverride string, apiserverInsecure, apiserverInsecureSkipTLSVerify bool) {
 	var logger log.Logger
 	{
-		logger = log.NewLogfmtLogger(os.Stderr)
-		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
-		logger = log.With(logger, "caller", log.DefaultCaller)
+		logger = logging.NewLogger()
+	}
+
+	var tracer stdopentracing.Tracer
+	{
+		if true { // TODO
+			var closer io.Closer
+			var err error
+			tracer, closer, err = tracing.NewJaegerTracer("powerssl-controller", logger)
+			if err != nil {
+				logger.Log("tracing", "jaeger", "during", "initialize", "err", err)
+			}
+			defer closer.Close()
+		} else {
+			tracer = stdopentracing.GlobalTracer()
+		}
 	}
 
 	var duration metrics.Histogram
@@ -46,16 +63,19 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, httpAddr
 
 	var client *apiserverclient.GRPCClient
 	{
-		client = apiserverclient.NewGRPCClient(apiserverAddr, apiserverCertFile, apiserverServerNameOverride, apiserverInsecure, apiserverInsecureSkipTLSVerify)
-		// TODO: Add error handling
+		var err error
+		if client, err = apiserverclient.NewGRPCClient(apiserverAddr, apiserverCertFile, apiserverServerNameOverride, apiserverInsecure, apiserverInsecureSkipTLSVerify, logger, tracer); err != nil {
+			logger.Log("transport", "gRPC", "during", "Connect", "err", err)
+			os.Exit(1)
+		}
 	}
 	var _ = client // TODO
 
 	engine := workflowengine.New()
 
-	acmeservice := acme.New(logger, duration)
+	acmeservice := acme.New(logger, tracer, duration)
 	integrationservice := integration.New(logger, duration)
-	workflowservice := workflow.New(logger, duration)
+	workflowservice := workflow.New(logger, tracer, duration)
 
 	var g group.Group
 	{

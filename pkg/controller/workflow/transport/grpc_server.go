@@ -2,9 +2,12 @@ package transport // import "powerssl.io/pkg/controller/workflow/transport"
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/tracing/opentracing"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
+	stdopentracing "github.com/opentracing/opentracing-go"
 
 	apiv1 "powerssl.io/pkg/controller/api/v1"
 	"powerssl.io/pkg/controller/workflow/endpoint"
@@ -14,7 +17,7 @@ type grpcServer struct {
 	create grpctransport.Handler
 }
 
-func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger) apiv1.WorkflowServiceServer {
+func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger, tracer stdopentracing.Tracer) apiv1.WorkflowServiceServer {
 	options := []grpctransport.ServerOption{
 		grpctransport.ServerErrorLogger(logger),
 	}
@@ -24,7 +27,7 @@ func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger) apiv1.Workfl
 			endpoints.CreateEndpoint,
 			decodeGRPCCreateRequest,
 			encodeGRPCCreateResponse,
-			options...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/Create", serviceName), logger)))...,
 		),
 	}
 }

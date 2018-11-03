@@ -2,6 +2,7 @@ package signer
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"os"
@@ -13,25 +14,43 @@ import (
 	"github.com/go-kit/kit/metrics/prometheus"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
 	"github.com/oklog/oklog/pkg/group"
+	stdopentracing "github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"powerssl.io/pkg/util/logging"
+	"powerssl.io/pkg/util/tracing"
 )
 
 func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, httpAddr string) {
 	var logger log.Logger
 	{
-		logger = log.NewLogfmtLogger(os.Stderr)
-		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
-		logger = log.With(logger, "caller", log.DefaultCaller)
+		logger = logging.NewLogger()
 	}
+
+	var tracer stdopentracing.Tracer
+	{
+		if true { // TODO
+			var closer io.Closer
+			var err error
+			tracer, closer, err = tracing.NewJaegerTracer("powerssl-signer", logger)
+			if err != nil {
+				logger.Log("tracing", "jaeger", "during", "initialize", "err", err)
+			}
+			defer closer.Close()
+		} else {
+			tracer = stdopentracing.GlobalTracer()
+		}
+	}
+
+	var _ = tracer // TODO
 
 	var duration metrics.Histogram
 	{
 		duration = prometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
 			Namespace: "powerssl_io",
-			Subsystem: "controller",
+			Subsystem: "signer",
 			Name:      "request_duration_seconds",
 			Help:      "Request duration in seconds.",
 		}, []string{"method", "success"})

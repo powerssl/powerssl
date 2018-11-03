@@ -2,29 +2,35 @@ package integration
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"time"
 
 	"github.com/go-kit/kit/log"
+	"github.com/opentracing/opentracing-go"
+	stdopentracing "github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
 
-	acmetransport "powerssl.io/pkg/controller/acme/transport"
+	acmetransport "powerssl.io/pkg/controller/acme/transport" // TODO: Wrong package
 	"powerssl.io/pkg/controller/api"
 	apiv1 "powerssl.io/pkg/controller/api/v1"
 	controllerclient "powerssl.io/pkg/controller/client"
 	integrationacme "powerssl.io/pkg/integration/acme"
 	// integrationdns "powerssl.io/pkg/integration/dns"
+	"powerssl.io/pkg/util/tracing"
 )
 
-type kind uint
+type kind string
 
 const (
-	KindACME kind = iota
-	KindDNS
+	KindACME kind = "acme"
+	KindDNS  kind = "dns"
 )
 
 type Integration interface {
-	HandleActivity(activity *api.Activity) error
+	HandleActivity(ctx context.Context, activity *api.Activity) error
 }
 
 type integration struct {
@@ -43,7 +49,20 @@ func New(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVer
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
 
-	client, err := controllerclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, logger)
+	var tracer stdopentracing.Tracer
+	{
+		if true { // TODO
+			var err error
+			tracer, _, err = tracing.NewJaegerTracer(fmt.Sprintf("powerssl-integration-%s", kind), logger)
+			if err != nil {
+				logger.Log("tracing", "jaeger", "during", "initialize", "err", err)
+			}
+		} else {
+			tracer = stdopentracing.GlobalTracer()
+		}
+	}
+
+	client, err := controllerclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, logger, tracer)
 	if err != nil {
 		logger.Log("transport", "gRPC", "err", err)
 		os.Exit(1)
@@ -69,13 +88,14 @@ func New(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVer
 }
 
 func (i *integration) Run() {
+	ctx := context.TODO()
 	for {
-		i.logger.Log("err", i.run())
+		i.logger.Log("err", i.run(ctx))
 		time.Sleep(time.Second)
 	}
 }
 
-func (i *integration) run() error {
+func (i *integration) run(ctx context.Context) error {
 	var kind apiv1.IntegrationKind
 	switch i.kind {
 	case KindACME:
@@ -84,7 +104,7 @@ func (i *integration) run() error {
 		kind = apiv1.IntegrationKind_DNS
 	}
 
-	stream, err := i.client.Integration.Register(context.Background(), &apiv1.RegisterIntegrationRequest{
+	stream, err := i.client.Integration.Register(ctx, &apiv1.RegisterIntegrationRequest{
 		Kind: kind,
 		Name: i.name,
 	})
@@ -114,6 +134,26 @@ func (i *integration) run() error {
 
 func (i *integration) handleActivity(activity *api.Activity) {
 	i.logger.Log("activity", activity.Token, "name", activity.Name)
-	err := i.handler.HandleActivity(activity)
+	wireContext, err := extractWireContext(activity.Signature) // TODO: Do not use Signature for Span
+	if err != nil {
+		// TODO
+	}
+	serverSpan := opentracing.StartSpan(string(activity.Name), ext.RPCServerOption(wireContext))
+	serverSpan.SetTag("token", activity.Token)
+	ctx := opentracing.ContextWithSpan(context.Background(), serverSpan)
+	err = i.handler.HandleActivity(ctx, activity)
+	serverSpan.Finish()
 	i.logger.Log("activity", activity.Token, "err", err)
+}
+
+func extractWireContext(s string) (opentracing.SpanContext, error) {
+	var tmc opentracing.TextMapCarrier
+	if err := json.Unmarshal([]byte(s), &tmc); err != nil {
+		return nil, err
+	}
+	wireContext, err := opentracing.GlobalTracer().Extract(opentracing.TextMap, tmc)
+	if err != nil {
+		return nil, err
+	}
+	return wireContext, nil
 }

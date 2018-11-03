@@ -14,6 +14,8 @@ import (
 	"gopkg.in/yaml.v2"
 
 	apiserverclient "powerssl.io/pkg/apiserver/client"
+	"powerssl.io/pkg/util/logging"
+	"powerssl.io/pkg/util/tracing"
 )
 
 var Filename string
@@ -70,7 +72,14 @@ func newGRPCClient() *apiserverclient.GRPCClient {
 	if !insecure && !insecureSkipTLSVerify && certFile == "" {
 		er("Provide ca-file")
 	}
-	return apiserverclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify)
+	logger := logging.NewLogger()
+	tracer, _, _ := tracing.NewNoopTracer("powerctl", logger)
+	client, err := apiserverclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, logger, tracer)
+	if err != nil {
+		logger.Log("transport", "gRPC", "during", "Connect", "err", err)
+		os.Exit(1)
+	}
+	return client
 }
 
 func nameArg(resourcePlural, arg string) string {

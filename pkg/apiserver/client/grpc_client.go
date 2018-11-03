@@ -2,11 +2,10 @@ package client
 
 import (
 	"crypto/tls"
-	"fmt"
-	"os"
 	"time"
 
 	"github.com/go-kit/kit/log"
+	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
@@ -24,14 +23,7 @@ type GRPCClient struct {
 	CertificateIssue     certificateissueservice.Service
 }
 
-func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool) *GRPCClient {
-	var logger log.Logger
-	{
-		logger = log.NewLogfmtLogger(os.Stderr)
-		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
-		logger = log.With(logger, "caller", log.DefaultCaller)
-	}
-
+func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
 	var conn *grpc.ClientConn
 	{
 		var err error
@@ -46,20 +38,19 @@ func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, inse
 		} else {
 			creds, err := credentials.NewClientTLSFromFile(certFile, serverNameOverride)
 			if err != nil {
-				logger.Log("transport", "gRPC", "err", fmt.Errorf("Failed to create TLS credentials %v", err))
+				return nil, err
 			}
 			opts = append(opts, grpc.WithTransportCredentials(creds))
 		}
 		conn, err = grpc.Dial(grpcAddr, opts...)
 		if err != nil {
-			logger.Log("transport", "gRPC", "err", err)
-			os.Exit(1)
+			return nil, err
 		}
 	}
 
 	return &GRPCClient{
-		Certificate:          certificatetransport.NewGRPCClient(conn, logger),
+		Certificate:          certificatetransport.NewGRPCClient(conn, logger, tracer),
 		CertificateAuthority: certificateauthoritytransport.NewGRPCClient(conn, logger),
 		CertificateIssue:     certificateissuetransport.NewGRPCClient(conn, logger),
-	}
+	}, nil
 }

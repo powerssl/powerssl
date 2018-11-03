@@ -44,7 +44,7 @@ func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GR
 	}
 }
 
-func (bs basicService) Create(_ context.Context, certificate *api.Certificate) (*api.Certificate, error) {
+func (bs basicService) Create(ctx context.Context, certificate *api.Certificate) (*api.Certificate, error) {
 	tx := bs.db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -61,7 +61,7 @@ func (bs basicService) Create(_ context.Context, certificate *api.Certificate) (
 		return nil, err
 	}
 
-	workflow, err := bs.controllerclient.Workflow.Create(context.Background(), fmt.Sprint("certificates/", cert.ID))
+	workflow, err := bs.controllerclient.Workflow.Create(ctx, fmt.Sprint("certificates/", cert.ID))
 	if err != nil {
 		return nil, err
 	}

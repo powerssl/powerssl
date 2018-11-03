@@ -5,6 +5,7 @@ import (
 	"github.com/go-kit/kit/metrics"
 	"google.golang.org/grpc"
 
+	stdopentracing "github.com/opentracing/opentracing-go"
 	apiv1 "powerssl.io/pkg/controller/api/v1"
 	"powerssl.io/pkg/controller/workflow/endpoint"
 	service "powerssl.io/pkg/controller/workflow/service"
@@ -14,19 +15,21 @@ import (
 type Workflow struct {
 	endpoints endpoint.Endpoints
 	logger    log.Logger
+	tracer    stdopentracing.Tracer
 }
 
-func New(logger log.Logger, duration metrics.Histogram) *Workflow {
+func New(logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram) *Workflow {
 	svc := service.New(logger)
-	endpoints := endpoint.NewEndpoints(svc, logger, duration)
+	endpoints := endpoint.NewEndpoints(svc, logger, tracer, duration)
 
 	return &Workflow{
 		endpoints: endpoints,
 		logger:    logger,
+		tracer:    tracer,
 	}
 }
 
-func (controller *Workflow) RegisterGRPCServer(baseServer *grpc.Server) {
-	grpcServer := transport.NewGRPCServer(controller.endpoints, controller.logger)
+func (w *Workflow) RegisterGRPCServer(baseServer *grpc.Server) {
+	grpcServer := transport.NewGRPCServer(w.endpoints, w.logger, w.tracer)
 	apiv1.RegisterWorkflowServiceServer(baseServer, grpcServer)
 }
