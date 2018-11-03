@@ -7,10 +7,10 @@ import (
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 
+	certificate "powerssl.io/pkg/apiserver/certificate/generated"
+	certificateauthority "powerssl.io/pkg/apiserver/certificateauthority/generated"
+	certificateissue "powerssl.io/pkg/apiserver/certificateissue/generated"
 	controllerclient "powerssl.io/pkg/controller/client"
-	"powerssl.io/pkg/resource/generated/certificate"
-	"powerssl.io/pkg/resource/generated/certificateauthority"
-	"powerssl.io/pkg/resource/generated/certificateissue"
 )
 
 type resource interface {

@@ -9,12 +9,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	certificateservice "powerssl.io/pkg/resource/certificate"
-	certificateauthorityservice "powerssl.io/pkg/resource/certificateauthority"
-	certificateissueservice "powerssl.io/pkg/resource/certificateissue"
-	certificatetransport "powerssl.io/pkg/resource/generated/certificate/transport"
-	certificateauthoritytransport "powerssl.io/pkg/resource/generated/certificateauthority/transport"
-	certificateissuetransport "powerssl.io/pkg/resource/generated/certificateissue/transport"
+	certificateservice "powerssl.io/pkg/apiserver/certificate"
+	certificatetransport "powerssl.io/pkg/apiserver/certificate/generated/transport"
+	certificateauthorityservice "powerssl.io/pkg/apiserver/certificateauthority"
+	certificateauthoritytransport "powerssl.io/pkg/apiserver/certificateauthority/generated/transport"
+	certificateissueservice "powerssl.io/pkg/apiserver/certificateissue"
+	certificateissuetransport "powerssl.io/pkg/apiserver/certificateissue/generated/transport"
 )
 
 type GRPCClient struct {
