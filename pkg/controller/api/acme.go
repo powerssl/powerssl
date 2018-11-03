@@ -16,8 +16,24 @@ type Account struct {
 	URL                  string
 }
 
-type Authorization struct{}
-type Identifier struct{}
-type Order struct{}
+type Authorization struct {
+	Challenges []Challenge
+}
+
+type IdentifierType string
+
+const IdentifierTypeDNS IdentifierType = "dns"
+
+type Identifier struct {
+	Type  IdentifierType
+	Value string
+}
+type Order struct {
+	Authorizations []string
+	URL            string
+	CertificateURL string
+}
 type RevocationReason uint
-type Challenge struct{}
+type Challenge struct {
+	URL string
+}

@@ -2,13 +2,26 @@ package activity
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/looplab/fsm"
+	"github.com/opentracing/opentracing-go"
 
 	"powerssl.io/pkg/controller/api"
 	apiv1 "powerssl.io/pkg/controller/api/v1"
 	"powerssl.io/pkg/controller/integration"
+)
+
+const (
+	acknowledge  = "acknowledge"
+	acknowledged = "acknowledged"
+	assign       = "assign"
+	assigned     = "assigned"
+	finish       = "finish"
+	finished     = "finished"
+	pending      = "pending"
 )
 
 type Status uint
@@ -26,18 +39,10 @@ type Activity struct {
 	UUID            uuid.UUID
 	activityName    api.ActivityName
 	Status
-	FSM *fsm.FSM
+	FSM  *fsm.FSM
+	c    chan struct{}
+	span opentracing.Span
 }
-
-const (
-	acknowledge  = "acknowledge"
-	acknowledged = "acknowledged"
-	assign       = "assign"
-	assigned     = "assigned"
-	finish       = "finish"
-	finished     = "finished"
-	pending      = "pending"
-)
 
 func New(activityName api.ActivityName) *Activity {
 	a := &Activity{
@@ -52,7 +57,6 @@ func New(activityName api.ActivityName) *Activity {
 				{Name: finish, Src: []string{acknowledged}, Dst: finished},
 			},
 			fsm.Callbacks{
-				"enter_state":   func(e *fsm.Event) { println(e) },
 				"leave_pending": func(e *fsm.Event) { e.Async() },
 			},
 		),
@@ -61,25 +65,39 @@ func New(activityName api.ActivityName) *Activity {
 	return a
 }
 
-func (a *Activity) Execute() {
-	go a.execute()
+func (a *Activity) String() string {
+	return fmt.Sprintf("activites/%s", a.UUID)
 }
 
-func (a *Activity) execute() {
-	integ, err := integration.Integrations.WaitByKind(context.Background(), a.IntegrationKind())
-	if err != nil {
-		panic(err) // TODO
-	}
-	err = a.FSM.Event(assign)
+func (a *Activity) Execute(ctx context.Context) chan struct{} {
+	a.c = make(chan struct{})
+	go a.execute(ctx)
+	return a.c
+}
+
+func (a *Activity) execute(ctx context.Context) {
+	a.span, _ = opentracing.StartSpanFromContext(ctx, "Activity")
+	a.span.SetTag("Name", a.activityName)
+	a.span.SetTag("UUID", a.UUID)
+
+	err := a.FSM.Event(assign)
 	if e, ok := err.(fsm.AsyncError); !ok && e.Err != nil {
 		panic(err)
 	}
-	integ.Send(&apiv1.Activity{
+
+	tmc := opentracing.TextMapCarrier{}
+	a.span.Tracer().Inject(a.span.Context(), opentracing.TextMap, tmc)
+	textMapCarrier, err := json.Marshal(tmc)
+	if err != nil {
+		panic(err)
+	}
+
+	a.integration().Send(&apiv1.Activity{
 		Name:      apiv1.Activity_Name(a.activityName),
-		Signature: uuid.New().String(), // TODO
+		Signature: string(textMapCarrier),
 		Token:     a.UUID.String(),
 		Workflow: &apiv1.Activity_Workflow{
-			Activities: []string{"foo", "bar", "baz"},
+			Activities: []string{},
 		},
 	})
 	if err := a.FSM.Transition(); err != nil {
@@ -87,9 +105,18 @@ func (a *Activity) execute() {
 	}
 }
 
-func (a *Activity) IntegrationKind() integration.IntegrationKind {
+func (a *Activity) integrationKind() integration.IntegrationKind {
 	// TODO
 	return integration.IntegrationKindACME
+}
+
+func (a *Activity) integration() *integration.Integration {
+	integ, err := integration.Integrations.WaitByKind(context.Background(), a.integrationKind())
+	if err != nil {
+		// a.FSM.SetState("failed")
+		panic(err) // TODO
+	}
+	return integ
 }
 
 func (a *Activity) GetRequest() (interface{}, error) {
@@ -103,5 +130,7 @@ func (a *Activity) SetResponse() (interface{}, error) {
 	if err := a.FSM.Event(finish); err != nil {
 		return nil, err
 	}
+	a.span.Finish()
+	close(a.c)
 	return a.SetResponseFunc, nil
 }
