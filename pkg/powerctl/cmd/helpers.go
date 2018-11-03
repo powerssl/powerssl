@@ -21,24 +21,26 @@ import (
 var Filename string
 
 func er(msg interface{}) {
-	fmt.Println(msg)
+	fmt.Fprintln(os.Stderr, msg)
 	os.Exit(1)
 }
 
-func loadResource(filename string, resource interface{}) error {
+func loadResource(filename string, resource interface{}) {
 	in, err := ioutil.ReadFile(filename)
 	if err != nil {
 		er(err)
 	}
 	switch filepath.Ext(filename) {
 	case ".yml", ".yaml":
-		return yaml.Unmarshal(in, resource)
+		err = yaml.Unmarshal(in, resource)
 	case ".json":
-		return json.Unmarshal(in, resource)
+		err = json.Unmarshal(in, resource)
 	default:
-		er("Unknown input format")
+		err = errors.New("Unknown input format")
 	}
-	return nil
+	if err != nil {
+		er(err)
+	}
 }
 
 func pr(resource interface{}) {
@@ -57,7 +59,7 @@ func pr(resource interface{}) {
 	if err != nil {
 		er(err)
 	}
-	fmt.Println(string(out))
+	fmt.Fprintln(os.Stdout, string(out))
 }
 
 func newGRPCClient() *apiserverclient.GRPCClient {
