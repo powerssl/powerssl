@@ -16,7 +16,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/oklog/oklog/pkg/group"
+	"github.com/oklog/run"
 	stdopentracing "github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -80,7 +80,7 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialec
 
 	resources := makeResources(db, logger, tracer, duration, client)
 
-	var g group.Group
+	var g run.Group
 	{
 		grpcListener, err := net.Listen("tcp", grpcAddr)
 		if err != nil {

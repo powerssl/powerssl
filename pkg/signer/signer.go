@@ -13,7 +13,7 @@ import (
 	"github.com/go-kit/kit/metrics"
 	"github.com/go-kit/kit/metrics/prometheus"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
-	"github.com/oklog/oklog/pkg/group"
+	"github.com/oklog/run"
 	stdopentracing "github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -58,7 +58,7 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, httpAddr
 
 	var _ = duration // TODO
 
-	var g group.Group
+	var g run.Group
 	{
 		grpcListener, err := net.Listen("tcp", grpcAddr)
 		if err != nil {

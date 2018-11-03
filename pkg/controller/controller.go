@@ -14,7 +14,7 @@ import (
 	"github.com/go-kit/kit/metrics"
 	"github.com/go-kit/kit/metrics/prometheus"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
-	"github.com/oklog/oklog/pkg/group"
+	"github.com/oklog/run"
 	stdopentracing "github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -77,7 +77,7 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, httpAddr
 	integrationservice := integration.New(logger, duration)
 	workflowservice := workflow.New(logger, tracer, duration)
 
-	var g group.Group
+	var g run.Group
 	{
 		ctx, cancel := context.WithCancel(context.Background())
 		g.Add(func() error {
