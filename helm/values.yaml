@@ -1,0 +1,46 @@
+# Default values for powerssl.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+#
+apiserver:
+  image:
+    repository: powerssl/apiserver
+    tag: latest
+    pullPolicy: IfNotPresent
+  ingress:
+    enabled: false
+    annotations: {}
+    path: /
+    hosts:
+      - apiserver.127.0.0.1.nip.io
+    tls: []
+    #  - secretName: example-tls-secret
+    #    hosts:
+    #      - apiserver.127.0.0.1.nip.io
+
+controller:
+  image:
+    repository: powerssl/controller
+    tag: latest
+    pullPolicy: IfNotPresent
+
+signer:
+  image:
+    repository: powerssl/signer
+    tag: latest
+    pullPolicy: IfNotPresent
+
+integration:
+  acme:
+    enabled: true
+    image:
+      repository: powerssl/integration-acme
+      tag: latest
+      pullPolicy: IfNotPresent
+  cloudflare:
+    enabled: true
+    image:
+      repository: powerssl/integration/cloudflare
+      tag: latest
+      pullPolicy: IfNotPresent
+

@@ -1,0 +1,19 @@
+# Deployments
+    - apiserver
+    - controller
+    - signer
+
+# Integration Deployments
+    - integration-acme
+    - integration-cloudflare
+
+# Internal Services
+    - apiserver
+    - controller
+    - signer
+    - integration-acme
+    - integration-cloudflare
+
+# Ingress/Exposed Services
+    - apiserver
+

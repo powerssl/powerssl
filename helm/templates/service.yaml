@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "powerssl.fullname" . }}
+  labels:
+    app: {{ template "powerssl.name" . }}
+    chart: {{ template "powerssl.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ template "powerssl.name" . }}
+    release: {{ .Release.Name }}
