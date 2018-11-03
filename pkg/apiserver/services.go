@@ -13,12 +13,12 @@ import (
 	controllerclient "powerssl.io/pkg/controller/client"
 )
 
-type resource interface {
+type service interface {
 	RegisterGRPCServer(baseServer *grpc.Server)
 }
 
-func makeResources(db *gorm.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *controllerclient.GRPCClient) []resource {
-	return []resource{
+func makeServices(db *gorm.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *controllerclient.GRPCClient) []service {
+	return []service{
 		certificate.New(db, logger, tracer, duration, client),
 		certificateauthority.New(db, logger, duration, client), // TODO: tracing
 		certificateissue.New(db, logger, duration, client),     // TODO: tracing

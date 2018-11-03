@@ -22,9 +22,6 @@ import (
 	"google.golang.org/grpc/credentials"
 
 	apiserverclient "powerssl.io/pkg/apiserver/client"
-	"powerssl.io/pkg/controller/acme"
-	"powerssl.io/pkg/controller/integration"
-	"powerssl.io/pkg/controller/workflow"
 	workflowengine "powerssl.io/pkg/controller/workflow/engine"
 	"powerssl.io/pkg/util/logging"
 	"powerssl.io/pkg/util/tracing"
@@ -69,13 +66,10 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, httpAddr
 			os.Exit(1)
 		}
 	}
-	var _ = client // TODO
 
 	engine := workflowengine.New()
 
-	acmeservice := acme.New(logger, tracer, duration)
-	integrationservice := integration.New(logger, duration)
-	workflowservice := workflow.New(logger, tracer, duration)
+	services := makeServices(logger, tracer, duration, client)
 
 	var g run.Group
 	{
@@ -106,9 +100,9 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, httpAddr
 				options = append(options, grpc.Creds(creds))
 			}
 			baseServer := grpc.NewServer(options...)
-			acmeservice.RegisterGRPCServer(baseServer)
-			integrationservice.RegisterGRPCServer(baseServer)
-			workflowservice.RegisterGRPCServer(baseServer)
+			for _, service := range services {
+				service.RegisterGRPCServer(baseServer)
+			}
 			return baseServer.Serve(grpcListener)
 		}, func(error) {
 			grpcListener.Close()

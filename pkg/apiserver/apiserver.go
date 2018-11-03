@@ -78,7 +78,7 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialec
 		}
 	}
 
-	resources := makeResources(db, logger, tracer, duration, client)
+	services := makeServices(db, logger, tracer, duration, client)
 
 	var g run.Group
 	{
@@ -101,8 +101,8 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialec
 				options = append(options, grpc.Creds(creds))
 			}
 			baseServer := grpc.NewServer(options...)
-			for _, resource := range resources {
-				resource.RegisterGRPCServer(baseServer)
+			for _, service := range services {
+				service.RegisterGRPCServer(baseServer)
 			}
 			return baseServer.Serve(grpcListener)
 		}, func(error) {
