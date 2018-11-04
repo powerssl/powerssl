@@ -230,7 +230,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentraci
 			apiv1.GetCreateAuthorizationRequestResponse{},
 			options...,
 		).Endpoint()
-		getCreateAccountRequestEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/GetCreateAuthorizationRequest", serviceName))(getCreateAccountRequestEndpoint)
+		getCreateAuthorizationRequestEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/GetCreateAuthorizationRequest", serviceName))(getCreateAuthorizationRequestEndpoint)
 	}
 
 	var setCreateAuthorizationResponseEndpoint kitendpoint.Endpoint
