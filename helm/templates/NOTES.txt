@@ -1,4 +1,4 @@
-# Deployments
+# Mandatory Deployments
     - apiserver
     - controller
     - signer
@@ -7,12 +7,10 @@
     - integration-acme
     - integration-cloudflare
 
-# Internal Services
+# Services for discovery and simple round robin load balancing
     - apiserver
     - controller
     - signer
-    - integration-acme
-    - integration-cloudflare
 
 # Ingress/Exposed Services
     - apiserver
