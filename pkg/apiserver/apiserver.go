@@ -20,6 +20,7 @@ import (
 	stdopentracing "github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	otgorm "github.com/smacker/opentracing-gorm"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
@@ -67,6 +68,7 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialec
 			os.Exit(1)
 		}
 		defer db.Close()
+		otgorm.AddGormCallbacks(db)
 	}
 
 	var client *controllerclient.GRPCClient

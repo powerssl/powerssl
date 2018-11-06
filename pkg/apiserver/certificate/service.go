@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/jinzhu/gorm"
+	otgorm "github.com/smacker/opentracing-gorm"
 
 	"powerssl.io/pkg/apiserver/api"
 	controllerclient "powerssl.io/pkg/controller/client"
@@ -45,7 +46,9 @@ func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GR
 }
 
 func (bs basicService) Create(ctx context.Context, certificate *api.Certificate) (*api.Certificate, error) {
-	tx := bs.db.Begin()
+	db := otgorm.SetSpanToGorm(ctx, bs.db)
+
+	tx := db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
@@ -74,23 +77,29 @@ func (bs basicService) Create(ctx context.Context, certificate *api.Certificate)
 	return cert.ToAPI(), nil
 }
 
-func (bs basicService) Delete(_ context.Context, name string) error {
-	certificate, err := FindCertificateByName(name, bs.db)
+func (bs basicService) Delete(ctx context.Context, name string) error {
+	db := otgorm.SetSpanToGorm(ctx, bs.db)
+
+	certificate, err := FindCertificateByName(name, db)
 	if err != nil {
 		return err
 	}
-	return bs.db.Delete(certificate).Error
+	return db.Delete(certificate).Error
 }
 
-func (bs basicService) Get(_ context.Context, name string) (*api.Certificate, error) {
-	certificate, err := FindCertificateByName(name, bs.db)
+func (bs basicService) Get(ctx context.Context, name string) (*api.Certificate, error) {
+	db := otgorm.SetSpanToGorm(ctx, bs.db)
+
+	certificate, err := FindCertificateByName(name, db)
 	if err != nil {
 		return nil, err
 	}
 	return certificate.ToAPI(), nil
 }
 
-func (bs basicService) List(_ context.Context, pageSize int, pageToken string) ([]*api.Certificate, string, error) {
+func (bs basicService) List(ctx context.Context, pageSize int, pageToken string) ([]*api.Certificate, string, error) {
+	db := otgorm.SetSpanToGorm(ctx, bs.db)
+
 	var (
 		certificates  Certificates
 		nextPageToken string
@@ -108,7 +117,7 @@ func (bs basicService) List(_ context.Context, pageSize int, pageToken string) (
 			return nil, "", fmt.Errorf("Invalid page token")
 		}
 	}
-	if err := bs.db.Limit(pageSize + 1).Offset(offset).Find(&certificates).Error; err != nil {
+	if err := db.Limit(pageSize + 1).Offset(offset).Find(&certificates).Error; err != nil {
 		return nil, "", err
 	}
 	if len(certificates) > pageSize {
@@ -122,15 +131,17 @@ func (bs basicService) List(_ context.Context, pageSize int, pageToken string) (
 	return certificates.ToAPI(), nextPageToken, nil
 }
 
-func (bs basicService) Update(_ context.Context, name string, certificate *api.Certificate) (*api.Certificate, error) {
-	cert, err := FindCertificateByName(name, bs.db)
+func (bs basicService) Update(ctx context.Context, name string, certificate *api.Certificate) (*api.Certificate, error) {
+	db := otgorm.SetSpanToGorm(ctx, bs.db)
+
+	cert, err := FindCertificateByName(name, db)
 	if err != nil {
 		return nil, err
 	}
-	if err := bs.db.Model(cert).Updates(NewCertificateFromAPI(certificate)).Error; err != nil {
+	if err := db.Model(cert).Updates(NewCertificateFromAPI(certificate)).Error; err != nil {
 		return nil, err
 	}
-	cert, err = FindCertificateByName(name, bs.db)
+	cert, err = FindCertificateByName(name, db)
 	if err != nil {
 		return nil, err
 	}
