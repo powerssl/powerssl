@@ -2,8 +2,8 @@ package activity
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"reflect"
 
 	"github.com/google/uuid"
 	"github.com/looplab/fsm"
@@ -12,6 +12,7 @@ import (
 	"powerssl.io/pkg/controller/api"
 	apiv1 "powerssl.io/pkg/controller/api/v1"
 	"powerssl.io/pkg/controller/integration"
+	"powerssl.io/pkg/util/tracing"
 )
 
 const (
@@ -24,31 +25,35 @@ const (
 	pending      = "pending"
 )
 
-type Status uint
-
-const (
-	Pending Status = iota
-	Assinged
-	Acknowledged
-	Finished
-)
+type ActivityInterface interface {
+	ActivityName() api.ActivityName
+	GetInputType() interface{}
+}
 
 type Activity struct {
+	FSM             *fsm.FSM
 	GetRequestFunc  interface{}
 	SetResponseFunc interface{}
 	UUID            uuid.UUID
 	activityName    api.ActivityName
-	Status
-	FSM  *fsm.FSM
-	c    chan struct{}
-	span opentracing.Span
+	c               chan struct{}
+
+	input  interface{}
+	result interface{}
+
+	Definition ActivityInterface
+}
+
+func NewV2(activity ActivityInterface) *Activity {
+	a := New(activity.ActivityName())
+	a.Definition = activity
+	return a
 }
 
 func New(activityName api.ActivityName) *Activity {
 	a := &Activity{
 		UUID:         uuid.New(),
 		activityName: activityName,
-		Status:       Pending,
 		FSM: fsm.NewFSM(
 			pending,
 			fsm.Events{
@@ -60,41 +65,41 @@ func New(activityName api.ActivityName) *Activity {
 				"leave_pending": func(e *fsm.Event) { e.Async() },
 			},
 		),
+		c: make(chan struct{}),
 	}
 	Activities.Put(a)
 	return a
 }
 
-func (a *Activity) String() string {
+func (a *Activity) Name() string {
 	return fmt.Sprintf("activites/%s", a.UUID)
 }
 
 func (a *Activity) Execute(ctx context.Context) chan struct{} {
-	a.c = make(chan struct{})
-	go a.execute(ctx)
-	return a.c
+	c := make(chan struct{})
+	go a.execute(ctx, c)
+	return c
 }
 
-func (a *Activity) execute(ctx context.Context) {
-	a.span, _ = opentracing.StartSpanFromContext(ctx, "Activity")
-	a.span.SetTag("Name", a.activityName)
-	a.span.SetTag("UUID", a.UUID)
+func (a *Activity) execute(ctx context.Context, c chan struct{}) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Activity")
+	defer span.Finish()
+	span.SetTag("kind", a.activityName)
+	span.SetTag("name", a.Name())
 
 	err := a.FSM.Event(assign)
 	if e, ok := err.(fsm.AsyncError); !ok && e.Err != nil {
 		panic(err)
 	}
 
-	tmc := opentracing.TextMapCarrier{}
-	a.span.Tracer().Inject(a.span.Context(), opentracing.TextMap, tmc)
-	textMapCarrier, err := json.Marshal(tmc)
+	carrier, err := tracing.JSONCarrierFromSpan(span)
 	if err != nil {
 		panic(err)
 	}
 
 	a.integration().Send(&apiv1.Activity{
 		Name:      apiv1.Activity_Name(a.activityName),
-		Signature: string(textMapCarrier),
+		Signature: carrier,
 		Token:     a.UUID.String(),
 		Workflow: &apiv1.Activity_Workflow{
 			Activities: []string{},
@@ -103,6 +108,13 @@ func (a *Activity) execute(ctx context.Context) {
 	if err := a.FSM.Transition(); err != nil {
 		panic(err)
 	}
+
+	select {
+	case <-a.c:
+	case <-ctx.Done():
+		fmt.Println(ctx.Err()) // TODO
+	}
+	close(c)
 }
 
 func (a *Activity) integrationKind() integration.IntegrationKind {
@@ -130,7 +142,35 @@ func (a *Activity) SetResponse() (interface{}, error) {
 	if err := a.FSM.Event(finish); err != nil {
 		return nil, err
 	}
-	a.span.Finish()
 	close(a.c)
 	return a.SetResponseFunc, nil
+}
+
+func (a *Activity) GetInput(v interface{}) error {
+	if err := a.FSM.Event(acknowledge); err != nil {
+		return err
+	}
+	reflect.ValueOf(v).Elem().Set(reflect.ValueOf(a.input)) // TODO: Panic handling
+	return nil
+}
+
+func (a *Activity) SetInput(input interface{}) {
+	// if reflect.TypeOf(a.Definition.GetInputType()) != reflect.TypeOf(input) {
+	// 	panic("BOOM")
+	// }
+	a.input = input
+}
+
+func (a *Activity) GetResult(v interface{}) error {
+	reflect.ValueOf(v).Elem().Set(reflect.ValueOf(a.result)) // TODO: Panic handling
+	return nil
+}
+
+func (a *Activity) SetResult(result interface{}) error {
+	if err := a.FSM.Event(finish); err != nil {
+		return err
+	}
+	close(a.c)
+	a.result = result
+	return nil
 }

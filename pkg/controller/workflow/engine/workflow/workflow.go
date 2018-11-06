@@ -9,69 +9,119 @@ import (
 
 	"powerssl.io/pkg/controller/api"
 	"powerssl.io/pkg/controller/workflow/engine/activity"
+	"powerssl.io/pkg/controller/workflow/engine/activity/acme"
 )
 
-type WorkflowInterface interface {
-	Run()
+type Definition interface {
+	Kind() string
+	Run(ctx context.Context)
 }
 
 type Workflow struct {
-	Activities []*activity.Activity
-	Kind       string
-	UUID       uuid.UUID
-	ctx        context.Context
-	span       opentracing.Span
+	UUID uuid.UUID
+
+	Definition
 }
 
-func New(ctx context.Context, kind string) *Workflow {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "Workflow")
-
+func New(definition Definition) *Workflow {
 	w := &Workflow{
-		Kind: kind,
-		UUID: uuid.New(),
-		ctx:  ctx,
-		span: span,
+		UUID:       uuid.New(),
+		Definition: definition,
 	}
-
-	span.SetTag("kind", w.Kind)
-	span.SetTag("Name", w.String())
-
 	Workflows.Put(w)
 	return w
 }
 
-func (w *Workflow) String() string {
+func (w *Workflow) Name() string {
 	return fmt.Sprintf("workflows/%s", w.UUID)
 }
 
-func (w *Workflow) API() *api.Workflow {
+func (w *Workflow) ToAPI() *api.Workflow {
 	return &api.Workflow{
-		Name: w.String(),
-		Kind: w.Kind,
+		Name: w.Name(),
 	}
 }
 
-func (w *Workflow) AddActivity(activity *activity.Activity) {
-	w.Activities = append(w.Activities, activity)
+func (w *Workflow) Execute(ctx context.Context) chan struct{} {
+	c := make(chan struct{})
+	go w.execute(ctx, c)
+	return c
 }
 
-func (w *Workflow) Execute() {
-	go w.execute()
+func (w *Workflow) execute(ctx context.Context, c chan struct{}) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Workflow")
+	defer span.Finish()
+	span.SetTag("kind", w.Kind())
+	span.SetTag("name", w.Name())
+	w.Run(ctx)
+	// select {
+	// case <-w.Run(ctx):
+	// case <-ctx.Done():
+	// 	fmt.Println(ctx.Err()) // TODO
+	// }
+	close(c)
 }
 
-func (w *Workflow) execute() {
-	for _, activity := range w.Activities {
-		<-activity.Execute(w.ctx)
+type CreateAccount struct {
+	DirectoryURL         string
+	TermsOfServiceAgreed bool
+	Contacts             []string
+}
+
+func (w CreateAccount) Kind() string {
+	return "CreateAccount"
+}
+
+func (w CreateAccount) Run(ctx context.Context) {
+	createAccountResult, err := w.CreateAccount(ctx, w.DirectoryURL, w.TermsOfServiceAgreed, w.Contacts)
+	if err != nil {
+		panic(err)
 	}
-	go func() error {
-		select {
-		case <-w.ctx.Done():
-			return w.ctx.Err()
-		}
-	}()
-	w.finish()
+	fmt.Printf("--------------------------------\nAccount: %#v\nError: %#v\n--------------------------------\n", createAccountResult.Account, createAccountResult.Error)
 }
 
-func (w *Workflow) finish() {
-	w.span.Finish()
+func (w CreateAccount) CreateAccount(ctx context.Context, directoryURL string, termsOfServiceAgreed bool, contacts []string) (*acme.CreateAccountResult, error) {
+	a := activity.NewV2(acme.CreateAccount{})
+	a.SetInput(acme.CreateAccountInput{
+		DirectoryURL:         directoryURL,
+		TermsOfServiceAgreed: termsOfServiceAgreed,
+		Contacts:             contacts,
+	})
+	<-a.Execute(ctx)
+	var result *acme.CreateAccountResult
+	if err := a.GetResult(&result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+type RequestCertificate struct {
+	DirectoryURL string
+	AccountURL   string
+	Dnsnames     []string
+	NotBefore    string
+	NotAfter     string
+}
+
+func (w RequestCertificate) Kind() string {
+	return "RequestCertificate"
+}
+
+func (w RequestCertificate) Run(ctx context.Context) {
+	identifiers := make([]*api.Identifier, len(w.Dnsnames))
+	for i, dnsname := range w.Dnsnames {
+		identifiers[i] = &api.Identifier{Type: api.IdentifierTypeDNS, Value: dnsname}
+	}
+
+	{
+		a := activity.New(api.Activity_ACME_CREATE_ORDER)
+		a.SetInput(acme.CreateOrderInput{w.DirectoryURL, w.AccountURL, identifiers, w.NotBefore, w.NotAfter})
+		a.Execute(ctx)
+	}
+	for range []struct{}{} {
+		activity.New(api.Activity_ACME_GET_AUTHORIZATION)
+		activity.New(api.Activity_ACME_VALIDATE_CHALLENGE)
+	}
+	activity.New(api.Activity_ACME_FINALIZE_ORDER)
+	activity.New(api.Activity_ACME_GET_CERTIFICATE)
 }

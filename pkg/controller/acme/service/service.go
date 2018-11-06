@@ -8,6 +8,7 @@ import (
 
 	"powerssl.io/pkg/controller/api"
 	engineactivity "powerssl.io/pkg/controller/workflow/engine/activity"
+	"powerssl.io/pkg/controller/workflow/engine/activity/acme"
 )
 
 type Service interface {
@@ -74,19 +75,16 @@ func NewBasicService(logger log.Logger) Service {
 }
 
 func (bs basicService) GetCreateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, bool, []string, error) {
-	f, err := engineactivity.GetRequest(activity)
-	if err != nil {
+	var input acme.CreateAccountInput
+	if err := engineactivity.GetInput(activity, &input); err != nil {
 		return nil, "", false, nil, err
 	}
-	return f.(func(*api.Activity) (*api.Activity, string, bool, []string, error))(activity)
+	return activity, input.DirectoryURL, input.TermsOfServiceAgreed, input.Contacts, nil
 }
 
 func (bs basicService) SetCreateAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error {
-	f, err := engineactivity.SetResponse(activity)
-	if err != nil {
-		return err
-	}
-	return f.(func(*api.Account, *api.Error) error)(account, erro)
+	result := acme.CreateAccountResult{account, erro}
+	return engineactivity.SetResult(activity, &result)
 }
 
 func (bs basicService) GetDeactivateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, error) {
@@ -138,19 +136,16 @@ func (bs basicService) SetUpdateAccountResponse(ctx context.Context, activity *a
 }
 
 func (bs basicService) GetCreateOrderRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, []*api.Identifier, string, string, error) {
-	f, err := engineactivity.GetRequest(activity)
-	if err != nil {
+	var input acme.CreateOrderInput
+	if err := engineactivity.GetInput(activity, &input); err != nil {
 		return nil, "", "", nil, "", "", err
 	}
-	return f.(func(*api.Activity) (*api.Activity, string, string, []*api.Identifier, string, string, error))(activity)
+	return activity, input.DirectoryURL, input.AccountURL, input.Identifiers, input.NotBefore, input.NotAfter, nil
 }
 
 func (bs basicService) SetCreateOrderResponse(ctx context.Context, activity *api.Activity, order *api.Order, erro *api.Error) error {
-	f, err := engineactivity.SetResponse(activity)
-	if err != nil {
-		return err
-	}
-	return f.(func(*api.Order, *api.Error) error)(order, erro)
+	result := acme.CreateOrderResult{order, erro}
+	return engineactivity.SetResult(activity, &result)
 }
 
 func (bs basicService) GetFinalizeOrderRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, *x509.CertificateRequest, error) {

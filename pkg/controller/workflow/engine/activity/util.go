@@ -14,6 +14,14 @@ func GetRequest(activity *api.Activity) (interface{}, error) {
 	return f, nil
 }
 
+func GetInput(activity *api.Activity, input interface{}) error {
+	a, err := Activities.GetByAPIActivity(activity)
+	if err != nil {
+		return err
+	}
+	return a.GetInput(input)
+}
+
 func SetResponse(activity *api.Activity) (interface{}, error) {
 	a, err := Activities.GetByAPIActivity(activity)
 	if err != nil {
@@ -24,4 +32,12 @@ func SetResponse(activity *api.Activity) (interface{}, error) {
 		return nil, err
 	}
 	return f, nil
+}
+
+func SetResult(activity *api.Activity, result interface{}) error {
+	a, err := Activities.GetByAPIActivity(activity)
+	if err != nil {
+		return err
+	}
+	return a.SetResult(result)
 }
