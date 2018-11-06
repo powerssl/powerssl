@@ -32,9 +32,9 @@ func NewEndpoints(svc service.Service, logger log.Logger, tracer stdopentracing.
 	}
 }
 
-func (e Endpoints) Create(ctx context.Context, kind string) (*api.Workflow, error) {
+func (e Endpoints) Create(ctx context.Context, workflow *api.Workflow) (*api.Workflow, error) {
 	resp, err := e.CreateEndpoint(ctx, CreateRequest{
-		Kind: kind,
+		Workflow: workflow,
 	})
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func (e Endpoints) Create(ctx context.Context, kind string) (*api.Workflow, erro
 }
 
 type CreateRequest struct {
-	Kind string
+	Workflow *api.Workflow
 }
 
 type CreateResponse struct {
@@ -54,7 +54,7 @@ type CreateResponse struct {
 func makeCreateEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(CreateRequest)
-		workflow, err := s.Create(ctx, req.Kind)
+		workflow, err := s.Create(ctx, req.Workflow)
 		if err != nil {
 			return nil, err
 		}

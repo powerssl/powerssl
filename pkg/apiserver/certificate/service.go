@@ -10,6 +10,7 @@ import (
 	otgorm "github.com/smacker/opentracing-gorm"
 
 	"powerssl.io/pkg/apiserver/api"
+	controllerapi "powerssl.io/pkg/controller/api"
 	controllerclient "powerssl.io/pkg/controller/client"
 )
 
@@ -64,7 +65,19 @@ func (bs basicService) Create(ctx context.Context, certificate *api.Certificate)
 		return nil, err
 	}
 
-	workflow, err := bs.controllerclient.Workflow.Create(ctx, fmt.Sprint("certificates/", cert.ID))
+	workflow, err := bs.controllerclient.Workflow.Create(ctx, &controllerapi.Workflow{
+		Kind: controllerapi.WorkflowKindRequestACMECertificate,
+		IntegrationFilters: []*controllerapi.WorkflowIntegrationFilter{
+			&controllerapi.WorkflowIntegrationFilter{},
+		},
+		Input: &controllerapi.RequestACMECertificateInput{
+			DirectoryURL: "https://example.com/directory",
+			AccountURL:   "https://example.com/acct/123",
+			Dnsnames:     []string{"example.com", "example.net"},
+			NotBefore:    "",
+			NotAfter:     "",
+		},
+	})
 	if err != nil {
 		return nil, err
 	}

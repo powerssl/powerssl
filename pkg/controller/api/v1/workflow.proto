@@ -2,17 +2,51 @@ syntax = "proto3";
 
 package powerssl.controller.v1;
 
+import "controller/api/v1/integration.proto";
+
 option go_package = "powerssl.io/pkg/controller/api/v1;api";
 
 service WorkflowService {
   rpc Create(CreateWorkflowRequest) returns (Workflow) {};
 }
 
+enum WorkflowKind {
+  WORKFLOW_KIND_UNSPECIFIED = 0;
+  CREATE_ACME_ACCOUNT = 1;
+  REQUEST_ACME_CERTIFICATE = 2;
+}
+
 message CreateWorkflowRequest {
-  string kind = 1;
+  Workflow workflow = 1;
 }
 
 message Workflow {
+  message IntegrationFilter {
+    IntegrationKind kind = 1;
+    string name = 2;
+  }
+
   string name = 1;
-  string kind = 2;
+
+  WorkflowKind kind = 2;
+  repeated IntegrationFilter integration_filters = 3;
+
+  oneof input {
+    CreateACMEAccountInput create_acme_account_input = 11;
+    RequestACMECertificateInput request_acme_certificate_input = 12;
+  }
+}
+
+message CreateACMEAccountInput {
+  string directory_url = 1;
+  bool terms_of_service_agreed = 2;
+  repeated string contacts = 3;
+}
+
+message RequestACMECertificateInput {
+  string directory_url = 1;
+  string account_url = 2;
+  repeated string dnsnames = 3;
+  string not_before = 4;
+  string not_after = 5;
 }

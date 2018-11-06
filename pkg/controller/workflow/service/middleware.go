@@ -21,9 +21,9 @@ type loggingMiddleware struct {
 	next   Service
 }
 
-func (mw loggingMiddleware) Create(ctx context.Context, kind string) (*api.Workflow, error) {
+func (mw loggingMiddleware) Create(ctx context.Context, workflow *api.Workflow) (*api.Workflow, error) {
 	defer func() {
-		mw.logger.Log("method", "Create", "kind", kind)
+		mw.logger.Log("method", "Create")
 	}()
-	return mw.next.Create(ctx, kind)
+	return mw.next.Create(ctx, workflow)
 }
