@@ -10,6 +10,7 @@ import (
 	"powerssl.io/pkg/controller/acme"
 	"powerssl.io/pkg/controller/integration"
 	"powerssl.io/pkg/controller/workflow"
+	"powerssl.io/pkg/util/health"
 )
 
 type service interface {
@@ -19,6 +20,7 @@ type service interface {
 func makeServices(logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *apiserverclient.GRPCClient) []service {
 	return []service{
 		acme.New(logger, tracer, duration),
+		health.New(),
 		integration.New(logger, duration), // TODO: tracing
 		workflow.New(logger, tracer, duration),
 	}

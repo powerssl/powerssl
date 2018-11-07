@@ -19,6 +19,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"powerssl.io/pkg/util/health"
 	"powerssl.io/pkg/util/logging"
 	"powerssl.io/pkg/util/tracing"
 )
@@ -79,6 +80,7 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, httpAddr
 				options = append(options, grpc.Creds(creds))
 			}
 			baseServer := grpc.NewServer(options...)
+			health.New().RegisterGRPCServer(baseServer)
 			return baseServer.Serve(grpcListener)
 		}, func(error) {
 			grpcListener.Close()

@@ -11,6 +11,7 @@ import (
 	certificateauthority "powerssl.io/pkg/apiserver/certificateauthority/generated"
 	certificateissue "powerssl.io/pkg/apiserver/certificateissue/generated"
 	controllerclient "powerssl.io/pkg/controller/client"
+	"powerssl.io/pkg/util/health"
 )
 
 type service interface {
@@ -22,5 +23,6 @@ func makeServices(db *gorm.DB, logger log.Logger, tracer stdopentracing.Tracer, 
 		certificate.New(db, logger, tracer, duration, client),
 		certificateauthority.New(db, logger, duration, client), // TODO: tracing
 		certificateissue.New(db, logger, duration, client),     // TODO: tracing
+		health.New(),
 	}
 }
