@@ -19,7 +19,7 @@ import (
 	controllerclient "powerssl.io/pkg/controller/client"
 	integrationacme "powerssl.io/pkg/integration/acme"
 	// integrationdns "powerssl.io/pkg/integration/dns"
-	"powerssl.io/pkg/util/logging"
+	"powerssl.io/pkg/util"
 	"powerssl.io/pkg/util/tracing"
 )
 
@@ -45,7 +45,7 @@ type integration struct {
 func New(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, kind kind, name string, handler interface{}) *integration {
 	var logger log.Logger
 	{
-		logger = logging.NewLogger()
+		logger = util.NewLogger(os.Stdout)
 	}
 
 	var tracer stdopentracing.Tracer

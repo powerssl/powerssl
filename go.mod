@@ -15,6 +15,7 @@ require (
 	github.com/gogo/protobuf v1.1.1
 	github.com/google/go-cmp v0.2.0 // indirect
 	github.com/google/uuid v1.0.0
+	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jinzhu/gorm v1.9.1
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
@@ -25,7 +26,6 @@ require (
 	github.com/mattn/go-sqlite3 v1.10.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/mitchellh/go-homedir v1.0.0
-	github.com/oklog/run v1.0.0
 	github.com/opentracing/opentracing-go v1.0.2
 	github.com/pkg/errors v0.8.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -43,6 +43,7 @@ require (
 	go.uber.org/atomic v1.3.2 // indirect
 	golang.org/x/crypto v0.0.0-20181025213731-e84da0312774 // indirect
 	golang.org/x/net v0.0.0-20181023162649-9b4f9f5ad519
+	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
 	google.golang.org/grpc v1.16.0
 	gopkg.in/yaml.v2 v2.2.1
 )

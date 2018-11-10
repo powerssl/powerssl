@@ -22,13 +22,17 @@ var serveCmd = &cobra.Command{
 		controllerServerNameOverride := viper.GetString("controller.server-name-override")
 		dbConnection := viper.GetString("db.connection")
 		dbDialect := viper.GetString("db.dialect")
-		var httpAddr string
+		var metricsAddr string
 		if !viper.GetBool("no-metrics") {
-			httpAddr = viper.GetString("metrics-addr")
+			metricsAddr = viper.GetString("metrics-addr")
 		}
 		insecure := viper.GetBool("insecure")
 		tlsCertFile := viper.GetString("tls.cert-file")
 		tlsPrivateKeyFile := viper.GetString("tls.private-key-file")
+		var tracer string
+		if !viper.GetBool("no-tracing") {
+			tracer = viper.GetString("tracer")
+		}
 
 		ok := true
 		if addr == "" {
@@ -64,7 +68,7 @@ var serveCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		apiserver.Run(addr, tlsCertFile, tlsPrivateKeyFile, insecure, dbDialect, dbConnection, httpAddr, controllerAddr, controllerCertFile, controllerServerNameOverride, controllerInsecure, controllerInsecureSkipTLSVerify)
+		apiserver.Run(addr, tlsCertFile, tlsPrivateKeyFile, insecure, dbDialect, dbConnection, metricsAddr, tracer, controllerAddr, controllerCertFile, controllerServerNameOverride, controllerInsecure, controllerInsecureSkipTLSVerify)
 	},
 }
 
@@ -73,6 +77,7 @@ func init() {
 	serveCmd.Flags().BoolP("controller-insecure-skip-tls-verify", "", false, "Accepts any certificate presented by the server and any host name in that certificate")
 	serveCmd.Flags().BoolP("insecure", "", false, "Do not use TLS for the server")
 	serveCmd.Flags().BoolP("no-metrics", "", false, "Do not serve metrics")
+	serveCmd.Flags().BoolP("no-tracing", "", false, "Do not trace")
 	serveCmd.Flags().StringP("addr", "", ":8080", "GRPC Addr")
 	serveCmd.Flags().StringP("controller-addr", "", "", "GRPC address of Controller")
 	serveCmd.Flags().StringP("controller-ca-file", "", "", "Certificate authority file")
@@ -82,6 +87,7 @@ func init() {
 	serveCmd.Flags().StringP("metrics-addr", "", ":9090", "HTTP Addr")
 	serveCmd.Flags().StringP("tls-cert-file", "", "", "File containing the default x509 Certificate for GRPC.")
 	serveCmd.Flags().StringP("tls-private-key-file", "", "", "File containing the default x509 private key matching --tls-cert-file.")
+	serveCmd.Flags().StringP("tracer", "", "jaeger", "Tracing implementation")
 
 	viper.BindPFlag("addr", serveCmd.Flags().Lookup("addr"))
 	viper.BindPFlag("controller.addr", serveCmd.Flags().Lookup("controller-addr"))
@@ -94,8 +100,10 @@ func init() {
 	viper.BindPFlag("insecure", serveCmd.Flags().Lookup("insecure"))
 	viper.BindPFlag("metrics-addr", serveCmd.Flags().Lookup("metrics-addr"))
 	viper.BindPFlag("no-metrics", serveCmd.Flags().Lookup("no-metrics"))
+	viper.BindPFlag("no-tracing", serveCmd.Flags().Lookup("no-tracing"))
 	viper.BindPFlag("tls.cert-file", serveCmd.Flags().Lookup("tls-cert-file"))
 	viper.BindPFlag("tls.private-key-file", serveCmd.Flags().Lookup("tls-private-key-file"))
+	viper.BindPFlag("tracer", serveCmd.Flags().Lookup("tracer"))
 
 	rootCmd.AddCommand(serveCmd)
 }
