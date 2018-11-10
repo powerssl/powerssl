@@ -11,6 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"google.golang.org/grpc/status"
 	"gopkg.in/yaml.v2"
 
 	apiserverclient "powerssl.io/pkg/apiserver/client"
@@ -21,7 +22,17 @@ import (
 var Filename string
 
 func er(msg interface{}) {
-	fmt.Fprintln(os.Stderr, msg)
+	err, ok := msg.(error)
+	if ok {
+		status, ok := status.FromError(err)
+		if ok {
+			fmt.Fprintln(os.Stderr, fmt.Sprintf("RPC error:\n  Code:    %s\n  Message: %s\n", status.Code(), status.Message()))
+		} else {
+			fmt.Fprintln(os.Stderr, err)
+		}
+	} else {
+		fmt.Fprintln(os.Stderr, msg)
+	}
 	os.Exit(1)
 }
 

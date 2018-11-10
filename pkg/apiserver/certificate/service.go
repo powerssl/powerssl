@@ -8,6 +8,7 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/jinzhu/gorm"
 	otgorm "github.com/smacker/opentracing-gorm"
+	"google.golang.org/grpc/status"
 
 	"powerssl.io/pkg/apiserver/api"
 	controllerapi "powerssl.io/pkg/controller/api"
@@ -79,7 +80,9 @@ func (bs basicService) Create(ctx context.Context, certificate *api.Certificate)
 		},
 	})
 	if err != nil {
-		return nil, err
+		st := status.Convert(err)
+		bs.logger.Log("err", "rpc", "code", st.Code(), "message", st.Message())
+		return nil, status.Error(st.Code(), st.Message())
 	}
 	bs.logger.Log("workflow", workflow.Name)
 
