@@ -12,6 +12,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
+	"golang.org/x/sync/errgroup"
 
 	acmetransport "powerssl.io/pkg/controller/acme/transport" // TODO: Wrong package
 	"powerssl.io/pkg/controller/api"
@@ -87,10 +88,36 @@ func New(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVer
 }
 
 func (i *integration) Run() {
-	ctx := context.TODO()
-	for {
-		i.logger.Log("err", i.run(ctx))
-		time.Sleep(time.Second)
+	logger := i.logger
+	g, ctx := errgroup.WithContext(context.Background())
+	g.Go(func() error {
+		return util.InterruptHandler(ctx, logger)
+	})
+
+	if false { // TODO
+		g.Go(func() error {
+			return util.ServeMetrics(ctx, "localhost:9090", log.With(logger, "component", "metrics"))
+		})
+	}
+
+	g.Go(func() error {
+		for {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			default:
+				i.logger.Log("err", i.run(ctx))
+				time.Sleep(time.Second)
+			}
+		}
+	})
+
+	if err := g.Wait(); err != nil {
+		switch err.(type) {
+		case util.InterruptError:
+		default:
+			logger.Log("err", err)
+		}
 	}
 }
 

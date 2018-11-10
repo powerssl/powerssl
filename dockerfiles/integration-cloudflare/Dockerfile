@@ -9,3 +9,4 @@ RUN apk add --no-cache ca-certificates
 COPY --from=builder /usr/local/bin/powerssl-integration-cloudflare /usr/local/bin/powerssl-integration-cloudflare
 ENTRYPOINT ["/usr/local/bin/powerssl-integration-cloudflare"]
 CMD ["run"]
+EXPOSE 9090/tcp
