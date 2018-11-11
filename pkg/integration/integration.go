@@ -10,7 +10,6 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/opentracing/opentracing-go"
-	stdopentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"golang.org/x/sync/errgroup"
 
@@ -36,31 +35,26 @@ type Integration interface {
 }
 
 type integration struct {
-	client  *controllerclient.GRPCClient
-	logger  log.Logger
-	kind    kind
-	name    string
-	handler Integration
+	client      *controllerclient.GRPCClient
+	logger      log.Logger
+	kind        kind
+	name        string
+	handler     Integration
+	metricsAddr string
 }
 
-func New(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, kind kind, name string, handler interface{}) *integration {
+func New(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, metricsAddr, tracerImpl string, kind kind, name string, handler interface{}) *integration {
 	var logger log.Logger
 	{
 		logger = util.NewLogger(os.Stdout)
 	}
 
-	var tracer stdopentracing.Tracer
-	{
-		if true { // TODO
-			var err error
-			tracer, _, err = tracing.NewJaegerTracer(fmt.Sprintf("powerssl-integration-%s", kind), logger)
-			if err != nil {
-				logger.Log("tracing", "jaeger", "during", "initialize", "err", err)
-			}
-		} else {
-			tracer = stdopentracing.GlobalTracer()
-		}
+	tracer, closer, err := tracing.Init(fmt.Sprintf("powerssl-integration-%s", kind), tracerImpl, log.With(logger, "component", "tracing"))
+	if err != nil {
+		logger.Log("component", "tracing", "err", err)
+		os.Exit(1)
 	}
+	defer closer.Close()
 
 	client, err := controllerclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, logger, tracer)
 	if err != nil {
@@ -79,11 +73,12 @@ func New(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVer
 	}
 
 	return &integration{
-		client:  client,
-		logger:  logger,
-		kind:    kind,
-		name:    name,
-		handler: integrationhandler,
+		client:      client,
+		logger:      logger,
+		kind:        kind,
+		name:        name,
+		handler:     integrationhandler,
+		metricsAddr: metricsAddr,
 	}
 }
 
@@ -94,9 +89,9 @@ func (i *integration) Run() {
 		return util.InterruptHandler(ctx, logger)
 	})
 
-	if false { // TODO
+	if i.metricsAddr != "" {
 		g.Go(func() error {
-			return util.ServeMetrics(ctx, "localhost:9090", log.With(logger, "component", "metrics"))
+			return util.ServeMetrics(ctx, i.metricsAddr, log.With(logger, "component", "metrics"))
 		})
 	}
 
