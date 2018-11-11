@@ -2,10 +2,11 @@ package acmeaccount
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gogo/status"
+	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc/codes"
 
@@ -13,7 +14,10 @@ import (
 )
 
 type ACMEAccount struct {
-	gorm.Model
+	ID        string `gorm:"primary_key"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time `sql:"index"`
 
 	DisplayName          string
 	Title                string
@@ -22,11 +26,22 @@ type ACMEAccount struct {
 	TermsOfServiceAgreed bool
 	Contacts             string
 	AccountURL           string
+
+	ACMEServerID string
+}
+
+func (*ACMEAccount) BeforeCreate(scope *gorm.Scope) error {
+	scope.SetColumn("ID", uuid.New().String())
+	return nil
+}
+
+func (a *ACMEAccount) Name() string {
+	return fmt.Sprintf("acme-accounts/%s", a.ID)
 }
 
 func (a *ACMEAccount) ToAPI() *api.ACMEAccount {
 	return &api.ACMEAccount{
-		Name: fmt.Sprintf("acme-accounts/%d", a.ID),
+		Name: a.Name(),
 
 		CreateTime:  a.CreatedAt,
 		UpdateTime:  a.UpdatedAt,
@@ -57,13 +72,9 @@ func FindACMEAccountByName(name string, db *gorm.DB) (*ACMEAccount, error) {
 	if len(s) != 2 {
 		return nil, status.Error(codes.InvalidArgument, "malformed name")
 	}
-	id, err := strconv.Atoi(s[1])
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "malformed name")
-	}
 
 	acmeAccount := &ACMEAccount{}
-	if db.Where("id = ?", id).First(&acmeAccount).RecordNotFound() {
+	if db.Where("id = ?", s[1]).First(&acmeAccount).RecordNotFound() {
 		return nil, status.Error(codes.NotFound, "not found")
 	}
 	return acmeAccount, nil

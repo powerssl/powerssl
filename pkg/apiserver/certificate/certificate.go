@@ -2,10 +2,11 @@ package certificate
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gogo/status"
+	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc/codes"
 
@@ -13,7 +14,10 @@ import (
 )
 
 type Certificate struct {
-	gorm.Model
+	ID        string `gorm:"primary_key"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time `sql:"index"`
 
 	DisplayName     string
 	Title           string
@@ -25,9 +29,18 @@ type Certificate struct {
 	AutoRenew       bool
 }
 
+func (*Certificate) BeforeCreate(scope *gorm.Scope) error {
+	scope.SetColumn("ID", uuid.New().String())
+	return nil
+}
+
+func (c *Certificate) Name() string {
+	return fmt.Sprintf("certificates/%s", c.ID)
+}
+
 func (c *Certificate) ToAPI() *api.Certificate {
 	return &api.Certificate{
-		Name: fmt.Sprintf("certificates/%d", c.ID),
+		Name: c.Name(),
 
 		CreateTime:  c.CreatedAt,
 		UpdateTime:  c.UpdatedAt,
@@ -59,13 +72,9 @@ func FindCertificateByName(name string, db *gorm.DB) (*Certificate, error) {
 	if len(s) != 2 {
 		return nil, status.Error(codes.InvalidArgument, "malformed name")
 	}
-	id, err := strconv.Atoi(s[1])
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "malformed name")
-	}
 
 	certificate := &Certificate{}
-	if db.Where("id = ?", id).First(&certificate).RecordNotFound() {
+	if db.Where("id = ?", s[1]).First(&certificate).RecordNotFound() {
 		return nil, status.Error(codes.NotFound, "not found")
 	}
 	return certificate, nil
