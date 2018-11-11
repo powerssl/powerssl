@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "powerssl.fullname" . }}-config
+  labels:
+    app: {{ template "powerssl.fullname" . }}
+    chart: {{ template "powerssl.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  csr: |-
+    {{ .Files.Get "configs/csr.json" }}
+  api: |-
+    {{ .Files.Get "configs/api.yaml" }}
+  controller: |-
+    {{ .Files.Get "configs/controller.yaml" }}
