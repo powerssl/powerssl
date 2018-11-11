@@ -1,17 +1,26 @@
 # Mandatory Deployments
-    - apiserver
-    - controller
-    - signer
+* apiserver
+* controller
+* signer
 
 # Integration Deployments
-    - integration-acme
-    - integration-cloudflare
+* integration-acme
+* integration-cloudflare
 
 # Services for discovery and simple round robin load balancing
-    - apiserver
-    - controller
-    - signer
+* apiserver
+* controller
+* signer
 
 # Ingress/Exposed Services
-    - apiserver
+* apiserver
 
+# Provide Configs
+* /etc/powerssl/api
+* /etc/powerssl/controller
+* /etc/powerssl/signer
+
+# Provide Secrets/Certificates
+* /etc/powerssl/ca.pem
+* /etc/powerssl/api/cert.pem
+* /etc/powerssl/api/cert-key.pem
