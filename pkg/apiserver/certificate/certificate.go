@@ -23,33 +23,6 @@ type Certificate struct {
 	AutoRenew       bool
 }
 
-func FindCertificateByName(name string, db *gorm.DB) (*Certificate, error) {
-	s := strings.Split(name, "/")
-	if len(s) != 2 {
-		return nil, fmt.Errorf("Name is wrong")
-	}
-	id, err := strconv.Atoi(s[1])
-	if err != nil {
-		return nil, err
-	}
-
-	certificate := &Certificate{}
-	if db.Where("id = ?", id).First(&certificate).RecordNotFound() {
-		return nil, fmt.Errorf("Not found")
-	}
-	return certificate, nil
-}
-
-func NewCertificateFromAPI(certificate *api.Certificate) *Certificate {
-	return &Certificate{
-		DNSNames:        strings.Join(certificate.Dnsnames, ","),
-		KeyAlgorithm:    certificate.KeyAlgorithm,
-		KeySize:         certificate.KeySize,
-		DigestAlgorithm: certificate.DigestAlgorithm,
-		AutoRenew:       certificate.AutoRenew,
-	}
-}
-
 func (c *Certificate) ToAPI() *api.Certificate {
 	return &api.Certificate{
 		Name: fmt.Sprint("certificates/", c.ID),
@@ -77,4 +50,31 @@ func (c Certificates) ToAPI() []*api.Certificate {
 		certs[i] = cert.ToAPI()
 	}
 	return certs
+}
+
+func FindCertificateByName(name string, db *gorm.DB) (*Certificate, error) {
+	s := strings.Split(name, "/")
+	if len(s) != 2 {
+		return nil, fmt.Errorf("Name is wrong")
+	}
+	id, err := strconv.Atoi(s[1])
+	if err != nil {
+		return nil, err
+	}
+
+	certificate := &Certificate{}
+	if db.Where("id = ?", id).First(&certificate).RecordNotFound() {
+		return nil, fmt.Errorf("Not found")
+	}
+	return certificate, nil
+}
+
+func NewCertificateFromAPI(certificate *api.Certificate) *Certificate {
+	return &Certificate{
+		DNSNames:        strings.Join(certificate.Dnsnames, ","),
+		KeyAlgorithm:    certificate.KeyAlgorithm,
+		KeySize:         certificate.KeySize,
+		DigestAlgorithm: certificate.DigestAlgorithm,
+		AutoRenew:       certificate.AutoRenew,
+	}
 }
