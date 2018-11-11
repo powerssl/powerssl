@@ -19,7 +19,10 @@ import (
 	"powerssl.io/pkg/util/tracing"
 )
 
-var Filename string
+var (
+	DisplayName string
+	Filename    string
+)
 
 func er(msg interface{}) {
 	err, ok := msg.(error)

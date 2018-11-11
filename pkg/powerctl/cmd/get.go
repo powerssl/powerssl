@@ -14,6 +14,7 @@ var (
 func init() {
 	getFuncs = make(map[string]func(string))
 	getFuncs["acmeaccounts"] = getACMEAccount
+	getFuncs["acmeservers"] = getACMEServer
 	getFuncs["certificates"] = getCertificate
 	getFuncs["issues"] = getIssue
 
