@@ -2,10 +2,12 @@ package acmeaccount
 
 import (
 	"context"
+	"strings"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gogo/status"
 	"github.com/jinzhu/gorm"
+	otgorm "github.com/smacker/opentracing-gorm"
 	"google.golang.org/grpc/codes"
 
 	"powerssl.io/pkg/apiserver/api"
@@ -52,15 +54,33 @@ func (bs basicService) Create(ctx context.Context, acmeAccount *api.ACMEAccount)
 		return nil, status.Error(codes.InvalidArgument, "terms of service need to be agreed")
 	}
 
+	db := otgorm.SetSpanToGorm(ctx, bs.db)
+
+	tx := db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	account := NewACMEAccountFromAPI(acmeAccount)
+	if err := tx.Create(account).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
 	workflow, err := bs.controllerclient.Workflow.Create(ctx, &controllerapi.Workflow{
 		Kind: controllerapi.WorkflowKindCreateACMEAccount,
 		IntegrationFilters: []*controllerapi.WorkflowIntegrationFilter{
 			&controllerapi.WorkflowIntegrationFilter{},
 		},
 		Input: &controllerapi.CreateACMEAccountInput{
-			DirectoryURL:         "https://example.com/directory",
-			TermsOfServiceAgreed: true,
-			Contacts:             []string{"mailto:bert@example.com"},
+			DirectoryURL:         account.DirectoryURL,
+			TermsOfServiceAgreed: account.TermsOfServiceAgreed,
+			Contacts:             strings.Split(account.Contacts, ","),
 		},
 	})
 	if err != nil {
@@ -69,15 +89,32 @@ func (bs basicService) Create(ctx context.Context, acmeAccount *api.ACMEAccount)
 		return nil, status.Error(st.Code(), st.Message())
 	}
 	bs.logger.Log("workflow", workflow.Name)
-	return acmeAccount, nil
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return account.ToAPI(), nil
 }
 
 func (bs basicService) Delete(ctx context.Context, name string) error {
-	return ErrUnimplemented
+	db := otgorm.SetSpanToGorm(ctx, bs.db)
+
+	acmeAccount, err := FindACMEAccountByName(name, db)
+	if err != nil {
+		return err
+	}
+	return db.Delete(acmeAccount).Error
 }
 
 func (bs basicService) Get(ctx context.Context, name string) (*api.ACMEAccount, error) {
-	return nil, ErrUnimplemented
+	db := otgorm.SetSpanToGorm(ctx, bs.db)
+
+	acmeAccount, err := FindACMEAccountByName(name, db)
+	if err != nil {
+		return nil, err
+	}
+	return acmeAccount.ToAPI(), nil
 }
 
 func (bs basicService) List(ctx context.Context, pageSize int, pageToken string) ([]*api.ACMEAccount, string, error) {

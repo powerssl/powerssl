@@ -22,9 +22,9 @@ func (acme *ACME) CreateAccount(_ context.Context, directoryURL string, termsOfS
 	// 	Contacts:             contacts,
 	// }
 	account := &api.Account{
-		Contacts:             []string{"mailto:bert@example.com"},
+		Contacts:             contacts,
 		Status:               api.AccountStatusRevoked,
-		TermsOfServiceAgreed: true,
+		TermsOfServiceAgreed: termsOfServiceAgreed,
 		URL:                  "https://example.com/acct/123",
 	}
 	return account, nil
