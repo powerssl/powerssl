@@ -1,4 +1,4 @@
-# Mandatory Deployments
+# Mandatory Deployments and Services
 * apiserver
 * controller
 * signer
@@ -7,12 +7,7 @@
 * integration-acme
 * integration-cloudflare
 
-# Services for discovery and simple round robin load balancing
-* apiserver
-* controller
-* signer
-
-# Ingress/Exposed Services
+# (Optional) Ingress for use out of a cluster
 * apiserver
 
 # Provide Configs
