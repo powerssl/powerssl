@@ -14,3 +14,5 @@ data:
     {{ .Files.Get "configs/api.yaml" }}
   controller: |-
     {{ .Files.Get "configs/controller.yaml" }}
+  signer: |-
+    {{ .Files.Get "configs/signer.yaml" }}
