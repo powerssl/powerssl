@@ -9,68 +9,66 @@ import (
 	"powerssl.io/pkg/apiserver/api"
 )
 
-var (
-	createIssueCmd = &cobra.Command{
-		Use:   "issue",
-		Short: "Create issue",
-		Args:  validateParentArg("certificates"),
-		Run: func(cmd *cobra.Command, args []string) {
-			issue := &api.CertificateIssue{}
-			if Filename != "" {
-				loadResource(Filename, issue)
-			} else {
-				issue = makeIssue()
-			}
-			createIssue(args[0], issue)
-		},
-	}
+var createIssueCmd = &cobra.Command{
+	Use:   "issue",
+	Short: "Create issue",
+	Args:  validateParentArg("certificates"),
+	Run: func(cmd *cobra.Command, args []string) {
+		issue := &api.CertificateIssue{}
+		if Filename != "" {
+			loadResource(Filename, issue)
+		} else {
+			issue = makeIssue()
+		}
+		createIssue(args[0], issue)
+	},
+}
 
-	deleteIssueCmd = &cobra.Command{
-		Use:   "issue",
-		Short: "Delete issue",
-		Args:  validateNameArg,
-		Run: func(cmd *cobra.Command, args []string) {
-			deleteIssue(args[0])
-		},
-	}
+var deleteIssueCmd = &cobra.Command{
+	Use:   "issue",
+	Short: "Delete issue",
+	Args:  validateNameArg,
+	Run: func(cmd *cobra.Command, args []string) {
+		deleteIssue(args[0])
+	},
+}
 
-	getIssueCmd = &cobra.Command{
-		Use:     "issue",
-		Aliases: []string{"issues"},
-		Short:   "Get issue",
-		Example: `  powerctl get issue                   List all issues
+var getIssueCmd = &cobra.Command{
+	Use:     "issue",
+	Aliases: []string{"issues"},
+	Short:   "Get issue",
+	Example: `  powerctl get issue                   List all issues
   powerctl get issue certificates/42   List all issues of an certificate
   powerctl get issue 42                Get an issue
   powerctl get issues/42               Get an issue`,
-		Args: cobra.RangeArgs(0, 1),
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) == 1 {
-				if strings.Contains(args[0], "/") {
-					listIssue(args[0])
-				} else {
-					getIssue(nameArg("issues", args[0]))
-				}
+	Args: cobra.RangeArgs(0, 1),
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 1 {
+			if strings.Contains(args[0], "/") {
+				listIssue(args[0])
 			} else {
-				listIssue("")
+				getIssue(nameArg("issues", args[0]))
 			}
-		},
-	}
+		} else {
+			listIssue("")
+		}
+	},
+}
 
-	updateIssueCmd = &cobra.Command{
-		Use:   "issue",
-		Short: "Update issue",
-		Args:  validateNameArg,
-		Run: func(cmd *cobra.Command, args []string) {
-			issue := &api.CertificateIssue{}
-			if Filename != "" {
-				loadResource(Filename, issue)
-			} else {
-				issue = makeIssue()
-			}
-			updateIssue(args[0], issue)
-		},
-	}
-)
+var updateIssueCmd = &cobra.Command{
+	Use:   "issue",
+	Short: "Update issue",
+	Args:  validateNameArg,
+	Run: func(cmd *cobra.Command, args []string) {
+		issue := &api.CertificateIssue{}
+		if Filename != "" {
+			loadResource(Filename, issue)
+		} else {
+			issue = makeIssue()
+		}
+		updateIssue(args[0], issue)
+	},
+}
 
 func init() {
 	createIssueCmd.Flags().StringVarP(&Filename, "filename", "f", "", "Filename to file to use to create the issue")

@@ -15,63 +15,63 @@ var (
 	DigestAlgorithm string
 	KeyAlgorithm    string
 	KeySize         int
+)
 
-	createCertificateCmd = &cobra.Command{
-		Use:   "certificate",
-		Short: "Create Certificate",
-		Args:  cobra.NoArgs,
-		Run: func(cmd *cobra.Command, args []string) {
-			certificate := &api.Certificate{}
-			if Filename != "" {
-				loadResource(Filename, certificate)
-			} else {
-				certificate = makeCertificate()
-			}
-			createCertificate(certificate)
-		},
-	}
+var createCertificateCmd = &cobra.Command{
+	Use:   "certificate",
+	Short: "Create Certificate",
+	Args:  cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		certificate := &api.Certificate{}
+		if Filename != "" {
+			loadResource(Filename, certificate)
+		} else {
+			certificate = makeCertificate()
+		}
+		createCertificate(certificate)
+	},
+}
 
-	deleteCertificateCmd = &cobra.Command{
-		Use:   "certificate",
-		Short: "Delete Certificate",
-		Args:  validateNameArg,
-		Run: func(cmd *cobra.Command, args []string) {
-			deleteCertificate(nameArg("certificates", args[0]))
-		},
-	}
+var deleteCertificateCmd = &cobra.Command{
+	Use:   "certificate",
+	Short: "Delete Certificate",
+	Args:  validateNameArg,
+	Run: func(cmd *cobra.Command, args []string) {
+		deleteCertificate(nameArg("certificates", args[0]))
+	},
+}
 
-	getCertificateCmd = &cobra.Command{
-		Use:     "certificate",
-		Aliases: []string{"certificates"},
-		Short:   "Get Certificate",
-		Example: `  powerctl get certificate       List all certificates
+var getCertificateCmd = &cobra.Command{
+	Use:     "certificate",
+	Aliases: []string{"certificates"},
+	Short:   "Get Certificate",
+	Example: `  powerctl get certificate       List all certificates
   powerctl get certificate 42    Get an certificate
   powerctl get certificates/42   Get an certificate`,
-		Args: cobra.RangeArgs(0, 1),
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) == 1 {
-				getCertificate(nameArg("certificates", args[0]))
-			} else {
-				listCertificate()
-			}
-		},
-	}
+	Args: cobra.RangeArgs(0, 1),
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 1 {
+			getCertificate(nameArg("certificates", args[0]))
+		} else {
+			listCertificate()
+		}
+	},
+}
 
-	updateCertificateCmd = &cobra.Command{
-		Use:   "certificate",
-		Short: "Update Certificate",
-		Args:  validateNameArg,
-		Run: func(cmd *cobra.Command, args []string) {
-			certificate := &api.Certificate{}
-			if Filename != "" {
-				loadResource(Filename, certificate)
-			} else {
-				certificate = makeCertificate()
-			}
-			updateCertificate(nameArg("certificates", args[0]), certificate)
-		},
-	}
-)
+var updateCertificateCmd = &cobra.Command{
+	Use:   "certificate",
+	Short: "Update Certificate",
+	Args:  validateNameArg,
+	Run: func(cmd *cobra.Command, args []string) {
+		certificate := &api.Certificate{}
+		if Filename != "" {
+			loadResource(Filename, certificate)
+		} else {
+			certificate = makeCertificate()
+		}
+		updateCertificate(nameArg("certificates", args[0]), certificate)
+	},
+}
 
 func init() {
 	createCertificateCmd.Flags().StringVarP(&Filename, "filename", "f", "", "Filename to file to use to create the certificate")
