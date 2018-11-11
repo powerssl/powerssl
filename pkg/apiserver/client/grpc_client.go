@@ -9,18 +9,18 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
+	acmeaccountservice "powerssl.io/pkg/apiserver/acmeaccount"
+	acmeaccounttransport "powerssl.io/pkg/apiserver/acmeaccount/generated/transport"
 	certificateservice "powerssl.io/pkg/apiserver/certificate"
 	certificatetransport "powerssl.io/pkg/apiserver/certificate/generated/transport"
-	certificateauthorityservice "powerssl.io/pkg/apiserver/certificateauthority"
-	certificateauthoritytransport "powerssl.io/pkg/apiserver/certificateauthority/generated/transport"
 	certificateissueservice "powerssl.io/pkg/apiserver/certificateissue"
 	certificateissuetransport "powerssl.io/pkg/apiserver/certificateissue/generated/transport"
 )
 
 type GRPCClient struct {
-	Certificate          certificateservice.Service
-	CertificateAuthority certificateauthorityservice.Service
-	CertificateIssue     certificateissueservice.Service
+	ACMEAccount      acmeaccountservice.Service
+	Certificate      certificateservice.Service
+	CertificateIssue certificateissueservice.Service
 }
 
 func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
@@ -49,8 +49,8 @@ func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, inse
 	}
 
 	return &GRPCClient{
-		Certificate:          certificatetransport.NewGRPCClient(conn, logger, tracer),
-		CertificateAuthority: certificateauthoritytransport.NewGRPCClient(conn, logger),
-		CertificateIssue:     certificateissuetransport.NewGRPCClient(conn, logger),
+		ACMEAccount:      acmeaccounttransport.NewGRPCClient(conn, logger, tracer),
+		Certificate:      certificatetransport.NewGRPCClient(conn, logger, tracer),
+		CertificateIssue: certificateissuetransport.NewGRPCClient(conn, logger),
 	}, nil
 }

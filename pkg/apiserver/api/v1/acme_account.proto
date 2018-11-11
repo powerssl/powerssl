@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package powerssl.apiserver.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "powerssl.io/pkg/apiserver/api/v1;api";
+
+service ACMEAccountService {
+  rpc Create(CreateACMEAccountRequest)
+      returns (ACMEAccount) {
+    option (google.api.http) = {
+      post: "/v1/acme-accounts"
+      body: "acme-account"
+    };
+  }
+  rpc Delete(DeleteACMEAccountRequest)
+      returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/{name=acme-accounts/*}"
+    };
+  }
+  rpc Get(GetACMEAccountRequest)
+      returns (ACMEAccount) {
+    option (google.api.http) = {
+      get: "/v1/{name=acme-accounts/*}"
+    };
+  }
+  rpc List(ListACMEAccountsRequest)
+      returns (ListACMEAccountsResponse) {
+    option (google.api.http) = {
+      get: "/v1/acme-accounts"
+    };
+  }
+  rpc Update(UpdateACMEAccountRequest)
+      returns (ACMEAccount) {
+    option (google.api.http) = {
+      put: "/v1/{name=acme-accounts/*}",
+      body: "acme-account"
+    };
+  }
+}
+
+message ACMEAccount {
+  string name = 1;
+
+  google.protobuf.Timestamp create_time = 2;
+  google.protobuf.Timestamp update_time = 3;
+  string display_name = 4;
+  string title = 5;
+  string description = 6;
+  map<string, string> labels = 7;
+
+  bool terms_of_service_agreed = 8;
+  repeated string contacts = 9;
+  string account_url = 10;
+  string directory_url = 11;
+  string integration_name = 12;
+}
+
+message CreateACMEAccountRequest {
+  ACMEAccount acme_account = 1;
+}
+
+message DeleteACMEAccountRequest {
+  string name = 1;
+}
+
+message GetACMEAccountRequest {
+  string name = 1;
+}
+
+message ListACMEAccountsRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message ListACMEAccountsResponse {
+  repeated ACMEAccount acme_accounts = 1;
+  string next_page_token = 2;
+}
+
+message UpdateACMEAccountRequest {
+  string name = 1;
+  ACMEAccount acme_account = 2;
+}

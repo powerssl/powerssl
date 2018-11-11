@@ -13,6 +13,7 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gogo/googleapis v1.1.0
 	github.com/gogo/protobuf v1.1.1
+	github.com/gogo/status v1.0.3
 	github.com/google/go-cmp v0.2.0 // indirect
 	github.com/google/uuid v1.0.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
