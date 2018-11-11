@@ -2,13 +2,13 @@ package certificate
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/go-kit/kit/log"
+	"github.com/gogo/status"
 	"github.com/jinzhu/gorm"
 	otgorm "github.com/smacker/opentracing-gorm"
-	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/codes"
 
 	"powerssl.io/pkg/apiserver/api"
 	controllerapi "powerssl.io/pkg/controller/api"
@@ -130,7 +130,7 @@ func (bs basicService) List(ctx context.Context, pageSize int, pageToken string)
 		var err error
 		offset, err = strconv.Atoi(pageToken)
 		if err != nil {
-			return nil, "", fmt.Errorf("Invalid page token")
+			return nil, "", status.Error(codes.InvalidArgument, "malformed page token")
 		}
 	}
 	if err := db.Limit(pageSize + 1).Offset(offset).Find(&certificates).Error; err != nil {

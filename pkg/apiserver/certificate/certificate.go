@@ -5,7 +5,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gogo/status"
 	"github.com/jinzhu/gorm"
+	"google.golang.org/grpc/codes"
 
 	"powerssl.io/pkg/apiserver/api"
 )
@@ -25,7 +27,7 @@ type Certificate struct {
 
 func (c *Certificate) ToAPI() *api.Certificate {
 	return &api.Certificate{
-		Name: fmt.Sprint("certificates/", c.ID),
+		Name: fmt.Sprintf("certificates/%d", c.ID),
 
 		CreateTime:  c.CreatedAt,
 		UpdateTime:  c.UpdatedAt,
@@ -55,16 +57,16 @@ func (c Certificates) ToAPI() []*api.Certificate {
 func FindCertificateByName(name string, db *gorm.DB) (*Certificate, error) {
 	s := strings.Split(name, "/")
 	if len(s) != 2 {
-		return nil, fmt.Errorf("Name is wrong")
+		return nil, status.Error(codes.InvalidArgument, "malformed name")
 	}
 	id, err := strconv.Atoi(s[1])
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.InvalidArgument, "malformed name")
 	}
 
 	certificate := &Certificate{}
 	if db.Where("id = ?", id).First(&certificate).RecordNotFound() {
-		return nil, fmt.Errorf("Not found")
+		return nil, status.Error(codes.NotFound, "not found")
 	}
 	return certificate, nil
 }
