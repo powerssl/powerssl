@@ -7,7 +7,7 @@ require (
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/denisenkom/go-mssqldb v0.0.0-20181014144952-4e0d7dc8888f // indirect
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
-	github.com/go-kit/kit v0.7.0
+	github.com/go-kit/kit v0.8.0
 	github.com/go-logfmt/logfmt v0.3.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
@@ -30,9 +30,9 @@ require (
 	github.com/opentracing/opentracing-go v1.0.2
 	github.com/pkg/errors v0.8.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_golang v0.9.0
+	github.com/prometheus/client_golang v0.9.1
 	github.com/prometheus/client_model v0.0.0-20180712105110-5c3871d89910 // indirect
-	github.com/prometheus/common v0.0.0-20181020173914-7e9e6cabbd39 // indirect
+	github.com/prometheus/common v0.0.0-20181109100915-0b1957f9d949 // indirect
 	github.com/prometheus/procfs v0.0.0-20181005140218-185b4288413d // indirect
 	github.com/smacker/opentracing-gorm v0.0.0-20181021120754-5d1581397338
 	github.com/spf13/cobra v0.0.3
@@ -42,9 +42,9 @@ require (
 	github.com/uber/jaeger-client-go v2.15.0+incompatible
 	github.com/uber/jaeger-lib v1.5.0
 	go.uber.org/atomic v1.3.2 // indirect
-	golang.org/x/crypto v0.0.0-20181025213731-e84da0312774 // indirect
-	golang.org/x/net v0.0.0-20181023162649-9b4f9f5ad519
-	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
+	golang.org/x/crypto v0.0.0-20181106171534-e4dc69e5b2fd // indirect
+	golang.org/x/net v0.0.0-20181108082009-03003ca0c849
+	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f
 	google.golang.org/grpc v1.16.0
 	gopkg.in/yaml.v2 v2.2.1
 )
