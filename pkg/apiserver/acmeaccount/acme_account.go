@@ -18,11 +18,10 @@ type ACMEAccount struct {
 	DisplayName          string
 	Title                string
 	Description          string
+	ACMEServer           string
 	TermsOfServiceAgreed bool
 	Contacts             string
 	AccountURL           string
-	DirectoryURL         string
-	IntegrationName      string
 }
 
 func (a *ACMEAccount) ToAPI() *api.ACMEAccount {
@@ -36,11 +35,10 @@ func (a *ACMEAccount) ToAPI() *api.ACMEAccount {
 		Description: a.Description,
 		Labels:      map[string]string{"not": "implemented"},
 
+		ACMEServer:           a.ACMEServer,
 		TermsOfServiceAgreed: a.TermsOfServiceAgreed,
 		Contacts:             strings.Split(a.Contacts, ","),
 		AccountURL:           a.AccountURL,
-		DirectoryURL:         a.DirectoryURL,
-		IntegrationName:      a.IntegrationName,
 	}
 }
 
@@ -73,10 +71,9 @@ func FindACMEAccountByName(name string, db *gorm.DB) (*ACMEAccount, error) {
 
 func NewACMEAccountFromAPI(acmeAccount *api.ACMEAccount) *ACMEAccount {
 	return &ACMEAccount{
+		ACMEServer:           acmeAccount.ACMEServer,
 		TermsOfServiceAgreed: acmeAccount.TermsOfServiceAgreed,
 		Contacts:             strings.Join(acmeAccount.Contacts, ","),
 		AccountURL:           acmeAccount.AccountURL,
-		DirectoryURL:         acmeAccount.DirectoryURL,
-		IntegrationName:      acmeAccount.IntegrationName,
 	}
 }

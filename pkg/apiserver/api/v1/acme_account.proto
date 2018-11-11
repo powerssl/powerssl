@@ -53,11 +53,10 @@ message ACMEAccount {
   string description = 6;
   map<string, string> labels = 7;
 
-  bool terms_of_service_agreed = 8;
-  repeated string contacts = 9;
-  string account_url = 10;
-  string directory_url = 11;
-  string integration_name = 12;
+  string acme_server = 8;
+  bool terms_of_service_agreed = 9;
+  repeated string contacts = 10;
+  string account_url = 11;
 }
 
 message CreateACMEAccountRequest {

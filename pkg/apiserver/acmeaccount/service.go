@@ -78,7 +78,7 @@ func (bs basicService) Create(ctx context.Context, acmeAccount *api.ACMEAccount)
 			&controllerapi.WorkflowIntegrationFilter{},
 		},
 		Input: &controllerapi.CreateACMEAccountInput{
-			DirectoryURL:         account.DirectoryURL,
+			DirectoryURL:         "account.DirectoryURL", // TODO
 			TermsOfServiceAgreed: account.TermsOfServiceAgreed,
 			Contacts:             strings.Split(account.Contacts, ","),
 		},

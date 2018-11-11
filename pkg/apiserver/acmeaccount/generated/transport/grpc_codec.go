@@ -29,11 +29,10 @@ func decodeGRPCACMEAccount(acmeAccount *apiv1.ACMEAccount) (*api.ACMEAccount, er
 		Title:                acmeAccount.GetTitle(),
 		Description:          acmeAccount.GetDescription(),
 		Labels:               acmeAccount.GetLabels(),
+		ACMEServer:           acmeAccount.GetAcmeServer(),
 		TermsOfServiceAgreed: acmeAccount.GetTermsOfServiceAgreed(),
 		Contacts:             acmeAccount.GetContacts(),
-		DirectoryURL:         acmeAccount.GetDirectoryUrl(),
 		AccountURL:           acmeAccount.GetAccountUrl(),
-		IntegrationName:      acmeAccount.GetIntegrationName(),
 	}, nil
 }
 
@@ -54,11 +53,10 @@ func encodeGRPCACMEAccount(acmeAccount *api.ACMEAccount) (*apiv1.ACMEAccount, er
 		Title:                acmeAccount.Title,
 		Description:          acmeAccount.Description,
 		Labels:               acmeAccount.Labels,
+		AcmeServer:           acmeAccount.ACMEServer,
 		TermsOfServiceAgreed: acmeAccount.TermsOfServiceAgreed,
 		Contacts:             acmeAccount.Contacts,
-		DirectoryUrl:         acmeAccount.DirectoryURL,
 		AccountUrl:           acmeAccount.AccountURL,
-		IntegrationName:      acmeAccount.IntegrationName,
 	}, nil
 }
 

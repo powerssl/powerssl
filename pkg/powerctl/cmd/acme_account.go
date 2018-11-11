@@ -10,9 +10,8 @@ import (
 )
 
 var (
+	ACMEServer           string
 	Contacts             string
-	DirectoryURL         string
-	IntegrationName      string
 	TermsOfServiceAgreed bool
 )
 
@@ -74,10 +73,9 @@ var updateACMEAccountCmd = &cobra.Command{
 
 func init() {
 	createACMEAccountCmd.Flags().BoolVarP(&TermsOfServiceAgreed, "agree-terms-of-service", "", false, "Terms of Service agreed")
+	createACMEAccountCmd.Flags().StringVarP(&ACMEServer, "acme-server", "", "", "ACME server name")
 	createACMEAccountCmd.Flags().StringVarP(&Contacts, "contacts", "", "", "Contact URLs (e.g. mailto:contact@example.com) (seperated by \",\")")
-	createACMEAccountCmd.Flags().StringVarP(&DirectoryURL, "directory-url", "", "", "Directory URL")
 	createACMEAccountCmd.Flags().StringVarP(&Filename, "filename", "f", "", "Filename to file to use to create the ACME account")
-	createACMEAccountCmd.Flags().StringVarP(&IntegrationName, "integration-name", "", "", "Integration name")
 
 	updateACMEAccountCmd.Flags().StringVarP(&Filename, "filename", "f", "", "Filename to file to use to update the ACME account")
 	updateACMEAccountCmd.Flags().StringVarP(&Contacts, "contacts", "", "", "Contact URLs (e.g. mailto:contact@example.com) (seperated by \",\")")
@@ -125,9 +123,8 @@ func updateACMEAccount(name string, acmeAccount *api.ACMEAccount) {
 
 func makeACMEAccount() *api.ACMEAccount {
 	return &api.ACMEAccount{
+		ACMEServer:           ACMEServer,
 		Contacts:             strings.Split(Contacts, ","),
-		DirectoryURL:         DirectoryURL,
-		IntegrationName:      IntegrationName,
 		TermsOfServiceAgreed: TermsOfServiceAgreed,
 	}
 }
