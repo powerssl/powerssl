@@ -10,15 +10,15 @@ import (
 )
 
 var (
-	ACMEServer           string
 	Contacts             string
 	TermsOfServiceAgreed bool
 )
 
 var createACMEAccountCmd = &cobra.Command{
-	Use:   "acmeaccount",
-	Short: "Create ACME account",
-	Args:  cobra.NoArgs,
+	Use:     "acmeaccount [PARENT]",
+	Short:   "Create ACME account",
+	Args:    validateParentArg("acme-server"),
+	Example: `  powerctl create acmeaccount acme-servers/42 --agree-terms-of-service --contacts mailto:john.doe@example.com   Create ACME account within ACME server`,
 	Run: func(cmd *cobra.Command, args []string) {
 		acmeAccount := &api.ACMEAccount{}
 		if Filename != "" {
@@ -26,7 +26,7 @@ var createACMEAccountCmd = &cobra.Command{
 		} else {
 			acmeAccount = makeACMEAccount()
 		}
-		createACMEAccount(acmeAccount)
+		createACMEAccount(args[0], acmeAccount)
 	},
 }
 
@@ -35,7 +35,7 @@ var deleteACMEAccountCmd = &cobra.Command{
 	Short: "Delete ACME account",
 	Args:  validateNameArg,
 	Run: func(cmd *cobra.Command, args []string) {
-		deleteACMEAccount(nameArg("acmeaccounts", args[0]))
+		deleteACMEAccount(args[0])
 	},
 }
 
@@ -44,14 +44,19 @@ var getACMEAccountCmd = &cobra.Command{
 	Aliases: []string{"acmeaccounts"},
 	Short:   "Get ACME account",
 	Example: `  powerctl get acmeaccount       List all ACME accounts
-  powerctl get acmeaccount 42    Get an ACME account
-  powerctl get acmeaccounts/42   Get an ACME account`,
+  powerctl get acmeaccount acmeservers/42    List all ACME accounts of an ACME server
+  powerctl get acmeaccount 42                Get an ACME account
+  powerctl get acmeaccounts/42               Get an ACME account`,
 	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
-			getACMEAccount(nameArg("acmeaccounts", args[0]))
+			if strings.Contains(args[0], "/") {
+				getACMEAccount(args[0])
+			} else {
+				getACMEAccount(nameArg("acmeaccount", args[0]))
+			}
 		} else {
-			listACMEAccount()
+			listACMEAccount("")
 		}
 	},
 }
@@ -67,13 +72,12 @@ var updateACMEAccountCmd = &cobra.Command{
 		} else {
 			acmeAccount = makeACMEAccount()
 		}
-		updateACMEAccount(nameArg("acmeaccounts", args[0]), acmeAccount)
+		updateACMEAccount(args[0], acmeAccount)
 	},
 }
 
 func init() {
 	createACMEAccountCmd.Flags().BoolVarP(&TermsOfServiceAgreed, "agree-terms-of-service", "", false, "Terms of Service agreed")
-	createACMEAccountCmd.Flags().StringVarP(&ACMEServer, "acme-server", "", "", "ACME server name")
 	createACMEAccountCmd.Flags().StringVarP(&Contacts, "contacts", "", "", "Contact URLs (e.g. mailto:contact@example.com) (seperated by \",\")")
 	createACMEAccountCmd.Flags().StringVarP(&Filename, "filename", "f", "", "Filename to file to use to create the ACME account")
 
@@ -86,10 +90,10 @@ func init() {
 	updateCmd.AddCommand(updateACMEAccountCmd)
 }
 
-func createACMEAccount(acmeAccount *api.ACMEAccount) {
+func createACMEAccount(parent string, acmeAccount *api.ACMEAccount) {
 	client := newGRPCClient()
 	createResource(func() (interface{}, error) {
-		return client.ACMEAccount.Create(context.Background(), acmeAccount)
+		return client.ACMEAccount.Create(context.Background(), parent, acmeAccount)
 	})
 }
 
@@ -107,10 +111,10 @@ func getACMEAccount(name string) {
 	})
 }
 
-func listACMEAccount() {
+func listACMEAccount(parent string) {
 	client := newGRPCClient()
 	listResource(func(pageToken string) (interface{}, string, error) {
-		return client.ACMEAccount.List(context.Background(), 0, pageToken)
+		return client.ACMEAccount.List(context.Background(), parent, 0, pageToken)
 	})
 }
 
@@ -123,7 +127,6 @@ func updateACMEAccount(name string, acmeAccount *api.ACMEAccount) {
 
 func makeACMEAccount() *api.ACMEAccount {
 	return &api.ACMEAccount{
-		ACMEServer:           ACMEServer,
 		Contacts:             strings.Split(Contacts, ","),
 		TermsOfServiceAgreed: TermsOfServiceAgreed,
 	}

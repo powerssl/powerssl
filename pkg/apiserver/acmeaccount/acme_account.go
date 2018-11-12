@@ -10,6 +10,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc/codes"
 
+	"powerssl.io/pkg/apiserver/acmeserver"
 	"powerssl.io/pkg/apiserver/api"
 )
 
@@ -22,12 +23,18 @@ type ACMEAccount struct {
 	DisplayName          string
 	Title                string
 	Description          string
-	ACMEServer           string
+	ACMEServerID         string
 	TermsOfServiceAgreed bool
 	Contacts             string
 	AccountURL           string
+}
 
-	ACMEServerID string
+func (a *ACMEAccount) ACMEServer(db *gorm.DB, s string) (*acmeserver.ACMEServer, error) {
+	acmeServer := &acmeserver.ACMEServer{}
+	if db.Model(a).Select(s).Related(&acmeServer).RecordNotFound() {
+		return nil, fmt.Errorf("ACME server not found")
+	}
+	return acmeServer, nil
 }
 
 func (*ACMEAccount) BeforeCreate(scope *gorm.Scope) error {
@@ -36,10 +43,14 @@ func (*ACMEAccount) BeforeCreate(scope *gorm.Scope) error {
 }
 
 func (a *ACMEAccount) Name() string {
-	return fmt.Sprintf("acme-accounts/%s", a.ID)
+	return fmt.Sprintf("acme-servers/%s/acme-accounts/%s", a.ACMEServerID, a.ID)
 }
 
 func (a *ACMEAccount) ToAPI() *api.ACMEAccount {
+	var contacts []string
+	if a.Contacts != "" {
+		contacts = strings.Split(a.Contacts, ",")
+	}
 	return &api.ACMEAccount{
 		Name: a.Name(),
 
@@ -50,10 +61,19 @@ func (a *ACMEAccount) ToAPI() *api.ACMEAccount {
 		Description: a.Description,
 		Labels:      map[string]string{"not": "implemented"},
 
-		ACMEServer:           a.ACMEServer,
 		TermsOfServiceAgreed: a.TermsOfServiceAgreed,
-		Contacts:             strings.Split(a.Contacts, ","),
+		Contacts:             contacts,
 		AccountURL:           a.AccountURL,
+	}
+}
+
+func (a *ACMEAccount) Validate(db *gorm.DB) {
+	if !a.TermsOfServiceAgreed {
+		db.AddError(status.Error(codes.InvalidArgument, "terms of service need to be agreed"))
+	}
+
+	if _, err := a.ACMEServer(db, "id"); err != nil {
+		db.AddError(err)
 	}
 }
 
@@ -69,22 +89,37 @@ func (a ACMEAccounts) ToAPI() []*api.ACMEAccount {
 
 func FindACMEAccountByName(name string, db *gorm.DB) (*ACMEAccount, error) {
 	s := strings.Split(name, "/")
-	if len(s) != 2 {
+	if len(s) != 4 || s[0] != "acme-servers" || s[2] != "acme-accounts" {
 		return nil, status.Error(codes.InvalidArgument, "malformed name")
+	}
+	acmeServerID, acmeAccountID := s[1], s[3]
+
+	q := db.Where("id = ?", acmeAccountID)
+	if s[1] != "-" {
+		acmeServer := &acmeserver.ACMEServer{}
+		if db.Select("id").Where("id = ?", acmeServerID).First(&acmeServer).RecordNotFound() {
+			return nil, status.Error(codes.NotFound, "parent not found")
+		}
+		q = q.Where("acme_server_id = ?", acmeServer.ID)
 	}
 
 	acmeAccount := &ACMEAccount{}
-	if db.Where("id = ?", s[1]).First(&acmeAccount).RecordNotFound() {
+	if q.First(&acmeAccount).RecordNotFound() {
 		return nil, status.Error(codes.NotFound, "not found")
 	}
 	return acmeAccount, nil
 }
 
-func NewACMEAccountFromAPI(acmeAccount *api.ACMEAccount) *ACMEAccount {
+func NewACMEAccountFromAPI(parent string, acmeAccount *api.ACMEAccount) (*ACMEAccount, error) {
+	s := strings.Split(parent, "/")
+	if len(s) != 2 || s[0] != "acme-servers" {
+		return nil, status.Error(codes.InvalidArgument, "malformed parent")
+	}
+	acmeServerID := s[1]
+
 	return &ACMEAccount{
-		ACMEServer:           acmeAccount.ACMEServer,
+		ACMEServerID:         acmeServerID,
 		TermsOfServiceAgreed: acmeAccount.TermsOfServiceAgreed,
 		Contacts:             strings.Join(acmeAccount.Contacts, ","),
-		AccountURL:           acmeAccount.AccountURL,
-	}
+	}, nil
 }

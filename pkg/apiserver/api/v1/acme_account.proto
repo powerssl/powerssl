@@ -12,32 +12,32 @@ service ACMEAccountService {
   rpc Create(CreateACMEAccountRequest)
       returns (ACMEAccount) {
     option (google.api.http) = {
-      post: "/v1/acme-accounts"
+      post: "/v1/{parent=acme-servers/*}/acme-accounts"
       body: "acme-account"
     };
   }
   rpc Delete(DeleteACMEAccountRequest)
       returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/v1/{name=acme-accounts/*}"
+      delete: "/v1/{name=acme-servers/*/acme-accounts/*}"
     };
   }
   rpc Get(GetACMEAccountRequest)
       returns (ACMEAccount) {
     option (google.api.http) = {
-      get: "/v1/{name=acme-accounts/*}"
+      get: "/v1/{name=acme-servers/*/acme-accounts/*}"
     };
   }
   rpc List(ListACMEAccountsRequest)
       returns (ListACMEAccountsResponse) {
     option (google.api.http) = {
-      get: "/v1/acme-accounts"
+      get: "/v1/{parent=acme-servers/*}/acme-accounts"
     };
   }
   rpc Update(UpdateACMEAccountRequest)
       returns (ACMEAccount) {
     option (google.api.http) = {
-      put: "/v1/{name=acme-accounts/*}",
+      put: "/v1/{name=acme-servers/*/acme-accounts/*}",
       body: "acme-account"
     };
   }
@@ -53,14 +53,14 @@ message ACMEAccount {
   string description = 6;
   map<string, string> labels = 7;
 
-  string acme_server = 8;
-  bool terms_of_service_agreed = 9;
-  repeated string contacts = 10;
-  string account_url = 11;
+  bool terms_of_service_agreed = 8;
+  repeated string contacts = 9;
+  string account_url = 10;
 }
 
 message CreateACMEAccountRequest {
-  ACMEAccount acme_account = 1;
+  string parent = 1;
+  ACMEAccount acme_account = 2;
 }
 
 message DeleteACMEAccountRequest {
@@ -72,8 +72,9 @@ message GetACMEAccountRequest {
 }
 
 message ListACMEAccountsRequest {
-  int32 page_size = 1;
-  string page_token = 2;
+  string parent = 1;
+  int32 page_size = 2;
+  string page_token = 3;
 }
 
 message ListACMEAccountsResponse {

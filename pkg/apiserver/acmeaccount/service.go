@@ -18,10 +18,10 @@ import (
 var ErrUnimplemented = status.Error(codes.Unimplemented, "Coming soon")
 
 type Service interface {
-	Create(ctx context.Context, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error)
+	Create(ctx context.Context, parent string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error)
 	Delete(ctx context.Context, name string) error
 	Get(ctx context.Context, name string) (*api.ACMEAccount, error)
-	List(ctx context.Context, pageSize int, pageToken string) ([]*api.ACMEAccount, string, error)
+	List(ctx context.Context, parent string, pageSize int, pageToken string) ([]*api.ACMEAccount, string, error)
 	Update(ctx context.Context, name string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error)
 }
 
@@ -49,11 +49,7 @@ func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GR
 	}
 }
 
-func (bs basicService) Create(ctx context.Context, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error) {
-	if !acmeAccount.TermsOfServiceAgreed {
-		return nil, status.Error(codes.InvalidArgument, "terms of service need to be agreed")
-	}
-
+func (bs basicService) Create(ctx context.Context, parent string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error) {
 	db := otgorm.SetSpanToGorm(ctx, bs.db)
 
 	tx := db.Begin()
@@ -66,19 +62,30 @@ func (bs basicService) Create(ctx context.Context, acmeAccount *api.ACMEAccount)
 		return nil, tx.Error
 	}
 
-	account := NewACMEAccountFromAPI(acmeAccount)
+	account, err := NewACMEAccountFromAPI(parent, acmeAccount)
+	if err != nil {
+		return nil, err
+	}
 	if err := tx.Create(account).Error; err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 
+	acmeServer, err := account.ACMEServer(db, "directory_url, integration_name")
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "not found")
+	}
+
 	workflow, err := bs.controllerclient.Workflow.Create(ctx, &controllerapi.Workflow{
 		Kind: controllerapi.WorkflowKindCreateACMEAccount,
 		IntegrationFilters: []*controllerapi.WorkflowIntegrationFilter{
-			&controllerapi.WorkflowIntegrationFilter{},
+			{
+				Kind: controllerapi.IntegrationKindACME,
+				Name: acmeServer.IntegrationName,
+			},
 		},
 		Input: &controllerapi.CreateACMEAccountInput{
-			DirectoryURL:         "account.DirectoryURL", // TODO
+			DirectoryURL:         acmeServer.DirectoryURL,
 			TermsOfServiceAgreed: account.TermsOfServiceAgreed,
 			Contacts:             strings.Split(account.Contacts, ","),
 		},
@@ -117,7 +124,7 @@ func (bs basicService) Get(ctx context.Context, name string) (*api.ACMEAccount, 
 	return acmeAccount.ToAPI(), nil
 }
 
-func (bs basicService) List(ctx context.Context, pageSize int, pageToken string) ([]*api.ACMEAccount, string, error) {
+func (bs basicService) List(ctx context.Context, parent string, pageSize int, pageToken string) ([]*api.ACMEAccount, string, error) {
 	return nil, "", ErrUnimplemented
 }
 

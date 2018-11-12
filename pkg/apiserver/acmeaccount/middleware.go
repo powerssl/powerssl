@@ -21,11 +21,11 @@ type loggingMiddleware struct {
 	next   Service
 }
 
-func (mw loggingMiddleware) Create(ctx context.Context, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error) {
+func (mw loggingMiddleware) Create(ctx context.Context, parent string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error) {
 	defer func() {
-		mw.logger.Log("method", "Create", "acmeAccount", true)
+		mw.logger.Log("method", "Create", "parent", parent, "acmeAccount", true)
 	}()
-	return mw.next.Create(ctx, acmeAccount)
+	return mw.next.Create(ctx, parent, acmeAccount)
 }
 
 func (mw loggingMiddleware) Delete(ctx context.Context, name string) error {
@@ -42,11 +42,11 @@ func (mw loggingMiddleware) Get(ctx context.Context, name string) (*api.ACMEAcco
 	return mw.next.Get(ctx, name)
 }
 
-func (mw loggingMiddleware) List(ctx context.Context, pageSize int, pageToken string) ([]*api.ACMEAccount, string, error) {
+func (mw loggingMiddleware) List(ctx context.Context, parent string, pageSize int, pageToken string) ([]*api.ACMEAccount, string, error) {
 	defer func() {
-		mw.logger.Log("method", "List", "pageSize", pageSize, "pageToken", pageToken)
+		mw.logger.Log("method", "List", "parent", parent, "pageSize", pageSize, "pageToken", pageToken)
 	}()
-	return mw.next.List(ctx, pageSize, pageToken)
+	return mw.next.List(ctx, parent, pageSize, pageToken)
 }
 
 func (mw loggingMiddleware) Update(ctx context.Context, name string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error) {

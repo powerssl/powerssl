@@ -3,6 +3,7 @@ module powerssl.io
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
+	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf // indirect
 	github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973 // indirect
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/denisenkom/go-mssqldb v0.0.0-20181014144952-4e0d7dc8888f // indirect
@@ -19,7 +20,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jinzhu/gorm v1.9.1
-	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
+	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a
 	github.com/jinzhu/now v0.0.0-20180511015916-ed742868f2ae // indirect
 	github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515 // indirect
 	github.com/lib/pq v1.0.0 // indirect
@@ -34,6 +35,8 @@ require (
 	github.com/prometheus/client_model v0.0.0-20180712105110-5c3871d89910 // indirect
 	github.com/prometheus/common v0.0.0-20181109100915-0b1957f9d949 // indirect
 	github.com/prometheus/procfs v0.0.0-20181005140218-185b4288413d // indirect
+	github.com/qor/qor v0.0.0-20180607095400-a9b667cbbf18 // indirect
+	github.com/qor/validations v0.0.0-20171228122639-f364bca61b46
 	github.com/smacker/opentracing-gorm v0.0.0-20181021120754-5d1581397338
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.2.1

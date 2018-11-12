@@ -10,7 +10,6 @@ type ACMEAccount struct {
 	Title                string            `json:"title,omitempty"                yaml:"title,omitempty"`
 	Description          string            `json:"description,omitempty"          yaml:"description,omitempty"`
 	Labels               map[string]string `json:"labels,omitempty"               yaml:"labels,omitempty"`
-	ACMEServer           string            `json:"acmeServer,omitempty"           yaml:"acmeServer,omitempty"`
 	TermsOfServiceAgreed bool              `json:"termsOfServiceAgreed,omitempty" yaml:"termsOfServiceAgreed,omitempty"`
 	Contacts             []string          `json:"contacts,omitempty"             yaml:"contacts,omitempty"`
 	AccountURL           string            `json:"accountURL,omitempty"           yaml:"accountURL,omitempty"`

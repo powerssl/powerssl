@@ -29,7 +29,6 @@ func decodeGRPCACMEAccount(acmeAccount *apiv1.ACMEAccount) (*api.ACMEAccount, er
 		Title:                acmeAccount.GetTitle(),
 		Description:          acmeAccount.GetDescription(),
 		Labels:               acmeAccount.GetLabels(),
-		ACMEServer:           acmeAccount.GetAcmeServer(),
 		TermsOfServiceAgreed: acmeAccount.GetTermsOfServiceAgreed(),
 		Contacts:             acmeAccount.GetContacts(),
 		AccountURL:           acmeAccount.GetAccountUrl(),
@@ -53,7 +52,6 @@ func encodeGRPCACMEAccount(acmeAccount *api.ACMEAccount) (*apiv1.ACMEAccount, er
 		Title:                acmeAccount.Title,
 		Description:          acmeAccount.Description,
 		Labels:               acmeAccount.Labels,
-		AcmeServer:           acmeAccount.ACMEServer,
 		TermsOfServiceAgreed: acmeAccount.TermsOfServiceAgreed,
 		Contacts:             acmeAccount.Contacts,
 		AccountUrl:           acmeAccount.AccountURL,
@@ -91,6 +89,7 @@ func decodeGRPCCreateRequest(_ context.Context, grpcReq interface{}) (interface{
 		return nil, err
 	}
 	return endpoint.CreateRequest{
+		Parent:      req.GetParent(),
 		ACMEAccount: acmeAccount,
 	}, nil
 }
@@ -118,6 +117,7 @@ func encodeGRPCCreateRequest(_ context.Context, request interface{}) (interface{
 		return nil, err
 	}
 	return &apiv1.CreateACMEAccountRequest{
+		Parent:      req.Parent,
 		AcmeAccount: acmeAccount,
 	}, nil
 }
@@ -177,6 +177,7 @@ func encodeGRPCGetRequest(_ context.Context, request interface{}) (interface{}, 
 func decodeGRPCListRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*apiv1.ListACMEAccountsRequest)
 	return endpoint.ListRequest{
+		Parent:    req.GetParent(),
 		PageSize:  int(req.GetPageSize()),
 		PageToken: req.GetPageToken(),
 	}, nil
@@ -209,6 +210,7 @@ func encodeGRPCListResponse(_ context.Context, response interface{}) (interface{
 func encodeGRPCListRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(endpoint.ListRequest)
 	return &apiv1.ListACMEAccountsRequest{
+		Parent:    req.Parent,
 		PageSize:  int32(req.PageSize),
 		PageToken: req.PageToken,
 	}, nil

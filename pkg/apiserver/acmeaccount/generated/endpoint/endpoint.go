@@ -74,8 +74,9 @@ func NewEndpoints(svc service.Service, logger log.Logger, tracer stdopentracing.
 	}
 }
 
-func (e Endpoints) Create(ctx context.Context, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error) {
+func (e Endpoints) Create(ctx context.Context, parent string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error) {
 	resp, err := e.CreateEndpoint(ctx, CreateRequest{
+		Parent:      parent,
 		ACMEAccount: acmeAccount,
 	})
 	if err != nil {
@@ -106,8 +107,9 @@ func (e Endpoints) Get(ctx context.Context, name string) (*api.ACMEAccount, erro
 	return response.ACMEAccount, nil
 }
 
-func (e Endpoints) List(ctx context.Context, pageSize int, pageToken string) ([]*api.ACMEAccount, string, error) {
+func (e Endpoints) List(ctx context.Context, parent string, pageSize int, pageToken string) ([]*api.ACMEAccount, string, error) {
 	resp, err := e.ListEndpoint(ctx, ListRequest{
+		Parent:    parent,
 		PageSize:  pageSize,
 		PageToken: pageToken,
 	})
@@ -131,6 +133,7 @@ func (e Endpoints) Update(ctx context.Context, name string, acmeAccount *api.ACM
 }
 
 type CreateRequest struct {
+	Parent      string
 	ACMEAccount *api.ACMEAccount
 }
 
@@ -141,7 +144,7 @@ type CreateResponse struct {
 func makeCreateEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(CreateRequest)
-		acmeAccount, err := s.Create(ctx, req.ACMEAccount)
+		acmeAccount, err := s.Create(ctx, req.Parent, req.ACMEAccount)
 		if err != nil {
 			return nil, err
 		}
@@ -189,6 +192,7 @@ func makeGetEndpoint(s service.Service) endpoint.Endpoint {
 }
 
 type ListRequest struct {
+	Parent    string
 	PageSize  int
 	PageToken string
 }
@@ -201,7 +205,7 @@ type ListResponse struct {
 func makeListEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(ListRequest)
-		acmeAccounts, nextPageToken, err := s.List(ctx, req.PageSize, req.PageToken)
+		acmeAccounts, nextPageToken, err := s.List(ctx, req.Parent, req.PageSize, req.PageToken)
 		if err != nil {
 			return nil, err
 		}

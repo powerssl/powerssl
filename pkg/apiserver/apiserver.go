@@ -10,6 +10,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
+	"github.com/qor/validations"
 	otgorm "github.com/smacker/opentracing-gorm"
 	"golang.org/x/sync/errgroup"
 
@@ -49,6 +50,7 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialec
 		}
 		defer db.Close()
 		otgorm.AddGormCallbacks(db)
+		validations.RegisterCallbacks(db)
 	}
 
 	var client *controllerclient.GRPCClient
