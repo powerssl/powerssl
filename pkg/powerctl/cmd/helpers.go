@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jinzhu/inflection"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc/status"
@@ -98,22 +99,27 @@ func newGRPCClient() *apiserverclient.GRPCClient {
 	return client
 }
 
-func nameArg(resourcePlural, arg string) string {
-	if strings.HasPrefix(arg, fmt.Sprint(resourcePlural, "/")) {
+func nameArg(resource, arg string) string {
+	if strings.HasPrefix(arg, fmt.Sprint(inflection.Plural(resource), "/")) {
 		return arg
 	}
-	return fmt.Sprint(resourcePlural, "/", arg)
+	return fmt.Sprint(inflection.Plural(resource), "/", arg)
 }
 
-func checkParentArg(parent string, resourcePlural string) error {
+func checkParentArg(parent string, resources []string) error {
 	sl := strings.Split(parent, "/")
-	if len(sl) != 2 || sl[0] != resourcePlural {
+	if len(sl) != 2 {
 		return errors.New("Invalid parent")
 	}
-	return nil
+	for _, resource := range resources {
+		if sl[0] == inflection.Plural(resource) {
+			return nil
+		}
+	}
+	return errors.New("Invalid parent")
 }
 
-func validateParentArg(resourcePlural string) func(cmd *cobra.Command, args []string) error {
+func validateParentArg(resources ...string) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("expected parent arg")
@@ -121,7 +127,7 @@ func validateParentArg(resourcePlural string) func(cmd *cobra.Command, args []st
 		if len(args) > 1 {
 			return errors.New("expected parent arg only")
 		}
-		return checkParentArg(args[0], resourcePlural)
+		return checkParentArg(args[0], resources)
 	}
 
 }

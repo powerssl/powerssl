@@ -37,7 +37,7 @@ var deleteCertificateCmd = &cobra.Command{
 	Short: "Delete Certificate",
 	Args:  validateNameArg,
 	Run: func(cmd *cobra.Command, args []string) {
-		deleteCertificate(nameArg("certificates", args[0]))
+		deleteCertificate(nameArg("certificate", args[0]))
 	},
 }
 
@@ -51,7 +51,7 @@ var getCertificateCmd = &cobra.Command{
 	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
-			getCertificate(nameArg("certificates", args[0]))
+			getCertificate(nameArg("certificate", args[0]))
 		} else {
 			listCertificate()
 		}
@@ -69,7 +69,7 @@ var updateCertificateCmd = &cobra.Command{
 		} else {
 			certificate = makeCertificate()
 		}
-		updateCertificate(nameArg("certificates", args[0]), certificate)
+		updateCertificate(nameArg("certificate", args[0]), certificate)
 	},
 }
 

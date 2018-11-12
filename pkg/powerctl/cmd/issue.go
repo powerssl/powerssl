@@ -12,7 +12,7 @@ import (
 var createIssueCmd = &cobra.Command{
 	Use:   "issue",
 	Short: "Create issue",
-	Args:  validateParentArg("certificates"),
+	Args:  validateParentArg("certificate"),
 	Run: func(cmd *cobra.Command, args []string) {
 		issue := &api.CertificateIssue{}
 		if Filename != "" {
@@ -47,7 +47,7 @@ var getIssueCmd = &cobra.Command{
 			if strings.Contains(args[0], "/") {
 				listIssue(args[0])
 			} else {
-				getIssue(nameArg("issues", args[0]))
+				getIssue(nameArg("issue", args[0]))
 			}
 		} else {
 			listIssue("")

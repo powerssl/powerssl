@@ -13,6 +13,8 @@ var (
 
 func init() {
 	getFuncs = make(map[string]func(string))
+	getFuncs["acme-accounts"] = getACMEAccount
+	getFuncs["acme-servers"] = getACMEServer
 	getFuncs["acmeaccounts"] = getACMEAccount
 	getFuncs["acmeservers"] = getACMEServer
 	getFuncs["certificates"] = getCertificate

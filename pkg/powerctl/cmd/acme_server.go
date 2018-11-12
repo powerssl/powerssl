@@ -16,9 +16,10 @@ var (
 )
 
 var createACMEServerCmd = &cobra.Command{
-	Use:   "acmeserver",
-	Short: "Create ACME server",
-	Args:  cobra.NoArgs,
+	Use:     "acmeserver",
+	Aliases: []string{"acme-server"},
+	Short:   "Create ACME server",
+	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		acmeServer := &api.ACMEServer{}
 		if Filename != "" {
@@ -31,17 +32,18 @@ var createACMEServerCmd = &cobra.Command{
 }
 
 var deleteACMEServerCmd = &cobra.Command{
-	Use:   "acmeserver",
-	Short: "Delete ACME server",
-	Args:  validateNameArg,
+	Use:     "acmeserver",
+	Aliases: []string{"acme-server"},
+	Short:   "Delete ACME server",
+	Args:    validateNameArg,
 	Run: func(cmd *cobra.Command, args []string) {
-		deleteACMEServer(nameArg("acmeservers", args[0]))
+		deleteACMEServer(nameArg("acmeserver", args[0]))
 	},
 }
 
 var getACMEServerCmd = &cobra.Command{
 	Use:     "acmeserver",
-	Aliases: []string{"acmeservers"},
+	Aliases: []string{"acme-servers", "acmeservers"},
 	Short:   "Get ACME server",
 	Example: `  powerctl get acmeserver       List all ACME servers
   powerctl get acmeserver 42    Get an ACME server
@@ -49,7 +51,7 @@ var getACMEServerCmd = &cobra.Command{
 	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
-			getACMEServer(nameArg("acmeservers", args[0]))
+			getACMEServer(nameArg("acmeserver", args[0]))
 		} else {
 			listACMEServer()
 		}
@@ -57,9 +59,10 @@ var getACMEServerCmd = &cobra.Command{
 }
 
 var updateACMEServerCmd = &cobra.Command{
-	Use:   "acmeserver",
-	Short: "Update ACME server",
-	Args:  validateNameArg,
+	Use:     "acmeserver",
+	Aliases: []string{"acme-server"},
+	Short:   "Update ACME server",
+	Args:    validateNameArg,
 	Run: func(cmd *cobra.Command, args []string) {
 		acmeServer := &api.ACMEServer{}
 		if Filename != "" {
@@ -67,7 +70,7 @@ var updateACMEServerCmd = &cobra.Command{
 		} else {
 			acmeServer = makeACMEServer()
 		}
-		updateACMEServer(nameArg("acmeservers", args[0]), acmeServer)
+		updateACMEServer(nameArg("acmeserver", args[0]), acmeServer)
 	},
 }
 
