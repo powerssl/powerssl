@@ -2,7 +2,6 @@ package integration
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -54,7 +53,8 @@ func New(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVer
 		logger.Log("component", "tracing", "err", err)
 		os.Exit(1)
 	}
-	defer closer.Close()
+	// defer closer.Close()
+	var _ = closer
 
 	client, err := controllerclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, logger, tracer)
 	if err != nil {
@@ -155,26 +155,15 @@ func (i *integration) run(ctx context.Context) error {
 
 func (i *integration) handleActivity(activity *api.Activity) {
 	i.logger.Log("activity", activity.Token, "name", activity.Name)
-	wireContext, err := extractWireContext(activity.Signature) // TODO: Do not use Signature for Span
+	wireContext, err := tracing.WireContextFromJSON(activity.Signature) // TODO: Do not use Signature for Span
 	if err != nil {
+		panic(err)
 		// TODO
 	}
-	serverSpan := opentracing.StartSpan(string(activity.Name), ext.RPCServerOption(wireContext))
-	serverSpan.SetTag("token", activity.Token)
-	ctx := opentracing.ContextWithSpan(context.Background(), serverSpan)
+	activitySpan := opentracing.StartSpan(activity.Name.String(), ext.RPCServerOption(wireContext))
+	activitySpan.SetTag("token", activity.Token)
+	ctx := opentracing.ContextWithSpan(context.Background(), activitySpan)
 	err = i.handler.HandleActivity(ctx, activity)
-	serverSpan.Finish()
+	activitySpan.Finish()
 	i.logger.Log("activity", activity.Token, "err", err)
-}
-
-func extractWireContext(s string) (opentracing.SpanContext, error) {
-	var tmc opentracing.TextMapCarrier
-	if err := json.Unmarshal([]byte(s), &tmc); err != nil {
-		return nil, err
-	}
-	wireContext, err := opentracing.GlobalTracer().Extract(opentracing.TextMap, tmc)
-	if err != nil {
-		return nil, err
-	}
-	return wireContext, nil
 }

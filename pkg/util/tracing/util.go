@@ -40,3 +40,15 @@ func JSONCarrierFromSpan(span opentracing.Span) (string, error) {
 	}
 	return string(bytes), nil
 }
+
+func WireContextFromJSON(s string) (opentracing.SpanContext, error) {
+	var tmc opentracing.TextMapCarrier
+	if err := json.Unmarshal([]byte(s), &tmc); err != nil {
+		return nil, err
+	}
+	wireContext, err := opentracing.GlobalTracer().Extract(opentracing.TextMap, tmc)
+	if err != nil {
+		return nil, err
+	}
+	return wireContext, nil
+}
