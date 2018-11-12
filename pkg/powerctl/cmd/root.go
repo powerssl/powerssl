@@ -67,6 +67,8 @@ func initConfig() {
 	}
 
 	viper.AutomaticEnv()
+	viper.SetEnvPrefix("powerssl")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 
 	if err := viper.ReadInConfig(); err != nil && strings.Contains("Not Found", err.Error()) {
 		fmt.Println("Can't read config:", err)

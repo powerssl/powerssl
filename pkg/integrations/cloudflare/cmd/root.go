@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -45,6 +46,8 @@ func initConfig() {
 	}
 
 	viper.AutomaticEnv()
+	viper.SetEnvPrefix("powerssl")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 
 	if err := viper.ReadInConfig(); err == nil && Verbose {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
