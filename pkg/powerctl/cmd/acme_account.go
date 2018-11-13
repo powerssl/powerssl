@@ -17,8 +17,8 @@ var (
 var createACMEAccountCmd = &cobra.Command{
 	Use:     "acmeaccount [PARENT]",
 	Short:   "Create ACME account",
-	Args:    validateParentArg("acme-server"),
-	Example: `  powerctl create acmeaccount acme-servers/42 --agree-terms-of-service --contacts mailto:john.doe@example.com   Create ACME account within ACME server`,
+	Args:    validateParentArg("acmeServer"),
+	Example: `  powerctl create acmeaccount acmeServers/42 --agree-terms-of-service --contacts mailto:john.doe@example.com   Create ACME account within ACME server`,
 	Run: func(cmd *cobra.Command, args []string) {
 		acmeAccount := &api.ACMEAccount{}
 		if Filename != "" {

@@ -43,7 +43,7 @@ func (*ACMEAccount) BeforeCreate(scope *gorm.Scope) error {
 }
 
 func (a *ACMEAccount) Name() string {
-	return fmt.Sprintf("acme-servers/%s/acme-accounts/%s", a.ACMEServerID, a.ID)
+	return fmt.Sprintf("acmeServers/%s/acmeAccounts/%s", a.ACMEServerID, a.ID)
 }
 
 func (a *ACMEAccount) ToAPI() *api.ACMEAccount {
@@ -89,7 +89,7 @@ func (a ACMEAccounts) ToAPI() []*api.ACMEAccount {
 
 func FindACMEAccountByName(name string, db *gorm.DB) (*ACMEAccount, error) {
 	s := strings.Split(name, "/")
-	if len(s) != 4 || s[0] != "acme-servers" || s[2] != "acme-accounts" {
+	if len(s) != 4 || s[0] != "acmeServers" || s[2] != "acmeAccounts" {
 		return nil, status.Error(codes.InvalidArgument, "malformed name")
 	}
 	acmeServerID, acmeAccountID := s[1], s[3]
@@ -112,7 +112,7 @@ func FindACMEAccountByName(name string, db *gorm.DB) (*ACMEAccount, error) {
 
 func NewACMEAccountFromAPI(parent string, acmeAccount *api.ACMEAccount) (*ACMEAccount, error) {
 	s := strings.Split(parent, "/")
-	if len(s) != 2 || s[0] != "acme-servers" {
+	if len(s) != 2 || s[0] != "acmeServers" {
 		return nil, status.Error(codes.InvalidArgument, "malformed parent")
 	}
 	acmeServerID := s[1]

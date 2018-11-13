@@ -17,7 +17,7 @@ var (
 
 var createACMEServerCmd = &cobra.Command{
 	Use:     "acmeserver",
-	Aliases: []string{"acme-server"},
+	Aliases: []string{"acmeServer"},
 	Short:   "Create ACME server",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -33,7 +33,7 @@ var createACMEServerCmd = &cobra.Command{
 
 var deleteACMEServerCmd = &cobra.Command{
 	Use:     "acmeserver",
-	Aliases: []string{"acme-server"},
+	Aliases: []string{"acmeServer"},
 	Short:   "Delete ACME server",
 	Args:    validateNameArg,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -43,7 +43,7 @@ var deleteACMEServerCmd = &cobra.Command{
 
 var getACMEServerCmd = &cobra.Command{
 	Use:     "acmeserver",
-	Aliases: []string{"acme-servers", "acmeservers"},
+	Aliases: []string{"acmeservers", "acmeServers"},
 	Short:   "Get ACME server",
 	Example: `  powerctl get acmeserver       List all ACME servers
   powerctl get acmeserver 42    Get an ACME server
@@ -51,7 +51,7 @@ var getACMEServerCmd = &cobra.Command{
 	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
-			getACMEServer(nameArg("acmeserver", args[0]))
+			getACMEServer(nameArg("acmeServer", args[0]))
 		} else {
 			listACMEServer()
 		}
@@ -60,7 +60,7 @@ var getACMEServerCmd = &cobra.Command{
 
 var updateACMEServerCmd = &cobra.Command{
 	Use:     "acmeserver",
-	Aliases: []string{"acme-server"},
+	Aliases: []string{"acmeServer"},
 	Short:   "Update ACME server",
 	Args:    validateNameArg,
 	Run: func(cmd *cobra.Command, args []string) {

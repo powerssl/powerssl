@@ -30,7 +30,7 @@ func (*ACMEServer) BeforeCreate(scope *gorm.Scope) error {
 }
 
 func (a *ACMEServer) Name() string {
-	return fmt.Sprintf("acme-servers/%s", a.ID)
+	return fmt.Sprintf("acmeServers/%s", a.ID)
 }
 
 func (a *ACMEServer) ToAPI() *api.ACMEServer {

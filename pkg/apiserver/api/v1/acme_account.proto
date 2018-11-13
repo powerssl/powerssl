@@ -12,33 +12,33 @@ service ACMEAccountService {
   rpc Create(CreateACMEAccountRequest)
       returns (ACMEAccount) {
     option (google.api.http) = {
-      post: "/v1/{parent=acme-servers/*}/acme-accounts"
-      body: "acme-account"
+      post: "/v1/{parent=acmeServers/*}/acmeAccounts"
+      body: "acmeAccount"
     };
   }
   rpc Delete(DeleteACMEAccountRequest)
       returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/v1/{name=acme-servers/*/acme-accounts/*}"
+      delete: "/v1/{name=acmeServers/*/acmeAccounts/*}"
     };
   }
   rpc Get(GetACMEAccountRequest)
       returns (ACMEAccount) {
     option (google.api.http) = {
-      get: "/v1/{name=acme-servers/*/acme-accounts/*}"
+      get: "/v1/{name=acmeServers/*/acmeAccounts/*}"
     };
   }
   rpc List(ListACMEAccountsRequest)
       returns (ListACMEAccountsResponse) {
     option (google.api.http) = {
-      get: "/v1/{parent=acme-servers/*}/acme-accounts"
+      get: "/v1/{parent=acmeServers/*}/acmeAccounts"
     };
   }
   rpc Update(UpdateACMEAccountRequest)
       returns (ACMEAccount) {
     option (google.api.http) = {
-      put: "/v1/{name=acme-servers/*/acme-accounts/*}",
-      body: "acme-account"
+      put: "/v1/{name=acmeServers/*/acmeAccounts/*}",
+      body: "acmeAccount"
     };
   }
 }

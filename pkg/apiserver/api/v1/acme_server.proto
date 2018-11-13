@@ -12,33 +12,33 @@ service ACMEServerService {
   rpc Create(CreateACMEServerRequest)
       returns (ACMEServer) {
     option (google.api.http) = {
-      post: "/v1/acme-servers"
-      body: "acme-server"
+      post: "/v1/acmeServers"
+      body: "acmeServer"
     };
   }
   rpc Delete(DeleteACMEServerRequest)
       returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/v1/{name=acme-servers/*}"
+      delete: "/v1/{name=acmeServers/*}"
     };
   }
   rpc Get(GetACMEServerRequest)
       returns (ACMEServer) {
     option (google.api.http) = {
-      get: "/v1/{name=acme-servers/*}"
+      get: "/v1/{name=acmeServers/*}"
     };
   }
   rpc List(ListACMEServersRequest)
       returns (ListACMEServersResponse) {
     option (google.api.http) = {
-      get: "/v1/acme-servers"
+      get: "/v1/acmeServers"
     };
   }
   rpc Update(UpdateACMEServerRequest)
       returns (ACMEServer) {
     option (google.api.http) = {
-      put: "/v1/{name=acme-servers/*}",
-      body: "acme-server"
+      put: "/v1/{name=acmeServers/*}",
+      body: "acmeServer"
     };
   }
 }
