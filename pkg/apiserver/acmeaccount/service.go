@@ -2,6 +2,7 @@ package acmeaccount
 
 import (
 	"context"
+	"strconv"
 	"strings"
 
 	"github.com/go-kit/kit/log"
@@ -125,7 +126,35 @@ func (bs basicService) Get(ctx context.Context, name string) (*api.ACMEAccount, 
 }
 
 func (bs basicService) List(ctx context.Context, parent string, pageSize int, pageToken string) ([]*api.ACMEAccount, string, error) {
-	return nil, "", ErrUnimplemented
+	db := otgorm.SetSpanToGorm(ctx, bs.db)
+
+	if pageSize < 1 {
+		pageSize = 10
+	} else if pageSize > 20 {
+		pageSize = 20
+	}
+	offset := -1
+	if pageToken != "" {
+		var err error
+		offset, err = strconv.Atoi(pageToken)
+		if err != nil {
+			return nil, "", status.Error(codes.InvalidArgument, "malformed page token")
+		}
+	}
+	var acmeAccounts ACMEAccounts
+	if err := db.Limit(pageSize + 1).Offset(offset).Find(&acmeAccounts).Error; err != nil {
+		return nil, "", err
+	}
+	var nextPageToken string
+	if len(acmeAccounts) > pageSize {
+		acmeAccounts = acmeAccounts[:len(acmeAccounts)-1]
+		if offset == -1 {
+			nextPageToken = strconv.Itoa(pageSize)
+		} else {
+			nextPageToken = strconv.Itoa(offset + pageSize)
+		}
+	}
+	return acmeAccounts.ToAPI(), nextPageToken, nil
 }
 
 func (bs basicService) Update(ctx context.Context, name string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error) {

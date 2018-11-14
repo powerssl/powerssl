@@ -2,6 +2,7 @@ package acmeserver
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gogo/status"
@@ -94,7 +95,35 @@ func (bs basicService) Get(ctx context.Context, name string) (*api.ACMEServer, e
 }
 
 func (bs basicService) List(ctx context.Context, pageSize int, pageToken string) ([]*api.ACMEServer, string, error) {
-	return nil, "", ErrUnimplemented
+	db := otgorm.SetSpanToGorm(ctx, bs.db)
+
+	if pageSize < 1 {
+		pageSize = 10
+	} else if pageSize > 20 {
+		pageSize = 20
+	}
+	offset := -1
+	if pageToken != "" {
+		var err error
+		offset, err = strconv.Atoi(pageToken)
+		if err != nil {
+			return nil, "", status.Error(codes.InvalidArgument, "malformed page token")
+		}
+	}
+	var acmeServers ACMEServers
+	if err := db.Limit(pageSize + 1).Offset(offset).Find(&acmeServers).Error; err != nil {
+		return nil, "", err
+	}
+	var nextPageToken string
+	if len(acmeServers) > pageSize {
+		acmeServers = acmeServers[:len(acmeServers)-1]
+		if offset == -1 {
+			nextPageToken = strconv.Itoa(pageSize)
+		} else {
+			nextPageToken = strconv.Itoa(offset + pageSize)
+		}
+	}
+	return acmeServers.ToAPI(), nextPageToken, nil
 }
 
 func (bs basicService) Update(ctx context.Context, name string, acmeServer *api.ACMEServer) (*api.ACMEServer, error) {
