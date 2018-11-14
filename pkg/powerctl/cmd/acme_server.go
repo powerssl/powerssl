@@ -2,11 +2,85 @@ package cmd
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
 	"powerssl.io/pkg/apiserver/api"
+	apiserverclient "powerssl.io/pkg/apiserver/client"
 )
+
+var ACMEServer acmeServer
+
+type ACMEServerSpec struct {
+	DisplayName     string `json:"displayName,omitempty"     yaml:"displayName,omitempty"`
+	DirectoryURL    string `json:"directoryURL,omitempty"    yaml:"directoryURL,omitempty"`
+	IntegrationName string `json:"integrationName,omitempty" yaml:"integrationName,omitempty"`
+}
+
+type acmeServer struct{}
+
+func (r acmeServer) Create(client *apiserverclient.GRPCClient, resource *Resource) (*Resource, error) {
+	spec := resource.Spec.(*ACMEServerSpec)
+	acmeServer := &api.ACMEServer{
+		DirectoryURL:    spec.DirectoryURL,
+		DisplayName:     spec.DisplayName,
+		IntegrationName: spec.IntegrationName,
+	}
+	acmeServer, err := client.ACMEServer.Create(context.Background(), acmeServer)
+	if err != nil {
+		return nil, err
+	}
+	return r.Encode(acmeServer), nil
+}
+
+func (r acmeServer) Delete(client *apiserverclient.GRPCClient, name string) error {
+	return client.ACMEServer.Delete(context.Background(), fmt.Sprintf("acmeServers/%s", name))
+}
+
+func (r acmeServer) Encode(acmeServer *api.ACMEServer) *Resource {
+	uid := strings.Split(acmeServer.Name, "/")[1]
+	return &Resource{
+		Kind: "acmeserver",
+		Meta: &ResourceMeta{
+			UID:        uid,
+			CreateTime: acmeServer.CreateTime,
+			UpdateTime: acmeServer.UpdateTime,
+		},
+		Spec: &ACMEServerSpec{
+			DisplayName:     acmeServer.DisplayName,
+			DirectoryURL:    acmeServer.DirectoryURL,
+			IntegrationName: acmeServer.IntegrationName,
+		},
+	}
+}
+
+func (r acmeServer) Get(client *apiserverclient.GRPCClient, name string) (*Resource, error) {
+	acmeServer, err := client.ACMEServer.Get(context.Background(), fmt.Sprintf("acmeServers/%s", name))
+	if err != nil {
+		return nil, err
+	}
+	return r.Encode(acmeServer), nil
+}
+
+func (r acmeServer) List(client *apiserverclient.GRPCClient) ([]*Resource, error) {
+	return listResource(func(pageToken string) ([]*Resource, string, error) {
+		acmeServers, nextPageToken, err := client.ACMEServer.List(context.Background(), 0, pageToken)
+		if err != nil {
+			return nil, nextPageToken, err
+		}
+		a := make([]*Resource, len(acmeServers))
+		for i, acmeServer := range acmeServers {
+			a[i] = r.Encode(acmeServer)
+		}
+		return a, nextPageToken, nil
+	})
+}
+
+func (r acmeServer) Spec() interface{} {
+	return new(ACMEServerSpec)
+}
 
 var (
 	DirectoryURL       string
@@ -21,60 +95,41 @@ var createACMEServerCmd = &cobra.Command{
 	Short:   "Create ACME server",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		acmeServer := &api.ACMEServer{}
-		if Filename != "" {
-			loadResource(Filename, acmeServer)
-		} else {
-			acmeServer = makeACMEServer()
+		client, err := NewGRPCClient()
+		if err != nil {
+			er(err)
 		}
-		createACMEServer(acmeServer)
-	},
-}
-
-var deleteACMEServerCmd = &cobra.Command{
-	Use:     "acmeserver",
-	Aliases: []string{"acmeServer"},
-	Short:   "Delete ACME server",
-	Args:    validateNameArg,
-	Run: func(cmd *cobra.Command, args []string) {
-		deleteACMEServer(nameArg("acmeserver", args[0]))
-	},
-}
-
-var getACMEServerCmd = &cobra.Command{
-	Use:     "acmeserver",
-	Aliases: []string{"acmeservers", "acmeServers"},
-	Short:   "Get ACME server",
-	Example: `  powerctl get acmeserver       List all ACME servers
-  powerctl get acmeserver 42    Get an ACME server
-  powerctl get acmeservers/42   Get an ACME server`,
-	Args: cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 1 {
-			getACMEServer(nameArg("acmeServer", args[0]))
+		var acmeServer *api.ACMEServer
+		if LetsEncrypt {
+			acmeServer = &api.ACMEServer{
+				DirectoryURL:    "https://acme-v02.api.letsencrypt.org/directory",
+				DisplayName:     "Let's Encrypt",
+				IntegrationName: "acme",
+			}
+		} else if LetsEncryptStaging {
+			acmeServer = &api.ACMEServer{
+				DirectoryURL:    "https://acme-staging-v02.api.letsencrypt.org/directory",
+				DisplayName:     "Let's Encrypt Staging",
+				IntegrationName: "acme",
+			}
 		} else {
-			listACMEServer()
+			acmeServer = &api.ACMEServer{
+				DirectoryURL:    DirectoryURL,
+				DisplayName:     DisplayName,
+				IntegrationName: IntegrationName,
+			}
 		}
-	},
-}
-
-var updateACMEServerCmd = &cobra.Command{
-	Use:     "acmeserver",
-	Aliases: []string{"acmeServer"},
-	Short:   "Update ACME server",
-	Args:    validateNameArg,
-	Run: func(cmd *cobra.Command, args []string) {
-		acmeServer := &api.ACMEServer{}
-		if Filename != "" {
-			loadResource(Filename, acmeServer)
-		} else {
-			acmeServer = makeACMEServer()
+		acmeServer, err = client.ACMEServer.Create(context.Background(), acmeServer)
+		if err != nil {
+			er(err)
 		}
-		updateACMEServer(nameArg("acmeserver", args[0]), acmeServer)
+		pr(ACMEServer.Encode(acmeServer))
 	},
 }
 
 func init() {
+	Resources.Add(ACMEServer, "as")
+
 	createACMEServerCmd.Flags().BoolVarP(&LetsEncrypt, "letsencrypt", "", false, "Let's Encrypt defaults")
 	createACMEServerCmd.Flags().BoolVarP(&LetsEncryptStaging, "letsencrypt-staging", "", false, "Let's Encrypt staging defaults")
 	createACMEServerCmd.Flags().StringVarP(&DisplayName, "display-name", "", "", "Display name")
@@ -82,70 +137,5 @@ func init() {
 	createACMEServerCmd.Flags().StringVarP(&Filename, "filename", "f", "", "Filename to file to use to create the ACME server")
 	createACMEServerCmd.Flags().StringVarP(&IntegrationName, "integration-name", "", "", "Integration name")
 
-	updateACMEServerCmd.Flags().StringVarP(&DisplayName, "display-name", "", "", "Display name")
-	updateACMEServerCmd.Flags().StringVarP(&DirectoryURL, "directory-url", "", "", "Directory URL")
-	updateACMEServerCmd.Flags().StringVarP(&Filename, "filename", "f", "", "Filename to file to use to create the ACME server")
-	updateACMEServerCmd.Flags().StringVarP(&IntegrationName, "integration-name", "", "", "Integration name")
-
 	createCmd.AddCommand(createACMEServerCmd)
-	deleteCmd.AddCommand(deleteACMEServerCmd)
-	getCmd.AddCommand(getACMEServerCmd)
-	updateCmd.AddCommand(updateACMEServerCmd)
-}
-
-func createACMEServer(acmeServer *api.ACMEServer) {
-	client := newGRPCClient()
-	createResource(func() (interface{}, error) {
-		return client.ACMEServer.Create(context.Background(), acmeServer)
-	})
-}
-
-func deleteACMEServer(name string) {
-	client := newGRPCClient()
-	deleteResource(func() error {
-		return client.ACMEServer.Delete(context.Background(), name)
-	})
-}
-
-func getACMEServer(name string) {
-	client := newGRPCClient()
-	getResource(func() (interface{}, error) {
-		return client.ACMEServer.Get(context.Background(), name)
-	})
-}
-
-func listACMEServer() {
-	client := newGRPCClient()
-	listResource(func(pageToken string) (interface{}, string, error) {
-		return client.ACMEServer.List(context.Background(), 0, pageToken)
-	})
-}
-
-func updateACMEServer(name string, acmeServer *api.ACMEServer) {
-	client := newGRPCClient()
-	updateResource(func() (interface{}, error) {
-		return client.ACMEServer.Update(context.Background(), name, acmeServer)
-	})
-}
-
-func makeACMEServer() *api.ACMEServer {
-	if LetsEncrypt {
-		return &api.ACMEServer{
-			DirectoryURL:    "https://acme-v02.api.letsencrypt.org/directory",
-			DisplayName:     "Let's Encrypt",
-			IntegrationName: "acme",
-		}
-	}
-	if LetsEncryptStaging {
-		return &api.ACMEServer{
-			DirectoryURL:    "https://acme-staging-v02.api.letsencrypt.org/directory",
-			DisplayName:     "Let's Encrypt Staging",
-			IntegrationName: "acme",
-		}
-	}
-	return &api.ACMEServer{
-		DirectoryURL:    DirectoryURL,
-		DisplayName:     DisplayName,
-		IntegrationName: IntegrationName,
-	}
 }

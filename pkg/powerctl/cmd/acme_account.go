@@ -2,132 +2,130 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
 
 	"powerssl.io/pkg/apiserver/api"
+	apiserverclient "powerssl.io/pkg/apiserver/client"
 )
 
+var ACMEAccount acmeAccount
+
+type ACMEAccountSpec struct {
+	DisplayName          string   `json:"displayName,omitempty"          yaml:"displayName,omitempty"`
+	Title                string   `json:"directoryURL,omitempty"         yaml:"directoryURL,omitempty"`
+	Description          string   `json:"integrationName,omitempty"      yaml:"integrationName,omitempty"`
+	ACMEServer           string   `json:"acmeServer,omitempty"           yaml:"acmeServer,omitempty"`
+	TermsOfServiceAgreed bool     `json:"termsOfServiceAgreed,omitempty" yaml:"termsOfServiceAgreed,omitempty"`
+	Contacts             []string `json:"contacts,omitempty"             yaml:"contacts,omitempty"`
+	AccountURL           string   `json:"accountURL,omitempty"           yaml:"accountURL,omitempty"`
+}
+
+type acmeAccount struct{}
+
+func (r acmeAccount) Create(client *apiserverclient.GRPCClient, resource *Resource) (*Resource, error) {
+	spec := resource.Spec.(*ACMEAccountSpec)
+	acmeAccount := &api.ACMEAccount{
+		Contacts:             spec.Contacts,
+		TermsOfServiceAgreed: spec.TermsOfServiceAgreed,
+	}
+	acmeAccount, err := client.ACMEAccount.Create(context.Background(), fmt.Sprintf("acmeServers/%s", spec.ACMEServer), acmeAccount)
+	if err != nil {
+		return nil, err
+	}
+	return r.Encode(acmeAccount), nil
+}
+
+func (r acmeAccount) Delete(client *apiserverclient.GRPCClient, name string) error {
+	return client.ACMEAccount.Delete(context.Background(), fmt.Sprintf("acmeServers/-/acmeAccounts/%s", name))
+}
+
+func (r acmeAccount) Encode(acmeAccount *api.ACMEAccount) *Resource {
+	uid := strings.Split(acmeAccount.Name, "/")[3]
+	acmeServer := strings.Split(acmeAccount.Name, "/")[1]
+	return &Resource{
+		Kind: "acmeaccount",
+		Meta: &ResourceMeta{
+			UID:        uid,
+			CreateTime: acmeAccount.CreateTime,
+			UpdateTime: acmeAccount.UpdateTime,
+		},
+		Spec: &ACMEAccountSpec{
+			DisplayName:          acmeAccount.DisplayName,
+			Title:                acmeAccount.Title,
+			Description:          acmeAccount.Description,
+			ACMEServer:           acmeServer,
+			TermsOfServiceAgreed: acmeAccount.TermsOfServiceAgreed,
+			Contacts:             acmeAccount.Contacts,
+			AccountURL:           acmeAccount.AccountURL,
+		},
+	}
+}
+
+func (r acmeAccount) Get(client *apiserverclient.GRPCClient, name string) (*Resource, error) {
+	acmeAccount, err := client.ACMEAccount.Get(context.Background(), fmt.Sprintf("acmeServers/-/acmeAccounts/%s", name))
+	if err != nil {
+		return nil, err
+	}
+	return r.Encode(acmeAccount), nil
+}
+
+func (r acmeAccount) List(client *apiserverclient.GRPCClient) ([]*Resource, error) {
+	return listResource(func(pageToken string) ([]*Resource, string, error) {
+		acmeAccounts, nextPageToken, err := client.ACMEAccount.List(context.Background(), "parent", 0, pageToken)
+		if err != nil {
+			return nil, nextPageToken, err
+		}
+		a := make([]*Resource, len(acmeAccounts))
+		for i, acmeAccount := range acmeAccounts {
+			a[i] = r.Encode(acmeAccount)
+		}
+		return a, nextPageToken, nil
+	})
+}
+
+func (r acmeAccount) Spec() interface{} {
+	return new(ACMEAccountSpec)
+}
+
 var (
+	ACMEServerID         string
 	Contacts             string
 	TermsOfServiceAgreed bool
 )
 
 var createACMEAccountCmd = &cobra.Command{
-	Use:     "acmeaccount [PARENT]",
-	Short:   "Create ACME account",
-	Args:    validateParentArg("acmeServer"),
-	Example: `  powerctl create acmeaccount acmeServers/42 --agree-terms-of-service --contacts mailto:john.doe@example.com   Create ACME account within ACME server`,
-	Run: func(cmd *cobra.Command, args []string) {
-		acmeAccount := &api.ACMEAccount{}
-		if Filename != "" {
-			loadResource(Filename, acmeAccount)
-		} else {
-			acmeAccount = makeACMEAccount()
-		}
-		createACMEAccount(args[0], acmeAccount)
-	},
-}
-
-var deleteACMEAccountCmd = &cobra.Command{
-	Use:   "acmeaccount",
-	Short: "Delete ACME account",
-	Args:  validateNameArg,
-	Run: func(cmd *cobra.Command, args []string) {
-		deleteACMEAccount(args[0])
-	},
-}
-
-var getACMEAccountCmd = &cobra.Command{
 	Use:     "acmeaccount",
-	Aliases: []string{"acmeaccounts"},
-	Short:   "Get ACME account",
-	Example: `  powerctl get acmeaccount       List all ACME accounts
-  powerctl get acmeaccount acmeservers/42    List all ACME accounts of an ACME server
-  powerctl get acmeaccount 42                Get an ACME account
-  powerctl get acmeaccounts/42               Get an ACME account`,
-	Args: cobra.RangeArgs(0, 1),
+	Short:   "Create ACME account",
+	Args:    cobra.NoArgs,
+	Example: `  powerctl create acmeaccount --agree-terms-of-service --contacts mailto:john.doe@example.com --acmeserver 42   Create ACME account within ACME server`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 1 {
-			if strings.Contains(args[0], "/") {
-				getACMEAccount(args[0])
-			} else {
-				getACMEAccount(nameArg("acmeaccount", args[0]))
-			}
-		} else {
-			listACMEAccount("")
+		client, err := NewGRPCClient()
+		if err != nil {
+			er(err)
 		}
-	},
-}
-
-var updateACMEAccountCmd = &cobra.Command{
-	Use:   "acmeaccount",
-	Short: "Update ACME account",
-	Args:  validateNameArg,
-	Run: func(cmd *cobra.Command, args []string) {
-		acmeAccount := &api.ACMEAccount{}
-		if Filename != "" {
-			loadResource(Filename, acmeAccount)
-		} else {
-			acmeAccount = makeACMEAccount()
+		acmeAccount := &api.ACMEAccount{
+			Contacts:             strings.Split(Contacts, ","),
+			TermsOfServiceAgreed: TermsOfServiceAgreed,
 		}
-		updateACMEAccount(args[0], acmeAccount)
+		acmeAccount, err = client.ACMEAccount.Create(context.Background(), fmt.Sprintf("acmeServers/%s", ACMEServerID), acmeAccount)
+		if err != nil {
+			er(err)
+		}
+		pr(ACMEAccount.Encode(acmeAccount))
 	},
 }
 
 func init() {
+	Resources.Add(ACMEAccount, "aa")
+
 	createACMEAccountCmd.Flags().BoolVarP(&TermsOfServiceAgreed, "agree-terms-of-service", "", false, "Terms of Service agreed")
 	createACMEAccountCmd.Flags().StringVarP(&Contacts, "contacts", "", "", "Contact URLs (e.g. mailto:contact@example.com) (seperated by \",\")")
 	createACMEAccountCmd.Flags().StringVarP(&Filename, "filename", "f", "", "Filename to file to use to create the ACME account")
-
-	updateACMEAccountCmd.Flags().StringVarP(&Filename, "filename", "f", "", "Filename to file to use to update the ACME account")
-	updateACMEAccountCmd.Flags().StringVarP(&Contacts, "contacts", "", "", "Contact URLs (e.g. mailto:contact@example.com) (seperated by \",\")")
+	createACMEAccountCmd.Flags().StringVarP(&ACMEServerID, "acmeserver", "", "", "ACME Server")
+	createACMEAccountCmd.MarkFlagRequired("acmeserver")
 
 	createCmd.AddCommand(createACMEAccountCmd)
-	deleteCmd.AddCommand(deleteACMEAccountCmd)
-	getCmd.AddCommand(getACMEAccountCmd)
-	updateCmd.AddCommand(updateACMEAccountCmd)
-}
-
-func createACMEAccount(parent string, acmeAccount *api.ACMEAccount) {
-	client := newGRPCClient()
-	createResource(func() (interface{}, error) {
-		return client.ACMEAccount.Create(context.Background(), parent, acmeAccount)
-	})
-}
-
-func deleteACMEAccount(name string) {
-	client := newGRPCClient()
-	deleteResource(func() error {
-		return client.ACMEAccount.Delete(context.Background(), name)
-	})
-}
-
-func getACMEAccount(name string) {
-	client := newGRPCClient()
-	getResource(func() (interface{}, error) {
-		return client.ACMEAccount.Get(context.Background(), name)
-	})
-}
-
-func listACMEAccount(parent string) {
-	client := newGRPCClient()
-	listResource(func(pageToken string) (interface{}, string, error) {
-		return client.ACMEAccount.List(context.Background(), parent, 0, pageToken)
-	})
-}
-
-func updateACMEAccount(name string, acmeAccount *api.ACMEAccount) {
-	client := newGRPCClient()
-	updateResource(func() (interface{}, error) {
-		return client.ACMEAccount.Update(context.Background(), name, acmeAccount)
-	})
-}
-
-func makeACMEAccount() *api.ACMEAccount {
-	return &api.ACMEAccount{
-		Contacts:             strings.Split(Contacts, ","),
-		TermsOfServiceAgreed: TermsOfServiceAgreed,
-	}
 }

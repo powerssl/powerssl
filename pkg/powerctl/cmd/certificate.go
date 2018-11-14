@@ -2,12 +2,91 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
 
 	"powerssl.io/pkg/apiserver/api"
+	apiserverclient "powerssl.io/pkg/apiserver/client"
 )
+
+var Certificate certificate
+
+type CertificateSpec struct {
+	Dnsnames        []string `json:"dnsnames,omitempty"        yaml:"dnsnames,omitempty"`
+	KeyAlgorithm    string   `json:"keyAlgorithm,omitempty"    yaml:"keyAlgorithm,omitempty"`
+	KeySize         int32    `json:"keySize,omitempty"         yaml:"keySize,omitempty"`
+	DigestAlgorithm string   `json:"digestAlgorithm,omitempty" yaml:"digestAlgorithm,omitempty"`
+	AutoRenew       bool     `json:"autoRenew,omitempty"       yaml:"autoRenew,omitempty"`
+}
+
+type certificate struct{}
+
+func (r certificate) Create(client *apiserverclient.GRPCClient, resource *Resource) (*Resource, error) {
+	spec := resource.Spec.(*CertificateSpec)
+	certificate := &api.Certificate{
+		Dnsnames:        spec.Dnsnames,
+		KeyAlgorithm:    spec.KeyAlgorithm,
+		KeySize:         spec.KeySize,
+		DigestAlgorithm: spec.DigestAlgorithm,
+		AutoRenew:       spec.AutoRenew,
+	}
+	certificate, err := client.Certificate.Create(context.Background(), certificate)
+	if err != nil {
+		return nil, err
+	}
+	return r.Encode(certificate), nil
+}
+
+func (r certificate) Delete(client *apiserverclient.GRPCClient, name string) error {
+	return client.Certificate.Delete(context.Background(), fmt.Sprintf("certificates/%s", name))
+}
+
+func (r certificate) Encode(certificate *api.Certificate) *Resource {
+	uid := strings.Split(certificate.Name, "/")[1]
+	return &Resource{
+		Kind: "certificate",
+		Meta: &ResourceMeta{
+			UID:        uid,
+			CreateTime: certificate.CreateTime,
+			UpdateTime: certificate.UpdateTime,
+		},
+		Spec: &CertificateSpec{
+			Dnsnames:        certificate.Dnsnames,
+			KeyAlgorithm:    certificate.KeyAlgorithm,
+			KeySize:         certificate.KeySize,
+			DigestAlgorithm: certificate.DigestAlgorithm,
+			AutoRenew:       certificate.AutoRenew,
+		},
+	}
+}
+
+func (r certificate) Get(client *apiserverclient.GRPCClient, name string) (*Resource, error) {
+	certificate, err := client.Certificate.Get(context.Background(), fmt.Sprintf("certificates/%s", name))
+	if err != nil {
+		return nil, err
+	}
+	return r.Encode(certificate), nil
+}
+
+func (r certificate) List(client *apiserverclient.GRPCClient) ([]*Resource, error) {
+	return listResource(func(pageToken string) ([]*Resource, string, error) {
+		certificates, nextPageToken, err := client.Certificate.List(context.Background(), 0, pageToken)
+		if err != nil {
+			return nil, nextPageToken, err
+		}
+		a := make([]*Resource, len(certificates))
+		for i, certificate := range certificates {
+			a[i] = r.Encode(certificate)
+		}
+		return a, nextPageToken, nil
+	})
+}
+
+func (r certificate) Spec() interface{} {
+	return new(CertificateSpec)
+}
 
 var (
 	AutoRenew       bool
@@ -22,58 +101,28 @@ var createCertificateCmd = &cobra.Command{
 	Short: "Create Certificate",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		certificate := &api.Certificate{}
-		if Filename != "" {
-			loadResource(Filename, certificate)
-		} else {
-			certificate = makeCertificate()
+		client, err := NewGRPCClient()
+		if err != nil {
+			er(err)
 		}
-		createCertificate(certificate)
-	},
-}
-
-var deleteCertificateCmd = &cobra.Command{
-	Use:   "certificate",
-	Short: "Delete Certificate",
-	Args:  validateNameArg,
-	Run: func(cmd *cobra.Command, args []string) {
-		deleteCertificate(nameArg("certificate", args[0]))
-	},
-}
-
-var getCertificateCmd = &cobra.Command{
-	Use:     "certificate",
-	Aliases: []string{"certificates"},
-	Short:   "Get Certificate",
-	Example: `  powerctl get certificate       List all certificates
-  powerctl get certificate 42    Get an certificate
-  powerctl get certificates/42   Get an certificate`,
-	Args: cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 1 {
-			getCertificate(nameArg("certificate", args[0]))
-		} else {
-			listCertificate()
+		certificate := &api.Certificate{
+			Dnsnames:        strings.Split(DNSNames, ","),
+			KeyAlgorithm:    KeyAlgorithm,
+			KeySize:         int32(KeySize),
+			DigestAlgorithm: DigestAlgorithm,
+			AutoRenew:       AutoRenew,
 		}
-	},
-}
-
-var updateCertificateCmd = &cobra.Command{
-	Use:   "certificate",
-	Short: "Update Certificate",
-	Args:  validateNameArg,
-	Run: func(cmd *cobra.Command, args []string) {
-		certificate := &api.Certificate{}
-		if Filename != "" {
-			loadResource(Filename, certificate)
-		} else {
-			certificate = makeCertificate()
+		certificate, err = client.Certificate.Create(context.Background(), certificate)
+		if err != nil {
+			er(err)
 		}
-		updateCertificate(nameArg("certificate", args[0]), certificate)
+		pr(Certificate.Encode(certificate))
 	},
 }
 
 func init() {
+	Resources.Add(Certificate, "cert", "c")
+
 	createCertificateCmd.Flags().StringVarP(&Filename, "filename", "f", "", "Filename to file to use to create the certificate")
 	createCertificateCmd.Flags().StringVarP(&DNSNames, "dns-names", "", "", "DNS name for the certificate (seperated by \",\")")
 	createCertificateCmd.Flags().StringVarP(&KeyAlgorithm, "key-algorithm", "", "", "Key algorithm ...")
@@ -81,60 +130,5 @@ func init() {
 	createCertificateCmd.Flags().StringVarP(&DigestAlgorithm, "digest-algorithm", "", "", "Digest algorithm ...")
 	createCertificateCmd.Flags().BoolVarP(&AutoRenew, "auto-renew", "", false, "Auto renew ...")
 
-	updateCertificateCmd.Flags().StringVarP(&Filename, "filename", "f", "", "Filename to file to use to update the certificate")
-	updateCertificateCmd.Flags().StringVarP(&DNSNames, "dns-names", "", "", "DNS name for the certificate (seperated by \",\")")
-	updateCertificateCmd.Flags().StringVarP(&KeyAlgorithm, "key-algorithm", "", "", "Key algorithm ...")
-	updateCertificateCmd.Flags().IntVarP(&KeySize, "key-size", "", 0, "Key size ...")
-	updateCertificateCmd.Flags().StringVarP(&DigestAlgorithm, "digest-algorithm", "", "", "Digest algorithm ...")
-	updateCertificateCmd.Flags().BoolVarP(&AutoRenew, "auto-renew", "", false, "Auto renew ...")
-
 	createCmd.AddCommand(createCertificateCmd)
-	deleteCmd.AddCommand(deleteCertificateCmd)
-	getCmd.AddCommand(getCertificateCmd)
-	updateCmd.AddCommand(updateCertificateCmd)
-}
-
-func createCertificate(certificate *api.Certificate) {
-	client := newGRPCClient()
-	createResource(func() (interface{}, error) {
-		return client.Certificate.Create(context.Background(), certificate)
-	})
-}
-
-func deleteCertificate(name string) {
-	client := newGRPCClient()
-	deleteResource(func() error {
-		return client.Certificate.Delete(context.Background(), name)
-	})
-}
-
-func getCertificate(name string) {
-	client := newGRPCClient()
-	getResource(func() (interface{}, error) {
-		return client.Certificate.Get(context.Background(), name)
-	})
-}
-
-func listCertificate() {
-	client := newGRPCClient()
-	listResource(func(pageToken string) (interface{}, string, error) {
-		return client.Certificate.List(context.Background(), 0, pageToken)
-	})
-}
-
-func updateCertificate(name string, certificate *api.Certificate) {
-	client := newGRPCClient()
-	updateResource(func() (interface{}, error) {
-		return client.Certificate.Update(context.Background(), name, certificate)
-	})
-}
-
-func makeCertificate() *api.Certificate {
-	return &api.Certificate{
-		Dnsnames:        strings.Split(DNSNames, ","),
-		KeyAlgorithm:    KeyAlgorithm,
-		KeySize:         int32(KeySize),
-		DigestAlgorithm: DigestAlgorithm,
-		AutoRenew:       AutoRenew,
-	}
 }

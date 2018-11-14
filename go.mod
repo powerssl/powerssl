@@ -8,6 +8,7 @@ require (
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/denisenkom/go-mssqldb v0.0.0-20181014144952-4e0d7dc8888f // indirect
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
+	github.com/ghodss/yaml v1.0.0
 	github.com/go-kit/kit v0.8.0
 	github.com/go-logfmt/logfmt v0.3.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.0 // indirect
@@ -49,5 +50,4 @@ require (
 	golang.org/x/net v0.0.0-20181108082009-03003ca0c849
 	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f
 	google.golang.org/grpc v1.16.0
-	gopkg.in/yaml.v2 v2.2.1
 )
