@@ -1,4 +1,4 @@
-package certificate
+package service
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 	"google.golang.org/grpc/codes"
 
 	"powerssl.io/pkg/apiserver/api"
+	"powerssl.io/pkg/apiserver/certificate/model"
 	controllerapi "powerssl.io/pkg/controller/api"
 	controllerclient "powerssl.io/pkg/controller/client"
 )
@@ -24,7 +25,7 @@ type Service interface {
 }
 
 func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) Service {
-	db.AutoMigrate(&Certificate{})
+	db.AutoMigrate(&model.Certificate{})
 	var svc Service
 	{
 		svc = NewBasicService(db, logger, client)
@@ -60,7 +61,7 @@ func (bs basicService) Create(ctx context.Context, certificate *api.Certificate)
 		return nil, tx.Error
 	}
 
-	cert := NewCertificateFromAPI(certificate)
+	cert := model.NewCertificateFromAPI(certificate)
 	if err := tx.Create(cert).Error; err != nil {
 		tx.Rollback()
 		return nil, err
@@ -96,7 +97,7 @@ func (bs basicService) Create(ctx context.Context, certificate *api.Certificate)
 func (bs basicService) Delete(ctx context.Context, name string) error {
 	db := otgorm.SetSpanToGorm(ctx, bs.db)
 
-	certificate, err := FindCertificateByName(name, db)
+	certificate, err := model.FindCertificateByName(name, db)
 	if err != nil {
 		return err
 	}
@@ -106,7 +107,7 @@ func (bs basicService) Delete(ctx context.Context, name string) error {
 func (bs basicService) Get(ctx context.Context, name string) (*api.Certificate, error) {
 	db := otgorm.SetSpanToGorm(ctx, bs.db)
 
-	certificate, err := FindCertificateByName(name, db)
+	certificate, err := model.FindCertificateByName(name, db)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +118,7 @@ func (bs basicService) List(ctx context.Context, pageSize int, pageToken string)
 	db := otgorm.SetSpanToGorm(ctx, bs.db)
 
 	var (
-		certificates  Certificates
+		certificates  model.Certificates
 		nextPageToken string
 	)
 	offset := -1
@@ -150,14 +151,14 @@ func (bs basicService) List(ctx context.Context, pageSize int, pageToken string)
 func (bs basicService) Update(ctx context.Context, name string, certificate *api.Certificate) (*api.Certificate, error) {
 	db := otgorm.SetSpanToGorm(ctx, bs.db)
 
-	cert, err := FindCertificateByName(name, db)
+	cert, err := model.FindCertificateByName(name, db)
 	if err != nil {
 		return nil, err
 	}
-	if err := db.Model(cert).Updates(NewCertificateFromAPI(certificate)).Error; err != nil {
+	if err := db.Model(cert).Updates(model.NewCertificateFromAPI(certificate)).Error; err != nil {
 		return nil, err
 	}
-	cert, err = FindCertificateByName(name, db)
+	cert, err = model.FindCertificateByName(name, db)
 	if err != nil {
 		return nil, err
 	}

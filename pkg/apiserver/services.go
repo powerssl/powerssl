@@ -6,9 +6,9 @@ import (
 	"github.com/jinzhu/gorm"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
-	acmeaccount "powerssl.io/pkg/apiserver/acmeaccount/generated"
-	acmeserver "powerssl.io/pkg/apiserver/acmeserver/generated"
-	certificate "powerssl.io/pkg/apiserver/certificate/generated"
+	"powerssl.io/pkg/apiserver/acmeaccount"
+	"powerssl.io/pkg/apiserver/acmeserver"
+	"powerssl.io/pkg/apiserver/certificate"
 	controllerclient "powerssl.io/pkg/controller/client"
 	"powerssl.io/pkg/util"
 )

@@ -1,4 +1,4 @@
-package certificate
+package service
 
 import (
 	"context"
@@ -21,11 +21,11 @@ type loggingMiddleware struct {
 	next   Service
 }
 
-func (mw loggingMiddleware) Create(ctx context.Context, certificate *api.Certificate) (*api.Certificate, error) {
+func (mw loggingMiddleware) Create(ctx context.Context, acmeServer *api.ACMEServer) (*api.ACMEServer, error) {
 	defer func() {
-		mw.logger.Log("method", "Create", "certificate", true)
+		mw.logger.Log("method", "Create", "acmeServer", true)
 	}()
-	return mw.next.Create(ctx, certificate)
+	return mw.next.Create(ctx, acmeServer)
 }
 
 func (mw loggingMiddleware) Delete(ctx context.Context, name string) error {
@@ -35,23 +35,23 @@ func (mw loggingMiddleware) Delete(ctx context.Context, name string) error {
 	return mw.next.Delete(ctx, name)
 }
 
-func (mw loggingMiddleware) Get(ctx context.Context, name string) (*api.Certificate, error) {
+func (mw loggingMiddleware) Get(ctx context.Context, name string) (*api.ACMEServer, error) {
 	defer func() {
 		mw.logger.Log("method", "Get", "name", name)
 	}()
 	return mw.next.Get(ctx, name)
 }
 
-func (mw loggingMiddleware) List(ctx context.Context, pageSize int, pageToken string) ([]*api.Certificate, string, error) {
+func (mw loggingMiddleware) List(ctx context.Context, pageSize int, pageToken string) ([]*api.ACMEServer, string, error) {
 	defer func() {
 		mw.logger.Log("method", "List", "pageSize", pageSize, "pageToken", pageToken)
 	}()
 	return mw.next.List(ctx, pageSize, pageToken)
 }
 
-func (mw loggingMiddleware) Update(ctx context.Context, name string, certificate *api.Certificate) (*api.Certificate, error) {
+func (mw loggingMiddleware) Update(ctx context.Context, name string, acmeServer *api.ACMEServer) (*api.ACMEServer, error) {
 	defer func() {
-		mw.logger.Log("method", "Update", "name", name, "certificate", true)
+		mw.logger.Log("method", "Update", "name", name, "acmeServer", true)
 	}()
-	return mw.next.Update(ctx, name, certificate)
+	return mw.next.Update(ctx, name, acmeServer)
 }

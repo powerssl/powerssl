@@ -9,18 +9,18 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	acmeaccountservice "powerssl.io/pkg/apiserver/acmeaccount"
-	acmeaccounttransport "powerssl.io/pkg/apiserver/acmeaccount/generated/transport"
-	acmeserverservice "powerssl.io/pkg/apiserver/acmeserver"
-	acmeservertransport "powerssl.io/pkg/apiserver/acmeserver/generated/transport"
-	certificateservice "powerssl.io/pkg/apiserver/certificate"
-	certificatetransport "powerssl.io/pkg/apiserver/certificate/generated/transport"
+	acmeaccountservice "powerssl.io/pkg/apiserver/acmeaccount/service"
+	acmeaccounttransport "powerssl.io/pkg/apiserver/acmeaccount/transport"
+	acmeserverservice "powerssl.io/pkg/apiserver/acmeserver/service"
+	acmeservertransport "powerssl.io/pkg/apiserver/acmeserver/transport"
+	certificateservice "powerssl.io/pkg/apiserver/certificate/service"
+	certificatetransport "powerssl.io/pkg/apiserver/certificate/transport"
 )
 
 type GRPCClient struct {
-	ACMEAccount      acmeaccountservice.Service
-	ACMEServer       acmeserverservice.Service
-	Certificate      certificateservice.Service
+	ACMEAccount acmeaccountservice.Service
+	ACMEServer  acmeserverservice.Service
+	Certificate certificateservice.Service
 }
 
 func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, authToken string, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
@@ -51,8 +51,8 @@ func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, inse
 	key := []byte(authToken)
 
 	return &GRPCClient{
-		ACMEAccount:      acmeaccounttransport.NewGRPCClient(conn, key, logger, tracer),
-		ACMEServer:       acmeservertransport.NewGRPCClient(conn, key, logger, tracer),
-		Certificate:      certificatetransport.NewGRPCClient(conn, key, logger, tracer),
+		ACMEAccount: acmeaccounttransport.NewGRPCClient(conn, key, logger, tracer),
+		ACMEServer:  acmeservertransport.NewGRPCClient(conn, key, logger, tracer),
+		Certificate: certificatetransport.NewGRPCClient(conn, key, logger, tracer),
 	}, nil
 }

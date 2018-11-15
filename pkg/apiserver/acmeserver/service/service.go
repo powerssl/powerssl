@@ -1,4 +1,4 @@
-package acmeserver
+package service
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	otgorm "github.com/smacker/opentracing-gorm"
 	"google.golang.org/grpc/codes"
 
+	"powerssl.io/pkg/apiserver/acmeserver/model"
 	"powerssl.io/pkg/apiserver/api"
 	controllerclient "powerssl.io/pkg/controller/client"
 )
@@ -25,7 +26,7 @@ type Service interface {
 }
 
 func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) Service {
-	db.AutoMigrate(&ACMEServer{})
+	db.AutoMigrate(&model.ACMEServer{})
 	var svc Service
 	{
 		svc = NewBasicService(db, logger, client)
@@ -61,7 +62,7 @@ func (bs basicService) Create(ctx context.Context, acmeServer *api.ACMEServer) (
 		return nil, tx.Error
 	}
 
-	server := NewACMEServerFromAPI(acmeServer)
+	server := model.NewACMEServerFromAPI(acmeServer)
 	if err := tx.Create(server).Error; err != nil {
 		tx.Rollback()
 		return nil, err
@@ -77,7 +78,7 @@ func (bs basicService) Create(ctx context.Context, acmeServer *api.ACMEServer) (
 func (bs basicService) Delete(ctx context.Context, name string) error {
 	db := otgorm.SetSpanToGorm(ctx, bs.db)
 
-	acmeServer, err := FindACMEServerByName(name, db)
+	acmeServer, err := model.FindACMEServerByName(name, db)
 	if err != nil {
 		return err
 	}
@@ -87,7 +88,7 @@ func (bs basicService) Delete(ctx context.Context, name string) error {
 func (bs basicService) Get(ctx context.Context, name string) (*api.ACMEServer, error) {
 	db := otgorm.SetSpanToGorm(ctx, bs.db)
 
-	acmeServer, err := FindACMEServerByName(name, db)
+	acmeServer, err := model.FindACMEServerByName(name, db)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +111,7 @@ func (bs basicService) List(ctx context.Context, pageSize int, pageToken string)
 			return nil, "", status.Error(codes.InvalidArgument, "malformed page token")
 		}
 	}
-	var acmeServers ACMEServers
+	var acmeServers model.ACMEServers
 	if err := db.Limit(pageSize + 1).Offset(offset).Find(&acmeServers).Error; err != nil {
 		return nil, "", err
 	}

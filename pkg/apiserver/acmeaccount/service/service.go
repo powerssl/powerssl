@@ -1,4 +1,4 @@
-package acmeaccount
+package service
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 	otgorm "github.com/smacker/opentracing-gorm"
 	"google.golang.org/grpc/codes"
 
+	"powerssl.io/pkg/apiserver/acmeaccount/model"
 	"powerssl.io/pkg/apiserver/api"
 	controllerapi "powerssl.io/pkg/controller/api"
 	controllerclient "powerssl.io/pkg/controller/client"
@@ -27,7 +28,7 @@ type Service interface {
 }
 
 func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) Service {
-	db.AutoMigrate(&ACMEAccount{})
+	db.AutoMigrate(&model.ACMEAccount{})
 	var svc Service
 	{
 		svc = NewBasicService(db, logger, client)
@@ -63,7 +64,7 @@ func (bs basicService) Create(ctx context.Context, parent string, acmeAccount *a
 		return nil, tx.Error
 	}
 
-	account, err := NewACMEAccountFromAPI(parent, acmeAccount)
+	account, err := model.NewACMEAccountFromAPI(parent, acmeAccount)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +109,7 @@ func (bs basicService) Create(ctx context.Context, parent string, acmeAccount *a
 func (bs basicService) Delete(ctx context.Context, name string) error {
 	db := otgorm.SetSpanToGorm(ctx, bs.db)
 
-	acmeAccount, err := FindACMEAccountByName(name, db)
+	acmeAccount, err := model.FindACMEAccountByName(name, db)
 	if err != nil {
 		return err
 	}
@@ -118,7 +119,7 @@ func (bs basicService) Delete(ctx context.Context, name string) error {
 func (bs basicService) Get(ctx context.Context, name string) (*api.ACMEAccount, error) {
 	db := otgorm.SetSpanToGorm(ctx, bs.db)
 
-	acmeAccount, err := FindACMEAccountByName(name, db)
+	acmeAccount, err := model.FindACMEAccountByName(name, db)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +142,7 @@ func (bs basicService) List(ctx context.Context, parent string, pageSize int, pa
 			return nil, "", status.Error(codes.InvalidArgument, "malformed page token")
 		}
 	}
-	var acmeAccounts ACMEAccounts
+	var acmeAccounts model.ACMEAccounts
 	if err := db.Limit(pageSize + 1).Offset(offset).Find(&acmeAccounts).Error; err != nil {
 		return nil, "", err
 	}
