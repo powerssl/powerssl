@@ -69,6 +69,7 @@ func init() {
 	serveCmd.Flags().BoolP("no-metrics", "", false, "Do not serve metrics")
 	serveCmd.Flags().BoolP("no-tracing", "", false, "Do not trace")
 	serveCmd.Flags().StringP("addr", "", ":8080", "GRPC Addr")
+	serveCmd.Flags().StringP("auth-token", "", "", "Authentication token")
 	serveCmd.Flags().StringP("apiserver-addr", "", "", "GRPC address of API server")
 	serveCmd.Flags().StringP("apiserver-auth-token", "", "", "API server authentication token")
 	serveCmd.Flags().StringP("apiserver-ca-file", "", "", "Certificate authority file")
@@ -79,6 +80,7 @@ func init() {
 	serveCmd.Flags().StringP("tracer", "", "jaeger", "Tracing implementation")
 
 	viper.BindPFlag("addr", serveCmd.Flags().Lookup("addr"))
+	viper.BindPFlag("auth-token", serveCmd.Flags().Lookup("auth-token"))
 	viper.BindPFlag("apiserver.addr", serveCmd.Flags().Lookup("apiserver-addr"))
 	viper.BindPFlag("apiserver.auth-token", serveCmd.Flags().Lookup("apiserver-auth-token"))
 	viper.BindPFlag("apiserver.ca-file", serveCmd.Flags().Lookup("apiserver-ca-file"))

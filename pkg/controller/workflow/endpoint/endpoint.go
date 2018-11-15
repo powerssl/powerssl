@@ -3,6 +3,7 @@ package endpoint // import "powerssl.io/pkg/controller/workflow/endpoint"
 import (
 	"context"
 
+	"github.com/go-kit/kit/auth/jwt"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
@@ -11,6 +12,7 @@ import (
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"powerssl.io/pkg/controller/api"
 	service "powerssl.io/pkg/controller/workflow/service"
+	"powerssl.io/pkg/util/auth"
 	"powerssl.io/pkg/util/middleware"
 )
 
@@ -19,9 +21,12 @@ type Endpoints struct {
 }
 
 func NewEndpoints(svc service.Service, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram) Endpoints {
+	jwtParser := jwt.NewParser(auth.KeyFunc, auth.Method, jwt.StandardClaimsFactory)
+
 	var createEndpoint endpoint.Endpoint
 	{
 		createEndpoint = makeCreateEndpoint(svc)
+		createEndpoint = jwtParser(createEndpoint)
 		createEndpoint = opentracing.TraceServer(tracer, "Create")(createEndpoint)
 		createEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Create"))(createEndpoint)
 		createEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Create"))(createEndpoint)

@@ -56,7 +56,8 @@ func New(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVer
 	// defer closer.Close()
 	var _ = closer
 
-	client, err := controllerclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, logger, tracer)
+	var authToken string
+	client, err := controllerclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, authToken, logger, tracer)
 	if err != nil {
 		logger.Log("transport", "gRPC", "err", err)
 		os.Exit(1)

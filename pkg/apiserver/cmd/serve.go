@@ -16,6 +16,7 @@ var serveCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		addr := viper.GetString("addr")
 		controllerAddr := viper.GetString("controller.addr")
+		controllerAuthToken := viper.GetString("controller.auth-token")
 		controllerCertFile := viper.GetString("controller.ca-file")
 		controllerInsecure := viper.GetBool("controller.insecure")
 		controllerInsecureSkipTLSVerify := viper.GetBool("controller.insecure-skip-tls-verify")
@@ -68,7 +69,7 @@ var serveCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		apiserver.Run(addr, tlsCertFile, tlsPrivateKeyFile, insecure, dbDialect, dbConnection, metricsAddr, tracer, controllerAddr, controllerCertFile, controllerServerNameOverride, controllerInsecure, controllerInsecureSkipTLSVerify)
+		apiserver.Run(addr, tlsCertFile, tlsPrivateKeyFile, insecure, dbDialect, dbConnection, metricsAddr, tracer, controllerAddr, controllerCertFile, controllerServerNameOverride, controllerInsecure, controllerInsecureSkipTLSVerify, controllerAuthToken)
 	},
 }
 
@@ -81,6 +82,7 @@ func init() {
 	serveCmd.Flags().StringP("addr", "", ":8080", "GRPC Addr")
 	serveCmd.Flags().StringP("auth-token", "", "", "Authentication token")
 	serveCmd.Flags().StringP("controller-addr", "", "", "GRPC address of Controller")
+	serveCmd.Flags().StringP("controller-auth-token", "", "", "Controller authentication token")
 	serveCmd.Flags().StringP("controller-ca-file", "", "", "Certificate authority file")
 	serveCmd.Flags().StringP("controller-server-name-override", "", "", "It will override the virtual host name of authority")
 	serveCmd.Flags().StringP("db-connection", "", "/tmp/powerssl.sqlie3", "DB connection")
@@ -93,6 +95,7 @@ func init() {
 	viper.BindPFlag("addr", serveCmd.Flags().Lookup("addr"))
 	viper.BindPFlag("auth-token", serveCmd.Flags().Lookup("auth-token"))
 	viper.BindPFlag("controller.addr", serveCmd.Flags().Lookup("controller-addr"))
+	viper.BindPFlag("controller.auth-token", serveCmd.Flags().Lookup("controller-auth-token"))
 	viper.BindPFlag("controller.ca-file", serveCmd.Flags().Lookup("controller-ca-file"))
 	viper.BindPFlag("controller.insecure", serveCmd.Flags().Lookup("controller-insecure"))
 	viper.BindPFlag("controller.insecure-skip-tls-verify", serveCmd.Flags().Lookup("controller-insecure-skip-tls-verify"))

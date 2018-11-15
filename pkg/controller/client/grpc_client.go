@@ -23,7 +23,7 @@ type GRPCClient struct {
 	Workflow    workflowservice.Service
 }
 
-func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
+func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, authToken string, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
 	opts := []grpc.DialOption{
 		grpc.WithTimeout(time.Second),
 	}
@@ -44,9 +44,11 @@ func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, inse
 		return nil, err
 	}
 
+	key := []byte(authToken)
+
 	return &GRPCClient{
 		ACME:        acmetransport.NewGRPCClient(conn, logger, tracer),
 		Integration: intregrationtransport.NewGRPCClient(conn, logger),
-		Workflow:    workflowtransport.NewGRPCClient(conn, logger, tracer),
+		Workflow:    workflowtransport.NewGRPCClient(conn, key, logger, tracer),
 	}, nil
 }

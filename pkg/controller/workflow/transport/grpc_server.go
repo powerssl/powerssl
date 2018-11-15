@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-kit/kit/auth/jwt"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/tracing/opentracing"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
@@ -20,6 +21,7 @@ type grpcServer struct {
 func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger, tracer stdopentracing.Tracer) apiv1.WorkflowServiceServer {
 	options := []grpctransport.ServerOption{
 		grpctransport.ServerErrorLogger(logger),
+		grpctransport.ServerBefore(jwt.GRPCToContext()),
 	}
 
 	return &grpcServer{
