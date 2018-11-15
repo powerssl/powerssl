@@ -1,4 +1,4 @@
-package service
+package meta
 
 import apiv1 "powerssl.io/pkg/controller/api/v1"
 

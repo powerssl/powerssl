@@ -14,13 +14,13 @@ import (
 
 	apiv1 "powerssl.io/pkg/controller/api/v1"
 	"powerssl.io/pkg/controller/workflow/endpoint"
-	service "powerssl.io/pkg/controller/workflow/service"
+	"powerssl.io/pkg/controller/workflow/meta"
 	"powerssl.io/pkg/util/auth"
 )
 
 const serviceName = "powerssl.controller.v1.WorkflowService"
 
-func NewGRPCClient(conn *grpc.ClientConn, key []byte, logger log.Logger, tracer stdopentracing.Tracer) service.Service {
+func NewGRPCClient(conn *grpc.ClientConn, key []byte, logger log.Logger, tracer stdopentracing.Tracer) meta.Service {
 	jwtSigner := jwt.NewSigner("TODO", key, auth.Method, stdjwt.StandardClaims{})
 
 	options := []grpctransport.ClientOption{

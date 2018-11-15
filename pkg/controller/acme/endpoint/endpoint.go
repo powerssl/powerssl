@@ -10,13 +10,10 @@ import (
 
 	"github.com/go-kit/kit/tracing/opentracing"
 	stdopentracing "github.com/opentracing/opentracing-go"
-	service "powerssl.io/pkg/controller/acme/service"
+	"powerssl.io/pkg/controller/acme/meta"
 	"powerssl.io/pkg/controller/api"
 	"powerssl.io/pkg/util/middleware"
 )
-
-type todo string
-type Todo string
 
 type Endpoints struct {
 	GetCreateAccountRequestEndpoint  endpoint.Endpoint
@@ -62,7 +59,7 @@ type Endpoints struct {
 	SetRevokeCertificateResponseEndpoint endpoint.Endpoint
 }
 
-func NewEndpoints(svc service.Service, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram) Endpoints {
+func NewEndpoints(svc meta.Service, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram) Endpoints {
 	var getCreateAccountRequestEndpoint endpoint.Endpoint
 	{
 		getCreateAccountRequestEndpoint = makeGetCreateAccountRequestEndpoint(svc)
@@ -354,7 +351,7 @@ type GetCreateAccountRequestResponse struct {
 	Contacts             []string
 }
 
-func makeGetCreateAccountRequestEndpoint(s service.Service) endpoint.Endpoint {
+func makeGetCreateAccountRequestEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetCreateAccountRequestRequest)
 		activity, directoryURL, termsOfServiceAgreed, contacts, err := s.GetCreateAccountRequest(ctx, req.Activity)
@@ -387,7 +384,7 @@ type SetCreateAccountResponseRequest struct {
 
 type SetCreateAccountResponseResponse struct{}
 
-func makeSetCreateAccountResponseEndpoint(s service.Service) endpoint.Endpoint {
+func makeSetCreateAccountResponseEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetCreateAccountResponseRequest)
 		err := s.SetCreateAccountResponse(ctx, req.Activity, req.Account, req.Error)
@@ -418,7 +415,7 @@ type GetDeactivateAccountRequestResponse struct {
 	AccountURL string
 }
 
-func makeGetDeactivateAccountRequestEndpoint(s service.Service) endpoint.Endpoint {
+func makeGetDeactivateAccountRequestEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetDeactivateAccountRequestRequest)
 		activity, accountURL, err := s.GetDeactivateAccountRequest(ctx, req.Activity)
@@ -449,7 +446,7 @@ type SetDeactivateAccountResponseRequest struct {
 
 type SetDeactivateAccountResponseResponse struct{}
 
-func makeSetDeactivateAccountResponseEndpoint(s service.Service) endpoint.Endpoint {
+func makeSetDeactivateAccountResponseEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetDeactivateAccountResponseRequest)
 		err := s.SetDeactivateAccountResponse(ctx, req.Activity, req.Account, req.Error)
@@ -481,7 +478,7 @@ type GetRekeyAccountRequestResponse struct {
 	DirectoryURL string
 }
 
-func makeGetRekeyAccountRequestEndpoint(s service.Service) endpoint.Endpoint {
+func makeGetRekeyAccountRequestEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetRekeyAccountRequestRequest)
 		activity, accountURL, directoryURL, err := s.GetRekeyAccountRequest(ctx, req.Activity)
@@ -513,7 +510,7 @@ type SetRekeyAccountResponseRequest struct {
 
 type SetRekeyAccountResponseResponse struct{}
 
-func makeSetRekeyAccountResponseEndpoint(s service.Service) endpoint.Endpoint {
+func makeSetRekeyAccountResponseEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetRekeyAccountResponseRequest)
 		err := s.SetRekeyAccountResponse(ctx, req.Activity, req.Account, req.Error)
@@ -545,7 +542,7 @@ type GetUpdateAccountRequestResponse struct {
 	Contacts   []string
 }
 
-func makeGetUpdateAccountRequestEndpoint(s service.Service) endpoint.Endpoint {
+func makeGetUpdateAccountRequestEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetUpdateAccountRequestRequest)
 		activity, accountURL, contacts, err := s.GetUpdateAccountRequest(ctx, req.Activity)
@@ -577,7 +574,7 @@ type SetUpdateAccountResponseRequest struct {
 
 type SetUpdateAccountResponseResponse struct{}
 
-func makeSetUpdateAccountResponseEndpoint(s service.Service) endpoint.Endpoint {
+func makeSetUpdateAccountResponseEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetUpdateAccountResponseRequest)
 		err := s.SetUpdateAccountResponse(ctx, req.Activity, req.Account, req.Error)
@@ -612,7 +609,7 @@ type GetCreateOrderRequestResponse struct {
 	NotAfter     string
 }
 
-func makeGetCreateOrderRequestEndpoint(s service.Service) endpoint.Endpoint {
+func makeGetCreateOrderRequestEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetCreateOrderRequestRequest)
 		activity, directoryURL, accountURL, identifiers, notBefore, notAfter, err := s.GetCreateOrderRequest(ctx, req.Activity)
@@ -647,7 +644,7 @@ type SetCreateOrderResponseRequest struct {
 
 type SetCreateOrderResponseResponse struct{}
 
-func makeSetCreateOrderResponseEndpoint(s service.Service) endpoint.Endpoint {
+func makeSetCreateOrderResponseEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetCreateOrderResponseRequest)
 		err := s.SetCreateOrderResponse(ctx, req.Activity, req.Order, req.Error)
@@ -680,7 +677,7 @@ type GetFinalizeOrderRequestResponse struct {
 	CertificateSigningRequest *x509.CertificateRequest
 }
 
-func makeGetFinalizeOrderRequestEndpoint(s service.Service) endpoint.Endpoint {
+func makeGetFinalizeOrderRequestEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetFinalizeOrderRequestRequest)
 		activity, accountURL, orderURL, certificateSigningRequest, err := s.GetFinalizeOrderRequest(ctx, req.Activity)
@@ -713,7 +710,7 @@ type SetFinalizeOrderResponseRequest struct {
 
 type SetFinalizeOrderResponseResponse struct{}
 
-func makeSetFinalizeOrderResponseEndpoint(s service.Service) endpoint.Endpoint {
+func makeSetFinalizeOrderResponseEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetFinalizeOrderResponseRequest)
 		err := s.SetFinalizeOrderResponse(ctx, req.Activity, req.Order, req.Error)
@@ -745,7 +742,7 @@ type GetGetOrderRequestResponse struct {
 	OrderURL   string
 }
 
-func makeGetGetOrderRequestEndpoint(s service.Service) endpoint.Endpoint {
+func makeGetGetOrderRequestEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetGetOrderRequestRequest)
 		activity, accountURL, orderURL, err := s.GetGetOrderRequest(ctx, req.Activity)
@@ -777,7 +774,7 @@ type SetGetOrderResponseRequest struct {
 
 type SetGetOrderResponseResponse struct{}
 
-func makeSetGetOrderResponseEndpoint(s service.Service) endpoint.Endpoint {
+func makeSetGetOrderResponseEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetGetOrderResponseRequest)
 		err := s.SetGetOrderResponse(ctx, req.Activity, req.Order, req.Error)
@@ -810,7 +807,7 @@ type GetCreateAuthorizationRequestResponse struct {
 	Identifier   *api.Identifier
 }
 
-func makeGetCreateAuthorizationRequestEndpoint(s service.Service) endpoint.Endpoint {
+func makeGetCreateAuthorizationRequestEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetCreateAuthorizationRequestRequest)
 		activity, directoryURL, accountURL, identifier, err := s.GetCreateAuthorizationRequest(ctx, req.Activity)
@@ -843,7 +840,7 @@ type SetCreateAuthorizationResponseRequest struct {
 
 type SetCreateAuthorizationResponseResponse struct{}
 
-func makeSetCreateAuthorizationResponseEndpoint(s service.Service) endpoint.Endpoint {
+func makeSetCreateAuthorizationResponseEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetCreateAuthorizationResponseRequest)
 		err := s.SetCreateAuthorizationResponse(ctx, req.Activity, req.Authorization, req.Error)
@@ -875,7 +872,7 @@ type GetDeactivateAuthorizationRequestResponse struct {
 	AuthorizationURL string
 }
 
-func makeGetDeactivateAuthorizationRequestEndpoint(s service.Service) endpoint.Endpoint {
+func makeGetDeactivateAuthorizationRequestEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetDeactivateAuthorizationRequestRequest)
 		activity, accountURL, authorizationURL, err := s.GetDeactivateAuthorizationRequest(ctx, req.Activity)
@@ -907,7 +904,7 @@ type SetDeactivateAuthorizationResponseRequest struct {
 
 type SetDeactivateAuthorizationResponseResponse struct{}
 
-func makeSetDeactivateAuthorizationResponseEndpoint(s service.Service) endpoint.Endpoint {
+func makeSetDeactivateAuthorizationResponseEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetDeactivateAuthorizationResponseRequest)
 		err := s.SetDeactivateAuthorizationResponse(ctx, req.Activity, req.Authorization, req.Error)
@@ -939,7 +936,7 @@ type GetGetAuthorizationRequestResponse struct {
 	AuthorizationURL string
 }
 
-func makeGetGetAuthorizationRequestEndpoint(s service.Service) endpoint.Endpoint {
+func makeGetGetAuthorizationRequestEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetGetAuthorizationRequestRequest)
 		activity, accountURL, authorizationURL, err := s.GetGetAuthorizationRequest(ctx, req.Activity)
@@ -971,7 +968,7 @@ type SetGetAuthorizationResponseRequest struct {
 
 type SetGetAuthorizationResponseResponse struct{}
 
-func makeSetGetAuthorizationResponseEndpoint(s service.Service) endpoint.Endpoint {
+func makeSetGetAuthorizationResponseEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetGetAuthorizationResponseRequest)
 		err := s.SetGetAuthorizationResponse(ctx, req.Activity, req.Authorization, req.Error)
@@ -1003,7 +1000,7 @@ type GetGetChallengeRequestResponse struct {
 	ChallengeURL string
 }
 
-func makeGetGetChallengeRequestEndpoint(s service.Service) endpoint.Endpoint {
+func makeGetGetChallengeRequestEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetGetChallengeRequestRequest)
 		activity, accountURL, challengeURL, err := s.GetGetChallengeRequest(ctx, req.Activity)
@@ -1035,7 +1032,7 @@ type SetGetChallengeResponseRequest struct {
 
 type SetGetChallengeResponseResponse struct{}
 
-func makeSetGetChallengeResponseEndpoint(s service.Service) endpoint.Endpoint {
+func makeSetGetChallengeResponseEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetGetChallengeResponseRequest)
 		err := s.SetGetChallengeResponse(ctx, req.Activity, req.Challenge, req.Error)
@@ -1067,7 +1064,7 @@ type GetValidateChallengeRequestResponse struct {
 	ChallengeURL string
 }
 
-func makeGetValidateChallengeRequestEndpoint(s service.Service) endpoint.Endpoint {
+func makeGetValidateChallengeRequestEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetValidateChallengeRequestRequest)
 		activity, accountURL, challengeURL, err := s.GetValidateChallengeRequest(ctx, req.Activity)
@@ -1099,7 +1096,7 @@ type SetValidateChallengeResponseRequest struct {
 
 type SetValidateChallengeResponseResponse struct{}
 
-func makeSetValidateChallengeResponseEndpoint(s service.Service) endpoint.Endpoint {
+func makeSetValidateChallengeResponseEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetValidateChallengeResponseRequest)
 		err := s.SetValidateChallengeResponse(ctx, req.Activity, req.Challenge, req.Error)
@@ -1131,7 +1128,7 @@ type GetGetCertificateRequestResponse struct {
 	CertificateURL string
 }
 
-func makeGetGetCertificateRequestEndpoint(s service.Service) endpoint.Endpoint {
+func makeGetGetCertificateRequestEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetGetCertificateRequestRequest)
 		activity, accountURL, certificateURL, err := s.GetGetCertificateRequest(ctx, req.Activity)
@@ -1163,7 +1160,7 @@ type SetGetCertificateResponseRequest struct {
 
 type SetGetCertificateResponseResponse struct{}
 
-func makeSetGetCertificateResponseEndpoint(s service.Service) endpoint.Endpoint {
+func makeSetGetCertificateResponseEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetGetCertificateResponseRequest)
 		err := s.SetGetCertificateResponse(ctx, req.Activity, req.Certificates, req.Error)
@@ -1197,7 +1194,7 @@ type GetRevokeCertificateRequestResponse struct {
 	Reason       *api.RevocationReason
 }
 
-func makeGetRevokeCertificateRequestEndpoint(s service.Service) endpoint.Endpoint {
+func makeGetRevokeCertificateRequestEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetRevokeCertificateRequestRequest)
 		activity, directoryURL, accountURL, certificate, reason, err := s.GetRevokeCertificateRequest(ctx, req.Activity)
@@ -1229,7 +1226,7 @@ type SetRevokeCertificateResponseRequest struct {
 
 type SetRevokeCertificateResponseResponse struct{}
 
-func makeSetRevokeCertificateResponseEndpoint(s service.Service) endpoint.Endpoint {
+func makeSetRevokeCertificateResponseEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetRevokeCertificateResponseRequest)
 		err := s.SetRevokeCertificateResponse(ctx, req.Activity, req.Error)

@@ -9,18 +9,18 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	acmeaccountservice "powerssl.io/pkg/apiserver/acmeaccount/service"
+	acmeaccountmeta "powerssl.io/pkg/apiserver/acmeaccount/meta"
 	acmeaccounttransport "powerssl.io/pkg/apiserver/acmeaccount/transport"
-	acmeserverservice "powerssl.io/pkg/apiserver/acmeserver/service"
+	acmeservermeta "powerssl.io/pkg/apiserver/acmeserver/meta"
 	acmeservertransport "powerssl.io/pkg/apiserver/acmeserver/transport"
-	certificateservice "powerssl.io/pkg/apiserver/certificate/service"
+	certificatemeta "powerssl.io/pkg/apiserver/certificate/meta"
 	certificatetransport "powerssl.io/pkg/apiserver/certificate/transport"
 )
 
 type GRPCClient struct {
-	ACMEAccount acmeaccountservice.Service
-	ACMEServer  acmeserverservice.Service
-	Certificate certificateservice.Service
+	ACMEAccount acmeaccountmeta.Service
+	ACMEServer  acmeservermeta.Service
+	Certificate certificatemeta.Service
 }
 
 func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, authToken string, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {

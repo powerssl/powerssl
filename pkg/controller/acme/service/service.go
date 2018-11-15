@@ -6,57 +6,14 @@ import (
 
 	"github.com/go-kit/kit/log"
 
+	"powerssl.io/pkg/controller/acme/meta"
 	"powerssl.io/pkg/controller/api"
 	engineactivity "powerssl.io/pkg/controller/workflow/engine/activity"
 	"powerssl.io/pkg/controller/workflow/engine/activity/acme"
 )
 
-type Service interface {
-	GetCreateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, bool, []string, error)
-	SetCreateAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error
-
-	GetDeactivateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, error)
-	SetDeactivateAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error
-
-	GetRekeyAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error)
-	SetRekeyAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error
-
-	GetUpdateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, []string, error)
-	SetUpdateAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error
-
-	GetCreateOrderRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, []*api.Identifier, string, string, error)
-	SetCreateOrderResponse(ctx context.Context, activity *api.Activity, order *api.Order, erro *api.Error) error
-
-	GetFinalizeOrderRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, *x509.CertificateRequest, error)
-	SetFinalizeOrderResponse(ctx context.Context, activity *api.Activity, order *api.Order, erro *api.Error) error
-
-	GetGetOrderRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error)
-	SetGetOrderResponse(ctx context.Context, activity *api.Activity, order *api.Order, erro *api.Error) error
-
-	GetCreateAuthorizationRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, *api.Identifier, error)
-	SetCreateAuthorizationResponse(ctx context.Context, activity *api.Activity, authorization *api.Authorization, erro *api.Error) error
-
-	GetDeactivateAuthorizationRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error)
-	SetDeactivateAuthorizationResponse(ctx context.Context, activity *api.Activity, authorization *api.Authorization, erro *api.Error) error
-
-	GetGetAuthorizationRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error)
-	SetGetAuthorizationResponse(ctx context.Context, activity *api.Activity, authorization *api.Authorization, erro *api.Error) error
-
-	GetGetChallengeRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error)
-	SetGetChallengeResponse(ctx context.Context, activity *api.Activity, challenge *api.Challenge, erro *api.Error) error
-
-	GetValidateChallengeRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error)
-	SetValidateChallengeResponse(ctx context.Context, activity *api.Activity, challenge *api.Challenge, erro *api.Error) error
-
-	GetGetCertificateRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error)
-	SetGetCertificateResponse(ctx context.Context, activity *api.Activity, certificates []*x509.Certificate, erro *api.Error) error
-
-	GetRevokeCertificateRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, *x509.Certificate, *api.RevocationReason, error)
-	SetRevokeCertificateResponse(ctx context.Context, activity *api.Activity, erro *api.Error) error
-}
-
-func New(logger log.Logger) Service {
-	var svc Service
+func New(logger log.Logger) meta.Service {
+	var svc meta.Service
 	{
 		svc = NewBasicService(logger)
 		svc = LoggingMiddleware(logger)(svc)
@@ -68,7 +25,7 @@ type basicService struct {
 	logger log.Logger
 }
 
-func NewBasicService(logger log.Logger) Service {
+func NewBasicService(logger log.Logger) meta.Service {
 	return basicService{
 		logger: logger,
 	}

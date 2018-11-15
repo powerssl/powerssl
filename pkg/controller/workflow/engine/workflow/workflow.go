@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 
+	apiserverapi "powerssl.io/pkg/apiserver/api"
 	"powerssl.io/pkg/controller/api"
 	"powerssl.io/pkg/controller/workflow/engine/activity"
 	"powerssl.io/pkg/controller/workflow/engine/activity/acme"
@@ -63,6 +64,7 @@ func (w *Workflow) execute(ctx context.Context, c chan struct{}) {
 }
 
 type CreateAccount struct {
+	AccountName          string
 	DirectoryURL         string
 	TermsOfServiceAgreed bool
 	Contacts             []string
@@ -77,7 +79,19 @@ func (w CreateAccount) Run(ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("--------------------------------\nAccount: %#v\nError: %#v\n--------------------------------\n", createAccountResult.Account, createAccountResult.Error)
+	if createAccountResult.Error != nil {
+		panic(err)
+	}
+	acmeAccount := &apiserverapi.ACMEAccount{
+		AccountURL: createAccountResult.Account.URL,
+		// Contacts:             createAccountResult.Account.Contacts,
+		// Status:               createAccountResult.Account.Status,
+		// TermsOfServiceAgreed: createAccountResult.Account.TermsOfServiceAgreed,
+	}
+	var _ = acmeAccount
+	//if _, err := client.ACMEAccount.Update(context.Background(), w.AccountName, acmeAccount); err != nil {
+	//	panic(err)
+	//}
 }
 
 func (w CreateAccount) CreateAccount(ctx context.Context, directoryURL string, termsOfServiceAgreed bool, contacts []string) (*acme.CreateAccountResult, error) {

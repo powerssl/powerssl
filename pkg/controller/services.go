@@ -16,6 +16,6 @@ func makeServices(logger log.Logger, tracer stdopentracing.Tracer, duration metr
 	return []util.Service{
 		acme.New(logger, tracer, duration),
 		integration.New(logger, duration), // TODO: tracing
-		workflow.New(logger, tracer, duration),
+		workflow.New(logger, tracer, duration, client),
 	}
 }

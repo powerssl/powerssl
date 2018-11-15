@@ -6,29 +6,28 @@ import (
 
 	"github.com/go-kit/kit/log"
 
+	apiserverclient "powerssl.io/pkg/apiserver/client"
 	"powerssl.io/pkg/controller/api"
 	"powerssl.io/pkg/controller/workflow/engine/workflow"
+	"powerssl.io/pkg/controller/workflow/meta"
 	"powerssl.io/pkg/util/tracing"
 )
 
-type Service interface {
-	Create(ctx context.Context, workflow *api.Workflow) (*api.Workflow, error)
-}
-
-func New(logger log.Logger) Service {
-	var svc Service
+func New(logger log.Logger, client *apiserverclient.GRPCClient) meta.Service {
+	var svc meta.Service
 	{
-		svc = NewBasicService(logger)
+		svc = NewBasicService(logger, client)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
 }
 
 type basicService struct {
+	client *apiserverclient.GRPCClient
 	logger log.Logger
 }
 
-func NewBasicService(logger log.Logger) Service {
+func NewBasicService(logger log.Logger, client *apiserverclient.GRPCClient) meta.Service {
 	return basicService{
 		logger: logger,
 	}
@@ -56,6 +55,7 @@ func newWorkflowFromAPI(apiWorkflow *api.Workflow) (*workflow.Workflow, error) {
 			return nil, fmt.Errorf("wrong input for workflow")
 		}
 		definition = workflow.CreateAccount{
+			AccountName:          "acmeAccounts/TODO",
 			DirectoryURL:         input.DirectoryURL,
 			TermsOfServiceAgreed: input.TermsOfServiceAgreed,
 			Contacts:             input.Contacts,

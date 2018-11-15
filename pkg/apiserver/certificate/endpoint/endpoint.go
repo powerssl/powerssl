@@ -11,7 +11,7 @@ import (
 	stdopentracing "github.com/opentracing/opentracing-go"
 
 	"powerssl.io/pkg/apiserver/api"
-	"powerssl.io/pkg/apiserver/certificate/service"
+	"powerssl.io/pkg/apiserver/certificate/meta"
 	"powerssl.io/pkg/util/auth"
 	"powerssl.io/pkg/util/middleware"
 )
@@ -24,7 +24,7 @@ type Endpoints struct {
 	UpdateEndpoint endpoint.Endpoint
 }
 
-func NewEndpoints(svc service.Service, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram) Endpoints {
+func NewEndpoints(svc meta.Service, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram) Endpoints {
 	jwtParser := jwt.NewParser(auth.KeyFunc, auth.Method, jwt.StandardClaimsFactory)
 
 	var createEndpoint endpoint.Endpoint
@@ -145,7 +145,7 @@ type CreateResponse struct {
 	Certificate *api.Certificate
 }
 
-func makeCreateEndpoint(s service.Service) endpoint.Endpoint {
+func makeCreateEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(CreateRequest)
 		certificate, err := s.Create(ctx, req.Certificate)
@@ -164,7 +164,7 @@ type DeleteRequest struct {
 
 type DeleteResponse struct{}
 
-func makeDeleteEndpoint(s service.Service) endpoint.Endpoint {
+func makeDeleteEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(DeleteRequest)
 		if err := s.Delete(ctx, req.Name); err != nil {
@@ -182,7 +182,7 @@ type GetResponse struct {
 	Certificate *api.Certificate
 }
 
-func makeGetEndpoint(s service.Service) endpoint.Endpoint {
+func makeGetEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetRequest)
 		certificate, err := s.Get(ctx, req.Name)
@@ -205,7 +205,7 @@ type ListResponse struct {
 	NextPageToken string
 }
 
-func makeListEndpoint(s service.Service) endpoint.Endpoint {
+func makeListEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(ListRequest)
 		certificates, nextPageToken, err := s.List(ctx, req.PageSize, req.PageToken)
@@ -228,7 +228,7 @@ type UpdateResponse struct {
 	Certificate *api.Certificate
 }
 
-func makeUpdateEndpoint(s service.Service) endpoint.Endpoint {
+func makeUpdateEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(UpdateRequest)
 		certificate, err := s.Update(ctx, req.Name, req.Certificate)

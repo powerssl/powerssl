@@ -6,19 +6,20 @@ import (
 	"github.com/go-kit/kit/log"
 
 	"powerssl.io/pkg/controller/api"
+	"powerssl.io/pkg/controller/workflow/meta"
 )
 
-type Middleware func(Service) Service
+type Middleware func(meta.Service) meta.Service
 
 func LoggingMiddleware(logger log.Logger) Middleware {
-	return func(next Service) Service {
+	return func(next meta.Service) meta.Service {
 		return loggingMiddleware{logger, next}
 	}
 }
 
 type loggingMiddleware struct {
 	logger log.Logger
-	next   Service
+	next   meta.Service
 }
 
 func (mw loggingMiddleware) Create(ctx context.Context, workflow *api.Workflow) (*api.Workflow, error) {

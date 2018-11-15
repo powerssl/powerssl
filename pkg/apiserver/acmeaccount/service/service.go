@@ -11,6 +11,7 @@ import (
 	otgorm "github.com/smacker/opentracing-gorm"
 	"google.golang.org/grpc/codes"
 
+	"powerssl.io/pkg/apiserver/acmeaccount/meta"
 	"powerssl.io/pkg/apiserver/acmeaccount/model"
 	"powerssl.io/pkg/apiserver/api"
 	controllerapi "powerssl.io/pkg/controller/api"
@@ -19,17 +20,9 @@ import (
 
 var ErrUnimplemented = status.Error(codes.Unimplemented, "Coming soon")
 
-type Service interface {
-	Create(ctx context.Context, parent string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error)
-	Delete(ctx context.Context, name string) error
-	Get(ctx context.Context, name string) (*api.ACMEAccount, error)
-	List(ctx context.Context, parent string, pageSize int, pageToken string) ([]*api.ACMEAccount, string, error)
-	Update(ctx context.Context, name string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error)
-}
-
-func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) Service {
+func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) meta.Service {
 	db.AutoMigrate(&model.ACMEAccount{})
-	var svc Service
+	var svc meta.Service
 	{
 		svc = NewBasicService(db, logger, client)
 		svc = LoggingMiddleware(logger)(svc)
@@ -43,7 +36,7 @@ type basicService struct {
 	logger           log.Logger
 }
 
-func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) Service {
+func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) meta.Service {
 	return basicService{
 		controllerclient: client,
 		db:               db,

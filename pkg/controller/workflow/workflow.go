@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc"
 
 	stdopentracing "github.com/opentracing/opentracing-go"
+	apiserverclient "powerssl.io/pkg/apiserver/client"
 	apiv1 "powerssl.io/pkg/controller/api/v1"
 	"powerssl.io/pkg/controller/workflow/endpoint"
 	service "powerssl.io/pkg/controller/workflow/service"
@@ -18,8 +19,8 @@ type Workflow struct {
 	tracer    stdopentracing.Tracer
 }
 
-func New(logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram) *Workflow {
-	svc := service.New(logger)
+func New(logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *apiserverclient.GRPCClient) *Workflow {
+	svc := service.New(logger, client)
 	endpoints := endpoint.NewEndpoints(svc, logger, tracer, duration)
 
 	return &Workflow{

@@ -11,22 +11,15 @@ import (
 	"google.golang.org/grpc/codes"
 
 	"powerssl.io/pkg/apiserver/api"
+	"powerssl.io/pkg/apiserver/certificate/meta"
 	"powerssl.io/pkg/apiserver/certificate/model"
 	controllerapi "powerssl.io/pkg/controller/api"
 	controllerclient "powerssl.io/pkg/controller/client"
 )
 
-type Service interface {
-	Create(ctx context.Context, certificate *api.Certificate) (*api.Certificate, error)
-	Delete(ctx context.Context, name string) error
-	Get(ctx context.Context, name string) (*api.Certificate, error)
-	List(ctx context.Context, pageSize int, pageToken string) ([]*api.Certificate, string, error)
-	Update(ctx context.Context, name string, certificate *api.Certificate) (*api.Certificate, error)
-}
-
-func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) Service {
+func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) meta.Service {
 	db.AutoMigrate(&model.Certificate{})
-	var svc Service
+	var svc meta.Service
 	{
 		svc = NewBasicService(db, logger, client)
 		svc = LoggingMiddleware(logger)(svc)
@@ -40,7 +33,7 @@ type basicService struct {
 	logger           log.Logger
 }
 
-func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) Service {
+func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) meta.Service {
 	return basicService{
 		controllerclient: client,
 		db:               db,
