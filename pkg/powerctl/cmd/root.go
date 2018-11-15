@@ -42,10 +42,12 @@ func init() {
 	rootCmd.PersistentFlags().BoolP("insecure", "", false, "Use insecure communication")
 	rootCmd.PersistentFlags().BoolP("insecure-skip-tls-verify", "", false, "Accepts any certificate presented by the server and any host name in that certificate")
 	rootCmd.PersistentFlags().StringP("addr", "", "", "GRPC address of API server")
+	rootCmd.PersistentFlags().StringP("auth-token", "", "", "Authentication token")
 	rootCmd.PersistentFlags().StringP("ca-file", "", "", "Certificate authority file")
 	rootCmd.PersistentFlags().StringP("server-name-override", "", "", "It will override the virtual host name of authority")
 
 	viper.BindPFlag("addr", rootCmd.PersistentFlags().Lookup("addr"))
+	viper.BindPFlag("auth-token", rootCmd.PersistentFlags().Lookup("auth-token"))
 	viper.BindPFlag("ca-file", rootCmd.PersistentFlags().Lookup("ca-file"))
 	viper.BindPFlag("insecure", rootCmd.PersistentFlags().Lookup("insecure"))
 	viper.BindPFlag("insecure-skip-tls-verify", rootCmd.PersistentFlags().Lookup("insecure-skip-tls-verify"))

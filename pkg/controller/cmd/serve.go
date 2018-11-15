@@ -16,6 +16,7 @@ var serveCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		addr := viper.GetString("addr")
 		apiserverAddr := viper.GetString("apiserver.addr")
+		apiserverAuthToken := viper.GetString("apiserver.auth-token")
 		apiserverCertFile := viper.GetString("apiserver.ca-file")
 		apiserverInsecure := viper.GetBool("apiserver.insecure")
 		apiserverInsecureSkipTLSVerify := viper.GetBool("apiserver.insecure-skip-tls-verify")
@@ -57,7 +58,7 @@ var serveCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		controller.Run(addr, tlsCertFile, tlsPrivateKeyFile, insecure, metricsAddr, tracer, apiserverAddr, apiserverCertFile, apiserverServerNameOverride, apiserverInsecure, apiserverInsecureSkipTLSVerify)
+		controller.Run(addr, tlsCertFile, tlsPrivateKeyFile, insecure, metricsAddr, tracer, apiserverAddr, apiserverCertFile, apiserverServerNameOverride, apiserverInsecure, apiserverInsecureSkipTLSVerify, apiserverAuthToken)
 	},
 }
 
@@ -69,6 +70,7 @@ func init() {
 	serveCmd.Flags().BoolP("no-tracing", "", false, "Do not trace")
 	serveCmd.Flags().StringP("addr", "", ":8080", "GRPC Addr")
 	serveCmd.Flags().StringP("apiserver-addr", "", "", "GRPC address of API server")
+	serveCmd.Flags().StringP("apiserver-auth-token", "", "", "API server authentication token")
 	serveCmd.Flags().StringP("apiserver-ca-file", "", "", "Certificate authority file")
 	serveCmd.Flags().StringP("apiserver-server-name-override", "", "", "It will override the virtual host name of authority")
 	serveCmd.Flags().StringP("metrics-addr", "", ":9090", "HTTP Addr")
@@ -78,6 +80,7 @@ func init() {
 
 	viper.BindPFlag("addr", serveCmd.Flags().Lookup("addr"))
 	viper.BindPFlag("apiserver.addr", serveCmd.Flags().Lookup("apiserver-addr"))
+	viper.BindPFlag("apiserver.auth-token", serveCmd.Flags().Lookup("apiserver-auth-token"))
 	viper.BindPFlag("apiserver.ca-file", serveCmd.Flags().Lookup("apiserver-ca-file"))
 	viper.BindPFlag("apiserver.insecure", serveCmd.Flags().Lookup("apiserver-insecure"))
 	viper.BindPFlag("apiserver.insecure-skip-tls-verify", serveCmd.Flags().Lookup("apiserver-insecure-skip-tls-verify"))

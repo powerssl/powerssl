@@ -5,6 +5,7 @@ package endpoint // import "powerssl.io/pkg/apiserver/acmeserver/generated/endpo
 import (
 	"context"
 
+	"github.com/go-kit/kit/auth/jwt"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
@@ -13,6 +14,7 @@ import (
 
 	service "powerssl.io/pkg/apiserver/acmeserver"
 	"powerssl.io/pkg/apiserver/api"
+	"powerssl.io/pkg/util/auth"
 	"powerssl.io/pkg/util/middleware"
 )
 
@@ -25,9 +27,12 @@ type Endpoints struct {
 }
 
 func NewEndpoints(svc service.Service, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram) Endpoints {
+	jwtParser := jwt.NewParser(auth.KeyFunc, auth.Method, jwt.StandardClaimsFactory)
+
 	var createEndpoint endpoint.Endpoint
 	{
 		createEndpoint = makeCreateEndpoint(svc)
+		createEndpoint = jwtParser(createEndpoint)
 		createEndpoint = opentracing.TraceServer(tracer, "Create")(createEndpoint)
 		createEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Create"))(createEndpoint)
 		createEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Create"))(createEndpoint)
@@ -36,6 +41,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, tracer stdopentracing.
 	var deleteEndpoint endpoint.Endpoint
 	{
 		deleteEndpoint = makeDeleteEndpoint(svc)
+		deleteEndpoint = jwtParser(deleteEndpoint)
 		deleteEndpoint = opentracing.TraceServer(tracer, "Delete")(deleteEndpoint)
 		deleteEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Delete"))(deleteEndpoint)
 		deleteEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Delete"))(deleteEndpoint)
@@ -44,6 +50,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, tracer stdopentracing.
 	var getEndpoint endpoint.Endpoint
 	{
 		getEndpoint = makeGetEndpoint(svc)
+		getEndpoint = jwtParser(getEndpoint)
 		getEndpoint = opentracing.TraceServer(tracer, "Get")(getEndpoint)
 		getEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Get"))(getEndpoint)
 		getEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Get"))(getEndpoint)
@@ -52,6 +59,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, tracer stdopentracing.
 	var listEndpoint endpoint.Endpoint
 	{
 		listEndpoint = makeListEndpoint(svc)
+		listEndpoint = jwtParser(listEndpoint)
 		listEndpoint = opentracing.TraceServer(tracer, "List")(listEndpoint)
 		listEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "List"))(listEndpoint)
 		listEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "List"))(listEndpoint)
@@ -60,6 +68,7 @@ func NewEndpoints(svc service.Service, logger log.Logger, tracer stdopentracing.
 	var updateEndpoint endpoint.Endpoint
 	{
 		updateEndpoint = makeUpdateEndpoint(svc)
+		updateEndpoint = jwtParser(updateEndpoint)
 		updateEndpoint = opentracing.TraceServer(tracer, "Update")(updateEndpoint)
 		updateEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Update"))(updateEndpoint)
 		updateEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Update"))(updateEndpoint)

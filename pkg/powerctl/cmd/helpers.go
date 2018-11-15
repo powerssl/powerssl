@@ -56,6 +56,7 @@ func NewGRPCClient() (*apiserverclient.GRPCClient, error) {
 	addr := viper.GetString("addr")
 	insecure := viper.GetBool("insecure")
 	insecureSkipTLSVerify := viper.GetBool("insecure-skip-tls-verify")
+	authToken := viper.GetString("auth-token")
 	serverNameOverride := viper.GetString("server-name-override")
 	if addr == "" {
 		return nil, errors.New("Provide addr")
@@ -65,7 +66,7 @@ func NewGRPCClient() (*apiserverclient.GRPCClient, error) {
 	}
 	logger := util.NewLogger(os.Stdout)
 	tracer, _, _ := tracing.NewNoopTracer("powerctl", logger)
-	client, err := apiserverclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, logger, tracer)
+	client, err := apiserverclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, authToken, logger, tracer)
 	if err != nil {
 		return nil, err
 	}

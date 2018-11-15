@@ -5,6 +5,8 @@ package transport // import "powerssl.io/pkg/apiserver/certificate/generated/tra
 import (
 	"fmt"
 
+	stdjwt "github.com/dgrijalva/jwt-go"
+	"github.com/go-kit/kit/auth/jwt"
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/tracing/opentracing"
@@ -16,12 +18,16 @@ import (
 	apiv1 "powerssl.io/pkg/apiserver/api/v1"
 	service "powerssl.io/pkg/apiserver/certificate"
 	"powerssl.io/pkg/apiserver/certificate/generated/endpoint"
+	"powerssl.io/pkg/util/auth"
 )
 
 const serviceName = "powerssl.apiserver.v1.CertificateService"
 
-func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentracing.Tracer) service.Service {
+func NewGRPCClient(conn *grpc.ClientConn, key []byte, logger log.Logger, tracer stdopentracing.Tracer) service.Service {
+	jwtSigner := jwt.NewSigner("TODO", key, auth.Method, stdjwt.StandardClaims{})
+
 	options := []grpctransport.ClientOption{
+		grpctransport.ClientBefore(jwt.ContextToGRPC()),
 		grpctransport.ClientBefore(opentracing.ContextToGRPC(tracer, logger)),
 	}
 
@@ -36,6 +42,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentraci
 			apiv1.Certificate{},
 			options...,
 		).Endpoint()
+		createEndpoint = jwtSigner(createEndpoint)
 		createEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/Create", serviceName))(createEndpoint)
 	}
 
@@ -50,6 +57,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentraci
 			types.Empty{},
 			options...,
 		).Endpoint()
+		deleteEndpoint = jwtSigner(deleteEndpoint)
 		deleteEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/Delete", serviceName))(deleteEndpoint)
 	}
 
@@ -64,6 +72,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentraci
 			apiv1.Certificate{},
 			options...,
 		).Endpoint()
+		getEndpoint = jwtSigner(getEndpoint)
 		getEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/Get", serviceName))(getEndpoint)
 	}
 
@@ -78,6 +87,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentraci
 			apiv1.ListCertificatesResponse{},
 			options...,
 		).Endpoint()
+		listEndpoint = jwtSigner(listEndpoint)
 		listEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/List", serviceName))(listEndpoint)
 	}
 
@@ -92,6 +102,7 @@ func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentraci
 			apiv1.Certificate{},
 			options...,
 		).Endpoint()
+		updateEndpoint = jwtSigner(updateEndpoint)
 		updateEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/Update", serviceName))(updateEndpoint)
 	}
 

@@ -21,7 +21,9 @@ var getCmd = &cobra.Command{
 			if err != nil {
 				er(err)
 			}
-			resources, err = resourceHandler.List(client)
+			if resources, err = resourceHandler.List(client); err != nil {
+				er(err)
+			}
 		} else {
 			resources, err = resourcesFromArgs(args)
 			if err != nil {

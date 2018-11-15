@@ -79,6 +79,7 @@ func init() {
 	serveCmd.Flags().BoolP("no-metrics", "", false, "Do not serve metrics")
 	serveCmd.Flags().BoolP("no-tracing", "", false, "Do not trace")
 	serveCmd.Flags().StringP("addr", "", ":8080", "GRPC Addr")
+	serveCmd.Flags().StringP("auth-token", "", "", "Authentication token")
 	serveCmd.Flags().StringP("controller-addr", "", "", "GRPC address of Controller")
 	serveCmd.Flags().StringP("controller-ca-file", "", "", "Certificate authority file")
 	serveCmd.Flags().StringP("controller-server-name-override", "", "", "It will override the virtual host name of authority")
@@ -90,6 +91,7 @@ func init() {
 	serveCmd.Flags().StringP("tracer", "", "jaeger", "Tracing implementation")
 
 	viper.BindPFlag("addr", serveCmd.Flags().Lookup("addr"))
+	viper.BindPFlag("auth-token", serveCmd.Flags().Lookup("auth-token"))
 	viper.BindPFlag("controller.addr", serveCmd.Flags().Lookup("controller-addr"))
 	viper.BindPFlag("controller.ca-file", serveCmd.Flags().Lookup("controller-ca-file"))
 	viper.BindPFlag("controller.insecure", serveCmd.Flags().Lookup("controller-insecure"))

@@ -26,7 +26,7 @@ type GRPCClient struct {
 	CertificateIssue certificateissueservice.Service
 }
 
-func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
+func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, authToken string, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
 	var conn *grpc.ClientConn
 	{
 		var err error
@@ -51,10 +51,12 @@ func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, inse
 		}
 	}
 
+	key := []byte(authToken)
+
 	return &GRPCClient{
-		ACMEAccount:      acmeaccounttransport.NewGRPCClient(conn, logger, tracer),
-		ACMEServer:       acmeservertransport.NewGRPCClient(conn, logger, tracer),
-		Certificate:      certificatetransport.NewGRPCClient(conn, logger, tracer),
+		ACMEAccount:      acmeaccounttransport.NewGRPCClient(conn, key, logger, tracer),
+		ACMEServer:       acmeservertransport.NewGRPCClient(conn, key, logger, tracer),
+		Certificate:      certificatetransport.NewGRPCClient(conn, key, logger, tracer),
 		CertificateIssue: certificateissuetransport.NewGRPCClient(conn, logger),
 	}, nil
 }
