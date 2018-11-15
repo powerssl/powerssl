@@ -15,15 +15,12 @@ import (
 	acmeservertransport "powerssl.io/pkg/apiserver/acmeserver/generated/transport"
 	certificateservice "powerssl.io/pkg/apiserver/certificate"
 	certificatetransport "powerssl.io/pkg/apiserver/certificate/generated/transport"
-	certificateissueservice "powerssl.io/pkg/apiserver/certificateissue"
-	certificateissuetransport "powerssl.io/pkg/apiserver/certificateissue/generated/transport"
 )
 
 type GRPCClient struct {
 	ACMEAccount      acmeaccountservice.Service
 	ACMEServer       acmeserverservice.Service
 	Certificate      certificateservice.Service
-	CertificateIssue certificateissueservice.Service
 }
 
 func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, authToken string, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
@@ -57,6 +54,5 @@ func NewGRPCClient(grpcAddr, certFile, serverNameOverride string, insecure, inse
 		ACMEAccount:      acmeaccounttransport.NewGRPCClient(conn, key, logger, tracer),
 		ACMEServer:       acmeservertransport.NewGRPCClient(conn, key, logger, tracer),
 		Certificate:      certificatetransport.NewGRPCClient(conn, key, logger, tracer),
-		CertificateIssue: certificateissuetransport.NewGRPCClient(conn, logger),
 	}, nil
 }

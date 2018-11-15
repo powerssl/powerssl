@@ -9,7 +9,6 @@ import (
 	acmeaccount "powerssl.io/pkg/apiserver/acmeaccount/generated"
 	acmeserver "powerssl.io/pkg/apiserver/acmeserver/generated"
 	certificate "powerssl.io/pkg/apiserver/certificate/generated"
-	certificateissue "powerssl.io/pkg/apiserver/certificateissue/generated"
 	controllerclient "powerssl.io/pkg/controller/client"
 	"powerssl.io/pkg/util"
 )
@@ -19,6 +18,5 @@ func makeServices(db *gorm.DB, logger log.Logger, tracer stdopentracing.Tracer, 
 		acmeaccount.New(db, logger, tracer, duration, client),
 		acmeserver.New(db, logger, tracer, duration, client),
 		certificate.New(db, logger, tracer, duration, client),
-		certificateissue.New(db, logger, duration, client), // TODO: tracing
 	}
 }
