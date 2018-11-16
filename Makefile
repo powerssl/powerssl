@@ -29,20 +29,16 @@ PROTOBUF_TARGETS := bin/.go_protobuf_sources
 .DEFAULT_GOAL := all
 all: build
 
-bin/.go_protobuf_sources: bin/protoc-gen-gogo bin/protoc-gen-gotemplate bin/protoc-gen-grpc-web
+bin/.go_protobuf_sources: bin/protoc-gen-gogo bin/protoc-gen-grpc-web
 	$(FIND_RELEVANT) -type f -name '*.pb.go' -exec rm {} +
 	set -e; for dir in $(sort $(dir $(GO_PROTOS))); do \
 		$(PROTOC) \
 			-I$(PKG_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
 			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src \
-			--gotemplate_out=$(PKG_PATH)/resource/generated \
 			--js_out=import_style=commonjs:vendor/javascript \
 			--grpc-web_out=import_style=commonjs,mode=grpcwebtext:vendor/javascript \
 			$$dir/*.proto; \
 	done
-	gofmt -s -w $(PKG_PATH)/resource/generated
-	find pkg/resource/generated -type d -depth 1 | cut -d '/' -f 4 | xargs -I '{}' sh -c "eval $$(echo mv -n $(PKG_PATH)/resource/generated/'{}'/service/\* $(PKG_PATH)/resource/'{}'/)"
-	rm -rf pkg/resource/generated/*/service
 	gofmt -s -w $(GO_SOURCES)
 	touch $@
 
@@ -56,9 +52,6 @@ controllerproto: bin/protoc-gen-gogo
 			$$dir/*.proto; \
 	done
 	# gofmt -s -w $(GO_SOURCES)
-
-bin/protoc-gen-gotemplate:
-	go build -o bin/protoc-gen-gotemplate $$(go mod download -json moul.io/protoc-gen-gotemplate | grep '"Dir"' | cut -d '"' -f 4)
 
 bin/protoc-gen-gogo:
 	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)/protoc-gen-gogo
