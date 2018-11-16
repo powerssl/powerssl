@@ -40,6 +40,16 @@ bin/.go_protobuf_sources: bin/protoc-gen-gogo
 	done
 	touch $@
 
+.PHONY: javascript-sdk
+javascript-sdk: bin/protoc-gen-grpc-web
+	set -e; for dir in $(sort $(dir $(PROTOS))); do \
+		$(PROTOC) \
+			-I$(PROTO_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
+			--js_out=import_style=commonjs:vendor/javascript-sdk \
+			--grpc-web_out=import_style=commonjs,mode=grpcwebtext:vendor/javascript-sdk \
+			$$dir/*.proto; \
+	done
+
 bin/protoc-gen-gogo:
 	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)/protoc-gen-gogo
 
