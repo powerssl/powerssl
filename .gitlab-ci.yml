@@ -24,6 +24,11 @@ build apiserver:
   variables:
     COMPONENT: apiserver
 
+build auth:
+  <<: *build_template
+  variables:
+    COMPONENT: auth
+
 build controller:
   <<: *build_template
   variables:
@@ -162,6 +167,11 @@ release apiserver:
   <<: *release_template
   variables:
     COMPONENT: apiserver
+
+release auth:
+  <<: *release_template
+  variables:
+    COMPONENT: auth
 
 release controller:
   <<: *release_template
