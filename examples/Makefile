@@ -3,6 +3,7 @@ quickstart:
 	cp powerctl.yaml ~/.powerctl.yaml
 	sudo mkdir -p /etc/powerssl
 	sudo cp -r api /etc/powerssl
+	sudo cp -r auth /etc/powerssl
 	sudo cp -r controller /etc/powerssl
 	sudo cp -r signer /etc/powerssl
 	make -C certs
@@ -10,6 +11,9 @@ quickstart:
 	sudo cp certs/localhost.pem /etc/powerssl/api/cert.pem
 	sudo cp certs/localhost-key.pem /etc/powerssl/api/cert-key.pem
 	sudo chmod +r /etc/powerssl/api/cert-key.pem
+	sudo cp certs/localhost.pem /etc/powerssl/auth/cert.pem
+	sudo cp certs/localhost-key.pem /etc/powerssl/auth/cert-key.pem
+	sudo chmod +r /etc/powerssl/auth/cert-key.pem
 	sudo cp certs/localhost.pem /etc/powerssl/controller/cert.pem
 	sudo cp certs/localhost-key.pem /etc/powerssl/controller/cert-key.pem
 	sudo chmod +r /etc/powerssl/controller/cert-key.pem

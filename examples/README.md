@@ -18,6 +18,10 @@ Copy `api` to `/etc/powerssl/api`.
 
 `sudo cp -r api /etc/powerssl`
 
+Copy `auth` to `/etc/powerssl/auth`.
+
+`sudo cp -r auth /etc/powerssl`
+
 Copy `controller` to `/etc/powerssl/controller`.
 
 `sudo cp -r controller /etc/powerssl`
@@ -45,6 +49,18 @@ Copy `certs/localhost-key.pem` to `/etc/powerssl/api/cert-key.pem`.
 Grant read permissions on `/etc/powerssl/api/cert-key.pem`.
 
 `sudo chmod +r /etc/powerssl/api/cert-key.pem`
+
+Copy `certs/localhost.pem` to `/etc/powerssl/auth/cert.pem`.
+
+`sudo cp certs/localhost.pem /etc/powerssl/auth/cert.pem`
+
+Copy `certs/localhost-key.pem` to `/etc/powerssl/auth/cert-key.pem`.
+
+`sudo cp certs/localhost-key.pem /etc/powerssl/auth/cert-key.pem`
+
+Grant read permissions on `/etc/powerssl/auth/cert-key.pem`.
+
+`sudo chmod +r /etc/powerssl/auth/cert-key.pem`
 
 Copy `certs/localhost.pem` to `/etc/powerssl/controller/cert.pem`.
 

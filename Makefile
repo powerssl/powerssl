@@ -74,6 +74,9 @@ bin/protoc-gen-grpc-web:
 bin/powerssl-apiserver: .ALWAYS_REBUILD
 	go build -o bin/powerssl-apiserver powerssl.io/cmd/powerssl-apiserver
 
+bin/powerssl-auth: .ALWAYS_REBUILD
+	go build -o bin/powerssl-auth powerssl.io/cmd/powerssl-auth
+
 bin/powerssl-controller: .ALWAYS_REBUILD
 	go build -o bin/powerssl-controller powerssl.io/cmd/powerssl-controller
 
@@ -90,7 +93,7 @@ bin/powerctl: .ALWAYS_REBUILD
 	go build -o bin/powerctl powerssl.io/cmd/powerctl
 
 .PHONY: build
-build: bin/powerssl-apiserver bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerctl
+build: bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerctl
 
 .PHONY: fmt
 fmt:
@@ -125,11 +128,15 @@ generate:
 	go generate $$(go list ./...)
 
 .PHONY: images
-images: apiserver-image controller-image envoy-image integration-acme-image integration-cloudflare-image powerctl-image signer-image
+images: apiserver-image auth-image controller-image envoy-image integration-acme-image integration-cloudflare-image powerctl-image signer-image
 
 .PHONY: apiserver-image
 apiserver-image:
 	docker build -f dockerfiles/apiserver/Dockerfile -t powerssl/apiserver .
+
+.PHONY: auth-image
+auth-image:
+	docker build -f dockerfiles/auth/Dockerfile -t powerssl/auth .
 
 .PHONY: controller-image
 controller-image:

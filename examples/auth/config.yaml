@@ -1,0 +1,4 @@
+addr: localhost:8080
+tls:
+  cert-file: /etc/powerssl/auth/cert.pem
+  private-key-file: /etc/powerssl/auth/cert-key.pem
