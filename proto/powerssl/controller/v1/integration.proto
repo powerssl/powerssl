@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package powerssl.controller.v1;
 
-import "controller/api/v1/meta.proto";
+import "powerssl/controller/v1/meta.proto";
 
 option go_package = "powerssl.io/pkg/controller/api/v1;api";
 

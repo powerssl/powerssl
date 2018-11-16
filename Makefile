@@ -2,10 +2,12 @@ PROTOC := $(shell which protoc)
 
 BIN_PATH := $(abspath bin)
 PKG_PATH := $(abspath pkg)
+PROTO_PATH := $(abspath proto)
 
 export PATH := $(BIN_PATH):$(PATH)
 
 FIND_RELEVANT := find $(PKG_PATH)
+FIND_PROTO := find $(PROTO_PATH)
 
 GOGO_GOOGLEAPIS_PATH := $(shell go mod download -json github.com/gogo/googleapis | grep '"Dir"' | cut -d '"' -f 4)
 GOGO_PROTOBUF_PATH := $(shell go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)
@@ -16,8 +18,7 @@ PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/api/annotations.proto=github.com/gogo
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types,
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,
 
-GO_PROTOS := $(sort $(shell $(FIND_RELEVANT) -type f -name '*.proto' -print))
-GO_SOURCES := $(GO_PROTOS:%.proto=%.pb.go)
+PROTOS := $(sort $(shell $(FIND_PROTO) -type f -name '*.proto' -print))
 
 PROTOBUF_TARGETS := bin/.go_protobuf_sources
 
@@ -31,25 +32,13 @@ all: build
 
 bin/.go_protobuf_sources: bin/protoc-gen-gogo
 	$(FIND_RELEVANT) -type f -name '*.pb.go' -exec rm {} +
-	set -e; for dir in $(sort $(dir $(GO_PROTOS))); do \
+	set -e; for dir in $(sort $(dir $(PROTOS))); do \
 		$(PROTOC) \
-			-I$(PKG_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
+			-I$(PROTO_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
 			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src \
 			$$dir/*.proto; \
 	done
-	gofmt -s -w $(GO_SOURCES)
 	touch $@
-
-.PHONY: controllerproto
-controllerproto: bin/protoc-gen-gogo
-	# $(FIND_RELEVANT) -type f -name '*.pb.go' -exec rm {} +
-	set -e; for dir in $(sort $(dir $(GO_PROTOS))); do \
-		echo $(PROTOC) \
-			-I$(PKG_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
-			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src \
-			$$dir/*.proto; \
-	done
-	# gofmt -s -w $(GO_SOURCES)
 
 bin/protoc-gen-gogo:
 	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)/protoc-gen-gogo
@@ -89,7 +78,7 @@ build: bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powe
 .PHONY: fmt
 fmt:
 	go fmt $$(go list ./...)
-	clang-format -i --style=google $(GO_PROTOS)
+	clang-format -i --style=google $(PROTOS)
 
 .PHONY: vet
 vet:
@@ -97,18 +86,12 @@ vet:
 
 .PHONY: clean
 clean:
-	go clean ./cmd/powerssl-api ./cmd/powerctl
+	go clean powerssl.io/cmd/powerctl powerssl.io/cmd/powerssl-apiserver powerssl.io/cmd/powerssl-auth powerssl.io/cmd/powerssl-controller powerssl.io/cmd/powerssl-integration-acme powerssl.io/cmd/powerssl-integration-cloudflare powerssl.io/cmd/powerssl-signer
 	rm -f bin/.go_protobuf_sources
-	rm -f bin/powerssl-apiserver bin/powerctl
+	rm -f bin/powerctl bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer
 
 .PHONY: protobuf
 protobuf: $(PROTOBUF_TARGETS)
-
-# build-linux:
-# 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/powerctl -v ./cmd/powerctl
-# docker-build:
-# 	docker run --rm -it -e GO111MODULE=on -v $$(pwd):/go/src -v $$(pwd)/bin:/go/bin -w /go/src golang:1.11rc1 go build -o /go/bin/powerctl -v ./cmd/powerctl
-#
 
 .PHONY: tools
 tools:
