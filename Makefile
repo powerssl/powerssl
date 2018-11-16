@@ -29,14 +29,12 @@ PROTOBUF_TARGETS := bin/.go_protobuf_sources
 .DEFAULT_GOAL := all
 all: build
 
-bin/.go_protobuf_sources: bin/protoc-gen-gogo bin/protoc-gen-grpc-web
+bin/.go_protobuf_sources: bin/protoc-gen-gogo
 	$(FIND_RELEVANT) -type f -name '*.pb.go' -exec rm {} +
 	set -e; for dir in $(sort $(dir $(GO_PROTOS))); do \
 		$(PROTOC) \
 			-I$(PKG_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
 			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src \
-			--js_out=import_style=commonjs:vendor/javascript \
-			--grpc-web_out=import_style=commonjs,mode=grpcwebtext:vendor/javascript \
 			$$dir/*.proto; \
 	done
 	gofmt -s -w $(GO_SOURCES)
