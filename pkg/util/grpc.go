@@ -2,10 +2,12 @@ package util
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
 	"runtime/debug"
+	"time"
 
 	"github.com/go-kit/kit/log"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
@@ -73,10 +75,34 @@ func ServeGRPC(ctx context.Context, addr, certFile, keyFile string, insecure boo
 		return ctx.Err()
 	}
 }
+
 func recoveryHandler(logger log.Logger) func(interface{}) error {
 	return func(err interface{}) error {
 		logger.Log("err", err)
 		debug.PrintStack()
 		return ErrUnkown
 	}
+}
+
+func NewClientConn(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool) (*grpc.ClientConn, error) {
+	opts := []grpc.DialOption{
+		grpc.WithTimeout(time.Second),
+	}
+	if insecure {
+		opts = append(opts, grpc.WithInsecure())
+	} else if insecureSkipTLSVerify {
+		creds := credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})
+		opts = append(opts, grpc.WithTransportCredentials(creds))
+	} else {
+		creds, err := credentials.NewClientTLSFromFile(certFile, serverNameOverride)
+		if err != nil {
+			return nil, err
+		}
+		opts = append(opts, grpc.WithTransportCredentials(creds))
+	}
+	conn, err := grpc.Dial(addr, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
 }
