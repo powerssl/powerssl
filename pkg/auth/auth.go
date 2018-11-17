@@ -67,7 +67,8 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		tokenString, err := generateToken(signKey)
+		expiresAt := time.Now().Add(time.Hour).Unix()
+		tokenString, err := generateToken(signKey, expiresAt)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -81,7 +82,16 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 		}
 	})
 	mux.HandleFunc("/raw", func(w http.ResponseWriter, req *http.Request) {
-		tokenString, err := generateToken(signKey)
+		expiresAt := time.Now().Add(time.Hour).Unix()
+		tokenString, err := generateToken(signKey, expiresAt)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprint(w, tokenString)
+	})
+	mux.HandleFunc("/service", func(w http.ResponseWriter, req *http.Request) {
+		tokenString, err := generateToken(signKey, 0)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -117,11 +127,14 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 	}
 }
 
-func generateToken(signKey *rsa.PrivateKey) (string, error) {
-	token := jwt.NewWithClaims(auth.Method, &jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(time.Hour).Unix(),
+func generateToken(signKey *rsa.PrivateKey, expiresAt int64) (string, error) {
+	claims := &jwt.StandardClaims{
 		IssuedAt:  time.Now().Unix(),
 		NotBefore: time.Now().Unix(),
-	})
+	}
+	if expiresAt != 0 {
+		claims.ExpiresAt = expiresAt
+	}
+	token := jwt.NewWithClaims(auth.Method, claims)
 	return token.SignedString(signKey)
 }
