@@ -11,12 +11,17 @@ import (
 	"powerssl.io/pkg/apiserver/certificate"
 	controllerclient "powerssl.io/pkg/controller/client"
 	"powerssl.io/pkg/util"
+	"powerssl.io/pkg/util/auth"
 )
 
-func makeServices(db *gorm.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *controllerclient.GRPCClient) []util.Service {
-	return []util.Service{
-		acmeaccount.New(db, logger, tracer, duration, client),
-		acmeserver.New(db, logger, tracer, duration, client),
-		certificate.New(db, logger, tracer, duration, client),
+func makeServices(db *gorm.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *controllerclient.GRPCClient, jwtPublicKeyFile string) ([]util.Service, error) {
+	auth, err := auth.NewParser(jwtPublicKeyFile)
+	if err != nil {
+		return nil, err
 	}
+	return []util.Service{
+		acmeaccount.New(db, logger, tracer, duration, client, auth),
+		acmeserver.New(db, logger, tracer, duration, client, auth),
+		certificate.New(db, logger, tracer, duration, client, auth),
+	}, nil
 }

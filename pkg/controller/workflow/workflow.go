@@ -1,6 +1,7 @@
 package workflow // import "powerssl.io/pkg/controller/workflow"
 
 import (
+	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
 	"google.golang.org/grpc"
@@ -19,9 +20,9 @@ type Workflow struct {
 	tracer    stdopentracing.Tracer
 }
 
-func New(logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *apiserverclient.GRPCClient) *Workflow {
+func New(logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *apiserverclient.GRPCClient, auth kitendpoint.Middleware) *Workflow {
 	svc := service.New(logger, client)
-	endpoints := endpoint.NewEndpoints(svc, logger, tracer, duration)
+	endpoints := endpoint.NewEndpoints(svc, logger, tracer, duration, auth)
 
 	return &Workflow{
 		endpoints: endpoints,

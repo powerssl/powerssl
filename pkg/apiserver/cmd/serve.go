@@ -28,6 +28,7 @@ var serveCmd = &cobra.Command{
 			metricsAddr = viper.GetString("metrics-addr")
 		}
 		insecure := viper.GetBool("insecure")
+		jwtPublicKeyFile := viper.GetString("jwt.public-key-file")
 		tlsCertFile := viper.GetString("tls.cert-file")
 		tlsPrivateKeyFile := viper.GetString("tls.private-key-file")
 		var tracer string
@@ -56,7 +57,10 @@ var serveCmd = &cobra.Command{
 			ok = false
 			fmt.Println("Provide tls-private-key-file")
 		}
-
+		if jwtPublicKeyFile == "" {
+			ok = false
+			fmt.Println("Provide jwt-public-key-file")
+		}
 		if controllerAddr == "" {
 			ok = false
 			fmt.Println("Provide controller-addr")
@@ -69,7 +73,7 @@ var serveCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		apiserver.Run(addr, tlsCertFile, tlsPrivateKeyFile, insecure, dbDialect, dbConnection, metricsAddr, tracer, controllerAddr, controllerCertFile, controllerServerNameOverride, controllerInsecure, controllerInsecureSkipTLSVerify, controllerAuthToken)
+		apiserver.Run(addr, tlsCertFile, tlsPrivateKeyFile, insecure, dbDialect, dbConnection, metricsAddr, tracer, controllerAddr, controllerCertFile, controllerServerNameOverride, controllerInsecure, controllerInsecureSkipTLSVerify, jwtPublicKeyFile, controllerAuthToken)
 	},
 }
 
@@ -86,8 +90,8 @@ func init() {
 	serveCmd.Flags().StringP("controller-server-name-override", "", "", "It will override the virtual host name of authority")
 	serveCmd.Flags().StringP("db-connection", "", "/tmp/powerssl.sqlie3", "DB connection")
 	serveCmd.Flags().StringP("db-dialect", "", "sqlite3", "DB Dialect")
+	serveCmd.Flags().StringP("jwt-public-key-file", "", "", "JWT public key file")
 	serveCmd.Flags().StringP("metrics-addr", "", ":9090", "HTTP Addr")
-	serveCmd.Flags().StringP("signing-key", "", "", "Signing key")
 	serveCmd.Flags().StringP("tls-cert-file", "", "", "File containing the default x509 Certificate for GRPC.")
 	serveCmd.Flags().StringP("tls-private-key-file", "", "", "File containing the default x509 private key matching --tls-cert-file.")
 	serveCmd.Flags().StringP("tracer", "", "jaeger", "Tracing implementation")
@@ -102,10 +106,10 @@ func init() {
 	viper.BindPFlag("db.connection", serveCmd.Flags().Lookup("db-connection"))
 	viper.BindPFlag("db.dialect", serveCmd.Flags().Lookup("db-dialect"))
 	viper.BindPFlag("insecure", serveCmd.Flags().Lookup("insecure"))
+	viper.BindPFlag("jwt.public-key-file", serveCmd.Flags().Lookup("jwt-public-key-file"))
 	viper.BindPFlag("metrics-addr", serveCmd.Flags().Lookup("metrics-addr"))
 	viper.BindPFlag("no-metrics", serveCmd.Flags().Lookup("no-metrics"))
 	viper.BindPFlag("no-tracing", serveCmd.Flags().Lookup("no-tracing"))
-	viper.BindPFlag("signing-key", serveCmd.Flags().Lookup("signing-key"))
 	viper.BindPFlag("tls.cert-file", serveCmd.Flags().Lookup("tls-cert-file"))
 	viper.BindPFlag("tls.private-key-file", serveCmd.Flags().Lookup("tls-private-key-file"))
 	viper.BindPFlag("tracer", serveCmd.Flags().Lookup("tracer"))

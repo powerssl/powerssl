@@ -19,7 +19,7 @@ import (
 	"powerssl.io/pkg/util/tracing"
 )
 
-func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialect, dbConnection, metricsAddr, tracerImpl, controllerAddr, controllerCertFile, controllerServerNameOverride string, controllerInsecure, controllerInsecureSkipTLSVerify bool, controllerAuthToken string) {
+func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialect, dbConnection, metricsAddr, tracerImpl, controllerAddr, controllerCertFile, controllerServerNameOverride string, controllerInsecure, controllerInsecureSkipTLSVerify bool, jwtPublicKeyFile, controllerAuthToken string) {
 	logger := util.NewLogger(os.Stdout)
 
 	g, ctx := errgroup.WithContext(context.Background())
@@ -62,7 +62,11 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialec
 		}
 	}
 
-	services := makeServices(db, logger, tracer, duration, client)
+	services, err := makeServices(db, logger, tracer, duration, client, jwtPublicKeyFile)
+	if err != nil {
+		logger.Log("err", err)
+		os.Exit(1)
+	}
 
 	if metricsAddr != "" {
 		g.Go(func() error {

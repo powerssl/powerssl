@@ -1,6 +1,7 @@
 package acmeaccount // import "powerssl.io/pkg/apiserver/acmeaccount"
 
 import (
+	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
 	"github.com/jinzhu/gorm"
@@ -20,9 +21,9 @@ type ACMEAccount struct {
 	tracer    stdopentracing.Tracer
 }
 
-func New(db *gorm.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *controllerclient.GRPCClient) *ACMEAccount {
+func New(db *gorm.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *controllerclient.GRPCClient, auth kitendpoint.Middleware) *ACMEAccount {
 	svc := service.New(db, logger, client)
-	endpoints := endpoint.NewEndpoints(svc, logger, tracer, duration)
+	endpoints := endpoint.NewEndpoints(svc, logger, tracer, duration, auth)
 
 	return &ACMEAccount{
 		endpoints: endpoints,

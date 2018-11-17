@@ -10,12 +10,17 @@ import (
 	"powerssl.io/pkg/controller/integration"
 	"powerssl.io/pkg/controller/workflow"
 	"powerssl.io/pkg/util"
+	"powerssl.io/pkg/util/auth"
 )
 
-func makeServices(logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *apiserverclient.GRPCClient) []util.Service {
+func makeServices(logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *apiserverclient.GRPCClient, jwtPublicKeyFile string) ([]util.Service, error) {
+	auth, err := auth.NewParser(jwtPublicKeyFile)
+	if err != nil {
+		return nil, err
+	}
 	return []util.Service{
 		acme.New(logger, tracer, duration),
 		integration.New(logger, duration), // TODO: tracing
-		workflow.New(logger, tracer, duration, client),
-	}
+		workflow.New(logger, tracer, duration, client, auth),
+	}, nil
 }
