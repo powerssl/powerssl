@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -64,8 +65,8 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".powerctl")
+		viper.AddConfigPath(filepath.Join(home, ".powerctl"))
+		viper.SetConfigName("config")
 	}
 
 	viper.AutomaticEnv()
