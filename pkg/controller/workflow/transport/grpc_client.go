@@ -3,7 +3,6 @@ package transport // import "powerssl.io/pkg/controller/workflow/transport"
 import (
 	"fmt"
 
-	stdjwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-kit/kit/auth/jwt"
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
@@ -15,14 +14,11 @@ import (
 	apiv1 "powerssl.io/pkg/controller/api/v1"
 	"powerssl.io/pkg/controller/workflow/endpoint"
 	"powerssl.io/pkg/controller/workflow/meta"
-	"powerssl.io/pkg/util/auth"
 )
 
 const serviceName = "powerssl.controller.v1.WorkflowService"
 
-func NewGRPCClient(conn *grpc.ClientConn, key []byte, logger log.Logger, tracer stdopentracing.Tracer) meta.Service {
-	jwtSigner := jwt.NewSigner("TODO", key, auth.Method, stdjwt.StandardClaims{})
-
+func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentracing.Tracer, authSigner kitendpoint.Middleware) meta.Service {
 	options := []grpctransport.ClientOption{
 		grpctransport.ClientBefore(jwt.ContextToGRPC()),
 		grpctransport.ClientBefore(opentracing.ContextToGRPC(tracer, logger)),
@@ -39,7 +35,7 @@ func NewGRPCClient(conn *grpc.ClientConn, key []byte, logger log.Logger, tracer 
 			apiv1.Workflow{},
 			options...,
 		).Endpoint()
-		createEndpoint = jwtSigner(createEndpoint)
+		createEndpoint = authSigner(createEndpoint)
 		createEndpoint = opentracing.TraceClient(tracer, fmt.Sprintf("/%s/Create", serviceName))(createEndpoint)
 	}
 

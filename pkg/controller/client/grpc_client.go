@@ -11,6 +11,7 @@ import (
 	workflowmeta "powerssl.io/pkg/controller/workflow/meta"
 	workflowtransport "powerssl.io/pkg/controller/workflow/transport"
 	"powerssl.io/pkg/util"
+	"powerssl.io/pkg/util/auth"
 )
 
 type GRPCClient struct {
@@ -24,10 +25,10 @@ func NewGRPCClient(addr, certFile, serverNameOverride string, insecure, insecure
 	if err != nil {
 		return nil, err
 	}
-	key := []byte(authToken)
+	authSigner := auth.NewSigner(authToken)
 	return &GRPCClient{
 		ACME:        acmetransport.NewGRPCClient(conn, logger, tracer),
 		Integration: intregrationtransport.NewGRPCClient(conn, logger),
-		Workflow:    workflowtransport.NewGRPCClient(conn, key, logger, tracer),
+		Workflow:    workflowtransport.NewGRPCClient(conn, logger, tracer, authSigner),
 	}, nil
 }
