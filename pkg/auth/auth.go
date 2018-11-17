@@ -28,7 +28,7 @@ func init() {
 	templates = template.Must(template.ParseGlob(pattern))
 }
 
-func Run(httpAddr, httpCertFile, httpKeyFile string, httpInsecure bool, metricsAddr, signingKey string) {
+func Run(httpAddr, httpCertFile, httpKeyFile string, httpInsecure bool, metricsAddr, jwtPrivateKeyFile string) {
 	logger := util.NewLogger(os.Stdout)
 
 	g, ctx := errgroup.WithContext(context.Background())
@@ -43,7 +43,7 @@ func Run(httpAddr, httpCertFile, httpKeyFile string, httpInsecure bool, metricsA
 	}
 
 	g.Go(func() error {
-		return ServeHTTP(ctx, httpAddr, log.With(logger, "component", "http"), signingKey)
+		return ServeHTTP(ctx, httpAddr, log.With(logger, "component", "http"), jwtPrivateKeyFile)
 	})
 
 	if err := g.Wait(); err != nil {
@@ -55,8 +55,8 @@ func Run(httpAddr, httpCertFile, httpKeyFile string, httpInsecure bool, metricsA
 	}
 }
 
-func ServeHTTP(ctx context.Context, addr string, logger log.Logger, signingKey string) error {
-	signBytes, err := ioutil.ReadFile(signingKey)
+func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKeyFile string) error {
+	signBytes, err := ioutil.ReadFile(jwtPrivateKeyFile)
 	if err != nil {
 		return fmt.Errorf("Failed to load signing key %v", err)
 	}

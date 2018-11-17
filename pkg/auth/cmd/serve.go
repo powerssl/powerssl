@@ -20,7 +20,7 @@ var serveCmd = &cobra.Command{
 			metricsAddr = viper.GetString("metrics-addr")
 		}
 		insecure := viper.GetBool("insecure")
-		signingKey := viper.GetString("signing-key")
+		jwtPrivateKeyFile := viper.GetString("jwt.private-key-file")
 		tlsCertFile := viper.GetString("tls.cert-file")
 		tlsPrivateKeyFile := viper.GetString("tls.private-key-file")
 
@@ -37,15 +37,15 @@ var serveCmd = &cobra.Command{
 			ok = false
 			fmt.Println("Provide tls-private-key-file")
 		}
-		if signingKey == "" {
+		if jwtPrivateKeyFile == "" {
 			ok = false
-			fmt.Println("Provide signing-key")
+			fmt.Println("Provide jwt-private-key-file")
 		}
 		if !ok {
 			os.Exit(1)
 		}
 
-		auth.Run(addr, tlsCertFile, tlsPrivateKeyFile, insecure, metricsAddr, signingKey)
+		auth.Run(addr, tlsCertFile, tlsPrivateKeyFile, insecure, metricsAddr, jwtPrivateKeyFile)
 	},
 }
 
@@ -53,17 +53,17 @@ func init() {
 	serveCmd.Flags().BoolP("insecure", "", false, "Do not use TLS for the server")
 	serveCmd.Flags().BoolP("no-metrics", "", false, "Do not serve metrics")
 	serveCmd.Flags().StringP("addr", "", ":8080", "GRPC Addr")
+	serveCmd.Flags().StringP("jwt-private-key-file", "", "", "JWT private key file")
 	serveCmd.Flags().StringP("metrics-addr", "", ":9090", "HTTP Addr")
-	serveCmd.Flags().StringP("signing-key", "", "", "Signing key")
 	serveCmd.Flags().StringP("tls-cert-file", "", "", "File containing the default x509 Certificate for GRPC.")
 	serveCmd.Flags().StringP("tls-private-key-file", "", "", "File containing the default x509 private key matching --tls-cert-file.")
 
 	viper.BindPFlag("addr", serveCmd.Flags().Lookup("addr"))
 	viper.BindPFlag("auth-token", serveCmd.Flags().Lookup("auth-token"))
 	viper.BindPFlag("insecure", serveCmd.Flags().Lookup("insecure"))
+	viper.BindPFlag("jwt.private-key-file", serveCmd.Flags().Lookup("jwt-private-key-file"))
 	viper.BindPFlag("metrics-addr", serveCmd.Flags().Lookup("metrics-addr"))
 	viper.BindPFlag("no-metrics", serveCmd.Flags().Lookup("no-metrics"))
-	viper.BindPFlag("signing-key", serveCmd.Flags().Lookup("signing-key"))
 	viper.BindPFlag("tls.cert-file", serveCmd.Flags().Lookup("tls-cert-file"))
 	viper.BindPFlag("tls.private-key-file", serveCmd.Flags().Lookup("tls-private-key-file"))
 
