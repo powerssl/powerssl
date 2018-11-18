@@ -2,18 +2,12 @@ package acme
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"powerssl.io/pkg/controller/api"
 )
 
 func (acme *ACME) CreateAccount(_ context.Context, directoryURL string, termsOfServiceAgreed bool, contacts []string) (*api.Account, error) {
-	time.Sleep(1 * time.Second)
-
-	fmt.Printf("directoryURL: %#v\n", directoryURL)
-	fmt.Printf("termsOfServiceAgreed: %#v\n", termsOfServiceAgreed)
-	fmt.Printf("contacts: %#v\n", contacts)
 	// newAccountReq := struct {
 	// 	TermsOfServiceAgreed bool     `json:"termsOfServiceAgreed"`
 	// 	Contacts             []string `json:"contact"`
