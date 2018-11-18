@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -17,8 +18,6 @@ import (
 	controllerapi "powerssl.io/pkg/controller/api"
 	controllerclient "powerssl.io/pkg/controller/client"
 )
-
-var ErrUnimplemented = status.Error(codes.Unimplemented, "Coming soon")
 
 func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) meta.Service {
 	db.AutoMigrate(&model.ACMEAccount{})
@@ -137,6 +136,29 @@ func (bs basicService) List(ctx context.Context, parent string, pageSize int, pa
 	return acmeAccounts.ToAPI(), nextPageToken, nil
 }
 
-func (bs basicService) Update(ctx context.Context, name string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error) {
-	return nil, ErrUnimplemented
+func (bs basicService) Update(ctx context.Context, name string, updateMask []string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error) {
+	db := otgorm.SetSpanToGorm(ctx, bs.db)
+
+	dbACMEAccount, err := model.FindACMEAccountByName(name, db)
+	if err != nil {
+		return nil, err
+	}
+	updates := []interface{}{nil}
+	for _, path := range updateMask {
+		switch path {
+		case "account_url", "contacts":
+			updates = append(updates, path)
+		default:
+			// TODO: error
+		}
+	}
+	updateACMEAccount, err := model.NewACMEAccountFromAPI(fmt.Sprintf("acmeServers/%s", dbACMEAccount.ACMEServerID), acmeAccount)
+	if err != nil {
+		return nil, err
+	}
+	// TODO: Compare name with acmeAccount.Name (empty or match)
+	if err := db.Model(dbACMEAccount).Select(nil, updates...).Updates(updateACMEAccount).Error; err != nil {
+		return nil, err
+	}
+	return dbACMEAccount.ToAPI(), nil
 }
