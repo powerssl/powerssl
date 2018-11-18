@@ -86,6 +86,10 @@ bin/powerctl: .ALWAYS_REBUILD
 .PHONY: build
 build: bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerctl
 
+.PHONY: install-powerctl
+install-powerctl:
+	go install powerssl.io/cmd/powerctl
+
 .PHONY: fmt
 fmt:
 	go fmt $$(go list ./...)
