@@ -17,6 +17,7 @@ type WorkflowInput interface {
 }
 
 type CreateACMEAccountInput struct {
+	Account              string
 	DirectoryURL         string
 	TermsOfServiceAgreed bool
 	Contacts             []string

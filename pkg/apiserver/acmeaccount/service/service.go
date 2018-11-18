@@ -80,6 +80,7 @@ func (bs basicService) Create(ctx context.Context, parent string, acmeAccount *a
 			},
 		},
 		Input: &controllerapi.CreateACMEAccountInput{
+			Account:              account.Name(),
 			DirectoryURL:         acmeServer.DirectoryURL,
 			TermsOfServiceAgreed: account.TermsOfServiceAgreed,
 			Contacts:             strings.Split(account.Contacts, ","),

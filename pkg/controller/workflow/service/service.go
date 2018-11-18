@@ -29,12 +29,13 @@ type basicService struct {
 
 func NewBasicService(logger log.Logger, client *apiserverclient.GRPCClient) meta.Service {
 	return basicService{
+		client: client,
 		logger: logger,
 	}
 }
 
 func (bs basicService) Create(ctx context.Context, apiWorkflow *api.Workflow) (*api.Workflow, error) {
-	workflow, err := newWorkflowFromAPI(apiWorkflow)
+	workflow, err := bs.newWorkflowFromAPI(apiWorkflow)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +47,7 @@ func (bs basicService) Create(ctx context.Context, apiWorkflow *api.Workflow) (*
 	return workflow.ToAPI(), nil
 }
 
-func newWorkflowFromAPI(apiWorkflow *api.Workflow) (*workflow.Workflow, error) {
+func (bs basicService) newWorkflowFromAPI(apiWorkflow *api.Workflow) (*workflow.Workflow, error) {
 	var definition workflow.Definition
 	switch apiWorkflow.Kind {
 	case api.WorkflowKindCreateACMEAccount:
@@ -55,10 +56,12 @@ func newWorkflowFromAPI(apiWorkflow *api.Workflow) (*workflow.Workflow, error) {
 			return nil, fmt.Errorf("wrong input for workflow")
 		}
 		definition = workflow.CreateAccount{
-			AccountName:          "acmeAccounts/TODO",
+			Account:              input.Account,
 			DirectoryURL:         input.DirectoryURL,
 			TermsOfServiceAgreed: input.TermsOfServiceAgreed,
 			Contacts:             input.Contacts,
+
+			Client: bs.client,
 		}
 	case api.WorkflowKindRequestACMECertificate:
 		input, ok := apiWorkflow.Input.(*api.RequestACMECertificateInput)
