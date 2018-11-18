@@ -47,27 +47,16 @@ func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GR
 func (bs basicService) Create(ctx context.Context, parent string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error) {
 	db := otgorm.SetSpanToGorm(ctx, bs.db)
 
-	tx := db.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-
 	account, err := model.NewACMEAccountFromAPI(parent, acmeAccount)
 	if err != nil {
 		return nil, err
 	}
-	if err := tx.Create(account).Error; err != nil {
-		tx.Rollback()
+	if err := db.Create(account).Error; err != nil {
 		return nil, err
 	}
 
 	acmeServer, err := account.ACMEServer(db, "directory_url, integration_name")
-	if err != nil {
+	if err != nil { // TODO
 		return nil, status.Error(codes.NotFound, "not found")
 	}
 
@@ -92,10 +81,6 @@ func (bs basicService) Create(ctx context.Context, parent string, acmeAccount *a
 		return nil, status.Error(st.Code(), st.Message())
 	}
 	bs.logger.Log("workflow", workflow.Name)
-
-	if err := tx.Commit().Error; err != nil {
-		return nil, err
-	}
 
 	return account.ToAPI(), nil
 }
