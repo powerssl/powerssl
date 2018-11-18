@@ -13,6 +13,7 @@ var global = Function('return this')();
 
 var google_api_annotations_pb = require('../../../google/api/annotations_pb.js');
 var google_protobuf_empty_pb = require('google-protobuf/google/protobuf/empty_pb.js');
+var google_protobuf_field_mask_pb = require('google-protobuf/google/protobuf/field_mask_pb.js');
 var google_protobuf_timestamp_pb = require('google-protobuf/google/protobuf/timestamp_pb.js');
 goog.exportSymbol('proto.powerssl.apiserver.v1.Certificate', null, global);
 goog.exportSymbol('proto.powerssl.apiserver.v1.CreateCertificateRequest', null, global);
@@ -1376,6 +1377,7 @@ proto.powerssl.apiserver.v1.UpdateCertificateRequest.prototype.toObject = functi
 proto.powerssl.apiserver.v1.UpdateCertificateRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     name: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    updateMask: (f = msg.getUpdateMask()) && google_protobuf_field_mask_pb.FieldMask.toObject(includeInstance, f),
     certificate: (f = msg.getCertificate()) && proto.powerssl.apiserver.v1.Certificate.toObject(includeInstance, f)
   };
 
@@ -1418,6 +1420,11 @@ proto.powerssl.apiserver.v1.UpdateCertificateRequest.deserializeBinaryFromReader
       msg.setName(value);
       break;
     case 2:
+      var value = new google_protobuf_field_mask_pb.FieldMask;
+      reader.readMessage(value,google_protobuf_field_mask_pb.FieldMask.deserializeBinaryFromReader);
+      msg.setUpdateMask(value);
+      break;
+    case 3:
       var value = new proto.powerssl.apiserver.v1.Certificate;
       reader.readMessage(value,proto.powerssl.apiserver.v1.Certificate.deserializeBinaryFromReader);
       msg.setCertificate(value);
@@ -1458,10 +1465,18 @@ proto.powerssl.apiserver.v1.UpdateCertificateRequest.serializeBinaryToWriter = f
       f
     );
   }
-  f = message.getCertificate();
+  f = message.getUpdateMask();
   if (f != null) {
     writer.writeMessage(
       2,
+      f,
+      google_protobuf_field_mask_pb.FieldMask.serializeBinaryToWriter
+    );
+  }
+  f = message.getCertificate();
+  if (f != null) {
+    writer.writeMessage(
+      3,
       f,
       proto.powerssl.apiserver.v1.Certificate.serializeBinaryToWriter
     );
@@ -1485,18 +1500,48 @@ proto.powerssl.apiserver.v1.UpdateCertificateRequest.prototype.setName = functio
 
 
 /**
- * optional Certificate certificate = 2;
+ * optional google.protobuf.FieldMask update_mask = 2;
+ * @return {?proto.google.protobuf.FieldMask}
+ */
+proto.powerssl.apiserver.v1.UpdateCertificateRequest.prototype.getUpdateMask = function() {
+  return /** @type{?proto.google.protobuf.FieldMask} */ (
+    jspb.Message.getWrapperField(this, google_protobuf_field_mask_pb.FieldMask, 2));
+};
+
+
+/** @param {?proto.google.protobuf.FieldMask|undefined} value */
+proto.powerssl.apiserver.v1.UpdateCertificateRequest.prototype.setUpdateMask = function(value) {
+  jspb.Message.setWrapperField(this, 2, value);
+};
+
+
+proto.powerssl.apiserver.v1.UpdateCertificateRequest.prototype.clearUpdateMask = function() {
+  this.setUpdateMask(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {!boolean}
+ */
+proto.powerssl.apiserver.v1.UpdateCertificateRequest.prototype.hasUpdateMask = function() {
+  return jspb.Message.getField(this, 2) != null;
+};
+
+
+/**
+ * optional Certificate certificate = 3;
  * @return {?proto.powerssl.apiserver.v1.Certificate}
  */
 proto.powerssl.apiserver.v1.UpdateCertificateRequest.prototype.getCertificate = function() {
   return /** @type{?proto.powerssl.apiserver.v1.Certificate} */ (
-    jspb.Message.getWrapperField(this, proto.powerssl.apiserver.v1.Certificate, 2));
+    jspb.Message.getWrapperField(this, proto.powerssl.apiserver.v1.Certificate, 3));
 };
 
 
 /** @param {?proto.powerssl.apiserver.v1.Certificate|undefined} value */
 proto.powerssl.apiserver.v1.UpdateCertificateRequest.prototype.setCertificate = function(value) {
-  jspb.Message.setWrapperField(this, 2, value);
+  jspb.Message.setWrapperField(this, 3, value);
 };
 
 
@@ -1510,7 +1555,7 @@ proto.powerssl.apiserver.v1.UpdateCertificateRequest.prototype.clearCertificate 
  * @return {!boolean}
  */
 proto.powerssl.apiserver.v1.UpdateCertificateRequest.prototype.hasCertificate = function() {
-  return jspb.Message.getField(this, 2) != null;
+  return jspb.Message.getField(this, 3) != null;
 };
 
 

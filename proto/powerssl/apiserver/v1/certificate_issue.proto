@@ -4,6 +4,7 @@ package powerssl.apiserver.v1;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "powerssl.io/pkg/apiserver/api/v1;api";
@@ -85,5 +86,6 @@ message ListCertificateIssuesResponse {
 
 message UpdateCertificateIssueRequest {
   string name = 1;
-  CertificateIssue certificate_issue = 2;
+  google.protobuf.FieldMask update_mask = 2;
+  CertificateIssue certificate_issue = 3;
 }

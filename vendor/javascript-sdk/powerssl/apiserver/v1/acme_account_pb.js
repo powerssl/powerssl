@@ -13,6 +13,7 @@ var global = Function('return this')();
 
 var google_api_annotations_pb = require('../../../google/api/annotations_pb.js');
 var google_protobuf_empty_pb = require('google-protobuf/google/protobuf/empty_pb.js');
+var google_protobuf_field_mask_pb = require('google-protobuf/google/protobuf/field_mask_pb.js');
 var google_protobuf_timestamp_pb = require('google-protobuf/google/protobuf/timestamp_pb.js');
 goog.exportSymbol('proto.powerssl.apiserver.v1.ACMEAccount', null, global);
 goog.exportSymbol('proto.powerssl.apiserver.v1.CreateACMEAccountRequest', null, global);
@@ -1374,6 +1375,7 @@ proto.powerssl.apiserver.v1.UpdateACMEAccountRequest.prototype.toObject = functi
 proto.powerssl.apiserver.v1.UpdateACMEAccountRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     name: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    updateMask: (f = msg.getUpdateMask()) && google_protobuf_field_mask_pb.FieldMask.toObject(includeInstance, f),
     acmeAccount: (f = msg.getAcmeAccount()) && proto.powerssl.apiserver.v1.ACMEAccount.toObject(includeInstance, f)
   };
 
@@ -1416,6 +1418,11 @@ proto.powerssl.apiserver.v1.UpdateACMEAccountRequest.deserializeBinaryFromReader
       msg.setName(value);
       break;
     case 2:
+      var value = new google_protobuf_field_mask_pb.FieldMask;
+      reader.readMessage(value,google_protobuf_field_mask_pb.FieldMask.deserializeBinaryFromReader);
+      msg.setUpdateMask(value);
+      break;
+    case 3:
       var value = new proto.powerssl.apiserver.v1.ACMEAccount;
       reader.readMessage(value,proto.powerssl.apiserver.v1.ACMEAccount.deserializeBinaryFromReader);
       msg.setAcmeAccount(value);
@@ -1456,10 +1463,18 @@ proto.powerssl.apiserver.v1.UpdateACMEAccountRequest.serializeBinaryToWriter = f
       f
     );
   }
-  f = message.getAcmeAccount();
+  f = message.getUpdateMask();
   if (f != null) {
     writer.writeMessage(
       2,
+      f,
+      google_protobuf_field_mask_pb.FieldMask.serializeBinaryToWriter
+    );
+  }
+  f = message.getAcmeAccount();
+  if (f != null) {
+    writer.writeMessage(
+      3,
       f,
       proto.powerssl.apiserver.v1.ACMEAccount.serializeBinaryToWriter
     );
@@ -1483,18 +1498,48 @@ proto.powerssl.apiserver.v1.UpdateACMEAccountRequest.prototype.setName = functio
 
 
 /**
- * optional ACMEAccount acme_account = 2;
+ * optional google.protobuf.FieldMask update_mask = 2;
+ * @return {?proto.google.protobuf.FieldMask}
+ */
+proto.powerssl.apiserver.v1.UpdateACMEAccountRequest.prototype.getUpdateMask = function() {
+  return /** @type{?proto.google.protobuf.FieldMask} */ (
+    jspb.Message.getWrapperField(this, google_protobuf_field_mask_pb.FieldMask, 2));
+};
+
+
+/** @param {?proto.google.protobuf.FieldMask|undefined} value */
+proto.powerssl.apiserver.v1.UpdateACMEAccountRequest.prototype.setUpdateMask = function(value) {
+  jspb.Message.setWrapperField(this, 2, value);
+};
+
+
+proto.powerssl.apiserver.v1.UpdateACMEAccountRequest.prototype.clearUpdateMask = function() {
+  this.setUpdateMask(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {!boolean}
+ */
+proto.powerssl.apiserver.v1.UpdateACMEAccountRequest.prototype.hasUpdateMask = function() {
+  return jspb.Message.getField(this, 2) != null;
+};
+
+
+/**
+ * optional ACMEAccount acme_account = 3;
  * @return {?proto.powerssl.apiserver.v1.ACMEAccount}
  */
 proto.powerssl.apiserver.v1.UpdateACMEAccountRequest.prototype.getAcmeAccount = function() {
   return /** @type{?proto.powerssl.apiserver.v1.ACMEAccount} */ (
-    jspb.Message.getWrapperField(this, proto.powerssl.apiserver.v1.ACMEAccount, 2));
+    jspb.Message.getWrapperField(this, proto.powerssl.apiserver.v1.ACMEAccount, 3));
 };
 
 
 /** @param {?proto.powerssl.apiserver.v1.ACMEAccount|undefined} value */
 proto.powerssl.apiserver.v1.UpdateACMEAccountRequest.prototype.setAcmeAccount = function(value) {
-  jspb.Message.setWrapperField(this, 2, value);
+  jspb.Message.setWrapperField(this, 3, value);
 };
 
 
@@ -1508,7 +1553,7 @@ proto.powerssl.apiserver.v1.UpdateACMEAccountRequest.prototype.clearAcmeAccount 
  * @return {!boolean}
  */
 proto.powerssl.apiserver.v1.UpdateACMEAccountRequest.prototype.hasAcmeAccount = function() {
-  return jspb.Message.getField(this, 2) != null;
+  return jspb.Message.getField(this, 3) != null;
 };
 
 

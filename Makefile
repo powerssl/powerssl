@@ -16,6 +16,7 @@ PROTOBUF_PATH := $(GOGO_PROTOBUF_PATH)/protobuf
 PROTO_MAPPINGS :=
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/api/annotations.proto=github.com/gogo/googleapis/google/api,
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types,
+PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/field_mask.proto=github.com/gogo/protobuf/types,
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,
 
 PROTOS := $(sort $(shell $(FIND_PROTO) -type f -name '*.proto' -print))

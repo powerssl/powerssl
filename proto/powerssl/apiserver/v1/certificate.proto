@@ -4,6 +4,7 @@ package powerssl.apiserver.v1;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "powerssl.io/pkg/apiserver/api/v1;api";
@@ -119,6 +120,9 @@ message UpdateCertificateRequest {
   // The name of the certificate to update.
   string name = 1;
 
+  // The field mask with paths to update.
+  google.protobuf.FieldMask update_mask = 2;
+
   // The certificate to update with. The name must match or be empty.
-  Certificate certificate = 2;
+  Certificate certificate = 3;
 }
