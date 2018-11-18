@@ -121,5 +121,6 @@ func NewACMEAccountFromAPI(parent string, acmeAccount *api.ACMEAccount) (*ACMEAc
 		ACMEServerID:         acmeServerID,
 		TermsOfServiceAgreed: acmeAccount.TermsOfServiceAgreed,
 		Contacts:             strings.Join(acmeAccount.Contacts, ","),
+		AccountURL:           acmeAccount.AccountURL,
 	}, nil
 }

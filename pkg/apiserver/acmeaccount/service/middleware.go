@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-kit/kit/log"
 
@@ -50,9 +51,9 @@ func (mw loggingMiddleware) List(ctx context.Context, parent string, pageSize in
 	return mw.next.List(ctx, parent, pageSize, pageToken)
 }
 
-func (mw loggingMiddleware) Update(ctx context.Context, name string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error) {
+func (mw loggingMiddleware) Update(ctx context.Context, name string, updateMask []string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error) {
 	defer func() {
-		mw.logger.Log("method", "Update", "name", name, "acmeAccount", true)
+		mw.logger.Log("method", "Update", "name", name, "updateMask", fmt.Sprintf("%+v", updateMask), "acmeAccount", true)
 	}()
-	return mw.next.Update(ctx, name, acmeAccount)
+	return mw.next.Update(ctx, name, updateMask, acmeAccount)
 }

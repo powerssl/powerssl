@@ -222,6 +222,7 @@ func decodeGRPCUpdateRequest(_ context.Context, grpcReq interface{}) (interface{
 	}
 	return endpoint.UpdateRequest{
 		Name:        req.GetName(),
+		UpdateMask:  req.GetUpdateMask().GetPaths(),
 		ACMEAccount: acmeAccount,
 	}, nil
 }
@@ -250,6 +251,7 @@ func encodeGRPCUpdateRequest(_ context.Context, request interface{}) (interface{
 	}
 	return &apiv1.UpdateACMEAccountRequest{
 		Name:        req.Name,
+		UpdateMask:  &types.FieldMask{Paths: req.UpdateMask},
 		AcmeAccount: acmeAccount,
 	}, nil
 }

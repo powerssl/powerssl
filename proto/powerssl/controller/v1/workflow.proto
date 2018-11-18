@@ -38,9 +38,10 @@ message Workflow {
 }
 
 message CreateACMEAccountInput {
-  string directory_url = 1;
-  bool terms_of_service_agreed = 2;
-  repeated string contacts = 3;
+  string account = 1;
+  string directory_url = 2;
+  bool terms_of_service_agreed = 3;
+  repeated string contacts = 4;
 }
 
 message RequestACMECertificateInput {

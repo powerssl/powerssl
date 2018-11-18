@@ -123,9 +123,10 @@ func (e Endpoints) List(ctx context.Context, parent string, pageSize int, pageTo
 	return response.ACMEAccounts, response.NextPageToken, nil
 }
 
-func (e Endpoints) Update(ctx context.Context, name string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error) {
+func (e Endpoints) Update(ctx context.Context, name string, updateMask []string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error) {
 	resp, err := e.UpdateEndpoint(ctx, UpdateRequest{
 		Name:        name,
+		UpdateMask:  updateMask,
 		ACMEAccount: acmeAccount,
 	})
 	if err != nil {
@@ -221,6 +222,7 @@ func makeListEndpoint(s meta.Service) endpoint.Endpoint {
 
 type UpdateRequest struct {
 	Name        string
+	UpdateMask  []string
 	ACMEAccount *api.ACMEAccount
 }
 
@@ -231,7 +233,7 @@ type UpdateResponse struct {
 func makeUpdateEndpoint(s meta.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(UpdateRequest)
-		acmeAccount, err := s.Update(ctx, req.Name, req.ACMEAccount)
+		acmeAccount, err := s.Update(ctx, req.Name, req.UpdateMask, req.ACMEAccount)
 		if err != nil {
 			return nil, err
 		}

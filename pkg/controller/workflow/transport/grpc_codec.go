@@ -60,6 +60,7 @@ func decodeGRPCWorkflow(grpcWorkflow *apiv1.Workflow) (*api.Workflow, error) {
 	case *apiv1.Workflow_CreateAcmeAccountInput:
 		input := grpcWorkflow.GetCreateAcmeAccountInput()
 		workflow.Input = &api.CreateACMEAccountInput{
+			Account:              input.GetAccount(),
 			DirectoryURL:         input.GetDirectoryUrl(),
 			TermsOfServiceAgreed: input.GetTermsOfServiceAgreed(),
 			Contacts:             input.GetContacts(),
@@ -95,6 +96,7 @@ func encodeGRPCWorkflow(workflow *api.Workflow) (*apiv1.Workflow, error) {
 		input := workflow.Input.(*api.CreateACMEAccountInput)
 		grpcWorkflow.Input = &apiv1.Workflow_CreateAcmeAccountInput{
 			&apiv1.CreateACMEAccountInput{
+				Account:              input.Account,
 				DirectoryUrl:         input.DirectoryURL,
 				TermsOfServiceAgreed: input.TermsOfServiceAgreed,
 				Contacts:             input.Contacts,
