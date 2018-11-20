@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"crypto"
 	"crypto/rsa"
 	"fmt"
 	"html/template"
@@ -15,6 +16,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-kit/kit/log"
 	"golang.org/x/sync/errgroup"
+	"gopkg.in/square/go-jose.v2"
 
 	"powerssl.io/pkg/util"
 	"powerssl.io/pkg/util/auth"
@@ -129,5 +131,14 @@ func generateToken(signKey *rsa.PrivateKey, subject string, expiresAt int64) (st
 		Subject:   subject,
 	}
 	token := jwt.NewWithClaims(auth.Method, claims)
+	key := jose.JSONWebKey{
+		Key: signKey,
+	}
+	public := key.Public()
+	thumbprint, err := public.Thumbprint(crypto.SHA1)
+	if err != nil {
+		return "", err
+	}
+	token.Header["kid"] = thumbprint
 	return token.SignedString(signKey)
 }

@@ -51,4 +51,5 @@ require (
 	golang.org/x/net v0.0.0-20181108082009-03003ca0c849
 	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f
 	google.golang.org/grpc v1.16.0
+	gopkg.in/square/go-jose.v2 v2.1.9
 )
