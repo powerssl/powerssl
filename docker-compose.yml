@@ -28,7 +28,7 @@ services:
       POWERSSL_TLS_PRIVATE_KEY_FILE: /etc/powerssl/auth/cert-key.pem
     image: powerssl/auth:latest
     ports:
-      - "8080"
+      - "8081:8080"
       - "9090"
     volumes:
       - "./examples/certs/ca.pem:/etc/powerssl/ca.pem:ro"
