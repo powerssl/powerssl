@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"io/ioutil"
 
 	stdjwt "github.com/dgrijalva/jwt-go"
@@ -22,7 +23,11 @@ func NewParser(pubKeyPath string) (endpoint.Middleware, error) {
 	if err != nil {
 		return nil, err
 	}
-	return jwt.NewParser(func(*stdjwt.Token) (interface{}, error) {
+	return jwt.NewParser(func(token *stdjwt.Token) (interface{}, error) {
+		_, ok := token.Header["kid"]
+		if !ok {
+			return nil, errors.New("JWT kid header not specified")
+		}
 		return verifyKey, nil
 	}, Method, jwt.StandardClaimsFactory), nil
 }
@@ -33,4 +38,16 @@ func NewSigner(token string) endpoint.Middleware {
 			return next(context.WithValue(ctx, jwt.JWTTokenContextKey, token), request)
 		}
 	}
+}
+
+func ClaimsFromContext(ctx context.Context) *stdjwt.StandardClaims {
+	claims, ok := ctx.Value(jwt.JWTClaimsContextKey).(*stdjwt.StandardClaims)
+	if !ok {
+		return &stdjwt.StandardClaims{}
+	}
+	return claims
+}
+
+func SubjectFromContext(ctx context.Context) string {
+	return ClaimsFromContext(ctx).Subject
 }
