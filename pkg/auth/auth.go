@@ -67,23 +67,14 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		expiresAt := time.Now().Add(time.Hour).Unix()
-		tokenString, err := generateToken(signKey, expiresAt)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		if err := templates.ExecuteTemplate(w, "index.tmpl", struct {
-			Token string
-		}{
-			Token: tokenString,
-		}); err != nil {
+		if err := templates.ExecuteTemplate(w, "index.tmpl", struct{}{}); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
 	mux.HandleFunc("/raw", func(w http.ResponseWriter, req *http.Request) {
-		expiresAt := time.Now().Add(time.Hour).Unix()
-		tokenString, err := generateToken(signKey, expiresAt)
+		expiresAt := time.Now().Add(time.Hour * 24).Unix()
+		subject := req.URL.Query().Get("sub")
+		tokenString, err := generateToken(signKey, subject, expiresAt)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -91,7 +82,8 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 		fmt.Fprint(w, tokenString)
 	})
 	mux.HandleFunc("/service", func(w http.ResponseWriter, req *http.Request) {
-		tokenString, err := generateToken(signKey, 0)
+		token := jwt.NewWithClaims(auth.Method, &jwt.StandardClaims{})
+		tokenString, err := token.SignedString(signKey)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -127,13 +119,14 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 	}
 }
 
-func generateToken(signKey *rsa.PrivateKey, expiresAt int64) (string, error) {
+func generateToken(signKey *rsa.PrivateKey, subject string, expiresAt int64) (string, error) {
 	claims := &jwt.StandardClaims{
+		Audience:  "https://api.powerssl.io/",
+		ExpiresAt: expiresAt,
 		IssuedAt:  time.Now().Unix(),
-		NotBefore: time.Now().Unix(),
-	}
-	if expiresAt != 0 {
-		claims.ExpiresAt = expiresAt
+		Issuer:    "https://auth.powerssl.io/",
+		NotBefore: time.Now().Unix() - 5,
+		Subject:   subject,
 	}
 	token := jwt.NewWithClaims(auth.Method, claims)
 	return token.SignedString(signKey)
