@@ -26,12 +26,6 @@ func ContextWithSpanFromContext(ctx context.Context, spanCtx context.Context) co
 	return opentracing.ContextWithSpan(ctx, span)
 }
 
-func TextMapCarrierFromSpan(span opentracing.Span) opentracing.TextMapCarrier {
-	textMapCarrier := opentracing.TextMapCarrier{}
-	span.Tracer().Inject(span.Context(), opentracing.TextMap, textMapCarrier)
-	return textMapCarrier
-}
-
 func JSONCarrierFromSpan(span opentracing.Span) (string, error) {
 	textMapCarrier := TextMapCarrierFromSpan(span)
 	bytes, err := json.Marshal(textMapCarrier)
@@ -39,6 +33,12 @@ func JSONCarrierFromSpan(span opentracing.Span) (string, error) {
 		return "", err
 	}
 	return string(bytes), nil
+}
+
+func TextMapCarrierFromSpan(span opentracing.Span) opentracing.TextMapCarrier {
+	textMapCarrier := opentracing.TextMapCarrier{}
+	span.Tracer().Inject(span.Context(), opentracing.TextMap, textMapCarrier)
+	return textMapCarrier
 }
 
 func WireContextFromJSON(s string) (opentracing.SpanContext, error) {

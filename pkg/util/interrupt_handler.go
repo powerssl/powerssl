@@ -14,7 +14,7 @@ type InterruptError struct {
 }
 
 func (interruptError InterruptError) Error() string {
-	return interruptError.Signal.String()
+	return interruptError.String()
 }
 
 func InterruptHandler(ctx context.Context, logger log.Logger) error {
@@ -23,7 +23,7 @@ func InterruptHandler(ctx context.Context, logger log.Logger) error {
 	select {
 	case sig := <-c:
 		logger.Log("signal", sig)
-		return InterruptError{sig}
+		return InterruptError{Signal: sig}
 	case <-ctx.Done():
 		logger.Log("err", ctx.Err())
 		return ctx.Err()

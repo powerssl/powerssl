@@ -19,10 +19,29 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
-var ErrUnkown = errors.New("Unknown error")
-
 type Service interface {
 	RegisterGRPCServer(baseServer *grpc.Server)
+}
+
+func NewClientConn(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool) (*grpc.ClientConn, error) {
+	opts := []grpc.DialOption{
+		grpc.WithTimeout(time.Second),
+	}
+	if insecure {
+		opts = append(opts, grpc.WithInsecure())
+	} else {
+		var creds credentials.TransportCredentials
+		if insecureSkipTLSVerify {
+			creds = credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})
+		} else {
+			var err error
+			if creds, err = credentials.NewClientTLSFromFile(certFile, serverNameOverride); err != nil {
+				return nil, err
+			}
+		}
+		opts = append(opts, grpc.WithTransportCredentials(creds))
+	}
+	return grpc.Dial(addr, opts...)
 }
 
 func ServeGRPC(ctx context.Context, addr, certFile, keyFile string, insecure bool, logger log.Logger, services []Service) error {
@@ -80,29 +99,7 @@ func recoveryHandler(logger log.Logger) func(interface{}) error {
 	return func(err interface{}) error {
 		logger.Log("err", err)
 		debug.PrintStack()
-		return ErrUnkown
-	}
-}
+		return errors.New("Unknown error")
 
-func NewClientConn(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool) (*grpc.ClientConn, error) {
-	opts := []grpc.DialOption{
-		grpc.WithTimeout(time.Second),
 	}
-	if insecure {
-		opts = append(opts, grpc.WithInsecure())
-	} else if insecureSkipTLSVerify {
-		creds := credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})
-		opts = append(opts, grpc.WithTransportCredentials(creds))
-	} else {
-		creds, err := credentials.NewClientTLSFromFile(certFile, serverNameOverride)
-		if err != nil {
-			return nil, err
-		}
-		opts = append(opts, grpc.WithTransportCredentials(creds))
-	}
-	conn, err := grpc.Dial(addr, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return conn, nil
 }
