@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto"
 	"crypto/rsa"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -15,6 +17,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-kit/kit/log"
+	"github.com/pborman/uuid"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/square/go-jose.v2"
 
@@ -73,6 +76,29 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
+	mux.HandleFunc("/.well-known/jwks.json", func(w http.ResponseWriter, req *http.Request) {
+		jsonWebKey := jose.JSONWebKey{
+			Key: signKey,
+		}
+		publicJSONWebKey := jsonWebKey.Public()
+		thumbprint, err := publicJSONWebKey.Thumbprint(crypto.SHA1)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		publicJSONWebKey.Algorithm = "RS256"
+		publicJSONWebKey.Use = "sig"
+		publicJSONWebKey.KeyID = base64.URLEncoding.EncodeToString(thumbprint)
+		jsonWebKeySet := &jose.JSONWebKeySet{
+			Keys: []jose.JSONWebKey{publicJSONWebKey},
+		}
+		jwks, err := json.Marshal(jsonWebKeySet)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprint(w, fmt.Sprintln(string(jwks)))
+	})
 	mux.HandleFunc("/raw", func(w http.ResponseWriter, req *http.Request) {
 		expiresAt := time.Now().Add(time.Hour * 24).Unix()
 		subject := req.URL.Query().Get("sub")
@@ -85,6 +111,16 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 	})
 	mux.HandleFunc("/service", func(w http.ResponseWriter, req *http.Request) {
 		token := jwt.NewWithClaims(auth.Method, &jwt.StandardClaims{})
+		key := jose.JSONWebKey{
+			Key: signKey,
+		}
+		public := key.Public()
+		thumbprint, err := public.Thumbprint(crypto.SHA1)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		token.Header["kid"] = base64.URLEncoding.EncodeToString(thumbprint)
 		tokenString, err := token.SignedString(signKey)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -123,10 +159,11 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 
 func generateToken(signKey *rsa.PrivateKey, subject string, expiresAt int64) (string, error) {
 	claims := &jwt.StandardClaims{
-		Audience:  "https://api.powerssl.io/",
+		Audience:  "powerssl.apiserver",
 		ExpiresAt: expiresAt,
+		Id:        base64.URLEncoding.EncodeToString(uuid.NewRandom())[:22],
 		IssuedAt:  time.Now().Unix(),
-		Issuer:    "https://auth.powerssl.io/",
+		Issuer:    "powerssl.auth",
 		NotBefore: time.Now().Unix() - 5,
 		Subject:   subject,
 	}
@@ -139,6 +176,6 @@ func generateToken(signKey *rsa.PrivateKey, subject string, expiresAt int64) (st
 	if err != nil {
 		return "", err
 	}
-	token.Header["kid"] = thumbprint
+	token.Header["kid"] = base64.URLEncoding.EncodeToString(thumbprint)
 	return token.SignedString(signKey)
 }

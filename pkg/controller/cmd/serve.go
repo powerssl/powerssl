@@ -26,7 +26,7 @@ var serveCmd = &cobra.Command{
 			metricsAddr = viper.GetString("metrics-addr")
 		}
 		insecure := viper.GetBool("insecure")
-		jwtPublicKeyFile := viper.GetString("jwt.public-key-file")
+		jwksURL := viper.GetString("jwks-url")
 		tlsCertFile := viper.GetString("tls.cert-file")
 		tlsPrivateKeyFile := viper.GetString("tls.private-key-file")
 		var tracer string
@@ -47,9 +47,9 @@ var serveCmd = &cobra.Command{
 			ok = false
 			fmt.Println("Provide tls-private-key-file")
 		}
-		if jwtPublicKeyFile == "" {
+		if jwksURL == "" {
 			ok = false
-			fmt.Println("Provide jwt-public-key-file")
+			fmt.Println("Provide jwks-url")
 		}
 		if apiserverAddr == "" {
 			ok = false
@@ -63,7 +63,7 @@ var serveCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		controller.Run(addr, tlsCertFile, tlsPrivateKeyFile, insecure, metricsAddr, tracer, apiserverAddr, apiserverCertFile, apiserverServerNameOverride, apiserverInsecure, apiserverInsecureSkipTLSVerify, jwtPublicKeyFile, apiserverAuthToken)
+		controller.Run(addr, tlsCertFile, tlsPrivateKeyFile, insecure, metricsAddr, tracer, apiserverAddr, apiserverCertFile, apiserverServerNameOverride, apiserverInsecure, apiserverInsecureSkipTLSVerify, jwksURL, apiserverAuthToken)
 	},
 }
 
@@ -78,7 +78,7 @@ func init() {
 	serveCmd.Flags().StringP("apiserver-auth-token", "", "", "API server authentication token")
 	serveCmd.Flags().StringP("apiserver-ca-file", "", "", "Certificate authority file")
 	serveCmd.Flags().StringP("apiserver-server-name-override", "", "", "It will override the virtual host name of authority")
-	serveCmd.Flags().StringP("jwt-public-key-file", "", "", "JWT public key file")
+	serveCmd.Flags().StringP("jwks-url", "", "", "JWKS URL")
 	serveCmd.Flags().StringP("metrics-addr", "", ":9090", "HTTP Addr")
 	serveCmd.Flags().StringP("tls-cert-file", "", "", "File containing the default x509 Certificate for GRPC.")
 	serveCmd.Flags().StringP("tls-private-key-file", "", "", "File containing the default x509 private key matching --tls-cert-file.")
@@ -92,7 +92,7 @@ func init() {
 	viper.BindPFlag("apiserver.insecure-skip-tls-verify", serveCmd.Flags().Lookup("apiserver-insecure-skip-tls-verify"))
 	viper.BindPFlag("apiserver.server-name-override", serveCmd.Flags().Lookup("apiserver-server-name-override"))
 	viper.BindPFlag("insecure", serveCmd.Flags().Lookup("insecure"))
-	viper.BindPFlag("jwt.public-key-file", serveCmd.Flags().Lookup("jwt-public-key-file"))
+	viper.BindPFlag("jwks-url", serveCmd.Flags().Lookup("jwks-url"))
 	viper.BindPFlag("metrics-addr", serveCmd.Flags().Lookup("metrics-addr"))
 	viper.BindPFlag("no-metrics", serveCmd.Flags().Lookup("no-metrics"))
 	viper.BindPFlag("no-tracing", serveCmd.Flags().Lookup("no-tracing"))

@@ -15,7 +15,7 @@ import (
 	"powerssl.io/pkg/util/tracing"
 )
 
-func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, metricsAddr, tracerImpl, apiserverAddr, apiserverCertFile, apiserverServerNameOverride string, apiserverInsecure, apiserverInsecureSkipTLSVerify bool, jwtPublicKeyFile, apiserverAuthToken string) {
+func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, metricsAddr, tracerImpl, apiserverAddr, apiserverCertFile, apiserverServerNameOverride string, apiserverInsecure, apiserverInsecureSkipTLSVerify bool, jwksURL, apiserverAuthToken string) {
 	logger := util.NewLogger(os.Stdout)
 
 	g, ctx := errgroup.WithContext(context.Background())
@@ -48,7 +48,7 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, metricsA
 
 	engine := workflowengine.New()
 
-	services, err := makeServices(logger, tracer, duration, client, jwtPublicKeyFile)
+	services, err := makeServices(logger, tracer, duration, client, jwksURL)
 	if err != nil {
 		logger.Log("err", err)
 		os.Exit(1)
