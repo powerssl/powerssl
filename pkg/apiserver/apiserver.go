@@ -16,6 +16,7 @@ import (
 
 	controllerclient "powerssl.io/pkg/controller/client"
 	"powerssl.io/pkg/util"
+	"powerssl.io/pkg/util/auth"
 	"powerssl.io/pkg/util/tracing"
 )
 
@@ -55,8 +56,12 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialec
 
 	var client *controllerclient.GRPCClient
 	{
-		var err error
-		if client, err = controllerclient.NewGRPCClient(controllerAddr, controllerCertFile, controllerServerNameOverride, controllerInsecure, controllerInsecureSkipTLSVerify, controllerAuthToken, logger, tracer); err != nil {
+		token, err := auth.NewServiceToken(controllerAuthToken)
+		if err != nil {
+			logger.Log("err", err)
+			os.Exit(1)
+		}
+		if client, err = controllerclient.NewGRPCClient(controllerAddr, controllerCertFile, controllerServerNameOverride, controllerInsecure, controllerInsecureSkipTLSVerify, token, logger, tracer); err != nil {
 			logger.Log("transport", "gRPC", "during", "Connect", "err", err)
 			os.Exit(1)
 		}

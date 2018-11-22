@@ -12,6 +12,7 @@ import (
 	apiserverclient "powerssl.io/pkg/apiserver/client"
 	workflowengine "powerssl.io/pkg/controller/workflow/engine"
 	"powerssl.io/pkg/util"
+	"powerssl.io/pkg/util/auth"
 	"powerssl.io/pkg/util/tracing"
 )
 
@@ -39,8 +40,12 @@ func Run(grpcAddr, grpcCertFile, grpcKeyFile string, grpcInsecure bool, metricsA
 
 	var client *apiserverclient.GRPCClient
 	{
-		var err error
-		if client, err = apiserverclient.NewGRPCClient(apiserverAddr, apiserverCertFile, apiserverServerNameOverride, apiserverInsecure, apiserverInsecureSkipTLSVerify, apiserverAuthToken, logger, tracer); err != nil {
+		token, err := auth.NewServiceToken(apiserverAuthToken)
+		if err != nil {
+			logger.Log("err", err)
+			os.Exit(1)
+		}
+		if client, err = apiserverclient.NewGRPCClient(apiserverAddr, apiserverCertFile, apiserverServerNameOverride, apiserverInsecure, apiserverInsecureSkipTLSVerify, token, logger, tracer); err != nil {
 			logger.Log("transport", "gRPC", "during", "Connect", "err", err)
 			os.Exit(1)
 		}

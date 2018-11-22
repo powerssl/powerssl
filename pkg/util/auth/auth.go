@@ -67,3 +67,16 @@ func ClaimsFromContext(ctx context.Context) *stdjwt.StandardClaims {
 func SubjectFromContext(ctx context.Context) string {
 	return ClaimsFromContext(ctx).Subject
 }
+
+func NewServiceToken(url string) (string, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	return string(body), nil
+}
