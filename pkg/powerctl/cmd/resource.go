@@ -18,6 +18,7 @@ type ResourceHandler interface {
 	Get(client *apiserverclient.GRPCClient, name string) (*Resource, error)
 	List(client *apiserverclient.GRPCClient) ([]*Resource, error)
 	Spec() interface{}
+	Columns(resource *Resource) ([]string, []string)
 }
 
 type resources struct {
@@ -78,6 +79,21 @@ func (r *Resource) Get(client *apiserverclient.GRPCClient) (*Resource, error) {
 		return nil, err
 	}
 	return resourceHandler.Get(client, r.Meta.UID)
+}
+
+func (r *Resource) ToTable() ([]string, []string, error) {
+	resourceHandler, err := Resources.Get(r.Kind)
+	if err != nil {
+		return nil, nil, err
+	}
+	rHeader, rColums := resourceHandler.Columns(r)
+	var header []string
+	header = append(header, "UID")
+	header = append(header, rHeader...)
+	var columns []string
+	columns = append(columns, r.Meta.UID)
+	columns = append(columns, rColums...)
+	return header, columns, nil
 }
 
 type ResourceLoader struct {

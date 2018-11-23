@@ -90,6 +90,23 @@ func (r acmeAccount) Spec() interface{} {
 	return new(ACMEAccountSpec)
 }
 
+func (r acmeAccount) Columns(resource *Resource) ([]string, []string) {
+	spec := resource.Spec.(*ACMEAccountSpec)
+	return []string{
+			"DISPLAY NAME",
+			"DESCRIPTION",
+			"ACME SERVER",
+			"TOS AGREED",
+			"CONTACTS",
+		}, []string{
+			fmt.Sprint(spec.DisplayName),
+			fmt.Sprint(spec.Description),
+			fmt.Sprint(spec.ACMEServer),
+			fmt.Sprint(spec.TermsOfServiceAgreed),
+			strings.Join(spec.Contacts, ", "),
+		}
+}
+
 var (
 	ACMEServerID         string
 	Contacts             string

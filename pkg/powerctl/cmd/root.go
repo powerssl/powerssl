@@ -38,7 +38,7 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.powerctl/config.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "Verbose output")
-	rootCmd.PersistentFlags().StringVarP(&Output, "output", "o", "yaml", "Output format")
+	rootCmd.PersistentFlags().StringVarP(&Output, "output", "o", "table", "Output format")
 
 	rootCmd.PersistentFlags().BoolP("insecure", "", false, "Use insecure communication")
 	rootCmd.PersistentFlags().BoolP("insecure-skip-tls-verify", "", false, "Accepts any certificate presented by the server and any host name in that certificate")

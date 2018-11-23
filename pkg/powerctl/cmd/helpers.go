@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/ghodss/yaml"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc/status"
 
@@ -42,6 +43,32 @@ func pr(resource interface{}) {
 		out, err = yaml.Marshal(resource)
 	case "json":
 		out, err = json.Marshal(resource)
+	case "table":
+		var ok bool
+		var resources []*Resource
+		resources, ok = resource.([]*Resource)
+		if !ok {
+			if r, ok := resource.(*Resource); ok {
+				resources = append(resources, r)
+			}
+		}
+		resourceMap := make(map[string][]*Resource)
+		for _, resource := range resources {
+			resourceMap[resource.Kind] = append(resourceMap[resource.Kind], resource)
+		}
+		for kind, resources := range resourceMap {
+			fmt.Printf("%s:\n", kind)
+			table := tablewriter.NewWriter(os.Stdout)
+			for _, resource := range resources {
+				header, columns, err := resource.ToTable()
+				if err != nil {
+					er(err)
+				}
+				table.SetHeader(header)
+				table.Append(columns)
+			}
+			table.Render()
+		}
 	default:
 		er("Unknown output format")
 	}

@@ -88,6 +88,23 @@ func (r certificate) Spec() interface{} {
 	return new(CertificateSpec)
 }
 
+func (r certificate) Columns(resource *Resource) ([]string, []string) {
+	spec := resource.Spec.(*CertificateSpec)
+	return []string{
+			"DNS NAMES",
+			"KEY ALGORITHM",
+			"KEY SIZE",
+			"DIGEST ALGORITHM",
+			"AUTO RENEW",
+		}, []string{
+			strings.Join(spec.Dnsnames, ", "),
+			fmt.Sprint(spec.KeyAlgorithm),
+			fmt.Sprint(spec.KeySize),
+			fmt.Sprint(spec.DigestAlgorithm),
+			fmt.Sprint(spec.AutoRenew),
+		}
+}
+
 var (
 	AutoRenew       bool
 	DNSNames        string

@@ -79,6 +79,17 @@ func (r user) Spec() interface{} {
 	return new(UserSpec)
 }
 
+func (r user) Columns(resource *Resource) ([]string, []string) {
+	spec := resource.Spec.(*UserSpec)
+	return []string{
+			"DISPLAY NAME",
+			"USER NAME",
+		}, []string{
+			fmt.Sprint(spec.DisplayName),
+			fmt.Sprint(spec.UserName),
+		}
+}
+
 var UserName string
 
 var createUserCmd = &cobra.Command{

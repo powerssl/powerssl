@@ -82,6 +82,19 @@ func (r acmeServer) Spec() interface{} {
 	return new(ACMEServerSpec)
 }
 
+func (r acmeServer) Columns(resource *Resource) ([]string, []string) {
+	spec := resource.Spec.(*ACMEServerSpec)
+	return []string{
+			"DISPLAY NAME",
+			"DIRECTORY URL",
+			"INTEGRATION NAME",
+		}, []string{
+			fmt.Sprint(spec.DisplayName),
+			fmt.Sprint(spec.DirectoryURL),
+			fmt.Sprint(spec.IntegrationName),
+		}
+}
+
 var (
 	DirectoryURL       string
 	IntegrationName    string
