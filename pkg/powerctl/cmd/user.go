@@ -115,7 +115,7 @@ var createUserCmd = &cobra.Command{
 }
 
 func init() {
-	Resources.Add(User, "as")
+	Resources.Add(User, "u")
 
 	createUserCmd.Flags().StringVarP(&DisplayName, "display-name", "", "", "Display name")
 	createUserCmd.Flags().StringVarP(&Filename, "filename", "f", "", "Filename to file to use to create the ACME server")
