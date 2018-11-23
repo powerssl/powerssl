@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/gogo/status"
-	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc/codes"
 
 	"powerssl.io/pkg/apiserver/api"
+	"powerssl.io/pkg/util/uid"
 )
 
 type User struct {
@@ -24,7 +24,7 @@ type User struct {
 }
 
 func (*User) BeforeCreate(scope *gorm.Scope) error {
-	scope.SetColumn("ID", uuid.New().String())
+	scope.SetColumn("ID", uid.New())
 	return nil
 }
 
