@@ -18,6 +18,9 @@ var getCmd = &cobra.Command{
 		var resources []*Resource
 		if len(args) == 1 && !strings.Contains(args[0], "/") {
 			kinds := strings.Split(args[0], ",")
+			if len(kinds) == 1 && kinds[0] == "all" {
+				kinds = Resources.Kinds()
+			}
 			for _, kind := range kinds {
 				resourceHandler, err := Resources.Get(kind)
 				if err != nil {

@@ -23,6 +23,7 @@ type ResourceHandler interface {
 
 type resources struct {
 	m map[string]ResourceHandler
+	s []string
 }
 
 func (r *resources) Add(resourceHandler ResourceHandler, aliases ...string) {
@@ -33,12 +34,17 @@ func (r *resources) Add(resourceHandler ResourceHandler, aliases ...string) {
 		kind = t.Name()
 	}
 	kind = strings.ToLower(kind)
-	plural := inflection.Plural(kind)
 	r.m[kind] = resourceHandler
+	plural := inflection.Plural(kind)
 	r.m[plural] = resourceHandler
 	for _, alias := range aliases {
 		r.m[alias] = resourceHandler
 	}
+	r.s = append(r.s, kind)
+}
+
+func (r *resources) Kinds() []string {
+	return r.s
 }
 
 func (r *resources) Get(kind string) (ResourceHandler, error) {
@@ -49,7 +55,7 @@ func (r *resources) Get(kind string) (ResourceHandler, error) {
 	return resourceHandler, nil
 }
 
-var Resources = resources{make(map[string]ResourceHandler)}
+var Resources = resources{m: make(map[string]ResourceHandler)}
 
 type Resource struct {
 	Kind string        `json:"kind,omitempty" yaml:"kind,omitempty"`

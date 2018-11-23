@@ -39,8 +39,6 @@ func pr(resource interface{}) {
 		out []byte
 	)
 	switch Output {
-	case "yaml":
-		out, err = yaml.Marshal(resource)
 	case "json":
 		out, err = json.Marshal(resource)
 	case "table":
@@ -69,6 +67,8 @@ func pr(resource interface{}) {
 			}
 			table.Render()
 		}
+	case "yaml":
+		out, err = yaml.Marshal(resource)
 	default:
 		er("Unknown output format")
 	}
