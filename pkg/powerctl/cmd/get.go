@@ -17,12 +17,17 @@ var getCmd = &cobra.Command{
 		}
 		var resources []*Resource
 		if len(args) == 1 && !strings.Contains(args[0], "/") {
-			resourceHandler, err := Resources.Get(args[0])
-			if err != nil {
-				er(err)
-			}
-			if resources, err = resourceHandler.List(client); err != nil {
-				er(err)
+			kinds := strings.Split(args[0], ",")
+			for _, kind := range kinds {
+				resourceHandler, err := Resources.Get(kind)
+				if err != nil {
+					er(err)
+				}
+				res, err := resourceHandler.List(client)
+				if err != nil {
+					er(err)
+				}
+				resources = append(resources, res...)
 			}
 		} else {
 			resources, err = resourcesFromArgs(args)
