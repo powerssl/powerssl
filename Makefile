@@ -62,6 +62,9 @@ bin/protoc-gen-grpc-web:
 		make protoc-gen-grpc-web && \
 		install protoc-gen-grpc-web $(BIN_PATH)/protoc-gen-grpc-web
 
+bin/powerssl-agent: .ALWAYS_REBUILD
+	go build -o bin/powerssl-agent powerssl.io/cmd/powerssl-agent
+
 bin/powerssl-apiserver: .ALWAYS_REBUILD
 	go build -o bin/powerssl-apiserver powerssl.io/cmd/powerssl-apiserver
 
@@ -84,7 +87,11 @@ bin/powerctl: .ALWAYS_REBUILD
 	go build -o bin/powerctl powerssl.io/cmd/powerctl
 
 .PHONY: build
-build: bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerctl
+build: bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerctl
+
+.PHONY: install-agent
+install-agent:
+	go install powerssl.io/cmd/powerssl-agent
 
 .PHONY: install-powerctl
 install-powerctl:
@@ -101,9 +108,9 @@ vet:
 
 .PHONY: clean
 clean:
-	go clean powerssl.io/cmd/powerctl powerssl.io/cmd/powerssl-apiserver powerssl.io/cmd/powerssl-auth powerssl.io/cmd/powerssl-controller powerssl.io/cmd/powerssl-integration-acme powerssl.io/cmd/powerssl-integration-cloudflare powerssl.io/cmd/powerssl-signer
+	go clean powerssl.io/cmd/powerctl powerssl.io/cmd/powerssl-agent powerssl.io/cmd/powerssl-apiserver powerssl.io/cmd/powerssl-auth powerssl.io/cmd/powerssl-controller powerssl.io/cmd/powerssl-integration-acme powerssl.io/cmd/powerssl-integration-cloudflare powerssl.io/cmd/powerssl-signer
 	rm -f bin/.go_protobuf_sources
-	rm -f bin/powerctl bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer
+	rm -f bin/powerctl bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer
 
 .PHONY: protobuf
 protobuf: $(PROTOBUF_TARGETS)
@@ -117,7 +124,11 @@ generate:
 	go generate $$(go list ./...)
 
 .PHONY: images
-images: apiserver-image auth-image controller-image envoy-image integration-acme-image integration-cloudflare-image powerctl-image signer-image
+images: agent-image apiserver-image auth-image controller-image envoy-image integration-acme-image integration-cloudflare-image powerctl-image signer-image
+
+.PHONY: agent-image
+agent-image:
+	docker build -f dockerfiles/agent/Dockerfile -t powerssl/agent .
 
 .PHONY: apiserver-image
 apiserver-image:

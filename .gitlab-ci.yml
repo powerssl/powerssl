@@ -19,6 +19,11 @@ stages:
   only:
     - branches
 
+build agent:
+  <<: *build_template
+  variables:
+    COMPONENT: agent
+
 build apiserver:
   <<: *build_template
   variables:
@@ -162,6 +167,11 @@ container_scanning:
   only:
     refs:
       - master
+
+release agent:
+  <<: *release_template
+  variables:
+    COMPONENT: agent
 
 release apiserver:
   <<: *release_template
