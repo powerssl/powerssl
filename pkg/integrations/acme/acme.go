@@ -1,11 +1,15 @@
 package acme
 
-import "errors"
+import (
+	"errors"
 
-var ErrNotImplemented = errors.New("not implemented.")
+	integrationacme "powerssl.io/pkg/integration/acme"
+)
+
+var ErrNotImplemented = errors.New("not implemented")
 
 type ACME struct{}
 
-func New() ACME {
-	return ACME{}
+func New() integrationacme.Integration {
+	return &ACME{}
 }

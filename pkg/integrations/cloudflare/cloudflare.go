@@ -1,10 +1,14 @@
 package cloudflare
 
-import "context"
+import (
+	"context"
+
+	integrationacme "powerssl.io/pkg/integration/dns"
+)
 
 type cloudflare struct{}
 
-func New() *cloudflare {
+func New() integrationdns.Integration {
 	return &cloudflare{}
 }
 
