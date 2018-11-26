@@ -2,7 +2,7 @@ PROTOC := $(shell which protoc)
 
 BIN_PATH := $(abspath bin)
 PKG_PATH := $(abspath pkg)
-PROTO_PATH := $(abspath proto)
+PROTO_PATH := $(abspath api/proto)
 
 export PATH := $(BIN_PATH):$(PATH)
 
@@ -21,8 +21,6 @@ PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/timestamp.proto=github.com/g
 
 PROTOS := $(sort $(shell $(FIND_PROTO) -type f -name '*.proto' -print))
 
-PROTOBUF_TARGETS := bin/.go_protobuf_sources
-
 .DELETE_ON_ERROR:
 
 .ALWAYS_REBUILD:
@@ -30,16 +28,6 @@ PROTOBUF_TARGETS := bin/.go_protobuf_sources
 
 .DEFAULT_GOAL := all
 all: build
-
-bin/.go_protobuf_sources: bin/protoc-gen-gogo
-	$(FIND_RELEVANT) -type f -name '*.pb.go' -exec rm {} +
-	set -e; for dir in $(sort $(dir $(PROTOS))); do \
-		$(PROTOC) \
-			-I$(PROTO_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
-			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src \
-			$$dir/*.proto; \
-	done
-	touch $@
 
 .PHONY: javascript-sdk
 javascript-sdk: bin/protoc-gen-grpc-web
@@ -113,7 +101,14 @@ clean:
 	rm -f bin/powerctl bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer
 
 .PHONY: protobuf
-protobuf: $(PROTOBUF_TARGETS)
+protobuf:
+	$(FIND_RELEVANT) -type f -name '*.pb.go' -exec rm {} +
+	set -e; for dir in $(sort $(dir $(PROTOS))); do \
+		$(PROTOC) \
+			-I$(PROTO_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
+			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src \
+			$$dir/*.proto; \
+	done
 
 .PHONY: tools
 tools:
