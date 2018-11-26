@@ -1,0 +1,348 @@
+image: alpine:latest
+
+variables:
+  DOCKER_DRIVER: overlay2
+
+stages:
+  - build
+  - test
+  - release
+
+.build: &build_template
+  stage: build
+  image: docker:stable-git
+  services:
+  - docker:stable-dind
+  script:
+    - setup_docker
+    - build $COMPONENT
+  only:
+    - branches
+
+build agent:
+  <<: *build_template
+  variables:
+    COMPONENT: agent
+
+build apiserver:
+  <<: *build_template
+  variables:
+    COMPONENT: apiserver
+
+build auth:
+  <<: *build_template
+  variables:
+    COMPONENT: auth
+
+build controller:
+  <<: *build_template
+  variables:
+    COMPONENT: controller
+
+build acme integration:
+  <<: *build_template
+  variables:
+    COMPONENT: integration-acme
+
+build cloudflare integration:
+  <<: *build_template
+  variables:
+    COMPONENT: integration-cloudflare
+
+build powerctl:
+  <<: *build_template
+  variables:
+    COMPONENT: powerctl
+
+build signer:
+  <<: *build_template
+  variables:
+    COMPONENT: signer
+
+code_quality:
+  stage: test
+  image: docker:stable
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  script:
+    - setup_docker
+    - code_quality
+  artifacts:
+    paths: [gl-code-quality-report.json]
+  only:
+    - branches
+  except:
+    variables:
+      - $CODE_QUALITY_DISABLED
+
+license_management:
+  stage: test
+  image: docker:stable
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  script:
+    - setup_docker
+    - license_management
+  artifacts:
+    paths: [gl-license-management-report.json]
+  only:
+    - branches
+  only:
+    variables:
+      - $GITLAB_FEATURES =~ /\blicense_management\b/
+  except:
+    variables:
+      - $LICENSE_MANAGEMENT_DISABLED
+
+sast:
+  stage: test
+  image: docker:stable
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  script:
+    - setup_docker
+    - sast
+  artifacts:
+    paths: [gl-sast-report.json]
+  only:
+    refs:
+      - branches
+    variables:
+      - $GITLAB_FEATURES =~ /\bsast\b/
+  except:
+    variables:
+      - $SAST_DISABLED
+
+dependency_scanning:
+  stage: test
+  image: docker:stable
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  script:
+    - setup_docker
+    - dependency_scanning
+  artifacts:
+    paths: [gl-dependency-scanning-report.json]
+  only:
+    refs:
+      - branches
+    variables:
+      - $GITLAB_FEATURES =~ /\bdependency_scanning\b/
+  except:
+    variables:
+      - $DEPENDENCY_SCANNING_DISABLED
+
+container_scanning:
+  stage: test
+  image: docker:stable
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  script:
+    - setup_docker
+    - container_scanning
+  artifacts:
+    paths: [gl-container-scanning-report.json]
+  only:
+    refs:
+      - branches
+    variables:
+      - $GITLAB_FEATURES =~ /\bsast_container\b/
+  except:
+    variables:
+      - $CONTAINER_SCANNING_DISABLED
+
+.release: &release_template
+  stage: release
+  image: docker:stable-git
+  services:
+  - docker:stable-dind
+  script:
+    - setup_docker
+    - release $COMPONENT
+  only:
+    refs:
+      - master
+
+release agent:
+  <<: *release_template
+  variables:
+    COMPONENT: agent
+
+release apiserver:
+  <<: *release_template
+  variables:
+    COMPONENT: apiserver
+
+release auth:
+  <<: *release_template
+  variables:
+    COMPONENT: auth
+
+release controller:
+  <<: *release_template
+  variables:
+    COMPONENT: controller
+
+release acme integration:
+  <<: *release_template
+  variables:
+    COMPONENT: integration-acme
+
+release cloudflare integration:
+  <<: *release_template
+  variables:
+    COMPONENT: integration-cloudflare
+
+release powerctl:
+  <<: *release_template
+  variables:
+    COMPONENT: powerctl
+
+release signer:
+  <<: *release_template
+  variables:
+    COMPONENT: signer
+
+# ---------------------------------------------------------------------------
+
+.auto_devops: &auto_devops |
+  # Auto DevOps variables and functions
+  [[ "$TRACE" ]] && set -x
+  export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
+  export CI_APPLICATION_TAG=$CI_COMMIT_SHA
+  # Extract "MAJOR.MINOR" from CI_SERVER_VERSION and generate "MAJOR-MINOR-stable" for Security Products
+  export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
+
+  function registry_login() {
+    if [[ -n "$CI_REGISTRY_USER" ]]; then
+      echo "Logging to GitLab Container Registry with CI credentials..."
+      docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+      echo ""
+    fi
+  }
+
+  function container_scanning() {
+    registry_login
+
+    docker run -d --name db arminc/clair-db:latest
+    docker run -p 6060:6060 --link db:postgres -d --name clair --restart on-failure arminc/clair-local-scan:v2.0.1
+    apk add -U wget ca-certificates
+    docker pull ${CI_APPLICATION_REPOSITORY}:${CI_APPLICATION_TAG}
+    wget https://github.com/arminc/clair-scanner/releases/download/v8/clair-scanner_linux_amd64
+    mv clair-scanner_linux_amd64 clair-scanner
+    chmod +x clair-scanner
+    touch clair-whitelist.yml
+    retries=0
+    echo "Waiting for clair daemon to start"
+    while( ! wget -T 10 -q -O /dev/null http://docker:6060/v1/namespaces ) ; do sleep 1 ; echo -n "." ; if [ $retries -eq 10 ] ; then echo " Timeout, aborting." ; exit 1 ; fi ; retries=$(($retries+1)) ; done
+    ./clair-scanner -c http://docker:6060 --ip $(hostname -i) -r gl-container-scanning-report.json -l clair.log -w clair-whitelist.yml ${CI_APPLICATION_REPOSITORY}:${CI_APPLICATION_TAG} || true
+  }
+
+  function code_quality() {
+    docker run --env SOURCE_CODE="$PWD" \
+               --volume "$PWD":/code \
+               --volume /var/run/docker.sock:/var/run/docker.sock \
+               "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
+  }
+
+  function license_management() {
+    # Extract "MAJOR.MINOR" from CI_SERVER_VERSION and generate "MAJOR-MINOR-stable"
+    LICENSE_MANAGEMENT_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
+
+    docker run --volume "$PWD:/code" \
+                                    "registry.gitlab.com/gitlab-org/security-products/license-management:$LICENSE_MANAGEMENT_VERSION" analyze /code
+  }
+
+  function sast() {
+    case "$CI_SERVER_VERSION" in
+      *-ee)
+
+        # Deprecation notice for CONFIDENCE_LEVEL variable
+        if [ -z "$SAST_CONFIDENCE_LEVEL" -a "$CONFIDENCE_LEVEL" ]; then
+          SAST_CONFIDENCE_LEVEL="$CONFIDENCE_LEVEL"
+          echo "WARNING: CONFIDENCE_LEVEL is deprecated and MUST be replaced with SAST_CONFIDENCE_LEVEL"
+        fi
+
+        docker run --env SAST_CONFIDENCE_LEVEL="${SAST_CONFIDENCE_LEVEL:-3}" \
+                   --volume "$PWD:/code" \
+                   --volume /var/run/docker.sock:/var/run/docker.sock \
+                   "registry.gitlab.com/gitlab-org/security-products/sast:$SP_VERSION" /app/bin/run /code
+        ;;
+      *)
+        echo "GitLab EE is required"
+        ;;
+    esac
+  }
+
+  function dependency_scanning() {
+    case "$CI_SERVER_VERSION" in
+      *-ee)
+        docker run --env DEP_SCAN_DISABLE_REMOTE_CHECKS="${DEP_SCAN_DISABLE_REMOTE_CHECKS:-false}" \
+                   --volume "$PWD:/code" \
+                   --volume /var/run/docker.sock:/var/run/docker.sock \
+                   "registry.gitlab.com/gitlab-org/security-products/dependency-scanning:$SP_VERSION" /code
+        ;;
+      *)
+        echo "GitLab EE is required"
+        ;;
+    esac
+  }
+
+  function setup_docker() {
+    if ! docker info &>/dev/null; then
+      if [ -z "$DOCKER_HOST" -a "$KUBERNETES_PORT" ]; then
+        export DOCKER_HOST='tcp://localhost:2375'
+      fi
+    fi
+  }
+
+  function build() {
+    component="$1"
+
+    registry_login
+
+    echo "Building $component..."
+    docker build \
+      --build-arg HTTP_PROXY="$HTTP_PROXY" \
+      --build-arg http_proxy="$http_proxy" \
+      --build-arg HTTPS_PROXY="$HTTPS_PROXY" \
+      --build-arg https_proxy="$https_proxy" \
+      --build-arg FTP_PROXY="$FTP_PROXY" \
+      --build-arg ftp_proxy="$ftp_proxy" \
+      --build-arg NO_PROXY="$NO_PROXY" \
+      --build-arg no_proxy="$no_proxy" \
+      -f "dockerfiles/$component/Dockerfile" \
+      -t "$CI_APPLICATION_REPOSITORY/$component:$CI_APPLICATION_TAG" .
+    docker tag "$CI_APPLICATION_REPOSITORY/$component:$CI_APPLICATION_TAG" "$CI_APPLICATION_REPOSITORY/$component:latest"
+
+    echo "Pushing to GitLab Container Registry..."
+    docker push "$CI_APPLICATION_REPOSITORY/$component:$CI_APPLICATION_TAG"
+    docker push "$CI_APPLICATION_REPOSITORY/$component:latest"
+    echo ""
+  }
+
+  function release() {
+    component="$1"
+
+    registry_login
+
+    echo "Releasing $component..."
+    docker pull "$CI_APPLICATION_REPOSITORY/$component:$CI_APPLICATION_TAG"
+    docker tag "$CI_APPLICATION_REPOSITORY/$component:$CI_APPLICATION_TAG" "powerssl/$component:$CI_APPLICATION_TAG"
+    docker tag "$CI_APPLICATION_REPOSITORY/$component:$CI_APPLICATION_TAG" "powerssl/$component:latest"
+
+    docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
+
+    echo "Pushing to Docker Hub..."
+    docker push "powerssl/$component:$CI_APPLICATION_TAG"
+    docker push "powerssl/$component:latest"
+    echo ""
+  }
+
+before_script:
+  - *auto_devops
