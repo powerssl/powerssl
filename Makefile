@@ -128,36 +128,36 @@ images: agent-image apiserver-image auth-image controller-image envoy-image inte
 
 .PHONY: agent-image
 agent-image:
-	docker build -f dockerfiles/agent/Dockerfile -t powerssl/agent .
+	docker build -f build/docker/agent/Dockerfile -t powerssl/agent .
 
 .PHONY: apiserver-image
 apiserver-image:
-	docker build -f dockerfiles/apiserver/Dockerfile -t powerssl/apiserver .
+	docker build -f build/docker/apiserver/Dockerfile -t powerssl/apiserver .
 
 .PHONY: auth-image
 auth-image:
-	docker build -f dockerfiles/auth/Dockerfile -t powerssl/auth .
+	docker build -f build/docker/auth/Dockerfile -t powerssl/auth .
 
 .PHONY: controller-image
 controller-image:
-	docker build -f dockerfiles/controller/Dockerfile -t powerssl/controller .
+	docker build -f build/docker/controller/Dockerfile -t powerssl/controller .
 
 .PHONY: envoy-image
 envoy-image:
-	docker build -f dockerfiles/envoy/Dockerfile -t powerssl/evnoy .
+	docker build -f build/docker/envoy/Dockerfile -t powerssl/evnoy .
 
 .PHONY: integration-acme-image
 integration-acme-image:
-	docker build -f dockerfiles/integration-acme/Dockerfile -t powerssl/integration-acme .
+	docker build -f build/docker/integration-acme/Dockerfile -t powerssl/integration-acme .
 
 .PHONY: integration-cloudflare-image
 integration-cloudflare-image:
-	docker build -f dockerfiles/integration-cloudflare/Dockerfile -t powerssl/integration-cloudflare .
+	docker build -f build/docker/integration-cloudflare/Dockerfile -t powerssl/integration-cloudflare .
 
 .PHONY: powerctl-image
 powerctl-image:
-	docker build -f dockerfiles/powerctl/Dockerfile -t powerssl/powerctl .
+	docker build -f build/docker/powerctl/Dockerfile -t powerssl/powerctl .
 
 .PHONY: signer-image
 signer-image:
-	docker build -f dockerfiles/signer/Dockerfile -t powerssl/signer .
+	docker build -f build/docker/signer/Dockerfile -t powerssl/signer .
