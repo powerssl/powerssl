@@ -1,31 +1,21 @@
 package cloudflare
 
-import (
-	"context"
+import "context"
 
-	integrationdns "powerssl.io/pkg/integration/dns"
-)
+type cloudflare struct{}
 
-type errorConst string
-
-func (e errorConst) Error() string { return string(e) }
-
-const ErrNotImplemented = errorConst("not implemented.")
-
-type Cloudflare struct{}
-
-func New() integrationdns.Integration {
-	return &Cloudflare{}
+func New() *cloudflare {
+	return &cloudflare{}
 }
 
-func (cloudflare *Cloudflare) CreateRecord(_ context.Context, domain, recordType, content string) (err error) {
+func (cloudflare *cloudflare) CreateRecord(ctx context.Context, domain, recordType, content string) (err error) {
 	return err
 }
 
-func (cloudflare *Cloudflare) DeleteRecord(_ context.Context, domain, recordType string) (err error) {
+func (cloudflare *cloudflare) DeleteRecord(ctx context.Context, domain, recordType string) (err error) {
 	return err
 }
 
-func (cloudflare *Cloudflare) VerifyDomain(_ context.Context, domain string) (err error) {
+func (cloudflare *cloudflare) VerifyDomain(cxt context.Context, domain string) (err error) {
 	return err
 }

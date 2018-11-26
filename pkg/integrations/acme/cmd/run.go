@@ -42,8 +42,7 @@ var runCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		integ := integration.New(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, metricsAddr, tracer, integration.KindACME, "acme", acme.New())
-		integ.Run()
+		integration.Run(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, metricsAddr, tracer, integration.KindACME, "acme", acme.New())
 	},
 }
 
