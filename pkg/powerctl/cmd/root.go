@@ -24,6 +24,13 @@ var rootCmd = &cobra.Command{
 
 Find more information at: https://powerssl.io`,
 	Version: "0.1.0",
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		switch Output {
+		case "json", "table", "yaml":
+		default:
+			er("Unknown output format")
+		}
+	},
 }
 
 func Execute() {

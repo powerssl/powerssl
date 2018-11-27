@@ -89,8 +89,6 @@ func pr(resource interface{}) {
 		}
 	case "yaml":
 		out, err = yaml.Marshal(resource)
-	default:
-		er("Unknown output format")
 	}
 	if err != nil {
 		er(err)
