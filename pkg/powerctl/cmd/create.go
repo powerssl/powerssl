@@ -18,9 +18,13 @@ var createCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		filename := Filename
 
+		if filename == "" {
+			er("Please specify filename")
+		}
+
 		in, err := ioutil.ReadFile(filename)
 		if err != nil {
-			panic(err)
+			er(err)
 		}
 
 		switch filepath.Ext(filename) {
@@ -28,17 +32,17 @@ var createCmd = &cobra.Command{
 		case ".yml", ".yaml":
 			in, err = yaml.YAMLToJSON(in)
 			if err != nil {
-				panic(err)
+				er(err)
 			}
 		default:
-			panic("Unknown input format")
+			er("Unknown input format")
 		}
 
 		var resources []ResourceLoader
 		if json.Unmarshal(in, &resources) != nil {
 			var resource ResourceLoader
 			if err := json.Unmarshal(in, &resource); err != nil {
-				panic(err)
+				er(err)
 			}
 			resources = append(resources, resource)
 		}
@@ -52,11 +56,11 @@ var createCmd = &cobra.Command{
 		for i, resource := range resources {
 			resourceHandler, err := Resources.Get(resource.Kind)
 			if err != nil {
-				panic(err)
+				er(err)
 			}
 			spec := resourceHandler.Spec()
 			if err := json.Unmarshal(resource.Spec, &spec); err != nil {
-				panic(err)
+				er(err)
 			}
 			res := Resource{
 				Kind: resource.Kind,
@@ -64,7 +68,7 @@ var createCmd = &cobra.Command{
 				Spec: spec,
 			}
 			if out[i], err = res.Create(client); err != nil {
-				panic(err)
+				er(err)
 			}
 		}
 
