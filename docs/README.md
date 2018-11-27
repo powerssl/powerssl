@@ -10,4 +10,3 @@
 * [powerssl-integration-acme](powerssl-integration-acme/powerssl-integration-acme.md)
 * [powerssl-integration-cloudflare](powerssl-integration-cloudflare/powerssl-integration-cloudflare.md)
 * [powerssl-signer](powerssl-signer/powerssl-signer.md)
-* [powerssl-tokenserver](powerssl-tokenserver/powerssl-tokenserver.md)
