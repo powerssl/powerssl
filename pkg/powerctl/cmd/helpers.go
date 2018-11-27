@@ -1,10 +1,13 @@
 package cmd
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/ghodss/yaml"
 	"github.com/olekukonko/tablewriter"
@@ -54,9 +57,22 @@ func pr(resource interface{}) {
 		for _, resource := range resources {
 			resourceMap[resource.Kind] = append(resourceMap[resource.Kind], resource)
 		}
+		first := true
 		for kind, resources := range resourceMap {
-			fmt.Printf("%s:\n", kind)
-			table := tablewriter.NewWriter(os.Stdout)
+			if len(resourceMap) > 1 {
+				if first {
+					first = false
+				} else {
+					out = append(out, []byte(fmt.Sprintln(""))...)
+				}
+				out = append(out, []byte(fmt.Sprintln(kind))...)
+			}
+			buf := new(bytes.Buffer)
+			table := tablewriter.NewWriter(buf)
+			table.SetBorder(false)
+			table.SetColumnSeparator(" ")
+			table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+			table.SetHeaderLine(false)
 			for _, resource := range resources {
 				header, columns, err := resource.ToTable()
 				if err != nil {
@@ -66,6 +82,10 @@ func pr(resource interface{}) {
 				table.Append(columns)
 			}
 			table.Render()
+			scanner := bufio.NewScanner(buf)
+			for scanner.Scan() {
+				out = append(out, []byte(fmt.Sprintln(strings.TrimSpace(scanner.Text())))...)
+			}
 		}
 	case "yaml":
 		out, err = yaml.Marshal(resource)
