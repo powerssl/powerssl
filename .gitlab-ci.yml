@@ -316,7 +316,7 @@ release signer:
       --build-arg ftp_proxy="$ftp_proxy" \
       --build-arg NO_PROXY="$NO_PROXY" \
       --build-arg no_proxy="$no_proxy" \
-      -f "dockerfiles/$component/Dockerfile" \
+      -f "build/docker/$component/Dockerfile" \
       -t "$CI_APPLICATION_REPOSITORY/$component:$CI_APPLICATION_TAG" .
     docker tag "$CI_APPLICATION_REPOSITORY/$component:$CI_APPLICATION_TAG" "$CI_APPLICATION_REPOSITORY/$component:latest"
 
