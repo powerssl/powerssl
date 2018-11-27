@@ -15,11 +15,11 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "powerssl-interation-acme",
+	Use:   "powerssl-integration-acme",
 	Short: "powerssl-integration-acme provides PowerSSL ACME integration",
 	Long: `powerssl-integration-acme provides PowerSSL ACME integration.
 
-Find more information at: https://powerssl.io`,
+Find more information at: https://docs.powerssl.io/powerssl-integration-acme/powerssl-integration-acme.html`,
 	Version: "0.1.0",
 }
 

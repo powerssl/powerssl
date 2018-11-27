@@ -19,7 +19,7 @@ var rootCmd = &cobra.Command{
 	Short: "powerssl-controller provides PowerSSL Controller",
 	Long: `powerssl-controller provides PowerSSL Controller.
 
-Find more information at: https://powerssl.io`,
+Find more information at: https://docs.powerssl.io/powerssl-controller/powerssl-controller.html`,
 	Version: "0.1.0",
 }
 

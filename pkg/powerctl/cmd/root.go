@@ -22,7 +22,7 @@ var rootCmd = &cobra.Command{
 	Short: "powerctl controls PowerSSL",
 	Long: `powerctl controls PowerSSL.
 
-Find more information at: https://powerssl.io`,
+Find more information at: https://docs.powerssl.io/powerctl/powerctl.html`,
 	Version: "0.1.0",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		switch Output {

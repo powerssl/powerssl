@@ -19,7 +19,7 @@ var rootCmd = &cobra.Command{
 	Short: "powerssl-signer provides PowerSSL Signer",
 	Long: `powerssl-signer provides PowerSSL Signer.
 
-Find more information at: https://powerssl.io`,
+Find more information at: https://docs.powerssl.io/powerssl-signer/powerssl-signer.html`,
 	Version: "0.1.0",
 }
 

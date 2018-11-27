@@ -15,11 +15,11 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "powerssl-interation-cloudflare",
+	Use:   "powerssl-integration-cloudflare",
 	Short: "powerssl-integration-cloudflare provides PowerSSL Cloudflare integration",
 	Long: `powerssl-integration-cloudflare provides PowerSSL Cloudflare integration.
 
-Find more information at: https://powerssl.io`,
+Find more information at: https://docs.powerssl.io/powerssl-integration-cloudflare/powerssl-integration-cloudflare.html`,
 	Version: "0.1.0",
 }
 

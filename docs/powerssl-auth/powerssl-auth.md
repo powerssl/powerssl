@@ -6,7 +6,7 @@ powerssl-auth provides PowerSSL Auth
 
 powerssl-auth provides PowerSSL Auth.
 
-Find more information at: https://powerssl.io
+Find more information at: https://docs.powerssl.io/powerssl-auth/powerssl-auth.html
 
 ### Options
 

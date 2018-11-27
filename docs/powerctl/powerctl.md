@@ -6,7 +6,7 @@ powerctl controls PowerSSL
 
 powerctl controls PowerSSL.
 
-Find more information at: https://powerssl.io
+Find more information at: https://docs.powerssl.io/powerctl/powerctl.html
 
 ### Options
 

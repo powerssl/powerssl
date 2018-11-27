@@ -19,7 +19,7 @@ var rootCmd = &cobra.Command{
 	Short: "powerssl-agent provides PowerSSL Agent",
 	Long: `powerssl-agent provides PowerSSL Agent.
 
-Find more information at: https://powerssl.io`,
+Find more information at: https://docs.powerssl.io/powerssl-agent/powerssl-agent.html`,
 	Version: "0.1.0",
 }
 

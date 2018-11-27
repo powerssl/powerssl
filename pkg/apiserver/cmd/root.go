@@ -19,7 +19,7 @@ var rootCmd = &cobra.Command{
 	Short: "powerssl-apiserver provides PowerSSL API",
 	Long: `powerssl-apiserver provides PowerSSL API.
 
-Find more information at: https://powerssl.io`,
+Find more information at: https://docs.powerssl.io/powerssl-apiserver/powerssl-apiserver.html`,
 	Version: "0.1.0",
 }
 
