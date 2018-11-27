@@ -66,6 +66,18 @@ bin/powerctl: .ALWAYS_REBUILD
 .PHONY: build
 build: bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerctl
 
+.PHONY: docs
+docs:
+	go run powerssl.io/cmd/powerctl-doc
+	go run powerssl.io/cmd/powerssl-agent-doc
+	go run powerssl.io/cmd/powerssl-apiserver-doc
+	go run powerssl.io/cmd/powerssl-auth-doc
+	go run powerssl.io/cmd/powerssl-controller-doc
+	go run powerssl.io/cmd/powerssl-integration-acme-doc
+	go run powerssl.io/cmd/powerssl-integration-cloudflare-doc
+	go run powerssl.io/cmd/powerssl-signer-doc
+	go run powerssl.io/cmd/powerssl-tokenserver-doc
+
 .PHONY: install-agent
 install-agent:
 	go install powerssl.io/cmd/powerssl-agent

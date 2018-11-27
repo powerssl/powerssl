@@ -3,7 +3,7 @@ package cloudflare
 import (
 	"context"
 
-	integrationacme "powerssl.io/pkg/integration/dns"
+	integrationdns "powerssl.io/pkg/integration/dns"
 )
 
 type cloudflare struct{}
