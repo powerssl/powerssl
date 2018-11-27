@@ -3,7 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 
@@ -103,6 +105,21 @@ func (r certificate) Columns(resource *Resource) ([]string, []string) {
 			fmt.Sprint(spec.DigestAlgorithm),
 			fmt.Sprint(spec.AutoRenew),
 		}
+}
+
+func (r certificate) Describe(client *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
+	spec := resource.Spec.(*CertificateSpec)
+	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
+	fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
+	fmt.Fprintln(w, fmt.Sprintf("Create Time:\t%s", resource.Meta.CreateTime))
+	fmt.Fprintln(w, fmt.Sprintf("Update Time:\t%s", resource.Meta.UpdateTime))
+	fmt.Fprintln(w, fmt.Sprintf("DNS Names:\t%s", strings.Join(spec.Dnsnames, ",")))
+	fmt.Fprintln(w, fmt.Sprintf("Key Algorithm:\t%s", fmt.Sprint(spec.KeyAlgorithm)))
+	fmt.Fprintln(w, fmt.Sprintf("Key Size:\t%s", fmt.Sprint(spec.KeySize)))
+	fmt.Fprintln(w, fmt.Sprintf("Digest Algorithm:\t%s", fmt.Sprint(spec.DigestAlgorithm)))
+	fmt.Fprintln(w, fmt.Sprintf("Auto Renew:\t%v", spec.AutoRenew))
+	w.Flush()
+	return nil
 }
 
 var (

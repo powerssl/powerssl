@@ -3,7 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 
@@ -93,6 +95,19 @@ func (r acmeServer) Columns(resource *Resource) ([]string, []string) {
 			fmt.Sprint(spec.DirectoryURL),
 			fmt.Sprint(spec.IntegrationName),
 		}
+}
+
+func (r acmeServer) Describe(client *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
+	spec := resource.Spec.(*ACMEServerSpec)
+	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
+	fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
+	fmt.Fprintln(w, fmt.Sprintf("Create Time:\t%s", resource.Meta.CreateTime))
+	fmt.Fprintln(w, fmt.Sprintf("Update Time:\t%s", resource.Meta.UpdateTime))
+	fmt.Fprintln(w, fmt.Sprintf("Display Name:\t%s", spec.DisplayName))
+	fmt.Fprintln(w, fmt.Sprintf("Directory URL:\t%s", spec.DirectoryURL))
+	fmt.Fprintln(w, fmt.Sprintf("Integration Name:\t%s", spec.IntegrationName))
+	w.Flush()
+	return nil
 }
 
 var (

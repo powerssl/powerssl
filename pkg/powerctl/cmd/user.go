@@ -3,7 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 
@@ -88,6 +90,18 @@ func (r user) Columns(resource *Resource) ([]string, []string) {
 			fmt.Sprint(spec.DisplayName),
 			fmt.Sprint(spec.UserName),
 		}
+}
+
+func (r user) Describe(client *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
+	spec := resource.Spec.(*UserSpec)
+	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
+	fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
+	fmt.Fprintln(w, fmt.Sprintf("Create Time:\t%s", resource.Meta.CreateTime))
+	fmt.Fprintln(w, fmt.Sprintf("Update Time:\t%s", resource.Meta.UpdateTime))
+	fmt.Fprintln(w, fmt.Sprintf("Display Name:\t%s", spec.DisplayName))
+	fmt.Fprintln(w, fmt.Sprintf("User Name:\t%s", spec.UserName))
+	w.Flush()
+	return nil
 }
 
 var UserName string

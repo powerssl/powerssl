@@ -1,9 +1,13 @@
 package cmd
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 
@@ -103,8 +107,40 @@ func (r acmeAccount) Columns(resource *Resource) ([]string, []string) {
 			fmt.Sprint(spec.Description),
 			fmt.Sprint(spec.ACMEServer),
 			fmt.Sprint(spec.TermsOfServiceAgreed),
-			strings.Join(spec.Contacts, ", "),
+			strings.Join(spec.Contacts, ","),
 		}
+}
+
+func (r acmeAccount) Describe(client *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
+	spec := resource.Spec.(*ACMEAccountSpec)
+	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
+	fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
+	fmt.Fprintln(w, fmt.Sprintf("Create Time:\t%s", resource.Meta.CreateTime))
+	fmt.Fprintln(w, fmt.Sprintf("Update Time:\t%s", resource.Meta.UpdateTime))
+	fmt.Fprintln(w, fmt.Sprintf("Display Name:\t%s", spec.DisplayName))
+	fmt.Fprintln(w, fmt.Sprintf("Title:\t%s", spec.Title))
+	fmt.Fprintln(w, fmt.Sprintf("Description:\t%s", spec.Description))
+	fmt.Fprintln(w, fmt.Sprintf("TOS Agreed:\t%v", spec.TermsOfServiceAgreed))
+	fmt.Fprintln(w, fmt.Sprintf("Contacts:\t%s", strings.Join(spec.Contacts, ",")))
+	fmt.Fprintln(w, fmt.Sprintf("Account URL:\t%s", spec.AccountURL))
+	fmt.Fprintln(w, "ACME Server:")
+	acmeServer := &Resource{
+		Kind: "acmeserver",
+		Meta: &ResourceMeta{
+			UID: spec.ACMEServer,
+		},
+	}
+	if acmeServer, err = acmeServer.Get(client); err != nil {
+		return err
+	}
+	acmeServerDescription := new(bytes.Buffer)
+	acmeServer.Describe(client, acmeServerDescription)
+	scanner := bufio.NewScanner(acmeServerDescription)
+	for scanner.Scan() {
+		fmt.Fprintln(w, "", "", scanner.Text())
+	}
+	w.Flush()
+	return nil
 }
 
 var (

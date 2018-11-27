@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"reflect"
 	"strings"
 	"time"
@@ -19,6 +20,7 @@ type ResourceHandler interface {
 	List(client *apiserverclient.GRPCClient) ([]*Resource, error)
 	Spec() interface{}
 	Columns(resource *Resource) ([]string, []string)
+	Describe(client *apiserverclient.GRPCClient, resource *Resource, output io.Writer) error
 }
 
 type resources struct {
@@ -102,6 +104,15 @@ func (r *Resource) ToTable() ([]string, []string, error) {
 	return header, columns, nil
 }
 
+func (r *Resource) Describe(client *apiserverclient.GRPCClient, output io.Writer) error {
+	resourceHandler, err := Resources.Get(r.Kind)
+	if err != nil {
+		return err
+	}
+	resourceHandler.Describe(client, r, output)
+	return nil
+}
+
 type ResourceLoader struct {
 	Resource
 	Spec json.RawMessage `json:"spec,omitempty" yaml:"spec,omitempty"`
@@ -111,6 +122,27 @@ type ResourceMeta struct {
 	UID        string    `json:"uid,omitempty"        yaml:"uid,omitempty"`
 	CreateTime time.Time `json:"createTime,omitempty" yaml:"createTime,omitempty"`
 	UpdateTime time.Time `json:"updateTime,omitempty" yaml:"updateTime,omitempty"`
+}
+
+func resourceFromArgs(args []string) (*Resource, error) {
+	if len(args) == 1 && strings.Contains(args[0], "/") {
+		s := strings.Split(args[0], "/")
+		return &Resource{
+			Kind: s[0],
+			Meta: &ResourceMeta{
+				UID: s[1],
+			},
+		}, nil
+	} else if len(args) == 2 && !strings.Contains(args[0], "/") && !strings.Contains(args[1], "/") {
+		return &Resource{
+			Kind: args[0],
+			Meta: &ResourceMeta{
+				UID: args[1],
+			},
+		}, nil
+	} else {
+		return nil, errors.New("malformed")
+	}
 }
 
 func resourcesFromArgs(args []string) (resources []*Resource, err error) {
