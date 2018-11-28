@@ -1,5 +1,6 @@
 ---
 layout: home
+title: Home
 ---
 
-## Welcome to PowerSSL
+![PowerSSL Logo](assets/images/powerssl.png)
