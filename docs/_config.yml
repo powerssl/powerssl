@@ -1,2 +1,5 @@
-color_scheme: dark
-remote_theme: pmarsceill/just-the-docs
+# color_scheme: dark
+markdown: kramdown
+search_enabled: true
+theme: just-the-docs
+title: PowerSSL Docs
