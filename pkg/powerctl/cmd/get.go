@@ -1,56 +1,64 @@
 package cmd
 
 import (
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
+
+	apiserverclient "powerssl.io/pkg/apiserver/client"
+	"powerssl.io/pkg/powerctl"
+	"powerssl.io/pkg/powerctl/resource"
 )
 
-var getCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get resource",
-	Args:  cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		client, err := NewGRPCClient()
-		if err != nil {
-			er(err)
-		}
-		var resources []*Resource
-		if len(args) == 1 && !strings.Contains(args[0], "/") {
-			kinds := strings.Split(args[0], ",")
-			if len(kinds) == 1 && kinds[0] == "all" {
-				kinds = Resources.Kinds()
-			}
-			for _, kind := range kinds {
-				resourceHandler, err := Resources.Get(kind)
-				if err != nil {
-					er(err)
-				}
-				res, err := resourceHandler.List(client)
-				if err != nil {
-					er(err)
-				}
-				resources = append(resources, res...)
-			}
-		} else {
-			resources, err = resourcesFromArgs(args)
-			if err != nil {
-				er(err)
-			}
-			for i, resource := range resources {
-				if resources[i], err = resource.Get(client); err != nil {
-					er(err)
-				}
-			}
-		}
-		if len(resources) > 1 {
-			pr(resources)
-		} else if len(resources) == 1 {
-			pr(resources[0])
-		}
-	},
-}
+func newCmdGet() *cobra.Command {
+	var client *apiserverclient.GRPCClient
 
-func init() {
-	rootCmd.AddCommand(getCmd)
+	cmd := &cobra.Command{
+		Use:   "get",
+		Short: "Get resource",
+		Args:  cobra.MinimumNArgs(1),
+		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
+			client, err = powerctl.NewGRPCClient()
+			return err
+		},
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			var resources []*resource.Resource
+			if len(args) == 1 && !strings.Contains(args[0], "/") {
+				kinds := strings.Split(args[0], ",")
+				if len(kinds) == 1 && kinds[0] == "all" {
+					kinds = resource.Kinds()
+				}
+				for _, kind := range kinds {
+					resourceHandler, err := resource.ResourceHandlerByKind(kind)
+					if err != nil {
+						return err
+					}
+					res, err := resourceHandler.List(client)
+					if err != nil {
+						return err
+					}
+					resources = append(resources, res...)
+				}
+			} else {
+				resources, err = resource.ResourcesFromArgs(args)
+				if err != nil {
+					return err
+				}
+				for i, res := range resources {
+					if resources[i], err = res.Get(client); err != nil {
+						return err
+					}
+				}
+			}
+			if len(resources) > 1 {
+				return resource.FormatResource(resources, os.Stdout)
+			} else if len(resources) == 1 {
+				return resource.FormatResource(resources[0], os.Stdout)
+			}
+			return nil
+		},
+	}
+
+	return cmd
 }

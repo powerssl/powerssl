@@ -1,9 +1,10 @@
-package cmd
+package resource
 
 import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 	"text/tabwriter"
 
@@ -11,19 +12,13 @@ import (
 
 	"powerssl.io/pkg/apiserver/api"
 	apiserverclient "powerssl.io/pkg/apiserver/client"
+	"powerssl.io/pkg/powerctl"
 )
-
-var User user
-
-type UserSpec struct {
-	DisplayName string `json:"displayName,omitempty" yaml:"displayName,omitempty"`
-	UserName    string `json:"userName,omitempty"    yaml:"userName,omitempty"`
-}
 
 type user struct{}
 
 func (r user) Create(client *apiserverclient.GRPCClient, resource *Resource) (*Resource, error) {
-	spec := resource.Spec.(*UserSpec)
+	spec := resource.Spec.(*userSpec)
 	user := &api.User{
 		DisplayName: spec.DisplayName,
 		UserName:    spec.UserName,
@@ -43,12 +38,12 @@ func (r user) Encode(user *api.User) *Resource {
 	uid := strings.Split(user.Name, "/")[1]
 	return &Resource{
 		Kind: "user",
-		Meta: &ResourceMeta{
+		Meta: &resourceMeta{
 			UID:        uid,
 			CreateTime: user.CreateTime,
 			UpdateTime: user.UpdateTime,
 		},
-		Spec: &UserSpec{
+		Spec: &userSpec{
 			DisplayName: user.DisplayName,
 			UserName:    user.UserName,
 		},
@@ -78,11 +73,11 @@ func (r user) List(client *apiserverclient.GRPCClient) ([]*Resource, error) {
 }
 
 func (r user) Spec() interface{} {
-	return new(UserSpec)
+	return new(userSpec)
 }
 
 func (r user) Columns(resource *Resource) ([]string, []string) {
-	spec := resource.Spec.(*UserSpec)
+	spec := resource.Spec.(*userSpec)
 	return []string{
 			"DISPLAY NAME",
 			"USER NAME",
@@ -93,7 +88,7 @@ func (r user) Columns(resource *Resource) ([]string, []string) {
 }
 
 func (r user) Describe(client *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
-	spec := resource.Spec.(*UserSpec)
+	spec := resource.Spec.(*userSpec)
 	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
 	fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
 	fmt.Fprintln(w, fmt.Sprintf("Create Time:\t%s", resource.Meta.CreateTime))
@@ -104,36 +99,45 @@ func (r user) Describe(client *apiserverclient.GRPCClient, resource *Resource, o
 	return nil
 }
 
-var UserName string
+type userSpec struct {
+	DisplayName string `json:"displayName,omitempty" yaml:"displayName,omitempty"`
+	UserName    string `json:"userName,omitempty"    yaml:"userName,omitempty"`
+}
 
-var createUserCmd = &cobra.Command{
-	Use:     "user",
-	Aliases: []string{"user"},
-	Short:   "Create ACME server",
-	Args:    cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
-		client, err := NewGRPCClient()
-		if err != nil {
-			er(err)
-		}
-		user := &api.User{
-			DisplayName: DisplayName,
-			UserName:    UserName,
-		}
-		user, err = client.User.Create(context.Background(), user)
-		if err != nil {
-			er(err)
-		}
-		pr(User.Encode(user))
-	},
+func NewCmdCreateUser() *cobra.Command {
+	var client *apiserverclient.GRPCClient
+	var (
+		displayName string
+		userName    string
+	)
+
+	cmd := &cobra.Command{
+		Use:     "user",
+		Aliases: []string{"user"},
+		Short:   "Create ACME server",
+		Args:    cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
+			client, err = powerctl.NewGRPCClient()
+			return err
+		},
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			apiUser := &api.User{
+				DisplayName: displayName,
+				UserName:    userName,
+			}
+			if apiUser, err = client.User.Create(context.Background(), apiUser); err != nil {
+				return err
+			}
+			return FormatResource(user{}.Encode(apiUser), os.Stdout)
+		},
+	}
+
+	cmd.Flags().StringVarP(&displayName, "display-name", "", "", "Display name")
+	cmd.Flags().StringVarP(&userName, "user-name", "", "", "User name")
+
+	return cmd
 }
 
 func init() {
-	Resources.Add(User, "u")
-
-	createUserCmd.Flags().StringVarP(&DisplayName, "display-name", "", "", "Display name")
-	createUserCmd.Flags().StringVarP(&Filename, "filename", "f", "", "Filename to file to use to create the ACME server")
-	createUserCmd.Flags().StringVarP(&UserName, "user-name", "", "", "User name")
-
-	createCmd.AddCommand(createUserCmd)
+	resources.Add(user{}, "u")
 }

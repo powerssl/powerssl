@@ -9,61 +9,74 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"powerssl.io/pkg/powerctl/resource"
 )
 
 var (
-	Verbose bool
+	verbose bool
 	cfgFile string
-	Output  string
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "powerctl",
-	Short: "powerctl controls PowerSSL",
-	Long: `powerctl controls PowerSSL.
+func NewCmdRoot() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "powerctl",
+		Short: "powerctl controls PowerSSL",
+		Long: `powerctl controls PowerSSL.
 
 Find more information at: https://docs.powerssl.io/powerctl/powerctl.html`,
-	Version: "0.1.0",
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		switch Output {
-		case "json", "table", "yaml":
-		default:
-			er("Unknown output format")
-		}
-	},
+		Version: "0.1.0",
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			switch viper.GetString("output") {
+			case "json", "table", "yaml":
+			default:
+				return fmt.Errorf("unknown output format")
+			}
+			return nil
+		},
+	}
+
+	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output")
+	cmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.powerctl/config.yaml)")
+
+	cmd.PersistentFlags().BoolP("insecure", "", false, "Use insecure communication")
+	cmd.PersistentFlags().BoolP("insecure-skip-tls-verify", "", false, "Accepts any certificate presented by the server and any host name in that certificate")
+	cmd.PersistentFlags().StringP("addr", "", "", "GRPC address of API server")
+	cmd.PersistentFlags().StringP("auth-token", "", "", "Authentication token")
+	cmd.PersistentFlags().StringP("ca-file", "", "", "Certificate authority file")
+	cmd.PersistentFlags().StringP("output", "o", "table", "Output format")
+	cmd.PersistentFlags().StringP("server-name-override", "", "", "It will override the virtual host name of authority")
+
+	viper.BindPFlag("addr", cmd.PersistentFlags().Lookup("addr"))
+	viper.BindPFlag("auth-token", cmd.PersistentFlags().Lookup("auth-token"))
+	viper.BindPFlag("ca-file", cmd.PersistentFlags().Lookup("ca-file"))
+	viper.BindPFlag("insecure", cmd.PersistentFlags().Lookup("insecure"))
+	viper.BindPFlag("insecure-skip-tls-verify", cmd.PersistentFlags().Lookup("insecure-skip-tls-verify"))
+	viper.BindPFlag("output", cmd.PersistentFlags().Lookup("output"))
+	viper.BindPFlag("server-name-override", cmd.PersistentFlags().Lookup("server-name-override"))
+
+	cmd.AddCommand(newCmdCompletion())
+	cmdCreate := newCmdCreate()
+	cmdCreate.AddCommand(resource.NewCmdCreateACMEAccount())
+	cmdCreate.AddCommand(resource.NewCmdCreateACMEServer())
+	cmdCreate.AddCommand(resource.NewCmdCreateCertificate())
+	cmdCreate.AddCommand(resource.NewCmdCreateUser())
+	cmd.AddCommand(cmdCreate)
+	cmd.AddCommand(newCmdDelete())
+	cmd.AddCommand(newCmdDescribe())
+	cmd.AddCommand(newCmdGet())
+	cmd.AddCommand(newCmdUpdate())
+
+	return cmd
 }
 
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	cobra.OnInitialize(initConfig)
+
+	if err := NewCmdRoot().Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-}
-
-func RootCmd() *cobra.Command {
-	return rootCmd
-}
-
-func init() {
-	cobra.OnInitialize(initConfig)
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.powerctl/config.yaml)")
-	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "Verbose output")
-	rootCmd.PersistentFlags().StringVarP(&Output, "output", "o", "table", "Output format")
-
-	rootCmd.PersistentFlags().BoolP("insecure", "", false, "Use insecure communication")
-	rootCmd.PersistentFlags().BoolP("insecure-skip-tls-verify", "", false, "Accepts any certificate presented by the server and any host name in that certificate")
-	rootCmd.PersistentFlags().StringP("addr", "", "", "GRPC address of API server")
-	rootCmd.PersistentFlags().StringP("auth-token", "", "", "Authentication token")
-	rootCmd.PersistentFlags().StringP("ca-file", "", "", "Certificate authority file")
-	rootCmd.PersistentFlags().StringP("server-name-override", "", "", "It will override the virtual host name of authority")
-
-	viper.BindPFlag("addr", rootCmd.PersistentFlags().Lookup("addr"))
-	viper.BindPFlag("auth-token", rootCmd.PersistentFlags().Lookup("auth-token"))
-	viper.BindPFlag("ca-file", rootCmd.PersistentFlags().Lookup("ca-file"))
-	viper.BindPFlag("insecure", rootCmd.PersistentFlags().Lookup("insecure"))
-	viper.BindPFlag("insecure-skip-tls-verify", rootCmd.PersistentFlags().Lookup("insecure-skip-tls-verify"))
-	viper.BindPFlag("server-name-override", rootCmd.PersistentFlags().Lookup("server-name-override"))
 }
 
 func initConfig() {
@@ -87,7 +100,7 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err != nil && strings.Contains("Not Found", err.Error()) {
 		fmt.Println("Can't read config:", err)
 		os.Exit(1)
-	} else if err == nil && Verbose {
+	} else if err == nil && verbose {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 }

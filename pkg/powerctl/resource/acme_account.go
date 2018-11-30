@@ -1,4 +1,4 @@
-package cmd
+package resource
 
 import (
 	"bufio"
@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 	"text/tabwriter"
 
@@ -13,24 +14,13 @@ import (
 
 	"powerssl.io/pkg/apiserver/api"
 	apiserverclient "powerssl.io/pkg/apiserver/client"
+	"powerssl.io/pkg/powerctl"
 )
-
-var ACMEAccount acmeAccount
-
-type ACMEAccountSpec struct {
-	DisplayName          string   `json:"displayName,omitempty"          yaml:"displayName,omitempty"`
-	Title                string   `json:"directoryURL,omitempty"         yaml:"directoryURL,omitempty"`
-	Description          string   `json:"integrationName,omitempty"      yaml:"integrationName,omitempty"`
-	ACMEServer           string   `json:"acmeServer,omitempty"           yaml:"acmeServer,omitempty"`
-	TermsOfServiceAgreed bool     `json:"termsOfServiceAgreed,omitempty" yaml:"termsOfServiceAgreed,omitempty"`
-	Contacts             []string `json:"contacts,omitempty"             yaml:"contacts,omitempty"`
-	AccountURL           string   `json:"accountURL,omitempty"           yaml:"accountURL,omitempty"`
-}
 
 type acmeAccount struct{}
 
 func (r acmeAccount) Create(client *apiserverclient.GRPCClient, resource *Resource) (*Resource, error) {
-	spec := resource.Spec.(*ACMEAccountSpec)
+	spec := resource.Spec.(*acmeAccountSpec)
 	acmeAccount := &api.ACMEAccount{
 		Contacts:             spec.Contacts,
 		TermsOfServiceAgreed: spec.TermsOfServiceAgreed,
@@ -51,12 +41,12 @@ func (r acmeAccount) Encode(acmeAccount *api.ACMEAccount) *Resource {
 	acmeServer := strings.Split(acmeAccount.Name, "/")[1]
 	return &Resource{
 		Kind: "acmeaccount",
-		Meta: &ResourceMeta{
+		Meta: &resourceMeta{
 			UID:        uid,
 			CreateTime: acmeAccount.CreateTime,
 			UpdateTime: acmeAccount.UpdateTime,
 		},
-		Spec: &ACMEAccountSpec{
+		Spec: &acmeAccountSpec{
 			DisplayName:          acmeAccount.DisplayName,
 			Title:                acmeAccount.Title,
 			Description:          acmeAccount.Description,
@@ -91,11 +81,11 @@ func (r acmeAccount) List(client *apiserverclient.GRPCClient) ([]*Resource, erro
 }
 
 func (r acmeAccount) Spec() interface{} {
-	return new(ACMEAccountSpec)
+	return new(acmeAccountSpec)
 }
 
 func (r acmeAccount) Columns(resource *Resource) ([]string, []string) {
-	spec := resource.Spec.(*ACMEAccountSpec)
+	spec := resource.Spec.(*acmeAccountSpec)
 	return []string{
 			"DISPLAY NAME",
 			"DESCRIPTION",
@@ -112,7 +102,7 @@ func (r acmeAccount) Columns(resource *Resource) ([]string, []string) {
 }
 
 func (r acmeAccount) Describe(client *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
-	spec := resource.Spec.(*ACMEAccountSpec)
+	spec := resource.Spec.(*acmeAccountSpec)
 	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
 	fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
 	fmt.Fprintln(w, fmt.Sprintf("Create Time:\t%s", resource.Meta.CreateTime))
@@ -126,7 +116,7 @@ func (r acmeAccount) Describe(client *apiserverclient.GRPCClient, resource *Reso
 	fmt.Fprintln(w, "ACME Server:")
 	acmeServer := &Resource{
 		Kind: "acmeserver",
-		Meta: &ResourceMeta{
+		Meta: &resourceMeta{
 			UID: spec.ACMEServer,
 		},
 	}
@@ -143,42 +133,54 @@ func (r acmeAccount) Describe(client *apiserverclient.GRPCClient, resource *Reso
 	return nil
 }
 
-var (
-	ACMEServerID         string
-	Contacts             string
-	TermsOfServiceAgreed bool
-)
+type acmeAccountSpec struct {
+	DisplayName          string   `json:"displayName,omitempty"          yaml:"displayName,omitempty"`
+	Title                string   `json:"directoryURL,omitempty"         yaml:"directoryURL,omitempty"`
+	Description          string   `json:"integrationName,omitempty"      yaml:"integrationName,omitempty"`
+	ACMEServer           string   `json:"acmeServer,omitempty"           yaml:"acmeServer,omitempty"`
+	TermsOfServiceAgreed bool     `json:"termsOfServiceAgreed,omitempty" yaml:"termsOfServiceAgreed,omitempty"`
+	Contacts             []string `json:"contacts,omitempty"             yaml:"contacts,omitempty"`
+	AccountURL           string   `json:"accountURL,omitempty"           yaml:"accountURL,omitempty"`
+}
 
-var createACMEAccountCmd = &cobra.Command{
-	Use:     "acmeaccount",
-	Short:   "Create ACME account",
-	Args:    cobra.NoArgs,
-	Example: `  powerctl create acmeaccount --agree-terms-of-service --contacts mailto:john.doe@example.com --acmeserver 42   Create ACME account within ACME server`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client, err := NewGRPCClient()
-		if err != nil {
-			er(err)
-		}
-		acmeAccount := &api.ACMEAccount{
-			Contacts:             strings.Split(Contacts, ","),
-			TermsOfServiceAgreed: TermsOfServiceAgreed,
-		}
-		acmeAccount, err = client.ACMEAccount.Create(context.Background(), fmt.Sprintf("acmeServers/%s", ACMEServerID), acmeAccount)
-		if err != nil {
-			er(err)
-		}
-		pr(ACMEAccount.Encode(acmeAccount))
-	},
+func NewCmdCreateACMEAccount() *cobra.Command {
+	var client *apiserverclient.GRPCClient
+	var (
+		acmeServerID         string
+		contacts             string
+		termsOfServiceAgreed bool
+	)
+
+	cmd := &cobra.Command{
+		Use:     "acmeaccount",
+		Short:   "Create ACME account",
+		Args:    cobra.NoArgs,
+		Example: `  powerctl create acmeaccount --agree-terms-of-service --contacts mailto:john.doe@example.com --acmeserver 42   Create ACME account within ACME server`,
+		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
+			client, err = powerctl.NewGRPCClient()
+			return err
+		},
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			apiACMEAccount := &api.ACMEAccount{
+				Contacts:             strings.Split(contacts, ","),
+				TermsOfServiceAgreed: termsOfServiceAgreed,
+			}
+			if apiACMEAccount, err = client.ACMEAccount.Create(context.Background(), fmt.Sprintf("acmeServers/%s", acmeServerID), apiACMEAccount); err != nil {
+				return err
+			}
+			return FormatResource(acmeAccount{}.Encode(apiACMEAccount), os.Stdout)
+		},
+	}
+
+	cmd.Flags().BoolVarP(&termsOfServiceAgreed, "agree-terms-of-service", "", false, "Terms of Service agreed")
+	cmd.Flags().StringVarP(&contacts, "contacts", "", "", "Contact URLs (e.g. mailto:contact@example.com) (seperated by \",\")")
+	cmd.Flags().StringVarP(&acmeServerID, "acmeserver", "", "", "ACME Server")
+
+	cmd.MarkFlagRequired("acmeserver")
+
+	return cmd
 }
 
 func init() {
-	Resources.Add(ACMEAccount, "aa")
-
-	createACMEAccountCmd.Flags().BoolVarP(&TermsOfServiceAgreed, "agree-terms-of-service", "", false, "Terms of Service agreed")
-	createACMEAccountCmd.Flags().StringVarP(&Contacts, "contacts", "", "", "Contact URLs (e.g. mailto:contact@example.com) (seperated by \",\")")
-	createACMEAccountCmd.Flags().StringVarP(&Filename, "filename", "f", "", "Filename to file to use to create the ACME account")
-	createACMEAccountCmd.Flags().StringVarP(&ACMEServerID, "acmeserver", "", "", "ACME Server")
-	createACMEAccountCmd.MarkFlagRequired("acmeserver")
-
-	createCmd.AddCommand(createACMEAccountCmd)
+	resources.Add(acmeAccount{}, "aa")
 }

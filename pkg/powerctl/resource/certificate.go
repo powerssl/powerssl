@@ -1,9 +1,10 @@
-package cmd
+package resource
 
 import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 	"text/tabwriter"
 
@@ -11,22 +12,13 @@ import (
 
 	"powerssl.io/pkg/apiserver/api"
 	apiserverclient "powerssl.io/pkg/apiserver/client"
+	"powerssl.io/pkg/powerctl"
 )
-
-var Certificate certificate
-
-type CertificateSpec struct {
-	Dnsnames        []string `json:"dnsnames,omitempty"        yaml:"dnsnames,omitempty"`
-	KeyAlgorithm    string   `json:"keyAlgorithm,omitempty"    yaml:"keyAlgorithm,omitempty"`
-	KeySize         int32    `json:"keySize,omitempty"         yaml:"keySize,omitempty"`
-	DigestAlgorithm string   `json:"digestAlgorithm,omitempty" yaml:"digestAlgorithm,omitempty"`
-	AutoRenew       bool     `json:"autoRenew,omitempty"       yaml:"autoRenew,omitempty"`
-}
 
 type certificate struct{}
 
 func (r certificate) Create(client *apiserverclient.GRPCClient, resource *Resource) (*Resource, error) {
-	spec := resource.Spec.(*CertificateSpec)
+	spec := resource.Spec.(*certificateSpec)
 	certificate := &api.Certificate{
 		Dnsnames:        spec.Dnsnames,
 		KeyAlgorithm:    spec.KeyAlgorithm,
@@ -49,12 +41,12 @@ func (r certificate) Encode(certificate *api.Certificate) *Resource {
 	uid := strings.Split(certificate.Name, "/")[1]
 	return &Resource{
 		Kind: "certificate",
-		Meta: &ResourceMeta{
+		Meta: &resourceMeta{
 			UID:        uid,
 			CreateTime: certificate.CreateTime,
 			UpdateTime: certificate.UpdateTime,
 		},
-		Spec: &CertificateSpec{
+		Spec: &certificateSpec{
 			Dnsnames:        certificate.Dnsnames,
 			KeyAlgorithm:    certificate.KeyAlgorithm,
 			KeySize:         certificate.KeySize,
@@ -87,11 +79,11 @@ func (r certificate) List(client *apiserverclient.GRPCClient) ([]*Resource, erro
 }
 
 func (r certificate) Spec() interface{} {
-	return new(CertificateSpec)
+	return new(certificateSpec)
 }
 
 func (r certificate) Columns(resource *Resource) ([]string, []string) {
-	spec := resource.Spec.(*CertificateSpec)
+	spec := resource.Spec.(*certificateSpec)
 	return []string{
 			"DNS NAMES",
 			"KEY ALGORITHM",
@@ -108,7 +100,7 @@ func (r certificate) Columns(resource *Resource) ([]string, []string) {
 }
 
 func (r certificate) Describe(client *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
-	spec := resource.Spec.(*CertificateSpec)
+	spec := resource.Spec.(*certificateSpec)
 	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
 	fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
 	fmt.Fprintln(w, fmt.Sprintf("Create Time:\t%s", resource.Meta.CreateTime))
@@ -122,47 +114,56 @@ func (r certificate) Describe(client *apiserverclient.GRPCClient, resource *Reso
 	return nil
 }
 
-var (
-	AutoRenew       bool
-	DNSNames        string
-	DigestAlgorithm string
-	KeyAlgorithm    string
-	KeySize         int
-)
+type certificateSpec struct {
+	Dnsnames        []string `json:"dnsnames,omitempty"        yaml:"dnsnames,omitempty"`
+	KeyAlgorithm    string   `json:"keyAlgorithm,omitempty"    yaml:"keyAlgorithm,omitempty"`
+	KeySize         int32    `json:"keySize,omitempty"         yaml:"keySize,omitempty"`
+	DigestAlgorithm string   `json:"digestAlgorithm,omitempty" yaml:"digestAlgorithm,omitempty"`
+	AutoRenew       bool     `json:"autoRenew,omitempty"       yaml:"autoRenew,omitempty"`
+}
 
-var createCertificateCmd = &cobra.Command{
-	Use:   "certificate",
-	Short: "Create Certificate",
-	Args:  cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
-		client, err := NewGRPCClient()
-		if err != nil {
-			er(err)
-		}
-		certificate := &api.Certificate{
-			Dnsnames:        strings.Split(DNSNames, ","),
-			KeyAlgorithm:    KeyAlgorithm,
-			KeySize:         int32(KeySize),
-			DigestAlgorithm: DigestAlgorithm,
-			AutoRenew:       AutoRenew,
-		}
-		certificate, err = client.Certificate.Create(context.Background(), certificate)
-		if err != nil {
-			er(err)
-		}
-		pr(Certificate.Encode(certificate))
-	},
+func NewCmdCreateCertificate() *cobra.Command {
+	var client *apiserverclient.GRPCClient
+	var (
+		autoRenew       bool
+		dnsNames        string
+		digestAlgorithm string
+		keyAlgorithm    string
+		keySize         int
+	)
+
+	cmd := &cobra.Command{
+		Use:   "certificate",
+		Short: "Create Certificate",
+		Args:  cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
+			client, err = powerctl.NewGRPCClient()
+			return err
+		},
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			apiCertificate := &api.Certificate{
+				Dnsnames:        strings.Split(dnsNames, ","),
+				KeyAlgorithm:    keyAlgorithm,
+				KeySize:         int32(keySize),
+				DigestAlgorithm: digestAlgorithm,
+				AutoRenew:       autoRenew,
+			}
+			if apiCertificate, err = client.Certificate.Create(context.Background(), apiCertificate); err != nil {
+				return err
+			}
+			return FormatResource(certificate{}.Encode(apiCertificate), os.Stdout)
+		},
+	}
+
+	cmd.Flags().BoolVarP(&autoRenew, "auto-renew", "", false, "Auto renew ...")
+	cmd.Flags().IntVarP(&keySize, "key-size", "", 0, "Key size ...")
+	cmd.Flags().StringVarP(&digestAlgorithm, "digest-algorithm", "", "", "Digest algorithm ...")
+	cmd.Flags().StringVarP(&dnsNames, "dns-names", "", "", "DNS name for the certificate (seperated by \",\")")
+	cmd.Flags().StringVarP(&keyAlgorithm, "key-algorithm", "", "", "Key algorithm ...")
+
+	return cmd
 }
 
 func init() {
-	Resources.Add(Certificate, "cert", "c")
-
-	createCertificateCmd.Flags().StringVarP(&Filename, "filename", "f", "", "Filename to file to use to create the certificate")
-	createCertificateCmd.Flags().StringVarP(&DNSNames, "dns-names", "", "", "DNS name for the certificate (seperated by \",\")")
-	createCertificateCmd.Flags().StringVarP(&KeyAlgorithm, "key-algorithm", "", "", "Key algorithm ...")
-	createCertificateCmd.Flags().IntVarP(&KeySize, "key-size", "", 0, "Key size ...")
-	createCertificateCmd.Flags().StringVarP(&DigestAlgorithm, "digest-algorithm", "", "", "Digest algorithm ...")
-	createCertificateCmd.Flags().BoolVarP(&AutoRenew, "auto-renew", "", false, "Auto renew ...")
-
-	createCmd.AddCommand(createCertificateCmd)
+	resources.Add(certificate{}, "cert", "c")
 }

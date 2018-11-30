@@ -4,30 +4,35 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
+	apiserverclient "powerssl.io/pkg/apiserver/client"
+	"powerssl.io/pkg/powerctl"
+	"powerssl.io/pkg/powerctl/resource"
 )
 
-var describeCmd = &cobra.Command{
-	Use:   "describe",
-	Short: "Describe resource",
-	Args:  cobra.RangeArgs(1, 2),
-	Run: func(cmd *cobra.Command, args []string) {
-		client, err := NewGRPCClient()
-		if err != nil {
-			er(err)
-		}
-		resource, err := resourceFromArgs(args)
-		if err != nil {
-			er(err)
-		}
-		if resource, err = resource.Get(client); err != nil {
-			er(err)
-		}
-		if err := resource.Describe(client, os.Stdout); err != nil {
-			er(err)
-		}
-	},
-}
+func newCmdDescribe() *cobra.Command {
+	var client *apiserverclient.GRPCClient
 
-func init() {
-	rootCmd.AddCommand(describeCmd)
+	cmd := &cobra.Command{
+		Use:   "describe",
+		Short: "Describe resource",
+		Args:  cobra.RangeArgs(1, 2),
+		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
+			client, err = powerctl.NewGRPCClient()
+			return err
+
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			res, err := resource.ResourceFromArgs(args)
+			if err != nil {
+				return err
+			}
+			if res, err = res.Get(client); err != nil {
+				return err
+			}
+			return res.Describe(client, os.Stdout)
+		},
+	}
+
+	return cmd
 }

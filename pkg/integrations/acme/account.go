@@ -2,26 +2,34 @@ package acme
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"fmt"
 	"time"
 
 	"powerssl.io/pkg/controller/api"
 )
 
-func (acme *ACME) CreateAccount(_ context.Context, directoryURL string, termsOfServiceAgreed bool, contacts []string) (*api.Account, error) {
-	// newAccountReq := struct {
-	// 	TermsOfServiceAgreed bool     `json:"termsOfServiceAgreed"`
-	// 	Contacts             []string `json:"contact"`
-	// }{
-	// 	TermsOfServiceAgreed: termsOfServiceAgreed,
-	// 	Contacts:             contacts,
-	// }
-	account := &api.Account{
-		Contacts:             contacts,
-		Status:               api.AccountStatusRevoked,
-		TermsOfServiceAgreed: termsOfServiceAgreed,
-		URL:                  "https://example.com/acct/123",
+func (acme *ACME) CreateAccount(ctx context.Context, directoryURL string, termsOfServiceAgreed bool, contacts []string) (*api.Account, error) {
+	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		return nil, fmt.Errorf("error creating private key: %v", err)
 	}
-	return account, nil
+	client, err := NewClient(ctx, directoryURL)
+	if err != nil {
+		return nil, err
+	}
+	account, err := client.NewAccount(privKey, false, termsOfServiceAgreed, contacts...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating new account: %v", err)
+	}
+	return &api.Account{
+		Contacts:             account.Contact,
+		Status:               api.AccountStatusRevoked, // TODO
+		TermsOfServiceAgreed: account.TermsOfServiceAgreed,
+		URL:                  account.URL,
+	}, nil
 }
 
 func (acme *ACME) DeactivateAccount(_ context.Context, accountURL string) (*api.Account, error) {
