@@ -52,6 +52,10 @@ func (s *integrationServiceServer) RegisterGRPCServer(baseServer *grpc.Server) {
 	apiv1.RegisterIntegrationServiceServer(baseServer, s)
 }
 
+func (*integrationServiceServer) ServiceName() string {
+	return "powerssl.controller.v1.IntegrationService"
+}
+
 func (s *integrationServiceServer) Register(request *apiv1.RegisterIntegrationRequest, stream apiv1.IntegrationService_RegisterServer) error {
 	var kind IntegrationKind
 	switch request.GetKind() {

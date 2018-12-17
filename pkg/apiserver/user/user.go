@@ -36,3 +36,7 @@ func (user *User) RegisterGRPCServer(baseServer *grpc.Server) {
 	grpcServer := transport.NewGRPCServer(user.endpoints, user.logger, user.tracer)
 	apiv1.RegisterUserServiceServer(baseServer, grpcServer)
 }
+
+func (*User) ServiceName() string {
+	return "powerssl.apiserver.v1.UserService"
+}

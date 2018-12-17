@@ -36,3 +36,7 @@ func (acmeServer *ACMEServer) RegisterGRPCServer(baseServer *grpc.Server) {
 	grpcServer := transport.NewGRPCServer(acmeServer.endpoints, acmeServer.logger, acmeServer.tracer)
 	apiv1.RegisterACMEServerServiceServer(baseServer, grpcServer)
 }
+
+func (*ACMEServer) ServiceName() string {
+	return "powerssl.apiserver.v1.ACMEServerService"
+}

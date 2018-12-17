@@ -36,3 +36,7 @@ func (certificate *Certificate) RegisterGRPCServer(baseServer *grpc.Server) {
 	grpcServer := transport.NewGRPCServer(certificate.endpoints, certificate.logger, certificate.tracer)
 	apiv1.RegisterCertificateServiceServer(baseServer, grpcServer)
 }
+
+func (*Certificate) ServiceName() string {
+	return "powerssl.apiserver.v1.CertificateService"
+}

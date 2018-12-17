@@ -21,6 +21,7 @@ import (
 
 type Service interface {
 	RegisterGRPCServer(baseServer *grpc.Server)
+	ServiceName() string
 }
 
 func NewClientConn(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool) (*grpc.ClientConn, error) {
@@ -76,6 +77,7 @@ func ServeGRPC(ctx context.Context, addr, certFile, keyFile string, insecure boo
 	healthpb.RegisterHealthServer(srv, healthSrv)
 	for _, service := range services {
 		service.RegisterGRPCServer(srv)
+		healthSrv.SetServingStatus(service.ServiceName(), healthpb.HealthCheckResponse_SERVING)
 	}
 
 	c := make(chan error)
