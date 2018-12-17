@@ -1,22 +1,23 @@
 .PHONY: quickstart
 quickstart:
-	cp powerctl.yaml ~/.powerctl.yaml
-	sudo mkdir -p /etc/powerssl
-	sudo cp -r api /etc/powerssl
-	sudo cp -r auth /etc/powerssl
-	sudo cp -r controller /etc/powerssl
-	sudo cp -r signer /etc/powerssl
+	mkdir ~/.powerctl
+	cp powerctl/config.yaml ~/.powerctl/config.yaml
+	mkdir -p /etc/powerssl
+	cp -r api /etc/powerssl
+	cp -r auth /etc/powerssl
+	cp -r controller /etc/powerssl
+	cp -r signer /etc/powerssl
 	make -C certs
-	sudo cp certs/ca.pem /etc/powerssl
-	sudo cp certs/localhost.pem /etc/powerssl/api/cert.pem
-	sudo cp certs/localhost-key.pem /etc/powerssl/api/cert-key.pem
-	sudo chmod +r /etc/powerssl/api/cert-key.pem
-	sudo cp certs/localhost.pem /etc/powerssl/auth/cert.pem
-	sudo cp certs/localhost-key.pem /etc/powerssl/auth/cert-key.pem
-	sudo chmod +r /etc/powerssl/auth/cert-key.pem
-	sudo cp certs/localhost.pem /etc/powerssl/controller/cert.pem
-	sudo cp certs/localhost-key.pem /etc/powerssl/controller/cert-key.pem
-	sudo chmod +r /etc/powerssl/controller/cert-key.pem
-	sudo cp certs/localhost.pem /etc/powerssl/signer/cert.pem
-	sudo cp certs/localhost-key.pem /etc/powerssl/signer/cert-key.pem
-	sudo chmod +r /etc/powerssl/signer/cert-key.pem
+	cp certs/ca.pem /etc/powerssl
+	cp certs/localhost.pem /etc/powerssl/api/cert.pem
+	cp certs/localhost-key.pem /etc/powerssl/api/cert-key.pem
+	chmod +r /etc/powerssl/api/cert-key.pem
+	cp certs/localhost.pem /etc/powerssl/auth/cert.pem
+	cp certs/localhost-key.pem /etc/powerssl/auth/cert-key.pem
+	chmod +r /etc/powerssl/auth/cert-key.pem
+	cp certs/localhost.pem /etc/powerssl/controller/cert.pem
+	cp certs/localhost-key.pem /etc/powerssl/controller/cert-key.pem
+	chmod +r /etc/powerssl/controller/cert-key.pem
+	cp certs/localhost.pem /etc/powerssl/signer/cert.pem
+	cp certs/localhost-key.pem /etc/powerssl/signer/cert-key.pem
+	chmod +r /etc/powerssl/signer/cert-key.pem
