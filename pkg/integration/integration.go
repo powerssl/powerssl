@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/go-kit/kit/log"
@@ -156,7 +157,7 @@ func (i *integration) loggingMiddleware(ctx context.Context, activity *api.Activ
 
 func (i *integration) tracingMiddleware(ctx context.Context, activity *api.Activity) error {
 	wireContext, err := tracing.WireContextFromJSON(activity.Signature) // TODO: Do not use Signature for Span
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "not found") {
 		i.logger.Log("activity", activity.Token, "err", err)
 	}
 	activitySpan := opentracing.StartSpan(activity.Name.String(), ext.RPCServerOption(wireContext))
