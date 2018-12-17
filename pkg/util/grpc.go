@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"net/url"
 	"runtime/debug"
 	"time"
 
@@ -13,6 +14,8 @@ import (
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
 	middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	"github.com/johanbrandhorst/certify"
+	"github.com/johanbrandhorst/certify/issuers/vault"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
@@ -45,7 +48,7 @@ func NewClientConn(addr, certFile, serverNameOverride string, insecure, insecure
 	return grpc.Dial(addr, opts...)
 }
 
-func ServeGRPC(ctx context.Context, addr, certFile, keyFile string, insecure bool, logger log.Logger, services []Service) error {
+func ServeGRPC(ctx context.Context, addr, certFile, keyFile, commonName, vaultURL, vaultToken, vaultRole string, insecure bool, logger log.Logger, services []Service) error {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
@@ -64,10 +67,39 @@ func ServeGRPC(ctx context.Context, addr, certFile, keyFile string, insecure boo
 			recovery.StreamServerInterceptor(recoveryOptions...),
 		),
 	}
+
 	if !insecure {
-		creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
-		if err != nil {
-			return fmt.Errorf("Failed to load TLS credentials %v", err)
+		var creds credentials.TransportCredentials
+		if certFile != "" && keyFile != "" {
+			if creds, err = credentials.NewServerTLSFromFile(certFile, keyFile); err != nil {
+				return fmt.Errorf("Failed to load TLS credentials %v", err)
+			}
+		} else {
+			url, err := url.Parse(vaultURL)
+			if err != nil {
+				return err
+			}
+			c := &certify.Certify{
+				Cache:      certify.NewMemCache(),
+				CommonName: commonName,
+				Issuer: &vault.Issuer{
+					InsecureAllowHTTP: url.Scheme == "http",
+					Role:              vaultRole,
+					Token:             vaultToken,
+					URL:               url,
+				},
+				RenewBefore: time.Hour,
+			}
+			getCertificate := func(hello *tls.ClientHelloInfo) (cert *tls.Certificate, err error) {
+				if cert, err = c.GetCertificate(hello); err != nil {
+					logger.Log("err", err)
+				}
+				return cert, err
+			}
+			if _, err := getCertificate(&tls.ClientHelloInfo{ServerName: commonName}); err != nil {
+				return err
+			}
+			creds = credentials.NewTLS(&tls.Config{GetCertificate: getCertificate})
 		}
 		options = append(options, grpc.Creds(creds))
 	}
