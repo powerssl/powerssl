@@ -76,7 +76,6 @@ docs:
 	go run powerssl.io/cmd/powerssl-integration-acme-doc
 	go run powerssl.io/cmd/powerssl-integration-cloudflare-doc
 	go run powerssl.io/cmd/powerssl-signer-doc
-	go run powerssl.io/cmd/powerssl-tokenserver-doc
 
 .PHONY: install-agent
 install-agent:
