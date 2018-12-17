@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	if err := doc.GenMarkdownTreeCustom(cmd.RootCmd(), "docs/powerctl", filePrepender, linkHandler); err != nil {
+	if err := doc.GenMarkdownTreeCustom(cmd.NewCmdRoot(), "docs/powerctl", filePrepender, linkHandler); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
