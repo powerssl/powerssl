@@ -60,6 +60,31 @@ func Run(httpAddr, httpCertFile, httpKeyFile string, httpInsecure bool, metricsA
 	}
 }
 
+func jwksEndpoint(signKeys ...*rsa.PrivateKey) (func(w http.ResponseWriter, req *http.Request), error) {
+	jsonWebKeys := make([]jose.JSONWebKey, len(signKeys))
+	for i, signKey := range signKeys {
+		jsonWebKey := jose.JSONWebKey{
+			Algorithm: "RS256",
+			Key:       signKey,
+			Use:       "sig",
+		}
+		publicJSONWebKey := jsonWebKey.Public()
+		thumbprint, err := publicJSONWebKey.Thumbprint(crypto.SHA1)
+		if err != nil {
+			return nil, err
+		}
+		publicJSONWebKey.KeyID = base64.URLEncoding.EncodeToString(thumbprint)
+		jsonWebKeys[i] = publicJSONWebKey
+	}
+	jwks, err := json.Marshal(&jose.JSONWebKeySet{Keys: jsonWebKeys})
+	if err != nil {
+		return nil, err
+	}
+	return func(w http.ResponseWriter, req *http.Request) {
+		fmt.Fprintln(w, string(jwks))
+	}, nil
+}
+
 func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKeyFile string) error {
 	signBytes, err := ioutil.ReadFile(jwtPrivateKeyFile)
 	if err != nil {
@@ -76,29 +101,11 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
-	mux.HandleFunc("/.well-known/jwks.json", func(w http.ResponseWriter, req *http.Request) {
-		jsonWebKey := jose.JSONWebKey{
-			Key: signKey,
-		}
-		publicJSONWebKey := jsonWebKey.Public()
-		thumbprint, err := publicJSONWebKey.Thumbprint(crypto.SHA1)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		publicJSONWebKey.Algorithm = "RS256"
-		publicJSONWebKey.Use = "sig"
-		publicJSONWebKey.KeyID = base64.URLEncoding.EncodeToString(thumbprint)
-		jsonWebKeySet := &jose.JSONWebKeySet{
-			Keys: []jose.JSONWebKey{publicJSONWebKey},
-		}
-		jwks, err := json.Marshal(jsonWebKeySet)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		fmt.Fprint(w, fmt.Sprintln(string(jwks)))
-	})
+	jwksHandler, err := jwksEndpoint(signKey)
+	if err != nil {
+		return err
+	}
+	mux.HandleFunc("/.well-known/jwks.json", jwksHandler)
 	mux.HandleFunc("/raw", func(w http.ResponseWriter, req *http.Request) {
 		expiresAt := time.Now().Add(time.Hour * 24).Unix()
 		subject := req.URL.Query().Get("sub")
@@ -110,16 +117,14 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 		fmt.Fprint(w, tokenString)
 	})
 	mux.HandleFunc("/service", func(w http.ResponseWriter, req *http.Request) {
-		token := jwt.NewWithClaims(auth.Method, &jwt.StandardClaims{})
-		key := jose.JSONWebKey{
-			Key: signKey,
-		}
+		key := jose.JSONWebKey{Key: signKey}
 		public := key.Public()
 		thumbprint, err := public.Thumbprint(crypto.SHA1)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		token := jwt.NewWithClaims(auth.Method, &jwt.StandardClaims{})
 		token.Header["kid"] = base64.URLEncoding.EncodeToString(thumbprint)
 		tokenString, err := token.SignedString(signKey)
 		if err != nil {
