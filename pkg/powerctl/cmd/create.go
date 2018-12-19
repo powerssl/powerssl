@@ -18,6 +18,11 @@ func newCmdCreate() *cobra.Command {
 		Use:   "create",
 		Short: "Create resource",
 		Args:  cobra.NoArgs,
+		Example: `  # Create a certificate using the data in certificate.json.
+  powerctl create -f ./certificate.json
+
+  # Create a certificate based on the JSON passed into stdin.
+  cat certificate.json | powerctl create -f -`,
 		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
 			client, err = powerctl.NewGRPCClient()
 			return err

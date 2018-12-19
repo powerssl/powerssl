@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -78,20 +79,48 @@ func ResourcesFromFile(filename string) ([]*Resource, error) {
 		return nil, errors.New("Please specify filename")
 	}
 
-	in, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-
-	switch filepath.Ext(filename) {
-	case ".json":
-	case ".yml", ".yaml":
-		in, err = yaml.YAMLToJSON(in)
+	var in []byte
+	if filename == "-" {
+		var buf bytes.Buffer
+		reader := bufio.NewReader(os.Stdin)
+		for {
+			line, err := reader.ReadString('\n')
+			if err != nil {
+				if err == io.EOF {
+					buf.WriteString(line)
+					break
+				} else {
+					return nil, err
+				}
+			}
+			buf.WriteString(line)
+		}
+		in = buf.Bytes()
+		if !json.Valid(in) {
+			var err error
+			in, err = yaml.YAMLToJSON(in)
+			if err != nil {
+				return nil, err
+			}
+		}
+	} else {
+		var err error
+		in, err = ioutil.ReadFile(filename)
 		if err != nil {
 			return nil, err
 		}
-	default:
-		return nil, errors.New("Unknown input format")
+
+		switch filepath.Ext(filename) {
+		case ".json":
+		case ".yml", ".yaml":
+			var err error
+			in, err = yaml.YAMLToJSON(in)
+			if err != nil {
+				return nil, err
+			}
+		default:
+			return nil, errors.New("Unknown input format")
+		}
 	}
 
 	var resources []resourceLoader
@@ -110,8 +139,10 @@ func ResourcesFromFile(filename string) ([]*Resource, error) {
 			return nil, err
 		}
 		spec := resourceHandler.Spec()
-		if err := json.Unmarshal(r.Spec, &spec); err != nil {
-			return nil, err
+		if r.Spec != nil {
+			if err := json.Unmarshal(r.Spec, &spec); err != nil {
+				return nil, fmt.Errorf("spec error: %s", err)
+			}
 		}
 		out[i] = &Resource{
 			Kind: r.Kind,
