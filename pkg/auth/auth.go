@@ -2,7 +2,10 @@ package auth
 
 import (
 	"context"
+	"crypto"
 	"crypto/rsa"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -14,7 +17,9 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-kit/kit/log"
+	"github.com/pborman/uuid"
 	"golang.org/x/sync/errgroup"
+	"gopkg.in/square/go-jose.v2"
 
 	"powerssl.io/pkg/util"
 	"powerssl.io/pkg/util/auth"
@@ -55,6 +60,31 @@ func Run(httpAddr, httpCertFile, httpKeyFile string, httpInsecure bool, metricsA
 	}
 }
 
+func jwksEndpoint(signKeys ...*rsa.PrivateKey) (func(w http.ResponseWriter, req *http.Request), error) {
+	jsonWebKeys := make([]jose.JSONWebKey, len(signKeys))
+	for i, signKey := range signKeys {
+		jsonWebKey := jose.JSONWebKey{
+			Algorithm: "RS256",
+			Key:       signKey,
+			Use:       "sig",
+		}
+		publicJSONWebKey := jsonWebKey.Public()
+		thumbprint, err := publicJSONWebKey.Thumbprint(crypto.SHA1)
+		if err != nil {
+			return nil, err
+		}
+		publicJSONWebKey.KeyID = base64.URLEncoding.EncodeToString(thumbprint)
+		jsonWebKeys[i] = publicJSONWebKey
+	}
+	jwks, err := json.Marshal(&jose.JSONWebKeySet{Keys: jsonWebKeys})
+	if err != nil {
+		return nil, err
+	}
+	return func(w http.ResponseWriter, req *http.Request) {
+		fmt.Fprintln(w, string(jwks))
+	}, nil
+}
+
 func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKeyFile string) error {
 	signBytes, err := ioutil.ReadFile(jwtPrivateKeyFile)
 	if err != nil {
@@ -67,23 +97,19 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		expiresAt := time.Now().Add(time.Hour).Unix()
-		tokenString, err := generateToken(signKey, expiresAt)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		if err := templates.ExecuteTemplate(w, "index.tmpl", struct {
-			Token string
-		}{
-			Token: tokenString,
-		}); err != nil {
+		if err := templates.ExecuteTemplate(w, "index.tmpl", struct{}{}); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
+	jwksHandler, err := jwksEndpoint(signKey)
+	if err != nil {
+		return err
+	}
+	mux.HandleFunc("/.well-known/jwks.json", jwksHandler)
 	mux.HandleFunc("/raw", func(w http.ResponseWriter, req *http.Request) {
-		expiresAt := time.Now().Add(time.Hour).Unix()
-		tokenString, err := generateToken(signKey, expiresAt)
+		expiresAt := time.Now().Add(time.Hour * 24).Unix()
+		subject := req.URL.Query().Get("sub")
+		tokenString, err := generateToken(signKey, subject, expiresAt)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -91,7 +117,16 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 		fmt.Fprint(w, tokenString)
 	})
 	mux.HandleFunc("/service", func(w http.ResponseWriter, req *http.Request) {
-		tokenString, err := generateToken(signKey, 0)
+		key := jose.JSONWebKey{Key: signKey}
+		public := key.Public()
+		thumbprint, err := public.Thumbprint(crypto.SHA1)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		token := jwt.NewWithClaims(auth.Method, &jwt.StandardClaims{})
+		token.Header["kid"] = base64.URLEncoding.EncodeToString(thumbprint)
+		tokenString, err := token.SignedString(signKey)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -127,14 +162,25 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 	}
 }
 
-func generateToken(signKey *rsa.PrivateKey, expiresAt int64) (string, error) {
+func generateToken(signKey *rsa.PrivateKey, subject string, expiresAt int64) (string, error) {
 	claims := &jwt.StandardClaims{
+		Audience:  "powerssl.apiserver",
+		ExpiresAt: expiresAt,
+		Id:        base64.URLEncoding.EncodeToString(uuid.NewRandom())[:22],
 		IssuedAt:  time.Now().Unix(),
-		NotBefore: time.Now().Unix(),
-	}
-	if expiresAt != 0 {
-		claims.ExpiresAt = expiresAt
+		Issuer:    "powerssl.auth",
+		NotBefore: time.Now().Unix() - 5,
+		Subject:   subject,
 	}
 	token := jwt.NewWithClaims(auth.Method, claims)
+	key := jose.JSONWebKey{
+		Key: signKey,
+	}
+	public := key.Public()
+	thumbprint, err := public.Thumbprint(crypto.SHA1)
+	if err != nil {
+		return "", err
+	}
+	token.Header["kid"] = base64.URLEncoding.EncodeToString(thumbprint)
 	return token.SignedString(signKey)
 }

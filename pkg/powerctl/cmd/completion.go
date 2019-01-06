@@ -6,16 +6,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var completionCmd = &cobra.Command{
-	Hidden: true,
-	Use:    "completion",
-	Short:  "Generates completion scripts",
+func newCmdCompletion() *cobra.Command {
+	cmd := &cobra.Command{
+		Hidden: true,
+		Use:    "completion",
+		Short:  "Generates completion scripts",
+	}
+
+	cmd.AddCommand(newCmdBashCompletion())
+	cmd.AddCommand(newCmdZSHCompletion())
+
+	return cmd
 }
 
-var bashCompletionCmd = &cobra.Command{
-	Use:   "bash",
-	Short: "Generates bash completion scripts",
-	Long: `To load completion run
+func newCmdBashCompletion() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "bash",
+		Short: "Generates bash completion scripts",
+		Long: `To load completion run
 
 . <(powerctl completion bash)
 
@@ -24,22 +32,22 @@ To configure your bash shell to load completions for each session add to your ba
 # ~/.bashrc or ~/.profile
 . <(powerctl completion bash)
 `,
-	Run: func(cmd *cobra.Command, args []string) {
-		rootCmd.GenBashCompletion(os.Stdout)
-	},
+		Run: func(cmd *cobra.Command, args []string) {
+			NewCmdRoot().GenBashCompletion(os.Stdout)
+		},
+	}
+
+	return cmd
 }
 
-var zshCompletionCmd = &cobra.Command{
-	Use:   "zsh",
-	Short: "Generates zsh completion scripts",
-	Run: func(cmd *cobra.Command, args []string) {
-		rootCmd.GenZshCompletion(os.Stdout)
-	},
-}
+func newCmdZSHCompletion() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "zsh",
+		Short: "Generates zsh completion scripts",
+		Run: func(cmd *cobra.Command, args []string) {
+			NewCmdRoot().GenZshCompletion(os.Stdout)
+		},
+	}
 
-func init() {
-	completionCmd.AddCommand(bashCompletionCmd)
-	completionCmd.AddCommand(zshCompletionCmd)
-
-	rootCmd.AddCommand(completionCmd)
+	return cmd
 }

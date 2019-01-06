@@ -18,11 +18,66 @@
   <body>
     <main role="main" class="container">
       <h1 class="mt-5">PowerSSL Auth</h1>
-      <p class="lead"><span class="font-weight-bold">A token is a form of a password.</span> Do not share your API token.</p>
-      <p><pre class="pre-scrollable"><code>{{.Token}}</code></pre></p>
+      <form>
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" class="form-control" id="username" placeholder="Enter username">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
     </main>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <div class="container" style="display: none; margin-top: 1em">
+      <p class="lead"><span class="font-weight-bold">A token is a form of a password.</span> Do not share your API token.</p>
+      <p><pre class="pre-scrollable"><code></code></pre></p>
+      <p><button class="copy btn btn-secondary" data-clipboard-target="code">Copy</button></p>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+    <script>
+      $(document).ready(function() {
+        $("form").submit(function(event) {
+          event.preventDefault();
+
+          var username = $("input").val();
+          $("form").trigger("reset");
+
+          $.get("/raw?sub=" + username, function(data) {
+            $("div.container").show();
+            $("code").text(data);
+          });
+        });
+
+        $(".copy").tooltip({
+          trigger: "click",
+          placement: "bottom"
+        });
+
+        function setTooltip(message) {
+          $(".copy").tooltip("hide")
+            .attr("data-original-title", message)
+            .tooltip("show");
+        }
+
+        function hideTooltip() {
+          setTimeout(function() {
+            $(".copy").tooltip("hide");
+          }, 1000);
+        }
+
+        var clipboard = new ClipboardJS(".copy");
+
+        clipboard.on("success", function(e) {
+          setTooltip("Copied!");
+          hideTooltip();
+        });
+
+        clipboard.on("error", function(e) {
+          setTooltip("Failed!");
+          hideTooltip();
+        });
+      });
+    </script>
   </body>
 </html>

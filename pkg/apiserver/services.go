@@ -9,6 +9,7 @@ import (
 	"powerssl.io/pkg/apiserver/acmeaccount"
 	"powerssl.io/pkg/apiserver/acmeserver"
 	"powerssl.io/pkg/apiserver/certificate"
+	"powerssl.io/pkg/apiserver/user"
 	controllerclient "powerssl.io/pkg/controller/client"
 	"powerssl.io/pkg/util"
 	"powerssl.io/pkg/util/auth"
@@ -23,5 +24,6 @@ func makeServices(db *gorm.DB, logger log.Logger, tracer stdopentracing.Tracer, 
 		acmeaccount.New(db, logger, tracer, duration, client, auth),
 		acmeserver.New(db, logger, tracer, duration, client, auth),
 		certificate.New(db, logger, tracer, duration, client, auth),
+		user.New(db, logger, tracer, duration, client, auth),
 	}, nil
 }

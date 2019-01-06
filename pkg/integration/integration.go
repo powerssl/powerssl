@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/go-kit/kit/log"
@@ -34,33 +35,36 @@ type Integration interface {
 }
 
 type integration struct {
-	client      *controllerclient.GRPCClient
-	logger      log.Logger
-	kind        kind
-	name        string
-	handler     Integration
-	metricsAddr string
+	client  *controllerclient.GRPCClient
+	logger  log.Logger
+	kind    kind
+	name    string
+	handler Integration
 }
 
-func New(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, metricsAddr, tracerImpl string, kind kind, name string, handler interface{}) *integration {
-	var logger log.Logger
-	{
-		logger = util.NewLogger(os.Stdout)
-	}
+func Run(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, metricsAddr, tracerImpl string, kind kind, name string, handler interface{}) {
+	logger := util.NewLogger(os.Stdout)
+
+	g, ctx := errgroup.WithContext(context.Background())
+	g.Go(func() error {
+		return util.InterruptHandler(ctx, logger)
+	})
 
 	tracer, closer, err := tracing.Init(fmt.Sprintf("powerssl-integration-%s", kind), tracerImpl, log.With(logger, "component", "tracing"))
 	if err != nil {
 		logger.Log("component", "tracing", "err", err)
 		os.Exit(1)
 	}
-	// defer closer.Close()
-	var _ = closer
+	defer closer.Close()
 
-	var authToken string
-	client, err := controllerclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, authToken, logger, tracer)
-	if err != nil {
-		logger.Log("transport", "gRPC", "err", err)
-		os.Exit(1)
+	var client *controllerclient.GRPCClient
+	{
+		var authToken string
+		var err error
+		if client, err = controllerclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, authToken, logger, tracer); err != nil {
+			logger.Log("transport", "gRPC", "during", "Connect", "err", err)
+			os.Exit(1)
+		}
 	}
 
 	var integrationhandler Integration
@@ -73,27 +77,18 @@ func New(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVer
 		// integrationhandler = integrationdns.New(client.DNS, handler.(integrationdns.Integration))
 	}
 
-	return &integration{
-		client:      client,
-		logger:      logger,
-		kind:        kind,
-		name:        name,
-		handler:     integrationhandler,
-		metricsAddr: metricsAddr,
-	}
-}
-
-func (i *integration) Run() {
-	logger := i.logger
-	g, ctx := errgroup.WithContext(context.Background())
-	g.Go(func() error {
-		return util.InterruptHandler(ctx, logger)
-	})
-
-	if i.metricsAddr != "" {
+	if metricsAddr != "" {
 		g.Go(func() error {
-			return util.ServeMetrics(ctx, i.metricsAddr, log.With(logger, "component", "metrics"))
+			return util.ServeMetrics(ctx, metricsAddr, log.With(logger, "component", "metrics"))
 		})
+	}
+
+	i := &integration{
+		client:  client,
+		logger:  logger,
+		kind:    kind,
+		name:    name,
+		handler: integrationhandler,
 	}
 
 	g.Go(func() error {
@@ -102,7 +97,7 @@ func (i *integration) Run() {
 			case <-ctx.Done():
 				return ctx.Err()
 			default:
-				i.logger.Log("err", i.run(ctx))
+				logger.Log("err", i.run(ctx))
 				time.Sleep(time.Second)
 			}
 		}
@@ -136,35 +131,43 @@ func (i *integration) run(ctx context.Context) error {
 	i.logger.Log("connected", true)
 	for {
 		activity, err := stream.Recv()
-		if err == io.EOF {
-			i.logger.Log("err", "EOF")
-			break
+		if err != nil {
+			if err == io.EOF {
+				i.logger.Log("err", "EOF")
+				break
+			}
+			return err
 		}
+		apiActivity, err := acmetransport.DecodeGRPCActivity(activity)
 		if err != nil {
 			return err
 		}
-		{
-			activity, err := acmetransport.DecodeGRPCActivity(activity)
-			if err != nil {
-				return err
-			}
-			go i.handleActivity(activity)
-		}
+		go i.handleActivity(ctx, apiActivity)
 	}
 	return nil
 }
 
-func (i *integration) handleActivity(activity *api.Activity) {
-	i.logger.Log("activity", activity.Token, "name", activity.Name)
+func (i *integration) loggingMiddleware(ctx context.Context, activity *api.Activity) (err error) {
+	defer func() {
+		i.logger.Log("activity", activity.Token, "name", activity.Name, "err", err)
+	}()
+
+	return i.tracingMiddleware(ctx, activity)
+}
+
+func (i *integration) tracingMiddleware(ctx context.Context, activity *api.Activity) error {
 	wireContext, err := tracing.WireContextFromJSON(activity.Signature) // TODO: Do not use Signature for Span
-	if err != nil {
-		panic(err)
-		// TODO
+	if err != nil && !strings.Contains(err.Error(), "not found") {
+		i.logger.Log("activity", activity.Token, "err", err)
 	}
 	activitySpan := opentracing.StartSpan(activity.Name.String(), ext.RPCServerOption(wireContext))
+	defer activitySpan.Finish()
 	activitySpan.SetTag("token", activity.Token)
-	ctx := opentracing.ContextWithSpan(context.Background(), activitySpan)
-	err = i.handler.HandleActivity(ctx, activity)
-	activitySpan.Finish()
-	i.logger.Log("activity", activity.Token, "err", err)
+	ctx = opentracing.ContextWithSpan(ctx, activitySpan)
+
+	return i.handler.HandleActivity(ctx, activity)
+}
+
+func (i *integration) handleActivity(ctx context.Context, activity *api.Activity) error {
+	return i.loggingMiddleware(ctx, activity)
 }

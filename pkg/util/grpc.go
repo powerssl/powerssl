@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"net/url"
 	"runtime/debug"
 	"time"
 
@@ -13,19 +14,41 @@ import (
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
 	middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	"github.com/johanbrandhorst/certify"
+	"github.com/johanbrandhorst/certify/issuers/vault"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
-var ErrUnkown = errors.New("Unknown error")
-
 type Service interface {
 	RegisterGRPCServer(baseServer *grpc.Server)
+	ServiceName() string
 }
 
-func ServeGRPC(ctx context.Context, addr, certFile, keyFile string, insecure bool, logger log.Logger, services []Service) error {
+func NewClientConn(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool) (*grpc.ClientConn, error) {
+	opts := []grpc.DialOption{
+		grpc.WithTimeout(time.Second),
+	}
+	if insecure {
+		opts = append(opts, grpc.WithInsecure())
+	} else {
+		var creds credentials.TransportCredentials
+		if insecureSkipTLSVerify {
+			creds = credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})
+		} else {
+			var err error
+			if creds, err = credentials.NewClientTLSFromFile(certFile, serverNameOverride); err != nil {
+				return nil, err
+			}
+		}
+		opts = append(opts, grpc.WithTransportCredentials(creds))
+	}
+	return grpc.Dial(addr, opts...)
+}
+
+func ServeGRPC(ctx context.Context, addr, certFile, keyFile, commonName, vaultURL, vaultToken, vaultRole string, insecure bool, logger log.Logger, services []Service) error {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
@@ -44,10 +67,39 @@ func ServeGRPC(ctx context.Context, addr, certFile, keyFile string, insecure boo
 			recovery.StreamServerInterceptor(recoveryOptions...),
 		),
 	}
+
 	if !insecure {
-		creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
-		if err != nil {
-			return fmt.Errorf("Failed to load TLS credentials %v", err)
+		var creds credentials.TransportCredentials
+		if certFile != "" && keyFile != "" {
+			if creds, err = credentials.NewServerTLSFromFile(certFile, keyFile); err != nil {
+				return fmt.Errorf("Failed to load TLS credentials %v", err)
+			}
+		} else {
+			url, err := url.Parse(vaultURL)
+			if err != nil {
+				return err
+			}
+			c := &certify.Certify{
+				Cache:      certify.NewMemCache(),
+				CommonName: commonName,
+				Issuer: &vault.Issuer{
+					InsecureAllowHTTP: url.Scheme == "http",
+					Role:              vaultRole,
+					Token:             vaultToken,
+					URL:               url,
+				},
+				RenewBefore: time.Hour,
+			}
+			getCertificate := func(hello *tls.ClientHelloInfo) (cert *tls.Certificate, err error) {
+				if cert, err = c.GetCertificate(hello); err != nil {
+					logger.Log("err", err)
+				}
+				return cert, err
+			}
+			if _, err := getCertificate(&tls.ClientHelloInfo{ServerName: commonName}); err != nil {
+				return err
+			}
+			creds = credentials.NewTLS(&tls.Config{GetCertificate: getCertificate})
 		}
 		options = append(options, grpc.Creds(creds))
 	}
@@ -57,6 +109,7 @@ func ServeGRPC(ctx context.Context, addr, certFile, keyFile string, insecure boo
 	healthpb.RegisterHealthServer(srv, healthSrv)
 	for _, service := range services {
 		service.RegisterGRPCServer(srv)
+		healthSrv.SetServingStatus(service.ServiceName(), healthpb.HealthCheckResponse_SERVING)
 	}
 
 	c := make(chan error)
@@ -80,29 +133,7 @@ func recoveryHandler(logger log.Logger) func(interface{}) error {
 	return func(err interface{}) error {
 		logger.Log("err", err)
 		debug.PrintStack()
-		return ErrUnkown
-	}
-}
+		return errors.New("Unknown error")
 
-func NewClientConn(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool) (*grpc.ClientConn, error) {
-	opts := []grpc.DialOption{
-		grpc.WithTimeout(time.Second),
 	}
-	if insecure {
-		opts = append(opts, grpc.WithInsecure())
-	} else if insecureSkipTLSVerify {
-		creds := credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})
-		opts = append(opts, grpc.WithTransportCredentials(creds))
-	} else {
-		creds, err := credentials.NewClientTLSFromFile(certFile, serverNameOverride)
-		if err != nil {
-			return nil, err
-		}
-		opts = append(opts, grpc.WithTransportCredentials(creds))
-	}
-	conn, err := grpc.Dial(addr, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return conn, nil
 }

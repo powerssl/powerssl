@@ -35,3 +35,7 @@ func (w *Workflow) RegisterGRPCServer(baseServer *grpc.Server) {
 	grpcServer := transport.NewGRPCServer(w.endpoints, w.logger, w.tracer)
 	apiv1.RegisterWorkflowServiceServer(baseServer, grpcServer)
 }
+
+func (*Workflow) ServiceName() string {
+	return "powerssl.controller.v1.WorkflowService"
+}

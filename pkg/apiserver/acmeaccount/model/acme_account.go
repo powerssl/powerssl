@@ -6,12 +6,12 @@ import (
 	"time"
 
 	"github.com/gogo/status"
-	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc/codes"
 
 	acmeserver "powerssl.io/pkg/apiserver/acmeserver/model"
 	"powerssl.io/pkg/apiserver/api"
+	"powerssl.io/pkg/util/uid"
 )
 
 type ACMEAccount struct {
@@ -38,7 +38,7 @@ func (a *ACMEAccount) ACMEServer(db *gorm.DB, s string) (*acmeserver.ACMEServer,
 }
 
 func (*ACMEAccount) BeforeCreate(scope *gorm.Scope) error {
-	scope.SetColumn("ID", uuid.New().String())
+	scope.SetColumn("ID", uid.New())
 	return nil
 }
 

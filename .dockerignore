@@ -1,6 +1,0 @@
-*
-!cmd
-!go.mod
-!go.sum
-!pkg
-!vendor/envoy.yaml

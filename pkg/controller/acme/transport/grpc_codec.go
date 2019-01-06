@@ -59,6 +59,9 @@ func decodeGRPCAccount(account *apiv1.Account) (*api.Account, error) {
 }
 
 func encodeGRPCAccount(account *api.Account) (*apiv1.Account, error) {
+	if account == nil { // TODO
+		account = new(api.Account)
+	}
 	return &apiv1.Account{
 		Status:               apiv1.Account_Status(account.Status),
 		Contacts:             account.Contacts,

@@ -2,7 +2,7 @@ PROTOC := $(shell which protoc)
 
 BIN_PATH := $(abspath bin)
 PKG_PATH := $(abspath pkg)
-PROTO_PATH := $(abspath proto)
+PROTO_PATH := $(abspath api/proto)
 
 export PATH := $(BIN_PATH):$(PATH)
 
@@ -21,8 +21,6 @@ PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/timestamp.proto=github.com/g
 
 PROTOS := $(sort $(shell $(FIND_PROTO) -type f -name '*.proto' -print))
 
-PROTOBUF_TARGETS := bin/.go_protobuf_sources
-
 .DELETE_ON_ERROR:
 
 .ALWAYS_REBUILD:
@@ -31,36 +29,18 @@ PROTOBUF_TARGETS := bin/.go_protobuf_sources
 .DEFAULT_GOAL := all
 all: build
 
-bin/.go_protobuf_sources: bin/protoc-gen-gogo
-	$(FIND_RELEVANT) -type f -name '*.pb.go' -exec rm {} +
-	set -e; for dir in $(sort $(dir $(PROTOS))); do \
-		$(PROTOC) \
-			-I$(PROTO_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
-			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src \
-			$$dir/*.proto; \
-	done
-	touch $@
-
-.PHONY: javascript-sdk
-javascript-sdk: bin/protoc-gen-grpc-web
-	set -e; for dir in $(sort $(dir $(PROTOS))); do \
-		$(PROTOC) \
-			-I$(PROTO_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
-			--js_out=import_style=commonjs:vendor/javascript-sdk \
-			--grpc-web_out=import_style=commonjs,mode=grpcwebtext:vendor/javascript-sdk \
-			$$dir/*.proto; \
-	done
-
 bin/protoc-gen-gogo:
 	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)/protoc-gen-gogo
 
-# Not used just as a reference
 bin/protoc-gen-grpc-web:
 	rm -rf /tmp/grpc-web
 	git clone --branch 0.4.0 https://github.com/grpc/grpc-web.git /tmp/grpc-web
 	cd /tmp/grpc-web/javascript/net/grpc/web && \
 		make protoc-gen-grpc-web && \
 		install protoc-gen-grpc-web $(BIN_PATH)/protoc-gen-grpc-web
+
+bin/powerssl-agent: .ALWAYS_REBUILD
+	go build -o bin/powerssl-agent powerssl.io/cmd/powerssl-agent
 
 bin/powerssl-apiserver: .ALWAYS_REBUILD
 	go build -o bin/powerssl-apiserver powerssl.io/cmd/powerssl-apiserver
@@ -84,7 +64,22 @@ bin/powerctl: .ALWAYS_REBUILD
 	go build -o bin/powerctl powerssl.io/cmd/powerctl
 
 .PHONY: build
-build: bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerctl
+build: bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerctl
+
+.PHONY: docs
+docs:
+	go run powerssl.io/cmd/powerctl-doc
+	go run powerssl.io/cmd/powerssl-agent-doc
+	go run powerssl.io/cmd/powerssl-apiserver-doc
+	go run powerssl.io/cmd/powerssl-auth-doc
+	go run powerssl.io/cmd/powerssl-controller-doc
+	go run powerssl.io/cmd/powerssl-integration-acme-doc
+	go run powerssl.io/cmd/powerssl-integration-cloudflare-doc
+	go run powerssl.io/cmd/powerssl-signer-doc
+
+.PHONY: install-agent
+install-agent:
+	go install powerssl.io/cmd/powerssl-agent
 
 .PHONY: install-powerctl
 install-powerctl:
@@ -101,12 +96,29 @@ vet:
 
 .PHONY: clean
 clean:
-	go clean powerssl.io/cmd/powerctl powerssl.io/cmd/powerssl-apiserver powerssl.io/cmd/powerssl-auth powerssl.io/cmd/powerssl-controller powerssl.io/cmd/powerssl-integration-acme powerssl.io/cmd/powerssl-integration-cloudflare powerssl.io/cmd/powerssl-signer
+	go clean powerssl.io/cmd/powerctl powerssl.io/cmd/powerssl-agent powerssl.io/cmd/powerssl-apiserver powerssl.io/cmd/powerssl-auth powerssl.io/cmd/powerssl-controller powerssl.io/cmd/powerssl-integration-acme powerssl.io/cmd/powerssl-integration-cloudflare powerssl.io/cmd/powerssl-signer
 	rm -f bin/.go_protobuf_sources
-	rm -f bin/powerctl bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer
+	rm -f bin/powerctl bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer
 
 .PHONY: protobuf
-protobuf: $(PROTOBUF_TARGETS)
+protobuf:
+	$(FIND_RELEVANT) -type f -name '*.pb.go' -exec rm {} +
+	set -e; for dir in $(sort $(dir $(PROTOS))); do \
+		$(PROTOC) \
+			-I$(PROTO_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
+			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src \
+			$$dir/*.proto; \
+	done
+
+.PHONY: javascript-sdk
+javascript-sdk: bin/protoc-gen-grpc-web
+	set -e; for dir in $(sort $(dir $(PROTOS))); do \
+		$(PROTOC) \
+			-I$(PROTO_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
+			--js_out=import_style=commonjs:vendor/javascript-sdk \
+			--grpc-web_out=import_style=commonjs,mode=grpcwebtext:vendor/javascript-sdk \
+			$$dir/*.proto; \
+	done
 
 .PHONY: tools
 tools:
@@ -117,36 +129,40 @@ generate:
 	go generate $$(go list ./...)
 
 .PHONY: images
-images: apiserver-image auth-image controller-image envoy-image integration-acme-image integration-cloudflare-image powerctl-image signer-image
+images: agent-image apiserver-image auth-image controller-image envoy-image integration-acme-image integration-cloudflare-image powerctl-image signer-image
+
+.PHONY: agent-image
+agent-image:
+	docker build -f build/docker/agent/Dockerfile -t powerssl/agent .
 
 .PHONY: apiserver-image
 apiserver-image:
-	docker build -f dockerfiles/apiserver/Dockerfile -t powerssl/apiserver .
+	docker build -f build/docker/apiserver/Dockerfile -t powerssl/apiserver .
 
 .PHONY: auth-image
 auth-image:
-	docker build -f dockerfiles/auth/Dockerfile -t powerssl/auth .
+	docker build -f build/docker/auth/Dockerfile -t powerssl/auth .
 
 .PHONY: controller-image
 controller-image:
-	docker build -f dockerfiles/controller/Dockerfile -t powerssl/controller .
+	docker build -f build/docker/controller/Dockerfile -t powerssl/controller .
 
 .PHONY: envoy-image
 envoy-image:
-	docker build -f dockerfiles/envoy/Dockerfile -t powerssl/evnoy .
+	docker build -f build/docker/envoy/Dockerfile -t powerssl/evnoy .
 
 .PHONY: integration-acme-image
 integration-acme-image:
-	docker build -f dockerfiles/integration-acme/Dockerfile -t powerssl/integration-acme .
+	docker build -f build/docker/integration-acme/Dockerfile -t powerssl/integration-acme .
 
 .PHONY: integration-cloudflare-image
 integration-cloudflare-image:
-	docker build -f dockerfiles/integration-cloudflare/Dockerfile -t powerssl/integration-cloudflare .
+	docker build -f build/docker/integration-cloudflare/Dockerfile -t powerssl/integration-cloudflare .
 
 .PHONY: powerctl-image
 powerctl-image:
-	docker build -f dockerfiles/powerctl/Dockerfile -t powerssl/powerctl .
+	docker build -f build/docker/powerctl/Dockerfile -t powerssl/powerctl .
 
 .PHONY: signer-image
 signer-image:
-	docker build -f dockerfiles/signer/Dockerfile -t powerssl/signer .
+	docker build -f build/docker/signer/Dockerfile -t powerssl/signer .
