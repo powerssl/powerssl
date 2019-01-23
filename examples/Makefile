@@ -7,6 +7,7 @@ quickstart:
 	cp -r auth /etc/powerssl
 	cp -r controller /etc/powerssl
 	cp -r signer /etc/powerssl
+	cp -r webapp /etc/powerssl
 	make -C certs
 	cp certs/ca.pem /etc/powerssl
 	cp certs/localhost.pem /etc/powerssl/api/cert.pem
@@ -21,3 +22,6 @@ quickstart:
 	cp certs/localhost.pem /etc/powerssl/signer/cert.pem
 	cp certs/localhost-key.pem /etc/powerssl/signer/cert-key.pem
 	chmod +r /etc/powerssl/signer/cert-key.pem
+	cp certs/localhost.pem /etc/powerssl/webapp/cert.pem
+	cp certs/localhost-key.pem /etc/powerssl/webapp/cert-key.pem
+	chmod +r /etc/powerssl/webapp/cert-key.pem

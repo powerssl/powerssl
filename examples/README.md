@@ -30,6 +30,10 @@ Copy `signer` to `/etc/powerssl/signer`.
 
 `sudo cp -r signer /etc/powerssl`
 
+Copy `webapp` to `/etc/powerssl/webapp`.
+
+`sudo cp -r webapp /etc/powerssl`
+
 Generate certificates:
 
 `make -C certs`
@@ -85,3 +89,15 @@ Copy `certs/localhost-key.pem` to `/etc/powerssl/signer/cert-key.pem`.
 Grant read permissions on `/etc/powerssl/signer/cert-key.pem`.
 
 `sudo chmod +r /etc/powerssl/signer/cert-key.pem`
+
+Copy `certs/localhost.pem` to `/etc/powerssl/webapp/cert.pem`.
+
+`sudo cp certs/localhost.pem /etc/powerssl/webapp/cert.pem`
+
+Copy `certs/localhost-key.pem` to `/etc/powerssl/webapp/cert-key.pem`.
+
+`sudo cp certs/localhost-key.pem /etc/powerssl/webapp/cert-key.pem`
+
+Grant read permissions on `/etc/powerssl/webapp/cert-key.pem`.
+
+`sudo chmod +r /etc/powerssl/webapp/cert-key.pem`
