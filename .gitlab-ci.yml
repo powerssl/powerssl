@@ -59,6 +59,11 @@ build signer:
   variables:
     COMPONENT: signer
 
+build webapp:
+  <<: *build_template
+  variables:
+    COMPONENT: webapp
+
 code_quality:
   stage: test
   image: docker:stable
@@ -207,6 +212,11 @@ release signer:
   <<: *release_template
   variables:
     COMPONENT: signer
+
+release webapp:
+  <<: *release_template
+  variables:
+    COMPONENT: webapp
 
 # ---------------------------------------------------------------------------
 
