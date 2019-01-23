@@ -81,6 +81,7 @@ func jwksEndpoint(signKeys ...*rsa.PrivateKey) (func(w http.ResponseWriter, req 
 		return nil, err
 	}
 	return func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Add("Content-Type", "application/jwk+json")
 		fmt.Fprintln(w, string(jwks))
 	}, nil
 }
@@ -114,6 +115,7 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		w.Header().Add("Content-Type", "application/jwt")
 		fmt.Fprint(w, tokenString)
 	})
 	mux.HandleFunc("/service", func(w http.ResponseWriter, req *http.Request) {
@@ -131,6 +133,7 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		w.Header().Add("Content-Type", "application/jwt")
 		fmt.Fprint(w, tokenString)
 	})
 	srv := http.Server{
