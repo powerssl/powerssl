@@ -52,10 +52,10 @@ func newCmdServe() *cobra.Command {
 
 	cmd.Flags().BoolP("insecure", "", false, "Do not use TLS for the server")
 	cmd.Flags().BoolP("no-metrics", "", false, "Do not serve metrics")
-	cmd.Flags().StringP("addr", "", ":8080", "GRPC Addr")
+	cmd.Flags().StringP("addr", "", ":8080", "GRPC")
 	cmd.Flags().StringP("jwt-private-key-file", "", "", "JWT private key file")
 	cmd.Flags().StringP("metrics-addr", "", ":9090", "HTTP Addr")
-	cmd.Flags().StringP("tls-cert-file", "", "", "File containing the default x509 Certificate for GRPC.")
+	cmd.Flags().StringP("tls-cert-file", "", "", "File containing the default x509 Certificate.")
 	cmd.Flags().StringP("tls-private-key-file", "", "", "File containing the default x509 private key matching --tls-cert-file.")
 
 	viper.BindPFlag("addr", cmd.Flags().Lookup("addr"))

@@ -1,10 +1,13 @@
 module powerssl.io
 
+replace github.com/russross/blackfriday => github.com/russross/blackfriday v1.5.2
+
 replace github.com/uber/jaeger-lib => github.com/uber/jaeger-lib v1.5.0
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf // indirect
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
+	github.com/cpuguy83/go-md2man v1.0.8 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eggsampler/acme v1.0.0
 	github.com/ghodss/yaml v1.0.0
@@ -35,7 +38,9 @@ require (
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/prometheus/client_golang v0.9.2
 	github.com/qor/validations v0.0.0-20171228122639-f364bca61b46
+	github.com/russross/blackfriday v2.0.0+incompatible // indirect
 	github.com/ryanuber/go-glob v0.0.0-20170128012129-256dc444b735 // indirect
+	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/smacker/opentracing-gorm v0.0.0-20181207094635-cd4974441042
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.1
@@ -46,4 +51,5 @@ require (
 	golang.org/x/time v0.0.0-20181108054448-85acf8d2951c // indirect
 	google.golang.org/grpc v1.18.0
 	gopkg.in/square/go-jose.v2 v2.2.2
+	gopkg.in/yaml.v2 v2.2.2
 )

@@ -18,12 +18,12 @@ powerssl-webapp serve [flags]
 ### Options
 
 ```
-      --addr string                   GRPC Addr (default ":8080")
+      --addr string                   Addr (default ":8080")
   -h, --help                          help for serve
       --insecure                      Do not use TLS for the server
       --metrics-addr string           HTTP Addr (default ":9090")
       --no-metrics                    Do not serve metrics
-      --tls-cert-file string          File containing the default x509 Certificate for GRPC.
+      --tls-cert-file string          File containing the default x509 Certificate.
       --tls-private-key-file string   File containing the default x509 private key matching --tls-cert-file.
 ```
 
