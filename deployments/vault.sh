@@ -25,5 +25,7 @@ vault write pki/roles/powerssl-apiserver \
 	max_ttl=24h
 vault write pki/roles/powerssl-controller \
 	max_ttl=24h
+vault write pki/roles/powerssl-signer \
+	max_ttl=24h
 
 wait
