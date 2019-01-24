@@ -17,6 +17,7 @@ import (
 	"powerssl.io/pkg/apiserver/api"
 	controllerapi "powerssl.io/pkg/controller/api"
 	controllerclient "powerssl.io/pkg/controller/client"
+	"powerssl.io/pkg/util/vault"
 )
 
 func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) meta.Service {
@@ -57,6 +58,14 @@ func (bs basicService) Create(ctx context.Context, parent string, acmeAccount *a
 	acmeServer, err := account.ACMEServer(db, "directory_url, integration_name")
 	if err != nil { // TODO
 		return nil, status.Error(codes.NotFound, "not found")
+	}
+
+	vaultClient, err := vault.New("http://localhost:8200", "insecure")
+	if err != nil {
+		return nil, err
+	}
+	if err := vaultClient.CreateTransitKey(ctx, account.ID); err != nil {
+		return nil, err
 	}
 
 	workflow, err := bs.controllerclient.Workflow.Create(ctx, &controllerapi.Workflow{

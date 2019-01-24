@@ -28,4 +28,6 @@ vault write pki/roles/powerssl-controller \
 vault write pki/roles/powerssl-signer \
 	max_ttl=24h
 
+vault secrets enable transit
+
 wait
