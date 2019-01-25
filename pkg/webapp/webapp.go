@@ -23,7 +23,7 @@ func init() {
 	templates = template.Must(template.ParseGlob(pattern))
 }
 
-func Run(httpAddr, httpCertFile, httpKeyFile string, httpInsecure bool, metricsAddr string) {
+func Run(httpAddr, metricsAddr, authURI string) {
 	logger := util.NewLogger(os.Stdout)
 
 	g, ctx := errgroup.WithContext(context.Background())
@@ -38,7 +38,7 @@ func Run(httpAddr, httpCertFile, httpKeyFile string, httpInsecure bool, metricsA
 	}
 
 	g.Go(func() error {
-		return ServeHTTP(ctx, httpAddr, log.With(logger, "component", "http"))
+		return ServeHTTP(ctx, httpAddr, log.With(logger, "component", "http"), authURI)
 	})
 
 	if err := g.Wait(); err != nil {
@@ -50,10 +50,10 @@ func Run(httpAddr, httpCertFile, httpKeyFile string, httpInsecure bool, metricsA
 	}
 }
 
-func ServeHTTP(ctx context.Context, addr string, logger log.Logger) error {
+func ServeHTTP(ctx context.Context, addr string, logger log.Logger, authURI string) error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		if err := templates.ExecuteTemplate(w, "index.tmpl", struct{}{}); err != nil {
+		if err := templates.ExecuteTemplate(w, "index.tmpl", map[string]interface{}{"AuthURI": template.URL(authURI)}); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
