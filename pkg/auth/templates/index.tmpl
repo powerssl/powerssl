@@ -28,8 +28,8 @@
           var username = $("input").val();
           $("form").trigger("reset");
 
-          $.get("/raw?sub=" + username, function(data) {
-            window.parent.postMessage(data, 'http://localhost:5600');
+          $.get("/jwt?sub=" + username, function(data) {
+            window.parent.postMessage(data, '{{ .WebAppURI }}');
           });
         });
       });

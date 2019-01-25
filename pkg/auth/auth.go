@@ -33,7 +33,7 @@ func init() {
 	templates = template.Must(template.ParseGlob(pattern))
 }
 
-func Run(httpAddr, httpCertFile, httpKeyFile string, httpInsecure bool, metricsAddr, jwtPrivateKeyFile string) {
+func Run(httpAddr, metricsAddr, jwtPrivateKeyFile, webappURI string) {
 	logger := util.NewLogger(os.Stdout)
 
 	g, ctx := errgroup.WithContext(context.Background())
@@ -48,7 +48,7 @@ func Run(httpAddr, httpCertFile, httpKeyFile string, httpInsecure bool, metricsA
 	}
 
 	g.Go(func() error {
-		return ServeHTTP(ctx, httpAddr, log.With(logger, "component", "http"), jwtPrivateKeyFile)
+		return ServeHTTP(ctx, httpAddr, log.With(logger, "component", "http"), jwtPrivateKeyFile, webappURI)
 	})
 
 	if err := g.Wait(); err != nil {
@@ -86,7 +86,7 @@ func jwksEndpoint(signKeys ...*rsa.PrivateKey) (func(w http.ResponseWriter, req 
 	}, nil
 }
 
-func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKeyFile string) error {
+func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKeyFile, webappURI string) error {
 	signBytes, err := ioutil.ReadFile(jwtPrivateKeyFile)
 	if err != nil {
 		return fmt.Errorf("Failed to load signing key %v", err)
@@ -98,7 +98,7 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		if err := templates.ExecuteTemplate(w, "index.tmpl", struct{}{}); err != nil {
+		if err := templates.ExecuteTemplate(w, "index.tmpl", map[string]interface{}{"WebAppURI": template.URL(webappURI)}); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
@@ -107,7 +107,7 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 		return err
 	}
 	mux.HandleFunc("/.well-known/jwks.json", jwksHandler)
-	mux.HandleFunc("/raw", func(w http.ResponseWriter, req *http.Request) {
+	mux.HandleFunc("/jwt", func(w http.ResponseWriter, req *http.Request) {
 		expiresAt := time.Now().Add(time.Hour * 24).Unix()
 		subject := req.URL.Query().Get("sub")
 		tokenString, err := generateToken(signKey, subject, expiresAt)
