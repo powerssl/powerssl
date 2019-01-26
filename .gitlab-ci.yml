@@ -4,6 +4,7 @@ variables:
   DOCKER_DRIVER: overlay2
 
 stages:
+  - pre-build
   - build
   - test
   - release
@@ -18,6 +19,12 @@ stages:
     - build $COMPONENT
   only:
     - branches
+
+build bulder:
+  <<: *build_template
+  stage: pre-build
+  variables:
+    COMPONENT: builder
 
 build agent:
   <<: *build_template
@@ -326,6 +333,8 @@ release webapp:
       --build-arg ftp_proxy="$ftp_proxy" \
       --build-arg NO_PROXY="$NO_PROXY" \
       --build-arg no_proxy="$no_proxy" \
+      --build-arg BUILDER_IMAGE="$CI_APPLICATION_REPOSITORY/builder:$CI_APPLICATION_TAG" \
+      --build-arg builder_image="$CI_APPLICATION_REPOSITORY/builder:$CI_APPLICATION_TAG" \
       -f "build/docker/$component/Dockerfile" \
       -t "$CI_APPLICATION_REPOSITORY/$component:$CI_APPLICATION_TAG" .
     docker tag "$CI_APPLICATION_REPOSITORY/$component:$CI_APPLICATION_TAG" "$CI_APPLICATION_REPOSITORY/$component:latest"

@@ -1,6 +1,5 @@
-FROM golang:1.11-alpine3.7 AS builder
-RUN apk add --no-cache gcc git musl-dev
-WORKDIR /src/powerssl.io
+ARG builder_image=powerssl/builder:latest
+FROM ${builder_image} AS builder
 COPY . .
 RUN go build -o /usr/local/bin/powerssl-integration-cloudflare powerssl.io/cmd/powerssl-integration-cloudflare
 

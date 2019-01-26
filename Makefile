@@ -133,7 +133,7 @@ generate:
 	go generate $$(go list ./...)
 
 .PHONY: images
-images: agent-image apiserver-image auth-image controller-image envoy-image integration-acme-image integration-cloudflare-image powerctl-image signer-image webapp-image
+images: agent-image apiserver-image auth-image builder-image controller-image envoy-image integration-acme-image integration-cloudflare-image powerctl-image signer-image webapp-image
 
 .PHONY: agent-image
 agent-image:
@@ -146,6 +146,10 @@ apiserver-image:
 .PHONY: auth-image
 auth-image:
 	docker build -f build/docker/auth/Dockerfile -t powerssl/auth .
+
+.PHONY: builder-image
+builder-image:
+	docker build -f build/docker/builder/Dockerfile -t powerssl/builder .
 
 .PHONY: controller-image
 controller-image:
