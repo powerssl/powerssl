@@ -1,6 +1,7 @@
 .PHONY: quickstart
 quickstart: ca.pem
 	$(MAKE) gencert HOSTNAME=localhost
+	$(MAKE) gencert HOSTNAME=vault
 
 ca.pem:
 	cfssl genkey -initca csr.json | cfssljson --bare ca

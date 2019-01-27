@@ -3,91 +3,144 @@ services:
   apiserver:
     depends_on:
       - postgres
+      - vault
     environment:
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      JAEGER_REPORTER_LOG_SPANS: "true"
+      JAEGER_SAMPLER_PARAM: 1
+      JAEGER_SAMPLER_TYPE: const
+      POWERSSL_CA_FILE: /etc/powerssl/ca.pem
+      POWERSSL_COMMON_NAME: apiserver
       POWERSSL_CONTROLLER_ADDR: controller:8080
-      POWERSSL_CONTROLLER_AUTH_TOKEN: TODO
-      POWERSSL_CONTROLLER_CA_FILE: /etc/powerssl/ca.pem
-      POWERSSL_CONTROLLER_INSECURE_SKIP_TLS_VERIFY: "true"
+      POWERSSL_CONTROLLER_AUTH_TOKEN: http://auth:8080/service
       POWERSSL_DB_CONNECTION: host=postgres user=postgres dbname=postgres sslmode=disable
       POWERSSL_DB_DIALECT: postgres
-      POWERSSL_JWT_PUBLIC_KEY_FILE: /etc/powerssl/api/cert.pem
-      POWERSSL_TLS_CERT_FILE: /etc/powerssl/api/cert.pem
-      POWERSSL_TLS_PRIVATE_KEY_FILE: /etc/powerssl/api/cert-key.pem
+      POWERSSL_JWKS_URL: http://auth:8080/.well-known/jwks.json
+      POWERSSL_VAULT_TOKEN: powerssl-apiserver
+      POWERSSL_VAULT_URL: https://vault:8200/
     image: powerssl/apiserver:latest
     ports:
-      - "8080:8080"
+      - "8443:8080"
       - "9090"
+    restart: always
     volumes:
       - "./examples/certs/ca.pem:/etc/powerssl/ca.pem:ro"
-      - "./examples/certs/localhost.pem:/etc/powerssl/api/cert.pem:ro"
-      - "./examples/certs/localhost-key.pem:/etc/powerssl/api/cert-key.pem:ro"
   auth:
     environment:
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      JAEGER_REPORTER_LOG_SPANS: "true"
+      JAEGER_SAMPLER_PARAM: 1
+      JAEGER_SAMPLER_TYPE: const
       POWERSSL_JWT_PRIVATE_KEY_FILE: /etc/powerssl/auth/cert-key.pem
-      POWERSSL_TLS_CERT_FILE: /etc/powerssl/auth/cert.pem
-      POWERSSL_TLS_PRIVATE_KEY_FILE: /etc/powerssl/auth/cert-key.pem
+      POWERSSL_WEBAPP_URI: http://localhost:8080
     image: powerssl/auth:latest
     ports:
       - "8081:8080"
       - "9090"
+    restart: always
     volumes:
-      - "./examples/certs/ca.pem:/etc/powerssl/ca.pem:ro"
-      - "./examples/certs/localhost.pem:/etc/powerssl/auth/cert.pem:ro"
       - "./examples/certs/localhost-key.pem:/etc/powerssl/auth/cert-key.pem:ro"
   controller:
+    depends_on:
+      - vault
     environment:
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      JAEGER_REPORTER_LOG_SPANS: "true"
+      JAEGER_SAMPLER_PARAM: 1
+      JAEGER_SAMPLER_TYPE: const
+      POWERSSL_CA_FILE: /etc/powerssl/ca.pem
+      POWERSSL_COMMON_NAME: controller
       POWERSSL_APISERVER_ADDR: apiserver:8080
-      POWERSSL_APISERVER_AUTH_TOKEN: TODO
-      POWERSSL_APISERVER_CA_FILE: /etc/powerssl/ca.pem
-      POWERSSL_APISERVER_INSECURE_SKIP_TLS_VERIFY: "true"
-      POWERSSL_JWT_PUBLIC_KEY_FILE: /etc/powerssl/controller/cert.pem
-      POWERSSL_TLS_CERT_FILE: /etc/powerssl/controller/cert.pem
-      POWERSSL_TLS_PRIVATE_KEY_FILE: /etc/powerssl/controller/cert-key.pem
+      POWERSSL_APISERVER_AUTH_TOKEN: http://auth:8080/service
+      POWERSSL_JWKS_URL: http://auth:8080/.well-known/jwks.json
+      POWERSSL_VAULT_TOKEN: powerssl-controller
+      POWERSSL_VAULT_URL: https://vault:8200/
     image: powerssl/controller:latest
     ports:
       - "8080"
       - "9090"
+    restart: always
     volumes:
       - "./examples/certs/ca.pem:/etc/powerssl/ca.pem:ro"
-      - "./examples/certs/localhost.pem:/etc/powerssl/controller/cert.pem:ro"
-      - "./examples/certs/localhost-key.pem:/etc/powerssl/controller/cert-key.pem:ro"
   integration-acme:
     environment:
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      JAEGER_REPORTER_LOG_SPANS: "true"
+      JAEGER_SAMPLER_PARAM: 1
+      JAEGER_SAMPLER_TYPE: const
       POWERSSL_ADDR: controller:8080
       POWERSSL_CA_FILE: /etc/powerssl/ca.pem
-      POWERSSL_INSECURE_SKIP_TLS_VERIFY: "true"
     image: powerssl/integration-acme:latest
     ports:
       - "9090"
+    restart: always
     volumes:
       - "./examples/certs/ca.pem:/etc/powerssl/ca.pem:ro"
   signer:
+    depends_on:
+      - vault
     environment:
-      POWERSSL_TLS_CERT_FILE: /etc/powerssl/signer/cert.pem
-      POWERSSL_TLS_PRIVATE_KEY_FILE: /etc/powerssl/signer/cert-key.pem
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      JAEGER_REPORTER_LOG_SPANS: "true"
+      JAEGER_SAMPLER_PARAM: 1
+      JAEGER_SAMPLER_TYPE: const
+      POWERSSL_CA_FILE: /etc/powerssl/ca.pem
+      POWERSSL_COMMON_NAME: signer
+      POWERSSL_VAULT_TOKEN: powerssl-signer
+      POWERSSL_VAULT_URL: https://vault:8200/
     image: powerssl/signer:latest
     ports:
       - "8080"
       - "9090"
+    restart: always
     volumes:
       - "./examples/certs/ca.pem:/etc/powerssl/ca.pem:ro"
-      - "./examples/certs/localhost.pem:/etc/powerssl/signer/cert.pem:ro"
-      - "./examples/certs/localhost-key.pem:/etc/powerssl/signer/cert-key.pem:ro"
+  webapp:
+    environment:
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      JAEGER_REPORTER_LOG_SPANS: "true"
+      JAEGER_SAMPLER_PARAM: 1
+      JAEGER_SAMPLER_TYPE: const
+      POWERSSL_AUTH_URI: http://localhost:8081
+    image: powerssl/webapp:latest
+    ports:
+      - "8080:8080"
+      - "9090"
+    restart: always
+    volumes:
+      - "./examples/certs/ca.pem:/etc/powerssl/ca.pem:ro"
   postgres:
-    image: postgres:latest
+    image: postgres:11.1-alpine
+    restart: always
     volumes:
       - postgres-data:/var/lib/postgresql/data
-# jaeger:
-#   environment:
-#     COLLECTOR_ZIPKIN_HTTP_PORT: 9411
-#   image: jaegertracing/all-in-one:1.7
-#   ports:
-#     - "5775/udp"
-#     - "6831/udp"
-#     - "6832/udp"
-#     - "5778"
-#     - "16686"
-#     - "14268"
-#     - "9411"
+  vault:
+    command: ["server"]
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_LOCAL_CONFIG: '{"listener": {"tcp": {"address": "0.0.0.0:8200", "tls_cert_file": "/etc/certs/vault.crt", "tls_key_file": "/etc/certs/vault.key"}}, "storage": {"file": {"path": "/vault/file"}}, "default_lease_ttl": "168h", "max_lease_ttl": "720h", "api_addr": "https://vault:8200", "cluster_addr": "https://vault:8201", "ui": "true"}'
+    image: vault:1.0.2
+    ports:
+      - "8200:8200"
+    restart: always
+    volumes:
+      - ./examples/certs/vault-key.pem:/etc/certs/vault.key:ro
+      - ./examples/certs/vault.pem:/etc/certs/vault.crt:ro
+      - vault-data:/vault/file
+  jaeger:
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    image: jaegertracing/all-in-one:1.8
+    restart: always
+    ports:
+      - "5775/udp"
+      - "6831/udp"
+      - "6832/udp"
+      - "5778"
+      - "16686:16686"
+      - "14268"
+      - "9411"
 volumes:
   postgres-data:
+  vault-data:
