@@ -3,8 +3,10 @@ package util
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/url"
 	"runtime/debug"
@@ -48,7 +50,7 @@ func NewClientConn(addr, certFile, serverNameOverride string, insecure, insecure
 	return grpc.Dial(addr, opts...)
 }
 
-func ServeGRPC(ctx context.Context, addr, certFile, keyFile, commonName, vaultURL, vaultToken, vaultRole string, insecure bool, logger log.Logger, services []Service) error {
+func ServeGRPC(ctx context.Context, addr, certFile, keyFile, caFile, commonName, vaultURL, vaultToken, vaultRole string, insecure bool, logger log.Logger, services []Service) error {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
@@ -75,6 +77,12 @@ func ServeGRPC(ctx context.Context, addr, certFile, keyFile, commonName, vaultUR
 				return fmt.Errorf("Failed to load TLS credentials %v", err)
 			}
 		} else {
+			certPool := x509.NewCertPool()
+			caData, err := ioutil.ReadFile(caFile)
+			if err != nil {
+				return err
+			}
+			certPool.AppendCertsFromPEM(caData)
 			url, err := url.Parse(vaultURL)
 			if err != nil {
 				return err
@@ -87,10 +95,15 @@ func ServeGRPC(ctx context.Context, addr, certFile, keyFile, commonName, vaultUR
 					Role:              vaultRole,
 					Token:             vaultToken,
 					URL:               url,
+					TLSConfig: &tls.Config{
+						RootCAs: certPool,
+					},
 				},
 				RenewBefore: time.Hour,
 			}
 			getCertificate := func(hello *tls.ClientHelloInfo) (cert *tls.Certificate, err error) {
+				// TODO: ???
+				hello.ServerName = commonName
 				if cert, err = c.GetCertificate(hello); err != nil {
 					logger.Log("err", err)
 				}
