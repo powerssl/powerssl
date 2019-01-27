@@ -20,25 +20,27 @@ import (
 	"powerssl.io/pkg/util/vault"
 )
 
-func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) meta.Service {
+func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient, vaultClient *vault.Client) meta.Service {
 	db.AutoMigrate(&model.ACMEAccount{})
 	var svc meta.Service
 	{
-		svc = NewBasicService(db, logger, client)
+		svc = NewBasicService(db, logger, client, vaultClient)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
 }
 
 type basicService struct {
-	controllerclient *controllerclient.GRPCClient
+	controllerClient *controllerclient.GRPCClient
 	db               *gorm.DB
 	logger           log.Logger
+	vaultClient      *vault.Client
 }
 
-func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) meta.Service {
+func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient, vaultClient *vault.Client) meta.Service {
 	return basicService{
-		controllerclient: client,
+		controllerClient: client,
+		vaultClient:      vaultClient,
 		db:               db,
 		logger:           logger,
 	}
@@ -60,15 +62,11 @@ func (bs basicService) Create(ctx context.Context, parent string, acmeAccount *a
 		return nil, status.Error(codes.NotFound, "not found")
 	}
 
-	vaultClient, err := vault.New("http://localhost:8200", "insecure")
-	if err != nil {
-		return nil, err
-	}
-	if err := vaultClient.CreateTransitKey(ctx, account.ID); err != nil {
+	if err := bs.vaultClient.CreateTransitKey(ctx, account.ID); err != nil {
 		return nil, err
 	}
 
-	workflow, err := bs.controllerclient.Workflow.Create(ctx, &controllerapi.Workflow{
+	workflow, err := bs.controllerClient.Workflow.Create(ctx, &controllerapi.Workflow{
 		Kind: controllerapi.WorkflowKindCreateACMEAccount,
 		IntegrationFilters: []*controllerapi.WorkflowIntegrationFilter{
 			{

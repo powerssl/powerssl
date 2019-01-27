@@ -13,6 +13,7 @@ import (
 	"powerssl.io/pkg/apiserver/acmeaccount/transport"
 	apiv1 "powerssl.io/pkg/apiserver/api/v1"
 	controllerclient "powerssl.io/pkg/controller/client"
+	"powerssl.io/pkg/util/vault"
 )
 
 type ACMEAccount struct {
@@ -21,8 +22,8 @@ type ACMEAccount struct {
 	tracer    stdopentracing.Tracer
 }
 
-func New(db *gorm.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *controllerclient.GRPCClient, auth kitendpoint.Middleware) *ACMEAccount {
-	svc := service.New(db, logger, client)
+func New(db *gorm.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *controllerclient.GRPCClient, vaultClient *vault.Client, auth kitendpoint.Middleware) *ACMEAccount {
+	svc := service.New(db, logger, client, vaultClient)
 	endpoints := endpoint.NewEndpoints(svc, logger, tracer, duration, auth)
 
 	return &ACMEAccount{

@@ -18,6 +18,7 @@ import (
 	"powerssl.io/pkg/util"
 	"powerssl.io/pkg/util/auth"
 	"powerssl.io/pkg/util/tracing"
+	"powerssl.io/pkg/util/vault"
 )
 
 const component = "powerssl-apiserver"
@@ -69,7 +70,16 @@ func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile s
 		}
 	}
 
-	services, err := makeServices(db, logger, tracer, duration, client, jwksURL)
+	var vaultClient *vault.Client
+	{
+		var err error
+		if vaultClient, err = vault.New(vaultURL, vaultToken, caFile); err != nil {
+			logger.Log("err", err)
+			os.Exit(1)
+		}
+	}
+
+	services, err := makeServices(db, logger, tracer, duration, client, vaultClient, jwksURL)
 	if err != nil {
 		logger.Log("err", err)
 		os.Exit(1)
@@ -82,7 +92,7 @@ func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile s
 	}
 
 	g.Go(func() error {
-		return util.ServeGRPC(ctx, grpcAddr, grpcCertFile, grpcKeyFile, commonName, vaultURL, vaultToken, component, grpcInsecure, log.With(logger, "transport", "gRPC"), services)
+		return util.ServeGRPC(ctx, grpcAddr, grpcCertFile, grpcKeyFile, caFile, commonName, vaultURL, vaultToken, component, grpcInsecure, log.With(logger, "transport", "gRPC"), services)
 	})
 
 	if err := g.Wait(); err != nil {
