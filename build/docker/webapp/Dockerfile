@@ -1,10 +1,10 @@
 ARG builder_image=powerssl/builder:latest
 FROM ${builder_image} AS builder
 COPY . .
-RUN go build -o /usr/local/bin/powerssl-webapp powerssl.io/cmd/powerssl-webapp
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w -extldflags "-static"' -o /usr/local/bin/powerssl-webapp powerssl.io/cmd/powerssl-webapp
 
 FROM alpine:latest
-RUN apk add --no-cache ca-certificates
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /usr/local/bin/powerssl-webapp /usr/local/bin/powerssl-webapp
 COPY --from=builder /go/src/powerssl.io/pkg/webapp/templates /go/src/powerssl.io/pkg/webapp/templates
 ENTRYPOINT ["/usr/local/bin/powerssl-webapp"]

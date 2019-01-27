@@ -20,7 +20,7 @@ stages:
   only:
     - branches
 
-build bulder:
+build builder:
   <<: *build_template
   stage: pre-build
   variables:
