@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    service: webapp
+  name: webapp
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: webapp
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: webapp
+        image: powerssl/webapp:latest
+        name: webapp
+        ports:
+        - containerPort: 8080
+        - containerPort: 9090
+        restartPolicy: Always

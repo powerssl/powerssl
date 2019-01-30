@@ -1,0 +1,28 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    service: vault
+  name: vault
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: vault
+    spec:
+      containers:
+      - args:
+        - server
+        envFrom:
+        - configMapRef:
+            name: vault
+        image: vault:1.0.2
+        name: vault
+        ports:
+        - containerPort: 8200
+        restartPolicy: Always
+        securityContext:
+          capabilities:
+            add:
+            - IPC_LOCK

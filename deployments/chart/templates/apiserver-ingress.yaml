@@ -1,0 +1,12 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: apiserver
+spec:
+  rules:
+  - host: api.test.powerssl.io
+    http:
+      paths:
+      - backend:
+          serviceName: apiserver
+          servicePort: 8080

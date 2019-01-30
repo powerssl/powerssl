@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    service: integration-acme
+  name: integration-acme
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: integration-acme
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: integration-acme
+        image: powerssl/integration-acme:latest
+        name: integration-acme
+        ports:
+        - containerPort: 9090
+        restartPolicy: Always

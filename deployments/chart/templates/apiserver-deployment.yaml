@@ -1,0 +1,50 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    service: apiserver
+  name: apiserver
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: apiserver
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: apiserver
+        image: powerssl/apiserver:latest
+        name: apiserver
+        ports:
+        - containerPort: 8080
+        - containerPort: 9090
+        restartPolicy: Always
+        volumes:
+        - name: ca
+          mountPath: /etc/powerssl
+        livenessProbe:
+          exec:
+            command:
+            - grpc_health_probe
+            - -addr
+            - 127.0.0.1:8080
+            - -tls
+            - -tls-no-verify=true
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - grpc_health_probe
+            - -addr
+            - 127.0.0.1:8080
+            - -tls
+            - -tls-no-verify=true
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: ca
+        configMap:
+          name: ca

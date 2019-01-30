@@ -1,0 +1,57 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    service: signer
+  name: signer
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: signer
+    spec:
+      containers:
+      - env:
+        - name: JAEGER_ENDPOINT
+          value: http://jaeger:14268/api/traces
+        - name: JAEGER_REPORTER_LOG_SPANS
+          value: "true"
+        - name: JAEGER_SAMPLER_PARAM
+          value: "1"
+        - name: JAEGER_SAMPLER_TYPE
+          value: const
+        - name: POWERSSL_CA_FILE
+          value: /etc/powerssl/ca.pem
+        - name: POWERSSL_COMMON_NAME
+          value: signer
+        - name: POWERSSL_VAULT_TOKEN
+          value: powerssl-signer
+        - name: POWERSSL_VAULT_URL
+          value: https://vault:8200/
+        image: powerssl/signer:latest
+        name: signer
+        ports:
+        - containerPort: 8080
+        - containerPort: 9090
+        restartPolicy: Always
+        livenessProbe:
+          exec:
+            command:
+            - grpc_health_probe
+            - -addr
+            - 127.0.0.1:8080
+            - -tls
+            - -tls-no-verify=true
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - grpc_health_probe
+            - -addr
+            - 127.0.0.1:8080
+            - -tls
+            - -tls-no-verify=true
+          initialDelaySeconds: 5
+          periodSeconds: 5

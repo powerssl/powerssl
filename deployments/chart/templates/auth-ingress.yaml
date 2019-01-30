@@ -1,0 +1,12 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: auth
+spec:
+  rules:
+  - host: auth.test.powerssl.io
+    http:
+      paths:
+      - backend:
+          serviceName: auth
+          servicePort: 8080
