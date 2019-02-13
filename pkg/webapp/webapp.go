@@ -19,7 +19,7 @@ var templates *template.Template
 
 func init() {
 	_, file, _, _ := runtime.Caller(0)
-	pattern := filepath.Join(filepath.Dir(file), "templates", "*.tmpl")
+	pattern := filepath.Join(filepath.Dir(file), "..", "..", "web", "app", "*.html")
 	templates = template.Must(template.ParseGlob(pattern))
 }
 
@@ -53,7 +53,7 @@ func Run(httpAddr, metricsAddr, authURI string) {
 func ServeHTTP(ctx context.Context, addr string, logger log.Logger, authURI string) error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		if err := templates.ExecuteTemplate(w, "index.tmpl", map[string]interface{}{"AuthURI": template.URL(authURI)}); err != nil {
+		if err := templates.ExecuteTemplate(w, "index.html", map[string]interface{}{"AuthURI": template.URL(authURI)}); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
