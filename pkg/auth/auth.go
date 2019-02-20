@@ -1,3 +1,5 @@
+//go:generate go-bindata -pkg auth -prefix ../../web/auth ../../web/auth
+
 package auth
 
 import (
@@ -7,14 +9,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"html/template"
+	htmltemplate "html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path/filepath"
-	"runtime"
 	"time"
 
+	"github.com/arschles/go-bindata-html-template"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-kit/kit/log"
 	"github.com/pborman/uuid"
@@ -24,14 +25,6 @@ import (
 	"powerssl.io/pkg/util"
 	"powerssl.io/pkg/util/auth"
 )
-
-var templates *template.Template
-
-func init() {
-	_, file, _, _ := runtime.Caller(0)
-	pattern := filepath.Join(filepath.Dir(file), "..", "..", "web", "auth", "*.html")
-	templates = template.Must(template.ParseGlob(pattern))
-}
 
 func Run(httpAddr, metricsAddr, jwtPrivateKeyFile, webappURI string) {
 	logger := util.NewLogger(os.Stdout)
@@ -97,8 +90,12 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 	}
 
 	mux := http.NewServeMux()
+	tmpl, err := template.New("index", Asset).Parse("index.html")
+	if err != nil {
+		return err
+	}
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		if err := templates.ExecuteTemplate(w, "index.html", map[string]interface{}{"WebAppURI": template.URL(webappURI)}); err != nil {
+		if err := tmpl.Execute(w, map[string]interface{}{"WebAppURI": htmltemplate.URL(webappURI)}); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})

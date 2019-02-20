@@ -5,7 +5,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w -
 
 FROM alpine:latest
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /go/src/powerssl.io/web/auth /go/src/powerssl.io/web/auth
 COPY --from=builder /usr/local/bin/powerssl-auth /usr/local/bin/powerssl-auth
 ENTRYPOINT ["/usr/local/bin/powerssl-auth"]
 CMD ["serve"]

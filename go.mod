@@ -5,6 +5,7 @@ replace github.com/russross/blackfriday => github.com/russross/blackfriday v1.5.
 replace github.com/uber/jaeger-lib => github.com/uber/jaeger-lib v1.5.0
 
 require (
+	github.com/arschles/go-bindata-html-template v0.0.0-20170123182818-839a6918b9ff
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf // indirect
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/cpuguy83/go-md2man v1.0.8 // indirect
