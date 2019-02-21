@@ -65,6 +65,7 @@ Find more information at: https://docs.powerssl.io/powerctl/powerctl.html`,
 	cmd.AddCommand(newCmdDelete())
 	cmd.AddCommand(newCmdDescribe())
 	cmd.AddCommand(newCmdGet())
+	cmd.AddCommand(newCmdLogin())
 	cmd.AddCommand(newCmdUpdate())
 
 	return cmd

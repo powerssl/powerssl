@@ -48,7 +48,7 @@
       $(document).ready(function() {
         window.addEventListener('message', function (event) {
         if (event.origin != '{{ .AuthURI }}') return;
-          $("code").text(event.data);
+          $("code").text('powerctl login --auth-token ' + event.data);
           $("div.container").show();
           $("main").show();
           $("#login").hide();
