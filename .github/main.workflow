@@ -13,6 +13,7 @@ action "release darwin/amd64" {
     GOOS = "darwin"
     GOARCH = "amd64"
     GO111MODULE = "on"
+    CGO_ENABLED = "0"
   }
   secrets = ["GITHUB_TOKEN"]
 }
@@ -23,6 +24,7 @@ action "release windows/amd64" {
     GOOS = "windows"
     GOARCH = "amd64"
     GO111MODULE = "on"
+    CGO_ENABLED = "0"
   }
   secrets = ["GITHUB_TOKEN"]
 }
@@ -33,6 +35,7 @@ action "release linux/amd64" {
     GOOS = "linux"
     GOARCH = "amd64"
     GO111MODULE = "on"
+    CGO_ENABLED = "0"
   }
   secrets = ["GITHUB_TOKEN"]
 }
