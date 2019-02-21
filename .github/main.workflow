@@ -8,34 +8,31 @@ workflow "Build powerctl" {
 }
 
 action "release darwin/amd64" {
-  uses = "ngs/go-release.action@v1.0.1"
+  uses = "./build/action/"
   env = {
     GOOS = "darwin"
     GOARCH = "amd64"
-    GO111MODULE = "on"
-    CGO_ENABLED = "0"
+    POWERSSL_COMPONENT = "powerctl"
   }
   secrets = ["GITHUB_TOKEN"]
 }
 
 action "release windows/amd64" {
-  uses = "ngs/go-release.action@v1.0.1"
+  uses = "./build/action/"
   env = {
     GOOS = "windows"
     GOARCH = "amd64"
-    GO111MODULE = "on"
-    CGO_ENABLED = "0"
+    POWERSSL_COMPONENT = "powerctl"
   }
   secrets = ["GITHUB_TOKEN"]
 }
 
 action "release linux/amd64" {
-  uses = "ngs/go-release.action@v1.0.1"
+  uses = "./build/action/"
   env = {
     GOOS = "linux"
     GOARCH = "amd64"
-    GO111MODULE = "on"
-    CGO_ENABLED = "0"
+    POWERSSL_COMPONENT = "powerctl"
   }
   secrets = ["GITHUB_TOKEN"]
 }
