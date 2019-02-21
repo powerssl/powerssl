@@ -91,10 +91,9 @@ func ServeGRPC(ctx context.Context, addr, certFile, keyFile, caFile, commonName,
 				Cache:      certify.NewMemCache(),
 				CommonName: commonName,
 				Issuer: &vault.Issuer{
-					InsecureAllowHTTP: url.Scheme == "http",
-					Role:              vaultRole,
-					Token:             vaultToken,
-					URL:               url,
+					Role:  vaultRole,
+					Token: vaultToken,
+					URL:   url,
 					TLSConfig: &tls.Config{
 						RootCAs: certPool,
 					},
