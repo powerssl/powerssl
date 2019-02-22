@@ -32,13 +32,6 @@ all: build
 bin/protoc-gen-gogo:
 	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)/protoc-gen-gogo
 
-bin/protoc-gen-grpc-web:
-	rm -rf /tmp/grpc-web
-	git clone --branch 0.4.0 https://github.com/grpc/grpc-web.git /tmp/grpc-web
-	cd /tmp/grpc-web/javascript/net/grpc/web && \
-		make protoc-gen-grpc-web && \
-		install protoc-gen-grpc-web $(BIN_PATH)/protoc-gen-grpc-web
-
 bin/powerssl-agent: .ALWAYS_REBUILD
 	go build -o bin/powerssl-agent powerssl.io/cmd/powerssl-agent
 
@@ -110,16 +103,6 @@ protobuf:
 		$(PROTOC) \
 			-I$(PROTO_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
 			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src \
-			$$dir/*.proto; \
-	done
-
-.PHONY: javascript-sdk
-javascript-sdk: bin/protoc-gen-grpc-web
-	set -e; for dir in $(sort $(dir $(PROTOS))); do \
-		$(PROTOC) \
-			-I$(PROTO_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
-			--js_out=import_style=commonjs:vendor/javascript-sdk \
-			--grpc-web_out=import_style=commonjs,mode=grpcwebtext:vendor/javascript-sdk \
 			$$dir/*.proto; \
 	done
 
