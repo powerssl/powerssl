@@ -33,34 +33,34 @@ bin/protoc-gen-gogo:
 	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)/protoc-gen-gogo
 
 bin/powerssl-agent: .ALWAYS_REBUILD
-	go build -o bin/powerssl-agent powerssl.io/cmd/powerssl-agent
+	COMPONENT=powerssl-agent scripts/build.sh
 
 bin/powerssl-apiserver: .ALWAYS_REBUILD
-	go build -o bin/powerssl-apiserver powerssl.io/cmd/powerssl-apiserver
+	COMPONENT=powerssl-apiserver scripts/build.sh
 
 bin/powerssl-auth: .ALWAYS_REBUILD
-	go build -o bin/powerssl-auth powerssl.io/cmd/powerssl-auth
+	COMPONENT=powerssl-auth scripts/build.sh
 
 bin/powerssl-controller: .ALWAYS_REBUILD
-	go build -o bin/powerssl-controller powerssl.io/cmd/powerssl-controller
+	COMPONENT=powerssl-controller scripts/build.sh
 
 bin/powerssl-integration-acme: .ALWAYS_REBUILD
-	go build -o bin/powerssl-integration-acme powerssl.io/cmd/powerssl-integration-acme
+	COMPONENT=powerssl-integration-acme scripts/build.sh
 
 bin/powerssl-integration-cloudflare: .ALWAYS_REBUILD
-	go build -o bin/powerssl-integration-cloudflare powerssl.io/cmd/powerssl-integration-cloudflare
+	COMPONENT=powerssl-integration-cloudflare scripts/build.sh
 
 bin/powerssl-signer: .ALWAYS_REBUILD
-	go build -o bin/powerssl-signer powerssl.io/cmd/powerssl-signer
+	COMPONENT=powerssl-signer scripts/build.sh
 
 bin/powerssl-webapp: .ALWAYS_REBUILD
-	go build -o bin/powerssl-webapp powerssl.io/cmd/powerssl-webapp
+	COMPONENT=powerssl-webapp scripts/build.sh
 
 bin/powerctl: .ALWAYS_REBUILD
-	go build -o bin/powerctl powerssl.io/cmd/powerctl
+	COMPONENT=powerctl scripts/build.sh
 
 bin/powerutil: .ALWAYS_REBUILD
-	go build -o bin/powerutil powerssl.io/cmd/powerutil
+	COMPONENT=powerutil scripts/build.sh
 
 .PHONY: build
 build: bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerssl-webapp bin/powerctl bin/powerutil
@@ -71,15 +71,15 @@ docs:
 
 .PHONY: install-agent
 install-agent:
-	go install powerssl.io/cmd/powerssl-agent
+	COMPONENT=powerssl-agent scripts/install.sh
 
 .PHONY: install-powerctl
 install-powerctl:
-	go install powerssl.io/cmd/powerctl
+	COMPONENT=powerctl scripts/install.sh
 
 .PHONY: install-powerutil
 install-powerutil:
-	go install powerssl.io/cmd/powerutil
+	COMPONENT=powerutil scripts/install.sh
 
 .PHONY: fmt
 fmt:
