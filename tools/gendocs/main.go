@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -33,6 +34,17 @@ func main() {
 	check(doc.GenMarkdownTreeCustom(powerutil.NewCmdRoot(), "docs/powerutil", filePrepender, linkHandler))
 	check(doc.GenMarkdownTreeCustom(signer.NewCmdRoot(), "docs/powerssl-signer", filePrepender, linkHandler))
 	check(doc.GenMarkdownTreeCustom(web.NewCmdRoot(), "docs/powerssl-webapp", filePrepender, linkHandler))
+
+	// NOTE: Strip timestamp from all generated docs.
+	files, err := filepath.Glob("docs/**/*.md")
+	check(err)
+	for _, file := range files {
+		input, err := ioutil.ReadFile(file)
+		check(err)
+		lines := strings.Split(string(input), "\n")
+		output := strings.Join(lines[0:len(lines)-2], "\n")
+		check(ioutil.WriteFile(file, []byte(output), 0644))
+	}
 }
 
 func check(err error) {
