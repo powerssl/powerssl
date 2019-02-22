@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/vault/api"
 
-	"powerssl.io/pkg/powerutil/policy"
+	"powerssl.io/internal/app/powerutil/policy"
 	"powerssl.io/pkg/util/vault"
 )
 
