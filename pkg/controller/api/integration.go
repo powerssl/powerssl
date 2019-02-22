@@ -1,4 +1,4 @@
-package api
+package api // import "powerssl.io/pkg/controller/api"
 
 type IntegrationKind int32
 

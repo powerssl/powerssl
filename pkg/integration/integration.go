@@ -13,7 +13,7 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 	"golang.org/x/sync/errgroup"
 
-	acmetransport "powerssl.io/pkg/controller/acme/transport" // TODO: Wrong package
+	acmetransport "powerssl.io/internal/app/controller/acme/transport" // TODO: Wrong package
 	"powerssl.io/pkg/controller/api"
 	apiv1 "powerssl.io/pkg/controller/api/v1"
 	controllerclient "powerssl.io/pkg/controller/client"

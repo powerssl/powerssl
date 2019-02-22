@@ -1,4 +1,4 @@
-package api
+package api // import "powerssl.io/pkg/controller/api"
 
 //go:generate stringer -type=AccountStatus -trimprefix=AccountStatus
 type AccountStatus uint

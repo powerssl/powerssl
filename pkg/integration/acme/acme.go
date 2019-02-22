@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"fmt"
 
-	"powerssl.io/pkg/controller/acme/meta"
+	"powerssl.io/internal/app/controller/acme/meta"
 	"powerssl.io/pkg/controller/api"
 )
 
