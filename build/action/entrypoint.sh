@@ -2,7 +2,10 @@
 
 set -eux
 
-/build.sh
+ln -s $GITHUB_WORKSPACE /go/src/powerssl.io
+cd /go/src/powerssl.io
+GO111MODULE=on make "bin/${POWERSSL_COMPONENT}"
+cd bin
 
 EVENT_DATA=$(cat $GITHUB_EVENT_PATH)
 echo $EVENT_DATA | jq .
@@ -12,12 +15,11 @@ RELEASE_NAME=$(echo $EVENT_DATA | jq -r .release.tag_name)
 NAME="${POWERSSL_COMPONENT}_${RELEASE_NAME}_${GOOS}_${GOARCH}"
 
 EXT=''
-
-if [ $GOOS == 'windows' ]; then
+if [ "${GOOS:-}" == 'windows' ]; then
   EXT='.exe'
 fi
 
-cp "/go/bin/${POWERSSL_COMPONENT}${EXT}" .
+mv ${POWERSSL_COMPONENT} "${POWERSSL_COMPONENT}${EXT}"
 tar cvfz tmp.tgz "${POWERSSL_COMPONENT}${EXT}"
 CHECKSUM=$(md5sum tmp.tgz | cut -d ' ' -f 1)
 

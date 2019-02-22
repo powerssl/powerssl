@@ -5,8 +5,7 @@ LABEL "com.github.actions.description"="Automate publishing Go build artifacts f
 LABEL "com.github.actions.icon"="cpu"
 LABEL "com.github.actions.color"="orange"
 
-RUN apk add --no-cache ca-certificates curl gcc git jq musl-dev
+RUN apk add --no-cache ca-certificates curl gcc git jq make musl-dev
 
 ADD entrypoint.sh /entrypoint.sh
-ADD build.sh /build.sh
 ENTRYPOINT ["/entrypoint.sh"]
