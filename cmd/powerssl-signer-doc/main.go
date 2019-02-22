@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra/doc"
 	"gopkg.in/yaml.v2"
 
-	"powerssl.io/pkg/signer/cmd"
+	"powerssl.io/internal/app/signer/cmd"
 )
 
 func main() {

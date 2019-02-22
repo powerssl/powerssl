@@ -1,6 +1,6 @@
 package main
 
-import "powerssl.io/pkg/signer/cmd"
+import "powerssl.io/internal/app/signer/cmd"
 
 func main() {
 	cmd.Execute()
