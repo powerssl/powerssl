@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"powerssl.io/pkg/auth"
+	"powerssl.io/internal/app/auth"
 )
 
 func newCmdServe() *cobra.Command {

@@ -1,4 +1,4 @@
-//go:generate go-bindata -pkg auth -prefix ../../web/auth ../../web/auth
+//go:generate go-bindata -pkg auth -prefix ../../../web/auth ../../../web/auth
 
 package auth
 
