@@ -74,16 +74,7 @@ build: bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-
 
 .PHONY: docs
 docs:
-	go run powerssl.io/cmd/powerctl-doc
-	go run powerssl.io/cmd/powerssl-agent-doc
-	go run powerssl.io/cmd/powerssl-apiserver-doc
-	go run powerssl.io/cmd/powerssl-auth-doc
-	go run powerssl.io/cmd/powerssl-controller-doc
-	go run powerssl.io/cmd/powerssl-integration-acme-doc
-	go run powerssl.io/cmd/powerssl-integration-cloudflare-doc
-	go run powerssl.io/cmd/powerssl-signer-doc
-	go run powerssl.io/cmd/powerssl-webapp-doc
-	go run powerssl.io/cmd/powerutil-doc
+	go run powerssl.io/tools/gendocs
 
 .PHONY: install-agent
 install-agent:
