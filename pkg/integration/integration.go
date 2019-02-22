@@ -19,8 +19,8 @@ import (
 	controllerclient "powerssl.io/pkg/controller/client"
 	integrationacme "powerssl.io/pkg/integration/acme"
 	// integrationdns "powerssl.io/pkg/integration/dns"
-	"powerssl.io/pkg/util"
-	"powerssl.io/pkg/util/tracing"
+	"powerssl.io/internal/pkg/util"
+	"powerssl.io/internal/pkg/util/tracing"
 )
 
 type kind string

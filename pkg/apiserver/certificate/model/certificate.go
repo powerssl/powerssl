@@ -9,8 +9,8 @@ import (
 	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc/codes"
 
+	"powerssl.io/internal/pkg/util/uid"
 	"powerssl.io/pkg/apiserver/api"
-	"powerssl.io/pkg/util/uid"
 )
 
 type Certificate struct {

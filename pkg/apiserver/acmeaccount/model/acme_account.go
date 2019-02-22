@@ -9,9 +9,9 @@ import (
 	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc/codes"
 
+	"powerssl.io/internal/pkg/util/uid"
 	acmeserver "powerssl.io/pkg/apiserver/acmeserver/model"
 	"powerssl.io/pkg/apiserver/api"
-	"powerssl.io/pkg/util/uid"
 )
 
 type ACMEAccount struct {

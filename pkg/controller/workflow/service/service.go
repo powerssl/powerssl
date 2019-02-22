@@ -6,11 +6,11 @@ import (
 
 	"github.com/go-kit/kit/log"
 
+	"powerssl.io/internal/pkg/util/tracing"
 	apiserverclient "powerssl.io/pkg/apiserver/client"
 	"powerssl.io/pkg/controller/api"
 	"powerssl.io/pkg/controller/workflow/engine/workflow"
 	"powerssl.io/pkg/controller/workflow/meta"
-	"powerssl.io/pkg/util/tracing"
 )
 
 func New(logger log.Logger, client *apiserverclient.GRPCClient) meta.Service {

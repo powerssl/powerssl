@@ -9,11 +9,11 @@ import (
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 
+	"powerssl.io/internal/pkg/util"
+	"powerssl.io/internal/pkg/util/auth"
+	"powerssl.io/internal/pkg/util/tracing"
 	apiserverclient "powerssl.io/pkg/apiserver/client"
 	workflowengine "powerssl.io/pkg/controller/workflow/engine"
-	"powerssl.io/pkg/util"
-	"powerssl.io/pkg/util/auth"
-	"powerssl.io/pkg/util/tracing"
 )
 
 const component = "powerssl-controller"

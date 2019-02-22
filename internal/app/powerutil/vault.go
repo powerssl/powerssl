@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/vault/api"
 
 	"powerssl.io/internal/app/powerutil/policy"
-	"powerssl.io/pkg/util/vault"
+	"powerssl.io/internal/pkg/util/vault"
 )
 
 const (

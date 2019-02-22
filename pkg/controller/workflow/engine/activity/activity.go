@@ -9,10 +9,10 @@ import (
 	"github.com/looplab/fsm"
 	"github.com/opentracing/opentracing-go"
 
+	"powerssl.io/internal/pkg/util/tracing"
 	"powerssl.io/pkg/controller/api"
 	apiv1 "powerssl.io/pkg/controller/api/v1"
 	"powerssl.io/pkg/controller/integration"
-	"powerssl.io/pkg/util/tracing"
 )
 
 const (

@@ -6,9 +6,9 @@ import (
 
 	"github.com/spf13/viper"
 
+	"powerssl.io/internal/pkg/util"
+	"powerssl.io/internal/pkg/util/tracing"
 	apiserverclient "powerssl.io/pkg/apiserver/client"
-	"powerssl.io/pkg/util"
-	"powerssl.io/pkg/util/tracing"
 )
 
 func NewGRPCClient() (*apiserverclient.GRPCClient, error) {

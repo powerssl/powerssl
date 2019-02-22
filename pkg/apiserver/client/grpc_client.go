@@ -4,6 +4,8 @@ import (
 	"github.com/go-kit/kit/log"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
+	"powerssl.io/internal/pkg/util"
+	"powerssl.io/internal/pkg/util/auth"
 	acmeaccountmeta "powerssl.io/pkg/apiserver/acmeaccount/meta"
 	acmeaccounttransport "powerssl.io/pkg/apiserver/acmeaccount/transport"
 	acmeservermeta "powerssl.io/pkg/apiserver/acmeserver/meta"
@@ -12,8 +14,6 @@ import (
 	certificatetransport "powerssl.io/pkg/apiserver/certificate/transport"
 	usermeta "powerssl.io/pkg/apiserver/user/meta"
 	usertransport "powerssl.io/pkg/apiserver/user/transport"
-	"powerssl.io/pkg/util"
-	"powerssl.io/pkg/util/auth"
 )
 
 type GRPCClient struct {

@@ -22,8 +22,8 @@ import (
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/square/go-jose.v2"
 
-	"powerssl.io/pkg/util"
-	"powerssl.io/pkg/util/auth"
+	"powerssl.io/internal/pkg/util"
+	"powerssl.io/internal/pkg/util/auth"
 )
 
 func Run(httpAddr, metricsAddr, jwtPrivateKeyFile, webappURI string) {
