@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/codes"
 
 	"powerssl.io/internal/app/apiserver/acmeaccount/model"
-	"powerssl.io/internal/pkg/util/vault"
+	"powerssl.io/internal/pkg/vault"
 	"powerssl.io/pkg/apiserver/acmeaccount"
 	"powerssl.io/pkg/apiserver/api"
 	controllerapi "powerssl.io/pkg/controller/api"

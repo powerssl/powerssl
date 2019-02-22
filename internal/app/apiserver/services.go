@@ -10,9 +10,9 @@ import (
 	"powerssl.io/internal/app/apiserver/acmeserver"
 	"powerssl.io/internal/app/apiserver/certificate"
 	"powerssl.io/internal/app/apiserver/user"
+	"powerssl.io/internal/pkg/auth"
 	"powerssl.io/internal/pkg/util"
-	"powerssl.io/internal/pkg/util/auth"
-	"powerssl.io/internal/pkg/util/vault"
+	"powerssl.io/internal/pkg/vault"
 	controllerclient "powerssl.io/pkg/controller/client"
 )
 

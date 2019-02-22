@@ -9,7 +9,7 @@ import (
 	"github.com/go-kit/kit/tracing/opentracing"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
-	"powerssl.io/internal/pkg/util/middleware"
+	"powerssl.io/internal/pkg/middleware"
 	"powerssl.io/pkg/apiserver/api"
 	"powerssl.io/pkg/apiserver/user"
 )

@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/codes"
 
 	acmeserver "powerssl.io/internal/app/apiserver/acmeserver/model"
-	"powerssl.io/internal/pkg/util/uid"
+	"powerssl.io/internal/pkg/uid"
 	"powerssl.io/pkg/apiserver/api"
 )
 

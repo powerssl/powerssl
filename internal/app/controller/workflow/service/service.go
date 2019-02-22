@@ -7,7 +7,7 @@ import (
 	"github.com/go-kit/kit/log"
 
 	"powerssl.io/internal/app/controller/workflow/engine/workflow"
-	"powerssl.io/internal/pkg/util/tracing"
+	"powerssl.io/internal/pkg/tracing"
 	apiserverclient "powerssl.io/pkg/apiserver/client"
 	"powerssl.io/pkg/controller/api"
 	service "powerssl.io/pkg/controller/workflow"

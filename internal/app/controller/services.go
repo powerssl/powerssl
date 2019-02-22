@@ -8,8 +8,8 @@ import (
 	"powerssl.io/internal/app/controller/acme"
 	"powerssl.io/internal/app/controller/integration"
 	"powerssl.io/internal/app/controller/workflow"
+	"powerssl.io/internal/pkg/auth"
 	"powerssl.io/internal/pkg/util"
-	"powerssl.io/internal/pkg/util/auth"
 	apiserverclient "powerssl.io/pkg/apiserver/client"
 )
 

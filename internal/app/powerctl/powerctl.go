@@ -6,8 +6,8 @@ import (
 
 	"github.com/spf13/viper"
 
+	"powerssl.io/internal/pkg/tracing"
 	"powerssl.io/internal/pkg/util"
-	"powerssl.io/internal/pkg/util/tracing"
 	apiserverclient "powerssl.io/pkg/apiserver/client"
 )
 

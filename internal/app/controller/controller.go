@@ -10,9 +10,9 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	workflowengine "powerssl.io/internal/app/controller/workflow/engine"
+	"powerssl.io/internal/pkg/auth"
+	"powerssl.io/internal/pkg/tracing"
 	"powerssl.io/internal/pkg/util"
-	"powerssl.io/internal/pkg/util/auth"
-	"powerssl.io/internal/pkg/util/tracing"
 	apiserverclient "powerssl.io/pkg/apiserver/client"
 )
 

@@ -9,7 +9,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc/codes"
 
-	"powerssl.io/internal/pkg/util/uid"
+	"powerssl.io/internal/pkg/uid"
 	"powerssl.io/pkg/apiserver/api"
 )
 

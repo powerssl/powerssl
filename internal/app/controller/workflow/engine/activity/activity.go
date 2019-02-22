@@ -10,7 +10,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 
 	"powerssl.io/internal/app/controller/integration"
-	"powerssl.io/internal/pkg/util/tracing"
+	"powerssl.io/internal/pkg/tracing"
 	"powerssl.io/pkg/controller/api"
 	apiv1 "powerssl.io/pkg/controller/api/v1"
 )
