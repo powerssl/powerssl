@@ -66,8 +66,11 @@ bin/powerssl-webapp: .ALWAYS_REBUILD
 bin/powerctl: .ALWAYS_REBUILD
 	go build -o bin/powerctl powerssl.io/cmd/powerctl
 
+bin/powerutil: .ALWAYS_REBUILD
+	go build -o bin/powerutil powerssl.io/cmd/powerutil
+
 .PHONY: build
-build: bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerssl-webapp bin/powerctl
+build: bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerssl-webapp bin/powerctl bin/powerutil
 
 .PHONY: docs
 docs:
@@ -80,6 +83,7 @@ docs:
 	go run powerssl.io/cmd/powerssl-integration-cloudflare-doc
 	go run powerssl.io/cmd/powerssl-signer-doc
 	go run powerssl.io/cmd/powerssl-webapp-doc
+	go run powerssl.io/cmd/powerutil-doc
 
 .PHONY: install-agent
 install-agent:
@@ -88,6 +92,10 @@ install-agent:
 .PHONY: install-powerctl
 install-powerctl:
 	go install powerssl.io/cmd/powerctl
+
+.PHONY: install-powerutil
+install-powerutil:
+	go install powerssl.io/cmd/powerutil
 
 .PHONY: fmt
 fmt:
@@ -100,9 +108,9 @@ vet:
 
 .PHONY: clean
 clean:
-	go clean powerssl.io/cmd/powerctl powerssl.io/cmd/powerssl-agent powerssl.io/cmd/powerssl-apiserver powerssl.io/cmd/powerssl-auth powerssl.io/cmd/powerssl-controller powerssl.io/cmd/powerssl-integration-acme powerssl.io/cmd/powerssl-integration-cloudflare powerssl.io/cmd/powerssl-signer powerssl.io/cmd/powerssl-webapp
+	go clean powerssl.io/cmd/powerctl powerssl.io/cmd/powerssl-agent powerssl.io/cmd/powerssl-apiserver powerssl.io/cmd/powerssl-auth powerssl.io/cmd/powerssl-controller powerssl.io/cmd/powerssl-integration-acme powerssl.io/cmd/powerssl-integration-cloudflare powerssl.io/cmd/powerssl-signer powerssl.io/cmd/powerssl-webapp powerssl.io/cmd/powerutil
 	rm -f bin/.go_protobuf_sources
-	rm -f bin/powerctl bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerssl-webapp
+	rm -f bin/powerctl bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerssl-webapp bin/powerutil
 
 .PHONY: protobuf
 protobuf:
@@ -133,7 +141,7 @@ generate:
 	go generate $$(go list ./...)
 
 .PHONY: images
-images: agent-image apiserver-image auth-image builder-image controller-image envoy-image integration-acme-image integration-cloudflare-image powerctl-image signer-image webapp-image
+images: agent-image apiserver-image auth-image builder-image controller-image envoy-image integration-acme-image integration-cloudflare-image powerctl-image signer-image webapp-image powerutil-image
 
 .PHONY: agent-image
 agent-image:
@@ -170,6 +178,10 @@ integration-cloudflare-image:
 .PHONY: powerctl-image
 powerctl-image:
 	docker build -f build/docker/powerctl/Dockerfile -t powerssl/powerctl .
+
+.PHONY: powerutil-image
+powerutil-image:
+	docker build -f build/docker/powerutil/Dockerfile -t powerssl/powerutil .
 
 .PHONY: signer-image
 signer-image:
