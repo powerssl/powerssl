@@ -119,48 +119,48 @@ images: agent-image apiserver-image auth-image builder-image controller-image en
 
 .PHONY: agent-image
 agent-image:
-	docker build -f build/docker/agent/Dockerfile -t powerssl/agent .
+	COMPONENT=agent scripts/docker-build.sh
 
 .PHONY: apiserver-image
 apiserver-image:
-	docker build -f build/docker/apiserver/Dockerfile -t powerssl/apiserver .
+	COMPONENT=apiserver scripts/docker-build.sh
 
 .PHONY: auth-image
 auth-image:
-	docker build -f build/docker/auth/Dockerfile -t powerssl/auth .
+	COMPONENT=auth scripts/docker-build.sh
 
 .PHONY: builder-image
 builder-image:
-	docker build -f build/docker/builder/Dockerfile -t powerssl/builder .
+	COMPONENT=builder scripts/docker-build.sh
 
 .PHONY: controller-image
 controller-image:
-	docker build -f build/docker/controller/Dockerfile -t powerssl/controller .
+	COMPONENT=controller scripts/docker-build.sh
 
 .PHONY: envoy-image
 envoy-image:
-	docker build -f build/docker/envoy/Dockerfile -t powerssl/evnoy .
+	COMPONENT=envoy scripts/docker-build.sh
 
 .PHONY: integration-acme-image
 integration-acme-image:
-	docker build -f build/docker/integration-acme/Dockerfile -t powerssl/integration-acme .
+	COMPONENT=integration-acme scripts/docker-build.sh
 
 .PHONY: integration-cloudflare-image
 integration-cloudflare-image:
-	docker build -f build/docker/integration-cloudflare/Dockerfile -t powerssl/integration-cloudflare .
+	COMPONENT=integration-cloudflare scripts/docker-build.sh
 
 .PHONY: powerctl-image
 powerctl-image:
-	docker build -f build/docker/powerctl/Dockerfile -t powerssl/powerctl .
+	COMPONENT=powerctl scripts/docker-build.sh
 
 .PHONY: powerutil-image
 powerutil-image:
-	docker build -f build/docker/powerutil/Dockerfile -t powerssl/powerutil .
+	COMPONENT=powerutil scripts/docker-build.sh
 
 .PHONY: signer-image
 signer-image:
-	docker build -f build/docker/signer/Dockerfile -t powerssl/signer .
+	COMPONENT=signer scripts/docker-build.sh
 
 .PHONY: webapp-image
 webapp-image:
-	docker build -f build/docker/webapp/Dockerfile -t powerssl/webapp .
+	COMPONENT=webapp scripts/docker-build.sh
