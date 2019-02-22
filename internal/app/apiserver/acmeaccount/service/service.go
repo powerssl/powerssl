@@ -12,17 +12,17 @@ import (
 	otgorm "github.com/smacker/opentracing-gorm"
 	"google.golang.org/grpc/codes"
 
-	"powerssl.io/internal/app/apiserver/acmeaccount/meta"
 	"powerssl.io/internal/app/apiserver/acmeaccount/model"
 	"powerssl.io/internal/pkg/util/vault"
+	"powerssl.io/pkg/apiserver/acmeaccount"
 	"powerssl.io/pkg/apiserver/api"
 	controllerapi "powerssl.io/pkg/controller/api"
 	controllerclient "powerssl.io/pkg/controller/client"
 )
 
-func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient, vaultClient *vault.Client) meta.Service {
+func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient, vaultClient *vault.Client) acmeaccount.Service {
 	db.AutoMigrate(&model.ACMEAccount{})
-	var svc meta.Service
+	var svc acmeaccount.Service
 	{
 		svc = NewBasicService(db, logger, client, vaultClient)
 		svc = LoggingMiddleware(logger)(svc)
@@ -37,7 +37,7 @@ type basicService struct {
 	vaultClient      *vault.Client
 }
 
-func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient, vaultClient *vault.Client) meta.Service {
+func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient, vaultClient *vault.Client) acmeaccount.Service {
 	return basicService{
 		controllerClient: client,
 		vaultClient:      vaultClient,

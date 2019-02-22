@@ -5,21 +5,21 @@ import (
 
 	"github.com/go-kit/kit/log"
 
-	"powerssl.io/internal/app/apiserver/user/meta"
 	"powerssl.io/pkg/apiserver/api"
+	"powerssl.io/pkg/apiserver/user"
 )
 
-type Middleware func(meta.Service) meta.Service
+type Middleware func(user.Service) user.Service
 
 func LoggingMiddleware(logger log.Logger) Middleware {
-	return func(next meta.Service) meta.Service {
+	return func(next user.Service) user.Service {
 		return loggingMiddleware{logger, next}
 	}
 }
 
 type loggingMiddleware struct {
 	logger log.Logger
-	next   meta.Service
+	next   user.Service
 }
 
 func (mw loggingMiddleware) Create(ctx context.Context, user *api.User) (*api.User, error) {

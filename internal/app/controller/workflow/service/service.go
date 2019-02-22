@@ -7,14 +7,14 @@ import (
 	"github.com/go-kit/kit/log"
 
 	"powerssl.io/internal/app/controller/workflow/engine/workflow"
-	"powerssl.io/internal/app/controller/workflow/meta"
 	"powerssl.io/internal/pkg/util/tracing"
 	apiserverclient "powerssl.io/pkg/apiserver/client"
 	"powerssl.io/pkg/controller/api"
+	service "powerssl.io/pkg/controller/workflow"
 )
 
-func New(logger log.Logger, client *apiserverclient.GRPCClient) meta.Service {
-	var svc meta.Service
+func New(logger log.Logger, client *apiserverclient.GRPCClient) service.Service {
+	var svc service.Service
 	{
 		svc = NewBasicService(logger, client)
 		svc = LoggingMiddleware(logger)(svc)
@@ -27,7 +27,7 @@ type basicService struct {
 	logger log.Logger
 }
 
-func NewBasicService(logger log.Logger, client *apiserverclient.GRPCClient) meta.Service {
+func NewBasicService(logger log.Logger, client *apiserverclient.GRPCClient) service.Service {
 	return basicService{
 		client: client,
 		logger: logger,

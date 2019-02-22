@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"fmt"
 
-	"powerssl.io/internal/app/controller/acme/meta"
+	"powerssl.io/pkg/controller/acme"
 	"powerssl.io/pkg/controller/api"
 )
 
@@ -31,11 +31,11 @@ type Integration interface {
 }
 
 type integration struct {
-	client  meta.Service
+	client  acme.Service
 	handler Integration
 }
 
-func New(client meta.Service, handler Integration) *integration {
+func New(client acme.Service, handler Integration) *integration {
 	return &integration{
 		client:  client,
 		handler: handler,

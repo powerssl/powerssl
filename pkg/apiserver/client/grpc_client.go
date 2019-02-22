@@ -4,23 +4,23 @@ import (
 	"github.com/go-kit/kit/log"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
-	acmeaccountmeta "powerssl.io/internal/app/apiserver/acmeaccount/meta"
 	acmeaccounttransport "powerssl.io/internal/app/apiserver/acmeaccount/transport"
-	acmeservermeta "powerssl.io/internal/app/apiserver/acmeserver/meta"
 	acmeservertransport "powerssl.io/internal/app/apiserver/acmeserver/transport"
-	certificatemeta "powerssl.io/internal/app/apiserver/certificate/meta"
 	certificatetransport "powerssl.io/internal/app/apiserver/certificate/transport"
-	usermeta "powerssl.io/internal/app/apiserver/user/meta"
 	usertransport "powerssl.io/internal/app/apiserver/user/transport"
 	"powerssl.io/internal/pkg/util"
 	"powerssl.io/internal/pkg/util/auth"
+	"powerssl.io/pkg/apiserver/acmeaccount"
+	"powerssl.io/pkg/apiserver/acmeserver"
+	"powerssl.io/pkg/apiserver/certificate"
+	"powerssl.io/pkg/apiserver/user"
 )
 
 type GRPCClient struct {
-	ACMEAccount acmeaccountmeta.Service
-	ACMEServer  acmeservermeta.Service
-	Certificate certificatemeta.Service
-	User        usermeta.Service
+	ACMEAccount acmeaccount.Service
+	ACMEServer  acmeserver.Service
+	Certificate certificate.Service
+	User        user.Service
 }
 
 func NewGRPCClient(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, authToken string, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {

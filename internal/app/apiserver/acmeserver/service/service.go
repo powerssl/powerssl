@@ -10,17 +10,17 @@ import (
 	otgorm "github.com/smacker/opentracing-gorm"
 	"google.golang.org/grpc/codes"
 
-	"powerssl.io/internal/app/apiserver/acmeserver/meta"
 	"powerssl.io/internal/app/apiserver/acmeserver/model"
+	"powerssl.io/pkg/apiserver/acmeserver"
 	"powerssl.io/pkg/apiserver/api"
 	controllerclient "powerssl.io/pkg/controller/client"
 )
 
 var ErrUnimplemented = status.Error(codes.Unimplemented, "Coming soon")
 
-func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) meta.Service {
+func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) acmeserver.Service {
 	db.AutoMigrate(&model.ACMEServer{})
-	var svc meta.Service
+	var svc acmeserver.Service
 	{
 		svc = NewBasicService(db, logger, client)
 		svc = LoggingMiddleware(logger)(svc)
@@ -34,7 +34,7 @@ type basicService struct {
 	logger           log.Logger
 }
 
-func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) meta.Service {
+func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) acmeserver.Service {
 	return basicService{
 		controllerclient: client,
 		db:               db,

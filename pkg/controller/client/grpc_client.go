@@ -4,20 +4,20 @@ import (
 	"github.com/go-kit/kit/log"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
-	acmemeta "powerssl.io/internal/app/controller/acme/meta"
 	acmetransport "powerssl.io/internal/app/controller/acme/transport"
-	integrationmeta "powerssl.io/internal/app/controller/integration/meta"
 	intregrationtransport "powerssl.io/internal/app/controller/integration/transport"
-	workflowmeta "powerssl.io/internal/app/controller/workflow/meta"
 	workflowtransport "powerssl.io/internal/app/controller/workflow/transport"
 	"powerssl.io/internal/pkg/util"
 	"powerssl.io/internal/pkg/util/auth"
+	"powerssl.io/pkg/controller/acme"
+	"powerssl.io/pkg/controller/integration"
+	"powerssl.io/pkg/controller/workflow"
 )
 
 type GRPCClient struct {
-	ACME        acmemeta.Service
-	Integration integrationmeta.Service
-	Workflow    workflowmeta.Service
+	ACME        acme.Service
+	Integration integration.Service
+	Workflow    workflow.Service
 }
 
 func NewGRPCClient(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, authToken string, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {

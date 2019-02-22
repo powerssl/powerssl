@@ -9,16 +9,16 @@ import (
 	"github.com/go-kit/kit/tracing/opentracing"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
-	"powerssl.io/internal/app/controller/workflow/meta"
 	"powerssl.io/internal/pkg/util/middleware"
 	"powerssl.io/pkg/controller/api"
+	"powerssl.io/pkg/controller/workflow"
 )
 
 type Endpoints struct {
 	CreateEndpoint endpoint.Endpoint
 }
 
-func NewEndpoints(svc meta.Service, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, auth endpoint.Middleware) Endpoints {
+func NewEndpoints(svc workflow.Service, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, auth endpoint.Middleware) Endpoints {
 	var createEndpoint endpoint.Endpoint
 	{
 		createEndpoint = makeCreateEndpoint(svc)
@@ -52,7 +52,7 @@ type CreateResponse struct {
 	Workflow *api.Workflow
 }
 
-func makeCreateEndpoint(s meta.Service) endpoint.Endpoint {
+func makeCreateEndpoint(s workflow.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(CreateRequest)
 		workflow, err := s.Create(ctx, req.Workflow)

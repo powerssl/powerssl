@@ -9,8 +9,8 @@ import (
 	"github.com/go-kit/kit/tracing/opentracing"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
-	"powerssl.io/internal/app/apiserver/acmeaccount/meta"
 	"powerssl.io/internal/pkg/util/middleware"
+	"powerssl.io/pkg/apiserver/acmeaccount"
 	"powerssl.io/pkg/apiserver/api"
 )
 
@@ -22,7 +22,7 @@ type Endpoints struct {
 	UpdateEndpoint endpoint.Endpoint
 }
 
-func NewEndpoints(svc meta.Service, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, auth endpoint.Middleware) Endpoints {
+func NewEndpoints(svc acmeaccount.Service, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, auth endpoint.Middleware) Endpoints {
 	var createEndpoint endpoint.Endpoint
 	{
 		createEndpoint = makeCreateEndpoint(svc)
@@ -145,7 +145,7 @@ type CreateResponse struct {
 	ACMEAccount *api.ACMEAccount
 }
 
-func makeCreateEndpoint(s meta.Service) endpoint.Endpoint {
+func makeCreateEndpoint(s acmeaccount.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(CreateRequest)
 		acmeAccount, err := s.Create(ctx, req.Parent, req.ACMEAccount)
@@ -164,7 +164,7 @@ type DeleteRequest struct {
 
 type DeleteResponse struct{}
 
-func makeDeleteEndpoint(s meta.Service) endpoint.Endpoint {
+func makeDeleteEndpoint(s acmeaccount.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(DeleteRequest)
 		if err := s.Delete(ctx, req.Name); err != nil {
@@ -182,7 +182,7 @@ type GetResponse struct {
 	ACMEAccount *api.ACMEAccount
 }
 
-func makeGetEndpoint(s meta.Service) endpoint.Endpoint {
+func makeGetEndpoint(s acmeaccount.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetRequest)
 		acmeAccount, err := s.Get(ctx, req.Name)
@@ -206,7 +206,7 @@ type ListResponse struct {
 	NextPageToken string
 }
 
-func makeListEndpoint(s meta.Service) endpoint.Endpoint {
+func makeListEndpoint(s acmeaccount.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(ListRequest)
 		acmeAccounts, nextPageToken, err := s.List(ctx, req.Parent, req.PageSize, req.PageToken)
@@ -230,7 +230,7 @@ type UpdateResponse struct {
 	ACMEAccount *api.ACMEAccount
 }
 
-func makeUpdateEndpoint(s meta.Service) endpoint.Endpoint {
+func makeUpdateEndpoint(s acmeaccount.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(UpdateRequest)
 		acmeAccount, err := s.Update(ctx, req.Name, req.UpdateMask, req.ACMEAccount)

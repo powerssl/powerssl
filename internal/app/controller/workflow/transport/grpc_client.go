@@ -12,13 +12,13 @@ import (
 	"google.golang.org/grpc"
 
 	"powerssl.io/internal/app/controller/workflow/endpoint"
-	"powerssl.io/internal/app/controller/workflow/meta"
 	apiv1 "powerssl.io/pkg/controller/api/v1"
+	"powerssl.io/pkg/controller/workflow"
 )
 
 const serviceName = "powerssl.controller.v1.WorkflowService"
 
-func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentracing.Tracer, authSigner kitendpoint.Middleware) meta.Service {
+func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentracing.Tracer, authSigner kitendpoint.Middleware) workflow.Service {
 	options := []grpctransport.ClientOption{
 		grpctransport.ClientBefore(jwt.ContextToGRPC()),
 		grpctransport.ClientBefore(opentracing.ContextToGRPC(tracer, logger)),

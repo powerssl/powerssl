@@ -1,4 +1,4 @@
-package meta
+package acmeaccount // import "powerssl.io/pkg/apiserver/acmeaccount"
 
 import (
 	"context"

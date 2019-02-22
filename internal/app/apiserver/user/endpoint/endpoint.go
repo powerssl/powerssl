@@ -9,9 +9,9 @@ import (
 	"github.com/go-kit/kit/tracing/opentracing"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
-	"powerssl.io/internal/app/apiserver/user/meta"
 	"powerssl.io/internal/pkg/util/middleware"
 	"powerssl.io/pkg/apiserver/api"
+	"powerssl.io/pkg/apiserver/user"
 )
 
 type Endpoints struct {
@@ -22,7 +22,7 @@ type Endpoints struct {
 	UpdateEndpoint endpoint.Endpoint
 }
 
-func NewEndpoints(svc meta.Service, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, auth endpoint.Middleware) Endpoints {
+func NewEndpoints(svc user.Service, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, auth endpoint.Middleware) Endpoints {
 	var createEndpoint endpoint.Endpoint
 	{
 		createEndpoint = makeCreateEndpoint(svc)
@@ -141,7 +141,7 @@ type CreateResponse struct {
 	User *api.User
 }
 
-func makeCreateEndpoint(s meta.Service) endpoint.Endpoint {
+func makeCreateEndpoint(s user.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(CreateRequest)
 		user, err := s.Create(ctx, req.User)
@@ -160,7 +160,7 @@ type DeleteRequest struct {
 
 type DeleteResponse struct{}
 
-func makeDeleteEndpoint(s meta.Service) endpoint.Endpoint {
+func makeDeleteEndpoint(s user.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(DeleteRequest)
 		if err := s.Delete(ctx, req.Name); err != nil {
@@ -178,7 +178,7 @@ type GetResponse struct {
 	User *api.User
 }
 
-func makeGetEndpoint(s meta.Service) endpoint.Endpoint {
+func makeGetEndpoint(s user.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetRequest)
 		user, err := s.Get(ctx, req.Name)
@@ -201,7 +201,7 @@ type ListResponse struct {
 	NextPageToken string
 }
 
-func makeListEndpoint(s meta.Service) endpoint.Endpoint {
+func makeListEndpoint(s user.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(ListRequest)
 		users, nextPageToken, err := s.List(ctx, req.PageSize, req.PageToken)
@@ -224,7 +224,7 @@ type UpdateResponse struct {
 	User *api.User
 }
 
-func makeUpdateEndpoint(s meta.Service) endpoint.Endpoint {
+func makeUpdateEndpoint(s user.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(UpdateRequest)
 		user, err := s.Update(ctx, req.Name, req.User)

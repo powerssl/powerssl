@@ -1,4 +1,4 @@
-package meta
+package user // import "powerssl.io/pkg/apiserver/user"
 
 import (
 	"context"

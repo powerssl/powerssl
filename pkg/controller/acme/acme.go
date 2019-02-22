@@ -1,4 +1,4 @@
-package meta
+package acme // import "powerssl.io/pkg/controller/acme"
 
 import (
 	"context"

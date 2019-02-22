@@ -1,4 +1,4 @@
-package meta
+package integration // import "powerssl.io/pkg/controller/integration"
 
 import apiv1 "powerssl.io/pkg/controller/api/v1"
 

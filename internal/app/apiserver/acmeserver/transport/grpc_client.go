@@ -13,13 +13,13 @@ import (
 	"google.golang.org/grpc"
 
 	"powerssl.io/internal/app/apiserver/acmeserver/endpoint"
-	"powerssl.io/internal/app/apiserver/acmeserver/meta"
+	"powerssl.io/pkg/apiserver/acmeserver"
 	apiv1 "powerssl.io/pkg/apiserver/api/v1"
 )
 
 const serviceName = "powerssl.apiserver.v1.ACMEServerService"
 
-func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentracing.Tracer, authSigner kitendpoint.Middleware) meta.Service {
+func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentracing.Tracer, authSigner kitendpoint.Middleware) acmeserver.Service {
 	options := []grpctransport.ClientOption{
 		grpctransport.ClientBefore(jwt.ContextToGRPC()),
 		grpctransport.ClientBefore(opentracing.ContextToGRPC(tracer, logger)),

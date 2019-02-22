@@ -1,4 +1,4 @@
-package meta
+package workflow // import "powerssl.io/pkg/controller/workflow"
 
 import (
 	"context"

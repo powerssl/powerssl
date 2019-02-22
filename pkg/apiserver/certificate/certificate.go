@@ -1,4 +1,4 @@
-package meta
+package certificate // import "powerssl.io/pkg/apiserver/certificate"
 
 import (
 	"context"
