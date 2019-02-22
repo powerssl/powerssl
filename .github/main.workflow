@@ -1,13 +1,13 @@
 workflow "release powerctl" {
   on = "release"
   resolves = [
-    "release darwin/amd64",
-    "release windows/amd64",
-    "release linux/amd64",
+    "release powerctl darwin/amd64",
+    "release powerctl windows/amd64",
+    "release powerctl linux/amd64",
   ]
 }
 
-action "release darwin/amd64" {
+action "release powerctl darwin/amd64" {
   uses = "./build/action/"
   env = {
     GOOS = "darwin"
@@ -17,7 +17,7 @@ action "release darwin/amd64" {
   secrets = ["GITHUB_TOKEN"]
 }
 
-action "release windows/amd64" {
+action "release powerctl windows/amd64" {
   uses = "./build/action/"
   env = {
     GOOS = "windows"
@@ -27,7 +27,7 @@ action "release windows/amd64" {
   secrets = ["GITHUB_TOKEN"]
 }
 
-action "release linux/amd64" {
+action "release powerctl linux/amd64" {
   uses = "./build/action/"
   env = {
     GOOS = "linux"
@@ -40,13 +40,13 @@ action "release linux/amd64" {
 workflow "release powerutil" {
   on = "release"
   resolves = [
-    "release darwin/amd64",
-    "release windows/amd64",
-    "release linux/amd64",
+    "release powerutil darwin/amd64",
+    "release powerutil windows/amd64",
+    "release powerutil linux/amd64",
   ]
 }
 
-action "release darwin/amd64" {
+action "release powerutil darwin/amd64" {
   uses = "./build/action/"
   env = {
     GOOS = "darwin"
@@ -56,7 +56,7 @@ action "release darwin/amd64" {
   secrets = ["GITHUB_TOKEN"]
 }
 
-action "release windows/amd64" {
+action "release powerutil windows/amd64" {
   uses = "./build/action/"
   env = {
     GOOS = "windows"
@@ -66,7 +66,7 @@ action "release windows/amd64" {
   secrets = ["GITHUB_TOKEN"]
 }
 
-action "release linux/amd64" {
+action "release powerutil linux/amd64" {
   uses = "./build/action/"
   env = {
     GOOS = "linux"
