@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"powerssl.io/internal/app/integrations/cloudflare"
 	"powerssl.io/pkg/integration"
-	"powerssl.io/pkg/integrations/cloudflare"
 )
 
 func newCmdRun() *cobra.Command {

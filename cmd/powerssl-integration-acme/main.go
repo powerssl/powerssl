@@ -1,6 +1,6 @@
 package main
 
-import "powerssl.io/pkg/integrations/acme/cmd"
+import "powerssl.io/internal/app/integrations/acme/cmd"
 
 func main() {
 	cmd.Execute()
