@@ -1,36 +1,36 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 
+	"powerssl.io/internal/app/powerctl"
+	"powerssl.io/internal/app/powerctl/resource"
 	apiserverclient "powerssl.io/pkg/apiserver/client"
-	"powerssl.io/pkg/powerctl"
-	"powerssl.io/pkg/powerctl/resource"
 )
 
-func newCmdDelete() *cobra.Command {
+func newCmdDescribe() *cobra.Command {
 	var client *apiserverclient.GRPCClient
 
 	cmd := &cobra.Command{
-		Use:   "delete",
-		Short: "Delete resource",
-		Args:  cobra.MinimumNArgs(1),
+		Use:   "describe",
+		Short: "Describe resource",
+		Args:  cobra.RangeArgs(1, 2),
 		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
 			client, err = powerctl.NewGRPCClient()
 			return err
 
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			resources, err := resource.ResourcesFromArgs(args)
+			res, err := resource.ResourceFromArgs(args)
 			if err != nil {
 				return err
 			}
-			for _, resource := range resources {
-				if err := resource.Delete(client); err != nil {
-					return err
-				}
+			if res, err = res.Get(client); err != nil {
+				return err
 			}
-			return nil
+			return res.Describe(client, os.Stdout)
 		},
 	}
 

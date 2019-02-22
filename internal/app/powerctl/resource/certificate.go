@@ -10,9 +10,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"powerssl.io/internal/app/powerctl"
 	"powerssl.io/pkg/apiserver/api"
 	apiserverclient "powerssl.io/pkg/apiserver/client"
-	"powerssl.io/pkg/powerctl"
 )
 
 type certificate struct{}
