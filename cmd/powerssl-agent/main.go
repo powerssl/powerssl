@@ -1,6 +1,6 @@
 package main
 
-import "powerssl.io/pkg/agent/cmd"
+import "powerssl.io/internal/app/agent/cmd"
 
 func main() {
 	cmd.Execute()
