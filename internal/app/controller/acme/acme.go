@@ -9,7 +9,7 @@ import (
 	"powerssl.io/internal/app/controller/acme/endpoint"
 	service "powerssl.io/internal/app/controller/acme/service"
 	"powerssl.io/internal/app/controller/acme/transport"
-	apiv1 "powerssl.io/pkg/controller/api/v1"
+	apiv1 "powerssl.io/internal/pkg/controller/api/v1"
 )
 
 type ACME struct {

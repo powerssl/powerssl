@@ -10,8 +10,8 @@ import (
 	"powerssl.io/internal/app/controller/workflow/endpoint"
 	service "powerssl.io/internal/app/controller/workflow/service"
 	"powerssl.io/internal/app/controller/workflow/transport"
+	apiv1 "powerssl.io/internal/pkg/controller/api/v1"
 	apiserverclient "powerssl.io/pkg/apiserver/client"
-	apiv1 "powerssl.io/pkg/controller/api/v1"
 )
 
 type Workflow struct {

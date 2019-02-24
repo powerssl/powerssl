@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc"
 
 	"powerssl.io/internal/app/apiserver/user/endpoint"
-	apiv1 "powerssl.io/pkg/apiserver/api/v1"
+	apiv1 "powerssl.io/internal/pkg/apiserver/api/v1"
 	"powerssl.io/pkg/apiserver/user"
 )
 

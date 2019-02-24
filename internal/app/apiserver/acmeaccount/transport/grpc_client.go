@@ -13,8 +13,8 @@ import (
 	"google.golang.org/grpc"
 
 	"powerssl.io/internal/app/apiserver/acmeaccount/endpoint"
+	apiv1 "powerssl.io/internal/pkg/apiserver/api/v1"
 	"powerssl.io/pkg/apiserver/acmeaccount"
-	apiv1 "powerssl.io/pkg/apiserver/api/v1"
 )
 
 const serviceName = "powerssl.apiserver.v1.ACMEAccountService"

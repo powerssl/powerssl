@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
-	apiv1 "powerssl.io/pkg/controller/api/v1"
+	apiv1 "powerssl.io/internal/pkg/controller/api/v1"
 )
 
 var errUnknown = errors.New("Unknown error")

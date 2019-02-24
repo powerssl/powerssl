@@ -11,7 +11,7 @@ import (
 	"powerssl.io/internal/app/apiserver/acmeserver/endpoint"
 	"powerssl.io/internal/app/apiserver/acmeserver/service"
 	"powerssl.io/internal/app/apiserver/acmeserver/transport"
-	apiv1 "powerssl.io/pkg/apiserver/api/v1"
+	apiv1 "powerssl.io/internal/pkg/apiserver/api/v1"
 	controllerclient "powerssl.io/pkg/controller/client"
 )
 

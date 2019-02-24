@@ -11,7 +11,7 @@ import (
 	stdopentracing "github.com/opentracing/opentracing-go"
 
 	"powerssl.io/internal/app/controller/workflow/endpoint"
-	apiv1 "powerssl.io/pkg/controller/api/v1"
+	apiv1 "powerssl.io/internal/pkg/controller/api/v1"
 )
 
 type grpcServer struct {

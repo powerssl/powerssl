@@ -10,9 +10,9 @@ import (
 	"github.com/opentracing/opentracing-go"
 
 	"powerssl.io/internal/app/controller/integration"
+	apiv1 "powerssl.io/internal/pkg/controller/api/v1"
 	"powerssl.io/internal/pkg/tracing"
 	"powerssl.io/pkg/controller/api"
-	apiv1 "powerssl.io/pkg/controller/api/v1"
 )
 
 const (

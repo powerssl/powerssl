@@ -6,8 +6,8 @@ import (
 	"github.com/gogo/protobuf/types"
 
 	"powerssl.io/internal/app/controller/acme/endpoint"
+	apiv1 "powerssl.io/internal/pkg/controller/api/v1"
 	"powerssl.io/pkg/controller/api"
-	apiv1 "powerssl.io/pkg/controller/api/v1"
 )
 
 func DecodeGRPCActivity(activity *apiv1.Activity) (*api.Activity, error) {

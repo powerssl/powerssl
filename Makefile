@@ -2,7 +2,7 @@ PROTOC := $(shell which protoc)
 
 BIN_PATH := $(abspath bin)
 PKG_PATH := $(abspath pkg)
-PROTO_PATH := $(abspath api/proto)
+PROTO_PATH := $(abspath api/protobuf-spec)
 
 export PATH := $(BIN_PATH):$(PATH)
 

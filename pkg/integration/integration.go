@@ -14,8 +14,8 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	acmetransport "powerssl.io/internal/app/controller/acme/transport" // TODO: Wrong package
+	apiv1 "powerssl.io/internal/pkg/controller/api/v1"
 	"powerssl.io/pkg/controller/api"
-	apiv1 "powerssl.io/pkg/controller/api/v1"
 	controllerclient "powerssl.io/pkg/controller/client"
 	integrationacme "powerssl.io/pkg/integration/acme"
 	// integrationdns "powerssl.io/pkg/integration/dns"
