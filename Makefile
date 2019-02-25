@@ -47,34 +47,34 @@ bin/protoc-gen-gogo:
 	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)/protoc-gen-gogo
 
 bin/powerssl-agent: .ALWAYS_REBUILD
-	COMPONENT=powerssl-agent scripts/build.sh
+	COMPONENT=powerssl-agent scripts/build-go.sh
 
 bin/powerssl-apiserver: .ALWAYS_REBUILD
-	COMPONENT=powerssl-apiserver scripts/build.sh
+	COMPONENT=powerssl-apiserver scripts/build-go.sh
 
 bin/powerssl-auth: .ALWAYS_REBUILD
-	COMPONENT=powerssl-auth scripts/build.sh
+	COMPONENT=powerssl-auth scripts/build-go.sh
 
 bin/powerssl-controller: .ALWAYS_REBUILD
-	COMPONENT=powerssl-controller scripts/build.sh
+	COMPONENT=powerssl-controller scripts/build-go.sh
 
 bin/powerssl-integration-acme: .ALWAYS_REBUILD
-	COMPONENT=powerssl-integration-acme scripts/build.sh
+	COMPONENT=powerssl-integration-acme scripts/build-go.sh
 
 bin/powerssl-integration-cloudflare: .ALWAYS_REBUILD
-	COMPONENT=powerssl-integration-cloudflare scripts/build.sh
+	COMPONENT=powerssl-integration-cloudflare scripts/build-go.sh
 
 bin/powerssl-signer: .ALWAYS_REBUILD
-	COMPONENT=powerssl-signer scripts/build.sh
+	COMPONENT=powerssl-signer scripts/build-go.sh
 
 bin/powerssl-webapp: .ALWAYS_REBUILD
-	COMPONENT=powerssl-webapp scripts/build.sh
+	COMPONENT=powerssl-webapp scripts/build-go.sh
 
 bin/powerctl: .ALWAYS_REBUILD
-	COMPONENT=powerctl scripts/build.sh
+	COMPONENT=powerctl scripts/build-go.sh
 
 bin/powerutil: .ALWAYS_REBUILD
-	COMPONENT=powerutil scripts/build.sh
+	COMPONENT=powerutil scripts/build-go.sh
 
 .PHONY: build
 build: bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerssl-webapp bin/powerctl bin/powerutil
@@ -133,48 +133,48 @@ images: agent-image apiserver-image auth-image builder-image controller-image en
 
 .PHONY: agent-image
 agent-image:
-	COMPONENT=agent scripts/docker-build.sh
+	COMPONENT=agent scripts/build-image.sh
 
 .PHONY: apiserver-image
 apiserver-image:
-	COMPONENT=apiserver scripts/docker-build.sh
+	COMPONENT=apiserver scripts/build-image.sh
 
 .PHONY: auth-image
 auth-image:
-	COMPONENT=auth scripts/docker-build.sh
+	COMPONENT=auth scripts/build-image.sh
 
 .PHONY: builder-image
 builder-image:
-	COMPONENT=builder scripts/docker-build.sh
+	COMPONENT=builder scripts/build-image.sh
 
 .PHONY: controller-image
 controller-image:
-	COMPONENT=controller scripts/docker-build.sh
+	COMPONENT=controller scripts/build-image.sh
 
 .PHONY: envoy-image
 envoy-image:
-	COMPONENT=envoy scripts/docker-build.sh
+	COMPONENT=envoy scripts/build-image.sh
 
 .PHONY: integration-acme-image
 integration-acme-image:
-	COMPONENT=integration-acme scripts/docker-build.sh
+	COMPONENT=integration-acme scripts/build-image.sh
 
 .PHONY: integration-cloudflare-image
 integration-cloudflare-image:
-	COMPONENT=integration-cloudflare scripts/docker-build.sh
+	COMPONENT=integration-cloudflare scripts/build-image.sh
 
 .PHONY: powerctl-image
 powerctl-image:
-	COMPONENT=powerctl scripts/docker-build.sh
+	COMPONENT=powerctl scripts/build-image.sh
 
 .PHONY: powerutil-image
 powerutil-image:
-	COMPONENT=powerutil scripts/docker-build.sh
+	COMPONENT=powerutil scripts/build-image.sh
 
 .PHONY: signer-image
 signer-image:
-	COMPONENT=signer scripts/docker-build.sh
+	COMPONENT=signer scripts/build-image.sh
 
 .PHONY: webapp-image
 webapp-image:
-	COMPONENT=webapp scripts/docker-build.sh
+	COMPONENT=webapp scripts/build-image.sh
