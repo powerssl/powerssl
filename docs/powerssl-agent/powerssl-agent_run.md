@@ -1,6 +1,8 @@
 ---
+has_toc: false
 layout: default
 parent: powerssl-agent
+permalink: /powerssl-agent/run
 title: run
 ---
 ## powerssl-agent run
@@ -36,4 +38,4 @@ powerssl-agent run [flags]
 
 ### SEE ALSO
 
-* [powerssl-agent](powerssl-agent.md)	 - powerssl-agent provides PowerSSL Agent
+* [powerssl-agent](/powerssl-agent)	 - powerssl-agent provides PowerSSL Agent

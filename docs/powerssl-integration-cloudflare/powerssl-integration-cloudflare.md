@@ -1,6 +1,8 @@
 ---
 has_children: true
+has_toc: false
 layout: default
+permalink: /powerssl-integration-cloudflare
 title: powerssl-integration-cloudflare
 ---
 ## powerssl-integration-cloudflare
@@ -23,4 +25,4 @@ Find more information at: https://docs.powerssl.io/powerssl-integration-cloudfla
 
 ### SEE ALSO
 
-* [powerssl-integration-cloudflare run](powerssl-integration-cloudflare_run.md)	 - Run ACME integration
+* [powerssl-integration-cloudflare run](/powerssl-integration-cloudflare/run)	 - Run ACME integration

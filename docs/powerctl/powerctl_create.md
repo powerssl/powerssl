@@ -1,7 +1,9 @@
 ---
 has_children: true
+has_toc: false
 layout: default
 parent: powerctl
+permalink: /powerctl/create
 title: create
 ---
 ## powerctl create
@@ -49,8 +51,8 @@ powerctl create [flags]
 
 ### SEE ALSO
 
-* [powerctl](powerctl.md)	 - powerctl controls PowerSSL
-* [powerctl create acmeaccount](powerctl_create_acmeaccount.md)	 - Create ACME account
-* [powerctl create acmeserver](powerctl_create_acmeserver.md)	 - Create ACME server
-* [powerctl create certificate](powerctl_create_certificate.md)	 - Create Certificate
-* [powerctl create user](powerctl_create_user.md)	 - Create ACME server
+* [powerctl](/powerctl)	 - powerctl controls PowerSSL
+* [powerctl create acmeaccount](/powerctl/create/acmeaccount)	 - Create ACME account
+* [powerctl create acmeserver](/powerctl/create/acmeserver)	 - Create ACME server
+* [powerctl create certificate](/powerctl/create/certificate)	 - Create Certificate
+* [powerctl create user](/powerctl/create/user)	 - Create ACME server

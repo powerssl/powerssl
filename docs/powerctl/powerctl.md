@@ -1,6 +1,8 @@
 ---
 has_children: true
+has_toc: false
 layout: default
+permalink: /powerctl
 title: powerctl
 ---
 ## powerctl
@@ -30,8 +32,8 @@ Find more information at: https://docs.powerssl.io/powerctl/powerctl.html
 
 ### SEE ALSO
 
-* [powerctl create](powerctl_create.md)	 - Create resource
-* [powerctl delete](powerctl_delete.md)	 - Delete resource
-* [powerctl describe](powerctl_describe.md)	 - Describe resource
-* [powerctl get](powerctl_get.md)	 - Get resource
-* [powerctl login](powerctl_login.md)	 - Login to PowerSSL
+* [powerctl create](/powerctl/create)	 - Create resource
+* [powerctl delete](/powerctl/delete)	 - Delete resource
+* [powerctl describe](/powerctl/describe)	 - Describe resource
+* [powerctl get](/powerctl/get)	 - Get resource
+* [powerctl login](/powerctl/login)	 - Login to PowerSSL

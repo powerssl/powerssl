@@ -1,6 +1,8 @@
 ---
+has_toc: false
 layout: default
 parent: powerssl-integration-acme
+permalink: /powerssl-integration-acme/run
 title: run
 ---
 ## powerssl-integration-acme run
@@ -39,4 +41,4 @@ powerssl-integration-acme run [flags]
 
 ### SEE ALSO
 
-* [powerssl-integration-acme](powerssl-integration-acme.md)	 - powerssl-integration-acme provides PowerSSL ACME integration
+* [powerssl-integration-acme](/powerssl-integration-acme)	 - powerssl-integration-acme provides PowerSSL ACME integration

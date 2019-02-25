@@ -1,7 +1,9 @@
 ---
 has_children: true
+has_toc: false
 layout: default
 parent: powerutil
+permalink: /powerutil/ca
 title: ca
 ---
 ## powerutil ca
@@ -27,6 +29,6 @@ CA
 
 ### SEE ALSO
 
-* [powerutil](powerutil.md)	 - powerutil provides PowerSSL utilities
-* [powerutil ca gen](powerutil_ca_gen.md)	 - Generate certificate
-* [powerutil ca init](powerutil_ca_init.md)	 - Init certificate authority
+* [powerutil](/powerutil)	 - powerutil provides PowerSSL utilities
+* [powerutil ca gen](/powerutil/ca/gen)	 - Generate certificate
+* [powerutil ca init](/powerutil/ca/init)	 - Init certificate authority

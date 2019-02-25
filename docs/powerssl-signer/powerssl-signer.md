@@ -1,6 +1,8 @@
 ---
 has_children: true
+has_toc: false
 layout: default
+permalink: /powerssl-signer
 title: powerssl-signer
 ---
 ## powerssl-signer
@@ -23,4 +25,4 @@ Find more information at: https://docs.powerssl.io/powerssl-signer/powerssl-sign
 
 ### SEE ALSO
 
-* [powerssl-signer serve](powerssl-signer_serve.md)	 - Serve the Signer
+* [powerssl-signer serve](/powerssl-signer/serve)	 - Serve the Signer

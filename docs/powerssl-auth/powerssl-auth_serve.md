@@ -1,6 +1,8 @@
 ---
+has_toc: false
 layout: default
 parent: powerssl-auth
+permalink: /powerssl-auth/serve
 title: serve
 ---
 ## powerssl-auth serve
@@ -35,4 +37,4 @@ powerssl-auth serve [flags]
 
 ### SEE ALSO
 
-* [powerssl-auth](powerssl-auth.md)	 - powerssl-auth provides PowerSSL Auth
+* [powerssl-auth](/powerssl-auth)	 - powerssl-auth provides PowerSSL Auth

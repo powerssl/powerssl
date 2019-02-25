@@ -1,6 +1,8 @@
 ---
 has_children: true
+has_toc: false
 layout: default
+permalink: /powerutil
 title: powerutil
 ---
 ## powerutil
@@ -23,5 +25,5 @@ Find more information at: https://docs.powerssl.io/powerutil/powerutil.html
 
 ### SEE ALSO
 
-* [powerutil ca](powerutil_ca.md)	 - CA
-* [powerutil vault](powerutil_vault.md)	 - Vault migrations
+* [powerutil ca](/powerutil/ca)	 - CA
+* [powerutil vault](/powerutil/vault)	 - Vault migrations

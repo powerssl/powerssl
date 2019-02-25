@@ -1,6 +1,8 @@
 ---
+has_toc: false
 layout: default
 parent: powerssl-apiserver
+permalink: /powerssl-apiserver/serve
 title: serve
 ---
 ## powerssl-apiserver serve
@@ -50,4 +52,4 @@ powerssl-apiserver serve [flags]
 
 ### SEE ALSO
 
-* [powerssl-apiserver](powerssl-apiserver.md)	 - powerssl-apiserver provides PowerSSL API
+* [powerssl-apiserver](/powerssl-apiserver)	 - powerssl-apiserver provides PowerSSL API

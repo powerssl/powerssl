@@ -1,6 +1,8 @@
 ---
 has_children: true
+has_toc: false
 layout: default
+permalink: /powerssl-apiserver
 title: powerssl-apiserver
 ---
 ## powerssl-apiserver
@@ -23,4 +25,4 @@ Find more information at: https://docs.powerssl.io/powerssl-apiserver/powerssl-a
 
 ### SEE ALSO
 
-* [powerssl-apiserver serve](powerssl-apiserver_serve.md)	 - Serve the API
+* [powerssl-apiserver serve](/powerssl-apiserver/serve)	 - Serve the API

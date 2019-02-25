@@ -1,7 +1,9 @@
 ---
 grand_parent: powerctl
+has_toc: false
 layout: default
 parent: create
+permalink: /powerctl/create/certificate
 title: certificate
 ---
 ## powerctl create certificate
@@ -43,4 +45,4 @@ powerctl create certificate [flags]
 
 ### SEE ALSO
 
-* [powerctl create](powerctl_create.md)	 - Create resource
+* [powerctl create](/powerctl/create)	 - Create resource

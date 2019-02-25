@@ -1,6 +1,8 @@
 ---
 has_children: true
+has_toc: false
 layout: default
+permalink: /powerssl-auth
 title: powerssl-auth
 ---
 ## powerssl-auth
@@ -23,4 +25,4 @@ Find more information at: https://docs.powerssl.io/powerssl-auth/powerssl-auth.h
 
 ### SEE ALSO
 
-* [powerssl-auth serve](powerssl-auth_serve.md)	 - Serve the API
+* [powerssl-auth serve](/powerssl-auth/serve)	 - Serve the API

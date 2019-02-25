@@ -1,7 +1,9 @@
 ---
 grand_parent: powerctl
+has_toc: false
 layout: default
 parent: create
+permalink: /powerctl/create/acmeaccount
 title: acmeaccount
 ---
 ## powerctl create acmeaccount
@@ -47,4 +49,4 @@ powerctl create acmeaccount [flags]
 
 ### SEE ALSO
 
-* [powerctl create](powerctl_create.md)	 - Create resource
+* [powerctl create](/powerctl/create)	 - Create resource

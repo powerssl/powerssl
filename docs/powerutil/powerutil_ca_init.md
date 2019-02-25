@@ -1,7 +1,9 @@
 ---
 grand_parent: powerutil
+has_toc: false
 layout: default
 parent: ca
+permalink: /powerutil/ca/init
 title: init
 ---
 ## powerutil ca init
@@ -33,4 +35,4 @@ powerutil ca init [flags]
 
 ### SEE ALSO
 
-* [powerutil ca](powerutil_ca.md)	 - CA
+* [powerutil ca](/powerutil/ca)	 - CA

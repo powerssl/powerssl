@@ -60,6 +60,8 @@ func filePrepender(filename string) string {
 	s := strings.Split(base, "_")
 
 	meta := make(map[string]interface{})
+	meta["has_toc"] = false
+	meta["permalink"] = fmt.Sprintf("/%s", strings.Join(s, "/"))
 	meta["layout"] = "default"
 	meta["title"] = s[len(s)-1]
 	switch len(s) {
@@ -79,5 +81,8 @@ func filePrepender(filename string) string {
 }
 
 func linkHandler(name string) string {
-	return name
+	base := strings.TrimSuffix(name, path.Ext(name))
+	s := strings.Split(base, "_")
+	base = fmt.Sprintf("/%s", strings.Join(s, "/"))
+	return base
 }

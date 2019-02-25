@@ -1,6 +1,8 @@
 ---
 has_children: true
+has_toc: false
 layout: default
+permalink: /powerssl-controller
 title: powerssl-controller
 ---
 ## powerssl-controller
@@ -23,4 +25,4 @@ Find more information at: https://docs.powerssl.io/powerssl-controller/powerssl-
 
 ### SEE ALSO
 
-* [powerssl-controller serve](powerssl-controller_serve.md)	 - Serve the API
+* [powerssl-controller serve](/powerssl-controller/serve)	 - Serve the API

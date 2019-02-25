@@ -1,7 +1,9 @@
 ---
 grand_parent: powerutil
+has_toc: false
 layout: default
 parent: ca
+permalink: /powerutil/ca/gen
 title: gen
 ---
 ## powerutil ca gen
@@ -36,4 +38,4 @@ powerutil ca gen [flags]
 
 ### SEE ALSO
 
-* [powerutil ca](powerutil_ca.md)	 - CA
+* [powerutil ca](/powerutil/ca)	 - CA

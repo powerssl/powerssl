@@ -1,6 +1,8 @@
 ---
+has_toc: false
 layout: default
 parent: powerutil
+permalink: /powerutil/vault
 title: vault
 ---
 ## powerutil vault
@@ -30,4 +32,4 @@ powerutil vault [flags]
 
 ### SEE ALSO
 
-* [powerutil](powerutil.md)	 - powerutil provides PowerSSL utilities
+* [powerutil](/powerutil)	 - powerutil provides PowerSSL utilities

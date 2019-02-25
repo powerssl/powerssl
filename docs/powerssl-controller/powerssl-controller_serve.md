@@ -1,6 +1,8 @@
 ---
+has_toc: false
 layout: default
 parent: powerssl-controller
+permalink: /powerssl-controller/serve
 title: serve
 ---
 ## powerssl-controller serve
@@ -48,4 +50,4 @@ powerssl-controller serve [flags]
 
 ### SEE ALSO
 
-* [powerssl-controller](powerssl-controller.md)	 - powerssl-controller provides PowerSSL Controller
+* [powerssl-controller](/powerssl-controller)	 - powerssl-controller provides PowerSSL Controller

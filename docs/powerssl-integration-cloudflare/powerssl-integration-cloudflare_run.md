@@ -1,6 +1,8 @@
 ---
+has_toc: false
 layout: default
 parent: powerssl-integration-cloudflare
+permalink: /powerssl-integration-cloudflare/run
 title: run
 ---
 ## powerssl-integration-cloudflare run
@@ -39,4 +41,4 @@ powerssl-integration-cloudflare run [flags]
 
 ### SEE ALSO
 
-* [powerssl-integration-cloudflare](powerssl-integration-cloudflare.md)	 - powerssl-integration-cloudflare provides PowerSSL Cloudflare integration
+* [powerssl-integration-cloudflare](/powerssl-integration-cloudflare)	 - powerssl-integration-cloudflare provides PowerSSL Cloudflare integration

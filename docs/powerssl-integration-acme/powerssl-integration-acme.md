@@ -1,6 +1,8 @@
 ---
 has_children: true
+has_toc: false
 layout: default
+permalink: /powerssl-integration-acme
 title: powerssl-integration-acme
 ---
 ## powerssl-integration-acme
@@ -23,4 +25,4 @@ Find more information at: https://docs.powerssl.io/powerssl-integration-acme/pow
 
 ### SEE ALSO
 
-* [powerssl-integration-acme run](powerssl-integration-acme_run.md)	 - Run ACME integration
+* [powerssl-integration-acme run](/powerssl-integration-acme/run)	 - Run ACME integration

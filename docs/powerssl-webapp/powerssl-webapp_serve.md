@@ -1,6 +1,8 @@
 ---
+has_toc: false
 layout: default
 parent: powerssl-webapp
+permalink: /powerssl-webapp/serve
 title: serve
 ---
 ## powerssl-webapp serve
@@ -34,4 +36,4 @@ powerssl-webapp serve [flags]
 
 ### SEE ALSO
 
-* [powerssl-webapp](powerssl-webapp.md)	 - powerssl-webapp provides PowerSSL WebApp
+* [powerssl-webapp](/powerssl-webapp)	 - powerssl-webapp provides PowerSSL WebApp

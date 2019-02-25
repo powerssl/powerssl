@@ -1,6 +1,8 @@
 ---
 has_children: true
+has_toc: false
 layout: default
+permalink: /powerssl-agent
 title: powerssl-agent
 ---
 ## powerssl-agent
@@ -23,4 +25,4 @@ Find more information at: https://docs.powerssl.io/powerssl-agent/powerssl-agent
 
 ### SEE ALSO
 
-* [powerssl-agent run](powerssl-agent_run.md)	 - Run the Agent
+* [powerssl-agent run](/powerssl-agent/run)	 - Run the Agent

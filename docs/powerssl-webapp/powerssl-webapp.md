@@ -1,6 +1,8 @@
 ---
 has_children: true
+has_toc: false
 layout: default
+permalink: /powerssl-webapp
 title: powerssl-webapp
 ---
 ## powerssl-webapp
@@ -23,4 +25,4 @@ Find more information at: https://docs.powerssl.io/powerssl-webapp/powerssl-weba
 
 ### SEE ALSO
 
-* [powerssl-webapp serve](powerssl-webapp_serve.md)	 - Serve the API
+* [powerssl-webapp serve](/powerssl-webapp/serve)	 - Serve the API

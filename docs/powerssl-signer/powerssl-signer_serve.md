@@ -1,6 +1,8 @@
 ---
+has_toc: false
 layout: default
 parent: powerssl-signer
+permalink: /powerssl-signer/serve
 title: serve
 ---
 ## powerssl-signer serve
@@ -42,4 +44,4 @@ powerssl-signer serve [flags]
 
 ### SEE ALSO
 
-* [powerssl-signer](powerssl-signer.md)	 - powerssl-signer provides PowerSSL Signer
+* [powerssl-signer](/powerssl-signer)	 - powerssl-signer provides PowerSSL Signer

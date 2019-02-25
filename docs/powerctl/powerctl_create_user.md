@@ -1,7 +1,9 @@
 ---
 grand_parent: powerctl
+has_toc: false
 layout: default
 parent: create
+permalink: /powerctl/create/user
 title: user
 ---
 ## powerctl create user
@@ -40,4 +42,4 @@ powerctl create user [flags]
 
 ### SEE ALSO
 
-* [powerctl create](powerctl_create.md)	 - Create resource
+* [powerctl create](/powerctl/create)	 - Create resource

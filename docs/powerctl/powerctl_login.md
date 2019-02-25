@@ -1,6 +1,8 @@
 ---
+has_toc: false
 layout: default
 parent: powerctl
+permalink: /powerctl/login
 title: login
 ---
 ## powerctl login
@@ -37,4 +39,4 @@ powerctl login [flags]
 
 ### SEE ALSO
 
-* [powerctl](powerctl.md)	 - powerctl controls PowerSSL
+* [powerctl](/powerctl)	 - powerctl controls PowerSSL
