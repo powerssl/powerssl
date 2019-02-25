@@ -24,7 +24,7 @@ func NewCmdRoot() *cobra.Command {
 		Short: "powerctl controls PowerSSL",
 		Long: `powerctl controls PowerSSL.
 
-Find more information at: https://docs.powerssl.io/powerctl/powerctl.html`,
+Find more information at: https://docs.powerssl.io/powerctl`,
 		Version: "0.1.0",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			switch viper.GetString("output") {

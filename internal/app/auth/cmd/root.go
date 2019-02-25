@@ -20,7 +20,7 @@ func NewCmdRoot() *cobra.Command {
 		Short: "powerssl-auth provides PowerSSL Auth",
 		Long: `powerssl-auth provides PowerSSL Auth.
 
-Find more information at: https://docs.powerssl.io/powerssl-auth/powerssl-auth.html`,
+Find more information at: https://docs.powerssl.io/powerssl-auth`,
 		Version: "0.1.0",
 	}
 

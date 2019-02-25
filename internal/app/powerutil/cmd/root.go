@@ -20,7 +20,7 @@ func NewCmdRoot() *cobra.Command {
 		Short: "powerutil provides PowerSSL utilities",
 		Long: `powerutil provides PowerSSL utilities.
 
-Find more information at: https://docs.powerssl.io/powerutil/powerutil.html`,
+Find more information at: https://docs.powerssl.io/powerutil`,
 		Version: "0.1.0",
 	}
 

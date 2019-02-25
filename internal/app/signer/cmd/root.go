@@ -20,7 +20,7 @@ func NewCmdRoot() *cobra.Command {
 		Short: "powerssl-signer provides PowerSSL Signer",
 		Long: `powerssl-signer provides PowerSSL Signer.
 
-Find more information at: https://docs.powerssl.io/powerssl-signer/powerssl-signer.html`,
+Find more information at: https://docs.powerssl.io/powerssl-signer`,
 		Version: "0.1.0",
 	}
 

@@ -20,7 +20,7 @@ func NewCmdRoot() *cobra.Command {
 		Short: "powerssl-controller provides PowerSSL Controller",
 		Long: `powerssl-controller provides PowerSSL Controller.
 
-Find more information at: https://docs.powerssl.io/powerssl-controller/powerssl-controller.html`,
+Find more information at: https://docs.powerssl.io/powerssl-controller`,
 		Version: "0.1.0",
 	}
 

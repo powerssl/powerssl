@@ -20,7 +20,7 @@ func NewCmdRoot() *cobra.Command {
 		Short: "powerssl-webapp provides PowerSSL WebApp",
 		Long: `powerssl-webapp provides PowerSSL WebApp.
 
-Find more information at: https://docs.powerssl.io/powerssl-webapp/powerssl-webapp.html`,
+Find more information at: https://docs.powerssl.io/powerssl-webapp`,
 		Version: "0.1.0",
 	}
 

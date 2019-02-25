@@ -20,7 +20,7 @@ func NewCmdRoot() *cobra.Command {
 		Short: "powerssl-integration-cloudflare provides PowerSSL Cloudflare integration",
 		Long: `powerssl-integration-cloudflare provides PowerSSL Cloudflare integration.
 
-Find more information at: https://docs.powerssl.io/powerssl-integration-cloudflare/powerssl-integration-cloudflare.html`,
+Find more information at: https://docs.powerssl.io/powerssl-integration-cloudflare`,
 		Version: "0.1.0",
 	}
 

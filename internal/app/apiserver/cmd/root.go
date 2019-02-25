@@ -20,7 +20,7 @@ func NewCmdRoot() *cobra.Command {
 		Short: "powerssl-apiserver provides PowerSSL API",
 		Long: `powerssl-apiserver provides PowerSSL API.
 
-Find more information at: https://docs.powerssl.io/powerssl-apiserver/powerssl-apiserver.html`,
+Find more information at: https://docs.powerssl.io/powerssl-apiserver`,
 		Version: "0.1.0",
 	}
 

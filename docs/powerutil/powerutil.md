@@ -13,7 +13,7 @@ powerutil provides PowerSSL utilities
 
 powerutil provides PowerSSL utilities.
 
-Find more information at: https://docs.powerssl.io/powerutil/powerutil.html
+Find more information at: https://docs.powerssl.io/powerutil
 
 ### Options
 

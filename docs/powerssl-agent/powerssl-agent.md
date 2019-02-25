@@ -13,7 +13,7 @@ powerssl-agent provides PowerSSL Agent
 
 powerssl-agent provides PowerSSL Agent.
 
-Find more information at: https://docs.powerssl.io/powerssl-agent/powerssl-agent.html
+Find more information at: https://docs.powerssl.io/powerssl-agent
 
 ### Options
 

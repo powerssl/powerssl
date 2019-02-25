@@ -13,7 +13,7 @@ powerssl-controller provides PowerSSL Controller
 
 powerssl-controller provides PowerSSL Controller.
 
-Find more information at: https://docs.powerssl.io/powerssl-controller/powerssl-controller.html
+Find more information at: https://docs.powerssl.io/powerssl-controller
 
 ### Options
 
