@@ -21,6 +21,12 @@ PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/timestamp.proto=github.com/g
 
 PROTOS := $(sort $(shell $(FIND_PROTO) -type f -name '*.proto' -print))
 
+EXTERNAL_TOOLS=\
+	github.com/ddollar/forego \
+	github.com/jteeuwen/go-bindata/... \
+	golang.org/x/tools/cmd/stringer
+
+
 .DELETE_ON_ERROR:
 
 .ALWAYS_REBUILD:
@@ -28,6 +34,14 @@ PROTOS := $(sort $(shell $(FIND_PROTO) -type f -name '*.proto' -print))
 
 .DEFAULT_GOAL := all
 all: build
+
+# bootstrap the build by downloading additional tools
+.PHONY: bootstrap
+bootstrap:
+	@for tool in  $(EXTERNAL_TOOLS) ; do \
+		echo "Installing/Updating $$tool" ; \
+		GO111MODULE=off go get -u $$tool; \
+	done
 
 bin/protoc-gen-gogo:
 	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)/protoc-gen-gogo
