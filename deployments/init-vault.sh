@@ -25,7 +25,7 @@ vault secrets tune -max-lease-ttl=8760h pki
 csr=$(vault write -field=csr pki/intermediate/generate/internal \
 	common_name="PowerSSL Intermediate Authority" \
 	ttl=8760h)
-cert=$(echo "$csr" | cfssl sign -profile intermediate -config $CERTS_DIR/config.json -ca $CERTS_DIR/ca.pem -ca-key $CERTS_DIR/ca-key.pem -csr - | jq -r '.cert')
+cert=$(echo "$csr" | powerutil ca sign --ca $CERTS_DIR/ca.pem --ca-key $CERTS_DIR/ca-key.pem --csr -)
 vault write pki/intermediate/set-signed certificate="$cert"
 vault write pki/config/urls \
 	crl_distribution_points="${VAULT_ADDR}v1/pki/crl" \
@@ -49,9 +49,9 @@ vault write pki/roles/powerssl-signer \
 	max_ttl=24h
 
 # Initialize policies
-vault policy write powerssl-apiserver ./examples/vault/policies/powerssl-apiserver.hcl
-vault policy write powerssl-controller ./examples/vault/policies/powerssl-controller.hcl
-vault policy write powerssl-signer ./examples/vault/policies/powerssl-signer.hcl
+vault policy write powerssl-apiserver ./configs/vault/policies/powerssl-apiserver.hcl
+vault policy write powerssl-controller ./configs/vault/policies/powerssl-controller.hcl
+vault policy write powerssl-signer ./configs/vault/policies/powerssl-signer.hcl
 
 # Initialize tokens
 vault token create -id=powerssl-apiserver -policy=powerssl-apiserver

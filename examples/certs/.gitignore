@@ -2,5 +2,3 @@
 !.gitignore
 !Makefile
 !README.md
-!config.json
-!csr.json
