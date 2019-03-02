@@ -32,3 +32,4 @@ CA
 * [powerutil](/powerutil)	 - powerutil provides PowerSSL utilities
 * [powerutil ca gen](/powerutil/ca/gen)	 - Generate certificate
 * [powerutil ca init](/powerutil/ca/init)	 - Init certificate authority
+* [powerutil ca sign](/powerutil/ca/sign)	 - Signs a certificate by a given CA and CA key
