@@ -42,6 +42,11 @@ bootstrap:
 		echo "Installing/Updating $$tool" ; \
 		GO111MODULE=off go get -u $$tool; \
 	done
+	@echo
+	@echo "Make sure you have installed Protocol Buffers - Protocol Compiler and Protobuf Go Runtime"
+	@echo
+	@echo "On MacOS this can be achieved this way:"
+	@echo "$ brew install protobuf protoc-gen-go"
 
 bin/protoc-gen-gogo:
 	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)/protoc-gen-gogo
@@ -111,14 +116,16 @@ clean:
 	rm -f bin/powerctl bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerssl-webapp bin/powerutil
 
 .PHONY: protobuf
-protobuf:
+protobuf: bin/protoc-gen-gogo
 	$(FIND_RELEVANT) -type f -name '*.pb.go' -exec rm {} +
+	@rm -f powerssl.io && ln -s . powerssl.io
 	set -e; for dir in $(sort $(dir $(PROTOS))); do \
 		$(PROTOC) \
 			-I$(PROTO_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
-			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$(GOPATH)/src \
+			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:. \
 			$$dir/*.proto; \
 	done
+	@rm -f powerssl.io
 
 .PHONY: tools
 tools:
