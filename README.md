@@ -16,7 +16,7 @@ Developing PowerSSL
 
 If you wish to work on Vault itself or any of its built-in systems, you'll
 first need [Go](https://www.golang.org) installed on your machine (version
-1.11+ is *required*).
+1.12+ is *required*).
 
 ```sh
 $ make bootstrap
