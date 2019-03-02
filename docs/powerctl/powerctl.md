@@ -13,8 +13,6 @@ powerctl controls PowerSSL
 
 powerctl controls PowerSSL.
 
-Find more information at: https://docs.powerssl.io/powerctl
-
 ### Options
 
 ```

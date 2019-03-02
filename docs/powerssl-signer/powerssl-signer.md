@@ -13,8 +13,6 @@ powerssl-signer provides PowerSSL Signer
 
 powerssl-signer provides PowerSSL Signer.
 
-Find more information at: https://docs.powerssl.io/powerssl-signer
-
 ### Options
 
 ```

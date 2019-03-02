@@ -13,8 +13,6 @@ powerssl-apiserver provides PowerSSL API
 
 powerssl-apiserver provides PowerSSL API.
 
-Find more information at: https://docs.powerssl.io/powerssl-apiserver
-
 ### Options
 
 ```

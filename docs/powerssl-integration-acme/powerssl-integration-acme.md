@@ -13,8 +13,6 @@ powerssl-integration-acme provides PowerSSL ACME integration
 
 powerssl-integration-acme provides PowerSSL ACME integration.
 
-Find more information at: https://docs.powerssl.io/powerssl-integration-acme
-
 ### Options
 
 ```

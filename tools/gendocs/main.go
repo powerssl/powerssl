@@ -42,6 +42,11 @@ func main() {
 		input, err := ioutil.ReadFile(file)
 		check(err)
 		lines := strings.Split(string(input), "\n")
+		for i, line := range lines {
+			if strings.Contains(line, "Find more information at:") {
+				lines = append(lines[:i], lines[i+2:]...)
+			}
+		}
 		output := strings.Join(lines[0:len(lines)-2], "\n")
 		check(ioutil.WriteFile(file, []byte(output), 0644))
 	}

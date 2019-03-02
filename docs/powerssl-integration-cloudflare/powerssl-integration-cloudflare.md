@@ -13,8 +13,6 @@ powerssl-integration-cloudflare provides PowerSSL Cloudflare integration
 
 powerssl-integration-cloudflare provides PowerSSL Cloudflare integration.
 
-Find more information at: https://docs.powerssl.io/powerssl-integration-cloudflare
-
 ### Options
 
 ```
