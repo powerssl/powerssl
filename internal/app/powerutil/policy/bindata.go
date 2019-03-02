@@ -85,7 +85,7 @@ func powersslApiserverHcl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "powerssl-apiserver.hcl", size: 123, mode: os.FileMode(420), modTime: time.Unix(1550786034, 0)}
+	info := bindataFileInfo{name: "powerssl-apiserver.hcl", size: 123, mode: os.FileMode(420), modTime: time.Unix(1551202530, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -105,7 +105,7 @@ func powersslControllerHcl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "powerssl-controller.hcl", size: 69, mode: os.FileMode(420), modTime: time.Unix(1550786034, 0)}
+	info := bindataFileInfo{name: "powerssl-controller.hcl", size: 69, mode: os.FileMode(420), modTime: time.Unix(1551202530, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -125,7 +125,7 @@ func powersslSignerHcl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "powerssl-signer.hcl", size: 65, mode: os.FileMode(420), modTime: time.Unix(1550786034, 0)}
+	info := bindataFileInfo{name: "powerssl-signer.hcl", size: 65, mode: os.FileMode(420), modTime: time.Unix(1551202530, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

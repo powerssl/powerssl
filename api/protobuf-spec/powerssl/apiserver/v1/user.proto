@@ -13,29 +13,41 @@ option go_package = "powerssl.io/internal/pkg/apiserver/api/v1;api";
 service UserService {
   // Creates a user, and returns the new User.
   rpc Create(CreateUserRequest) returns (User) {
-    option (google.api.http) = { post: "/v1/users" body: "user" };
+    option (google.api.http) = {
+      post: "/v1/users"
+      body: "user"
+    };
   }
 
   // Deletes a user. Returns NOT_FOUND if the user does not exist.
   rpc Delete(DeleteUserRequest) returns (google.protobuf.Empty) {
-    option (google.api.http) = { delete: "/v1/{name=users/*}" };
+    option (google.api.http) = {
+      delete: "/v1/{name=users/*}"
+    };
   }
 
   // Gets a user. Returns NOT_FOUND if the user does not exist.
   rpc Get(GetUserRequest) returns (User) {
-    option (google.api.http) = { get: "/v1/{name=users/*}" };
+    option (google.api.http) = {
+      get: "/v1/{name=users/*}"
+    };
   }
 
   // Lists users. The order is unspecified but deterministic. Newly created
   // users will not necessarily be added to the end of this list.
   rpc List(ListUsersRequest) returns (ListUsersResponse) {
-    option (google.api.http) = { get: "/v1/users" };
+    option (google.api.http) = {
+      get: "/v1/users"
+    };
   }
 
   // Updates a user. Returns INVALID_ARGUMENT if the name of the user
   // is non-empty and does equal the previous name.
   rpc Update(UpdateUserRequest) returns (User) {
-    option (google.api.http) = { put: "/v1/{name=users/*}" body: "user" };
+    option (google.api.http) = {
+      put: "/v1/{name=users/*}"
+      body: "user"
+    };
   }
 }
 

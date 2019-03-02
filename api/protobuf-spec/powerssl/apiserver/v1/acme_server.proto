@@ -10,33 +10,28 @@ import "google/protobuf/timestamp.proto";
 option go_package = "powerssl.io/internal/pkg/apiserver/api/v1;api";
 
 service ACMEServerService {
-  rpc Create(CreateACMEServerRequest)
-      returns (ACMEServer) {
+  rpc Create(CreateACMEServerRequest) returns (ACMEServer) {
     option (google.api.http) = {
       post: "/v1/acmeServers"
       body: "acmeServer"
     };
   }
-  rpc Delete(DeleteACMEServerRequest)
-      returns (google.protobuf.Empty) {
+  rpc Delete(DeleteACMEServerRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/v1/{name=acmeServers/*}"
     };
   }
-  rpc Get(GetACMEServerRequest)
-      returns (ACMEServer) {
+  rpc Get(GetACMEServerRequest) returns (ACMEServer) {
     option (google.api.http) = {
       get: "/v1/{name=acmeServers/*}"
     };
   }
-  rpc List(ListACMEServersRequest)
-      returns (ListACMEServersResponse) {
+  rpc List(ListACMEServersRequest) returns (ListACMEServersResponse) {
     option (google.api.http) = {
       get: "/v1/acmeServers"
     };
   }
-  rpc Update(UpdateACMEServerRequest)
-      returns (ACMEServer) {
+  rpc Update(UpdateACMEServerRequest) returns (ACMEServer) {
     option (google.api.http) = {
       put: "/v1/{name=acmeServers/*}",
       body: "acmeServer"

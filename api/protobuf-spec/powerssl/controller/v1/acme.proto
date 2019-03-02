@@ -8,47 +8,72 @@ import "powerssl/controller/v1/meta.proto";
 option go_package = "powerssl.io/internal/pkg/controller/api/v1;api";
 
 service ACMEService {
-  rpc GetCreateAccountRequest(Activity) returns (GetCreateAccountRequestResponse);
-  rpc SetCreateAccountResponse(SetCreateAccountResponseRequest) returns (google.protobuf.Empty);
+  rpc GetCreateAccountRequest(Activity)
+      returns (GetCreateAccountRequestResponse);
+  rpc SetCreateAccountResponse(SetCreateAccountResponseRequest)
+      returns (google.protobuf.Empty);
 
-  rpc GetDeactivateAccountRequest(Activity) returns (GetDeactivateAccountRequestResponse);
-  rpc SetDeactivateAccountResponse(SetDeactivateAccountResponseRequest) returns (google.protobuf.Empty);
+  rpc GetDeactivateAccountRequest(Activity)
+      returns (GetDeactivateAccountRequestResponse);
+  rpc SetDeactivateAccountResponse(SetDeactivateAccountResponseRequest)
+      returns (google.protobuf.Empty);
 
   rpc GetRekeyAccountRequest(Activity) returns (GetRekeyAccountRequestResponse);
-  rpc SetRekeyAccountResponse(SetRekeyAccountResponseRequest) returns (google.protobuf.Empty);
+  rpc SetRekeyAccountResponse(SetRekeyAccountResponseRequest)
+      returns (google.protobuf.Empty);
 
-  rpc GetUpdateAccountRequest(Activity) returns (GetUpdateAccountRequestResponse);
-  rpc SetUpdateAccountResponse(SetUpdateAccountResponseRequest) returns (google.protobuf.Empty);
+  rpc GetUpdateAccountRequest(Activity)
+      returns (GetUpdateAccountRequestResponse);
+  rpc SetUpdateAccountResponse(SetUpdateAccountResponseRequest)
+      returns (google.protobuf.Empty);
 
   rpc GetCreateOrderRequest(Activity) returns (GetCreateOrderRequestResponse);
-  rpc SetCreateOrderResponse(SetCreateOrderResponseRequest) returns (google.protobuf.Empty);
+  rpc SetCreateOrderResponse(SetCreateOrderResponseRequest)
+      returns (google.protobuf.Empty);
 
-  rpc GetFinalizeOrderRequest(Activity) returns (GetFinalizeOrderRequestResponse);
-  rpc SetFinalizeOrderResponse(SetFinalizeOrderResponseRequest) returns (google.protobuf.Empty);
+  rpc GetFinalizeOrderRequest(Activity)
+      returns (GetFinalizeOrderRequestResponse);
+  rpc SetFinalizeOrderResponse(SetFinalizeOrderResponseRequest)
+      returns (google.protobuf.Empty);
 
   rpc GetGetOrderRequest(Activity) returns (GetGetOrderRequestResponse);
-  rpc SetGetOrderResponse(SetGetOrderResponseRequest) returns (google.protobuf.Empty);
+  rpc SetGetOrderResponse(SetGetOrderResponseRequest)
+      returns (google.protobuf.Empty);
 
-  rpc GetCreateAuthorizationRequest(Activity) returns (GetCreateAuthorizationRequestResponse);
-  rpc SetCreateAuthorizationResponse(SetCreateAuthorizationResponseRequest) returns (google.protobuf.Empty);
+  rpc GetCreateAuthorizationRequest(Activity)
+      returns (GetCreateAuthorizationRequestResponse);
+  rpc SetCreateAuthorizationResponse(SetCreateAuthorizationResponseRequest)
+      returns (google.protobuf.Empty);
 
-  rpc GetDeactivateAuthorizationRequest(Activity) returns (GetDeactivateAuthorizationRequestResponse);
-  rpc SetDeactivateAuthorizationResponse(SetDeactivateAuthorizationResponseRequest) returns (google.protobuf.Empty);
+  rpc GetDeactivateAuthorizationRequest(Activity)
+      returns (GetDeactivateAuthorizationRequestResponse);
+  rpc SetDeactivateAuthorizationResponse(
+      SetDeactivateAuthorizationResponseRequest)
+      returns (google.protobuf.Empty);
 
-  rpc GetGetAuthorizationRequest(Activity) returns (GetGetAuthorizationRequestResponse);
-  rpc SetGetAuthorizationResponse(SetGetAuthorizationResponseRequest) returns (google.protobuf.Empty);
+  rpc GetGetAuthorizationRequest(Activity)
+      returns (GetGetAuthorizationRequestResponse);
+  rpc SetGetAuthorizationResponse(SetGetAuthorizationResponseRequest)
+      returns (google.protobuf.Empty);
 
   rpc GetGetChallengeRequest(Activity) returns (GetGetChallengeRequestResponse);
-  rpc SetGetChallengeResponse(SetGetChallengeResponseRequest) returns (google.protobuf.Empty);
+  rpc SetGetChallengeResponse(SetGetChallengeResponseRequest)
+      returns (google.protobuf.Empty);
 
-  rpc GetValidateChallengeRequest(Activity) returns (GetValidateChallengeRequestResponse);
-  rpc SetValidateChallengeResponse(SetValidateChallengeResponseRequest) returns (google.protobuf.Empty);
+  rpc GetValidateChallengeRequest(Activity)
+      returns (GetValidateChallengeRequestResponse);
+  rpc SetValidateChallengeResponse(SetValidateChallengeResponseRequest)
+      returns (google.protobuf.Empty);
 
-  rpc GetGetCertificateRequest(Activity) returns (GetGetCertificateRequestResponse);
-  rpc SetGetCertificateResponse(SetGetCertificateResponseRequest) returns (google.protobuf.Empty);
+  rpc GetGetCertificateRequest(Activity)
+      returns (GetGetCertificateRequestResponse);
+  rpc SetGetCertificateResponse(SetGetCertificateResponseRequest)
+      returns (google.protobuf.Empty);
 
-  rpc GetRevokeCertificateRequest(Activity) returns (GetRevokeCertificateRequestResponse);
-  rpc SetRevokeCertificateResponse(SetRevokeCertificateResponseRequest) returns (google.protobuf.Empty);
+  rpc GetRevokeCertificateRequest(Activity)
+      returns (GetRevokeCertificateRequestResponse);
+  rpc SetRevokeCertificateResponse(SetRevokeCertificateResponseRequest)
+      returns (google.protobuf.Empty);
 }
 
 message GetCreateAccountRequestResponse {
@@ -168,8 +193,6 @@ message SetRevokeCertificateResponseRequest {
   Activity activity = 1;
 }
 
-
-
 /*
 message GetNewOrderRequestResponse {
   repeated Identifier identifiers = 1;
@@ -220,7 +243,7 @@ message Account {
   bool terms_of_service_agreed = 3;
   string orders = 4;
 
-  string url = 5; // TODO
+  string url = 5;  // TODO
 }
 
 message Authorization {

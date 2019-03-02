@@ -13,29 +13,41 @@ option go_package = "powerssl.io/internal/pkg/apiserver/api/v1;api";
 service CertificateService {
   // Creates a certificate, and returns the new Certificate.
   rpc Create(CreateCertificateRequest) returns (Certificate) {
-    option (google.api.http) = { post: "/v1/certificates" body: "certificate" };
+    option (google.api.http) = {
+      post: "/v1/certificates"
+      body: "certificate"
+    };
   }
 
   // Deletes a certificate. Returns NOT_FOUND if the certificate does not exist.
   rpc Delete(DeleteCertificateRequest) returns (google.protobuf.Empty) {
-    option (google.api.http) = { delete: "/v1/{name=certificates/*}" };
+    option (google.api.http) = {
+      delete: "/v1/{name=certificates/*}"
+    };
   }
 
   // Gets a certificate. Returns NOT_FOUND if the certificate does not exist.
   rpc Get(GetCertificateRequest) returns (Certificate) {
-    option (google.api.http) = { get: "/v1/{name=certificates/*}" };
+    option (google.api.http) = {
+      get: "/v1/{name=certificates/*}"
+    };
   }
 
-  // Lists certificates. The order is unspecified but deterministic. Newly created
-  // certificates will not necessarily be added to the end of this list.
+  // Lists certificates. The order is unspecified but deterministic. Newly
+  // created certificates will not necessarily be added to the end of this list.
   rpc List(ListCertificatesRequest) returns (ListCertificatesResponse) {
-    option (google.api.http) = { get: "/v1/certificates" };
+    option (google.api.http) = {
+      get: "/v1/certificates"
+    };
   }
 
-  // Updates a certificate. Returns INVALID_ARGUMENT if the name of the certificate
-  // is non-empty and does equal the previous name.
+  // Updates a certificate. Returns INVALID_ARGUMENT if the name of the
+  // certificate is non-empty and does equal the previous name.
   rpc Update(UpdateCertificateRequest) returns (Certificate) {
-    option (google.api.http) = { put: "/v1/{name=certificates/*}" body: "certificate" };
+    option (google.api.http) = {
+      put: "/v1/{name=certificates/*}"
+      body: "certificate"
+    };
   }
 }
 

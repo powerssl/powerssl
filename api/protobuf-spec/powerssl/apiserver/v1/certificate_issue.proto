@@ -13,37 +13,51 @@ option go_package = "powerssl.io/internal/pkg/apiserver/api/v1;api";
 service CertificateIssueService {
   // Creates a certificate, and returns the new CertificateIssue.
   rpc Create(CreateCertificateIssueRequest) returns (CertificateIssue) {
-    option (google.api.http) = { post: "/v1/{parent=certificates/*}/issues" body: "issue" };
+    option (google.api.http) = {
+      post: "/v1/{parent=certificates/*}/issues"
+      body: "issue"
+    };
   }
 
   // Deletes a certificate. Returns NOT_FOUND if the certificate does not exist.
   rpc Delete(DeleteCertificateIssueRequest) returns (google.protobuf.Empty) {
-    option (google.api.http) = { delete: "/v1/{name=certificates/*/issues/*}" };
+    option (google.api.http) = {
+      delete: "/v1/{name=certificates/*/issues/*}"
+    };
   }
 
   // Gets a certificate. Returns NOT_FOUND if the certificate does not exist.
   rpc Get(GetCertificateIssueRequest) returns (CertificateIssue) {
-    option (google.api.http) = { get: "/v1/{name=certificates/*/issues/*}" };
+    option (google.api.http) = {
+      get: "/v1/{name=certificates/*/issues/*}"
+    };
   }
 
-  // Lists certificates. The order is unspecified but deterministic. Newly created
-  // certificates will not necessarily be added to the end of this list.
-  rpc List(ListCertificateIssuesRequest) returns (ListCertificateIssuesResponse) {
-    option (google.api.http) = { get: "/v1/{parent=certificates/*}/issues" };
+  // Lists certificates. The order is unspecified but deterministic. Newly
+  // created certificates will not necessarily be added to the end of this list.
+  rpc List(ListCertificateIssuesRequest)
+      returns (ListCertificateIssuesResponse) {
+    option (google.api.http) = {
+      get: "/v1/{parent=certificates/*}/issues"
+    };
   }
 
-  // Updates a certificate. Returns INVALID_ARGUMENT if the name of the certificate
-  // is non-empty and does equal the previous name.
+  // Updates a certificate. Returns INVALID_ARGUMENT if the name of the
+  // certificate is non-empty and does equal the previous name.
   rpc Update(UpdateCertificateIssueRequest) returns (CertificateIssue) {
-    option (google.api.http) = { put: "/v1/{name=certificates/*/issues/*}" body: "issue" };
+    option (google.api.http) = {
+      put: "/v1/{name=certificates/*/issues/*}"
+      body: "issue"
+    };
   }
 }
 
 // A CertificateIssue ...
 message CertificateIssue {
   // The resource name of the certificate issue.
-  // CertificateIssue names have the form `certificates/{certificate_id}/issues/{issue_id}`.
-  // The name is ignored when creating a certificate issue.
+  // CertificateIssue names have the form
+  // `certificates/{certificate_id}/issues/{issue_id}`. The name is ignored when
+  // creating a certificate issue.
   string name = 1;
 
   google.protobuf.Timestamp create_time = 2;

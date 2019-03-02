@@ -46,7 +46,7 @@ bootstrap:
 	@echo "Make sure you have installed Protocol Buffers - Protocol Compiler and Protobuf Go Runtime"
 	@echo
 	@echo "On MacOS this can be achieved this way:"
-	@echo "$ brew install protobuf protoc-gen-go"
+	@echo "$ brew install protobuf protoc-gen-go clang-format"
 
 bin/protoc-gen-gogo:
 	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)/protoc-gen-gogo
@@ -103,7 +103,7 @@ install-powerutil:
 .PHONY: fmt
 fmt:
 	go fmt $$(go list ./...)
-	clang-format -i --style=google $(PROTOS)
+	clang-format -i --style=Google $(PROTOS)
 
 .PHONY: vet
 vet:
@@ -126,10 +126,6 @@ protobuf: bin/protoc-gen-gogo
 			$$dir/*.proto; \
 	done
 	@rm -f powerssl.io
-
-.PHONY: tools
-tools:
-	GO111MODULE=off go get golang.org/x/tools/cmd/stringer
 
 .PHONY: generate
 generate:
