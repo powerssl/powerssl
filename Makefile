@@ -100,6 +100,9 @@ install-powerctl:
 install-powerutil:
 	COMPONENT=powerutil scripts/install.sh
 
+.PHONY: install
+install: install-agent install-powerctl install-powerutil
+
 .PHONY: fmt
 fmt:
 	go fmt $$(go list ./...)
