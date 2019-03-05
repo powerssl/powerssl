@@ -55,7 +55,7 @@ bin/powerssl-agent: .ALWAYS_REBUILD
 	COMPONENT=powerssl-agent scripts/build-go.sh
 
 bin/powerssl-apiserver: .ALWAYS_REBUILD
-	COMPONENT=powerssl-apiserver scripts/build-go.sh
+	COMPONENT=powerssl-apiserver CGO_ENABLED=1 scripts/build-go.sh
 
 bin/powerssl-auth: .ALWAYS_REBUILD
 	COMPONENT=powerssl-auth scripts/build-go.sh
