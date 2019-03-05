@@ -1,4 +1,4 @@
-path "pki/issue/powerssl-apiserver" {
+path "pki/sign/powerssl-apiserver" {
   capabilities = ["update"]
 }
 
