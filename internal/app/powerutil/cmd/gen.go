@@ -4,12 +4,9 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/cloudflare/cfssl/cli/genkey"
-	"github.com/cloudflare/cfssl/config"
-	"github.com/cloudflare/cfssl/csr"
-	"github.com/cloudflare/cfssl/signer"
-	"github.com/cloudflare/cfssl/signer/local"
 	"github.com/spf13/cobra"
+
+	"powerssl.io/internal/pkg/pki"
 )
 
 func newCmdCAGen() *cobra.Command {
@@ -20,29 +17,7 @@ func newCmdCAGen() *cobra.Command {
 		Use:   "gen",
 		Short: "Generate certificate",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			req := csr.CertificateRequest{
-				KeyRequest: &csr.BasicKeyRequest{
-					A: keyAlgo,
-					S: keySize,
-				},
-				Hosts: []string{hostname},
-			}
-
-			g := &csr.Generator{Validator: genkey.Validator}
-			csr, key, err := g.ProcessRequest(&req)
-			if err != nil {
-				return err
-			}
-
-			policy := &config.Signing{Default: config.DefaultConfig()}
-
-			s, err := local.NewSignerFromFile(ca, caKey, policy)
-			if err != nil {
-				return err
-			}
-
-			signReq := signer.SignRequest{Request: string(csr)}
-			cert, err := s.Sign(signReq)
+			cert, csr, key, err := pki.Gen(ca, caKey, hostname, keyAlgo, keySize)
 			if err != nil {
 				return err
 			}

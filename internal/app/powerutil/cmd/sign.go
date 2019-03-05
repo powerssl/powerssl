@@ -4,11 +4,9 @@ import (
 	"fmt"
 
 	"github.com/cloudflare/cfssl/cli"
-	"github.com/cloudflare/cfssl/config"
-	"github.com/cloudflare/cfssl/helpers"
-	"github.com/cloudflare/cfssl/signer"
-	"github.com/cloudflare/cfssl/signer/local"
 	"github.com/spf13/cobra"
+
+	"powerssl.io/internal/pkg/pki"
 )
 
 func newCmdCASign() *cobra.Command {
@@ -23,36 +21,12 @@ func newCmdCASign() *cobra.Command {
 				return err
 			}
 
-			policy := &config.Signing{
-				Default: &config.SigningProfile{
-					Expiry: helpers.OneYear,
-					CAConstraint: config.CAConstraint{
-						IsCA:       true,
-						MaxPathLen: 1,
-					},
-					Usage: []string{
-						"digital signature",
-						"signing",
-						"key encipherment",
-						"cert sign",
-						"crl sign",
-					},
-				},
-			}
-
-			s, err := local.NewSignerFromFile(ca, caKey, policy)
+			cert, err := pki.Sign(ca, caKey, string(csr))
 			if err != nil {
 				return err
 			}
 
-			req := signer.SignRequest{Request: string(csr)}
-			cert, err := s.Sign(req)
-			if err != nil {
-				return err
-			}
-
-			fmt.Print(string(cert))
-
+			fmt.Println(string(cert))
 			return nil
 		},
 	}

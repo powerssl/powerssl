@@ -3,9 +3,9 @@ package cmd
 import (
 	"io/ioutil"
 
-	"github.com/cloudflare/cfssl/csr"
-	"github.com/cloudflare/cfssl/initca"
 	"github.com/spf13/cobra"
+
+	"powerssl.io/internal/pkg/pki"
 )
 
 func newCmdCAInit() *cobra.Command {
@@ -16,19 +16,7 @@ func newCmdCAInit() *cobra.Command {
 		Use:   "init",
 		Short: "Init certificate authority",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			req := csr.CertificateRequest{
-				KeyRequest: &csr.BasicKeyRequest{
-					A: keyAlgo,
-					S: keySize,
-				},
-				Names: []csr.Name{
-					{
-						O: "PowerSSL Root Authority",
-					},
-				},
-			}
-
-			cert, csr, key, err := initca.New(&req)
+			cert, csr, key, err := pki.Init(keyAlgo, keySize)
 			if err != nil {
 				return err
 			}
