@@ -27,13 +27,6 @@ powerutil ca sign [flags]
   -h, --help            help for sign
 ```
 
-### Options inherited from parent commands
-
-```
-      --config string   config file (default is /etc/powerssl/util/config.yaml)
-  -v, --verbose         Verbose output
-```
-
 ### SEE ALSO
 
 * [powerutil ca](/powerutil/ca)	 - CA

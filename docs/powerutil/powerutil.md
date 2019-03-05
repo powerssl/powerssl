@@ -16,9 +16,7 @@ powerutil provides PowerSSL utilities.
 ### Options
 
 ```
-      --config string   config file (default is /etc/powerssl/util/config.yaml)
-  -h, --help            help for powerutil
-  -v, --verbose         Verbose output
+  -h, --help   help for powerutil
 ```
 
 ### SEE ALSO

@@ -20,14 +20,9 @@ powerutil vault [flags]
 ### Options
 
 ```
-  -h, --help   help for vault
-```
-
-### Options inherited from parent commands
-
-```
-      --config string   config file (default is /etc/powerssl/util/config.yaml)
-  -v, --verbose         Verbose output
+      --addr string   Vault address (default "https://localhost:8200")
+      --ca string     Certificate authority file (default "/etc/powerssl/ca.pem")
+  -h, --help          help for vault
 ```
 
 ### SEE ALSO

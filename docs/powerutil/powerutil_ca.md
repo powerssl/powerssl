@@ -20,13 +20,6 @@ CA
   -h, --help   help for ca
 ```
 
-### Options inherited from parent commands
-
-```
-      --config string   config file (default is /etc/powerssl/util/config.yaml)
-  -v, --verbose         Verbose output
-```
-
 ### SEE ALSO
 
 * [powerutil](/powerutil)	 - powerutil provides PowerSSL utilities

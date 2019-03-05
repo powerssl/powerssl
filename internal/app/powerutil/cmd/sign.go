@@ -9,15 +9,16 @@ import (
 	"github.com/cloudflare/cfssl/signer"
 	"github.com/cloudflare/cfssl/signer/local"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 func newCmdCASign() *cobra.Command {
+	var ca, caKey, csr string
+
 	cmd := &cobra.Command{
 		Use:   "sign",
 		Short: "Signs a certificate by a given CA and CA key",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			csr, err := cli.ReadStdin(viper.GetString("csr"))
+			csr, err := cli.ReadStdin(csr)
 			if err != nil {
 				return err
 			}
@@ -39,13 +40,12 @@ func newCmdCASign() *cobra.Command {
 				},
 			}
 
-			s, err := local.NewSignerFromFile(viper.GetString("ca"), viper.GetString("ca-key"), policy)
+			s, err := local.NewSignerFromFile(ca, caKey, policy)
 			if err != nil {
 				return err
 			}
 
 			req := signer.SignRequest{Request: string(csr)}
-
 			cert, err := s.Sign(req)
 			if err != nil {
 				return err
@@ -57,13 +57,9 @@ func newCmdCASign() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringP("ca", "", "", "Certificate authority file")
-	cmd.Flags().StringP("ca-key", "", "", "Certificate authority key file")
-	cmd.Flags().StringP("csr", "", "", "Certificate signing request")
-
-	viper.BindPFlag("ca", cmd.Flags().Lookup("ca"))
-	viper.BindPFlag("ca-key", cmd.Flags().Lookup("ca-key"))
-	viper.BindPFlag("csr", cmd.Flags().Lookup("csr"))
+	cmd.Flags().StringVar(&ca, "ca", "", "Certificate authority file")
+	cmd.Flags().StringVar(&caKey, "ca-key", "", "Certificate authority key file")
+	cmd.Flags().StringVar(&csr, "csr", "", "Certificate signing request")
 
 	return cmd
 }
