@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"regexp"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -25,11 +28,23 @@ func newCmdLogin() *cobra.Command {
 				return fmt.Errorf("Auth token must be set")
 			}
 
+			location := viper.ConfigFileUsed()
 			if err := viper.WriteConfig(); err != nil {
-				return err
+				if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+					r := regexp.MustCompile(`\[(.+)\]`)
+					dir := r.FindStringSubmatch(err.Error())[1]
+					if err := os.MkdirAll(dir, 0755); err != nil {
+						return err
+					}
+					location = filepath.Join(dir, "config.yaml")
+					err = viper.WriteConfigAs(location)
+				}
+				if err != nil {
+					return err
+				}
 			}
 
-			fmt.Printf("Wrote config to %s\n", viper.ConfigFileUsed())
+			fmt.Printf("Wrote config to %s\n", location)
 
 			return nil
 		},
