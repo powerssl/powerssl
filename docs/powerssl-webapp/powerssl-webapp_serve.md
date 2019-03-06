@@ -21,6 +21,7 @@ powerssl-webapp serve [flags]
 
 ```
       --addr string           Addr (default ":8080")
+      --api-addr string       API Addr
       --auth-uri string       Auth URI
   -h, --help                  help for serve
       --metrics-addr string   HTTP Addr (default ":9090")

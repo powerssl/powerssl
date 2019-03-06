@@ -20,9 +20,10 @@ powerutil vault [flags]
 ### Options
 
 ```
-      --addr string   Vault address (default "https://localhost:8200")
-      --ca string     Certificate authority file (default "/etc/powerssl/ca.pem")
-  -h, --help          help for vault
+      --addr string     Vault address (default "https://localhost:8200")
+      --ca string       Certificate authority file (default "/etc/powerssl/ca.pem")
+      --ca-key string   Certificate authority private key file
+  -h, --help            help for vault
 ```
 
 ### SEE ALSO
