@@ -2,11 +2,14 @@ package powerutil
 
 import (
 	"fmt"
+	"io/ioutil"
 	"path/filepath"
 
+	"github.com/ghodss/yaml"
 	"github.com/hashicorp/vault/api"
 
 	"powerssl.io/internal/app/powerutil/policy"
+	"powerssl.io/internal/pkg/pki"
 	"powerssl.io/internal/pkg/vault"
 )
 
@@ -32,40 +35,56 @@ var mounts = map[string]*api.MountInput{
 var roles = map[string]map[string]interface{}{
 	fmt.Sprintf("%s/roles/powerssl-apiserver", PKI_PATH): map[string]interface{}{
 		"allowed_domains":    "apiserver",
-		"allow_localhost":    false,
+		"allow_localhost":    true, // TODO: Disable in production
 		"allow_bare_domains": true,
 		"max_ttl":            "24h",
 	},
 	fmt.Sprintf("%s/roles/powerssl-controller", PKI_PATH): map[string]interface{}{
 		"allowed_domains":    "controller",
-		"allow_localhost":    false,
+		"allow_localhost":    true, // TODO: Disable in production
 		"allow_bare_domains": true,
 		"max_ttl":            "24h",
 	},
 	fmt.Sprintf("%s/roles/powerssl-signer", PKI_PATH): map[string]interface{}{
 		"allowed_domains":    "signer",
-		"allow_localhost":    false,
+		"allow_localhost":    true, // TODO: Disable in production
 		"allow_bare_domains": true,
 		"max_ttl":            "24h",
 	},
 }
 
-func RunVault(addr, caFile string) error {
+var tokens = map[string][]string{
+	"powerssl-apiserver":  []string{"powerssl-apiserver"},
+	"powerssl-controller": []string{"powerssl-controller"},
+	"powerssl-signer":     []string{"powerssl-signer"},
+}
+
+func RunVault(addr, ca, caKey string) error {
 	var keys []string
 	var rootToken string
 	{
-		c, err := vault.New(addr, "", caFile)
+		c, err := vault.New(addr, "", ca)
 		if err != nil {
 			return err
 		}
 
-		keys, _, rootToken, err = vaultInit(c)
+		var recoveryKeys []string
+		keys, recoveryKeys, rootToken, err = vaultInit(c)
 		if err != nil {
+			return err
+		}
+
+		secret, err := yaml.Marshal(map[string]interface{}{
+			"keys":         keys,
+			"recoveryKeys": recoveryKeys,
+			"rootToken":    rootToken,
+		})
+		if err := ioutil.WriteFile("local/vault/secret.yaml", secret, 0644); err != nil {
 			return err
 		}
 	}
 
-	c, err := vault.New(addr, rootToken, caFile)
+	c, err := vault.New(addr, rootToken, ca)
 	if err != nil {
 		return err
 	}
@@ -78,11 +97,19 @@ func RunVault(addr, caFile string) error {
 		return err
 	}
 
+	if err := vaultInitPKI(c, addr, ca, caKey); err != nil {
+		return err
+	}
+
 	if err := vaultWritePKIRoles(c); err != nil {
 		return err
 	}
 
 	if err := vaultPutPolicies(c); err != nil {
+		return err
+	}
+
+	if err := vaultCreateTokens(c); err != nil {
 		return err
 	}
 
@@ -179,5 +206,68 @@ func vaultMount(c *vault.Client) error {
 			return err
 		}
 	}
+	return nil
+}
+
+func vaultCreateTokens(c *vault.Client) error {
+	for id, policies := range tokens {
+		opts := &api.TokenCreateRequest{
+			ID:       id,
+			Policies: policies,
+		}
+		if _, err := c.Auth().Token().Create(opts); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func vaultInitPKI(c *vault.Client, addr, ca, caKey string) error {
+	var cert, csr string
+
+	{
+		path := fmt.Sprintf("%s/intermediate/generate/internal", PKI_PATH)
+		data := map[string]interface{}{
+			"common_name": "PowerSSL Intermediate Authority",
+			"ttl":         "8760h",
+		}
+		secret, err := c.Logical().Write(path, data)
+		if err != nil {
+			return err
+		}
+		csr = secret.Data["csr"].(string)
+	}
+
+	{
+		pem, err := pki.Sign(ca, caKey, csr)
+		if err != nil {
+			return err
+		}
+		cert = string(pem)
+	}
+
+	{
+		path := fmt.Sprintf("%s/intermediate/set-signed", PKI_PATH)
+		data := map[string]interface{}{
+			"certificate": cert,
+		}
+		_, err := c.Logical().Write(path, data)
+		if err != nil {
+			return err
+		}
+	}
+
+	{
+		path := fmt.Sprintf("%s/config/urls", PKI_PATH)
+		data := map[string]interface{}{
+			"crl_distribution_points": fmt.Sprintf("%s/v1/pki/crl", addr),
+			"issuing_certificates":    fmt.Sprintf("%s/v1/pki/ca", addr),
+		}
+		_, err := c.Logical().Write(path, data)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

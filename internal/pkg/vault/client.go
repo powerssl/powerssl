@@ -16,7 +16,7 @@ func New(address, token, caFile string) (*Client, error) {
 	if caFile != "" {
 		conf.ConfigureTLS(&api.TLSConfig{CAPath: caFile})
 	}
-	conf.ConfigureTLS(&api.TLSConfig{TLSServerName: "vault"})
+	// conf.ConfigureTLS(&api.TLSConfig{TLSServerName: "vault"})
 
 	c, err := api.NewClient(conf)
 	if err != nil {
@@ -31,6 +31,10 @@ func New(address, token, caFile string) (*Client, error) {
 	}
 
 	return &Client{c: c}, nil
+}
+
+func (c *Client) Auth() *api.Auth {
+	return c.c.Auth()
 }
 
 func (c *Client) Logical() *api.Logical {
