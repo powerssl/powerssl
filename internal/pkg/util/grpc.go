@@ -2,6 +2,9 @@ package util
 
 import (
 	"context"
+	"crypto"
+	"crypto/rand"
+	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
@@ -23,6 +26,12 @@ import (
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
+
+type keyGeneratorFunc func() (crypto.PrivateKey, error)
+
+func (kgf keyGeneratorFunc) Generate() (crypto.PrivateKey, error) {
+	return kgf()
+}
 
 type Service interface {
 	RegisterGRPCServer(baseServer *grpc.Server)
@@ -99,6 +108,11 @@ func ServeGRPC(ctx context.Context, addr, certFile, keyFile, caFile, commonName,
 					},
 				},
 				RenewBefore: time.Hour,
+				CertConfig: &certify.CertConfig{
+					KeyGenerator: keyGeneratorFunc(func() (crypto.PrivateKey, error) {
+						return rsa.GenerateKey(rand.Reader, 2048)
+					}),
+				},
 			}
 			getCertificate := func(hello *tls.ClientHelloInfo) (cert *tls.Certificate, err error) {
 				// TODO: ???
