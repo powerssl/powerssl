@@ -55,6 +55,8 @@ $ go run powerssl.io/tools/dev-runner
 ```
 
 Visit [localhost:8080](http://localhost:8080) in your browser.
+Perform a login on the command line.
+Afterwards execute `powerctl login --ca-file $(pwd)/local/certs/ca.pem` from the workspace dir.
 
 ### Run locally with docker compose
 
