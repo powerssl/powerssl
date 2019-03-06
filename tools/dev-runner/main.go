@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -14,31 +15,25 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"powerssl.io/internal/pkg/util"
+	"powerssl.io/tools/dev-runner/internal"
 )
 
 var components = map[string]string{
-	"auth":      "serve --config configs/auth/config.yaml",
-	"apiserver": "serve --config configs/api/config.yaml",
-	//"controller": "serve --config configs/controller/config.yaml",
-	//"signer":     "serve --config configs/signer/config.yaml",
-	"webapp": "serve --config configs/webapp/config.yaml",
+	"auth":       "serve --config configs/auth/config.yaml",
+	"apiserver":  "serve --config configs/api/config.yaml",
+	"controller": "serve --config configs/controller/config.yaml",
+	"signer":     "serve --config configs/signer/config.yaml",
+	"webapp":     "serve --config configs/webapp/config.yaml",
 }
 
 func main() {
-	logger := util.NewLogger(os.Stdout)
-
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
+		logger := util.NewLogger(ioutil.Discard)
 		return util.InterruptHandler(ctx, logger)
 	})
 
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		logger.Log("err", err)
-	}
-	defer watcher.Close()
-
-	of := NewOutlet()
+	of := internal.NewOutlet()
 
 	{
 		var padding int = 10 // len(dev-runner)
@@ -50,20 +45,26 @@ func main() {
 		of.Padding = padding
 	}
 
-	g.Go(func() error {
-		return runComponent(ctx, watcher, of, "vault", "vault", "server -config configs/vault/config.hcl", 0)
-	})
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		of.ErrorOutput(fmt.Sprintf("watcher error: %s", err))
+	}
+	defer watcher.Close()
+
+	go func() {
+		runComponent(ctx, watcher, of, "vault", "vault", "server -config configs/vault/config.hcl", 0)
+	}()
 
 	var i int = 1 // skip vault
 	for c, a := range components {
 		component, arg, idx := c, a, i
 		bin := filepath.Join("bin", fmt.Sprintf("powerssl-%s", component))
-		g.Go(func() error {
+		go func() {
 			if err := watcher.Add(bin); err != nil {
-				return err
+				of.ErrorOutput(fmt.Sprintf("watcher error: %s", err))
 			}
-			return runComponent(ctx, watcher, of, component, bin, arg, idx)
-		})
+			runComponent(ctx, watcher, of, component, bin, arg, idx)
+		}()
 		i++
 	}
 
@@ -71,21 +72,21 @@ func main() {
 		switch err.(type) {
 		case util.InterruptError:
 		default:
-			logger.Log("err", err)
+			of.ErrorOutput(fmt.Sprintf("error: %s", err))
 		}
 	}
 }
 
-func runComponent(ctx context.Context, watcher *fsnotify.Watcher, of *Outlet, component, bin, arg string, idx int) error {
+func runComponent(ctx context.Context, watcher *fsnotify.Watcher, of *internal.Outlet, component, bin, arg string, idx int) {
 	cmd := exec.Command(bin, strings.Fields(arg)...)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return err
+		of.ErrorOutput(fmt.Sprintf("error: %s", err))
 	}
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		return err
+		of.ErrorOutput(fmt.Sprintf("error: %s", err))
 	}
 
 	pipeWait := new(sync.WaitGroup)
@@ -97,8 +98,7 @@ func runComponent(ctx context.Context, watcher *fsnotify.Watcher, of *Outlet, co
 
 	finished := make(chan struct{})
 	if err := cmd.Start(); err != nil {
-		of.SystemOutput(fmt.Sprintf("Failed to start %s: %s", component, err))
-		return err
+		of.ErrorOutput(fmt.Sprintf("Failed to start %s: %s", component, err))
 	}
 
 	go func() {
@@ -138,6 +138,4 @@ func runComponent(ctx context.Context, watcher *fsnotify.Watcher, of *Outlet, co
 			}
 		}
 	}()
-
-	return err
 }
