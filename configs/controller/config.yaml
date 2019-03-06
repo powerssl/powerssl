@@ -3,7 +3,7 @@ metrics-addr: localhost:9093
 apiserver:
   addr: localhost:8082
   auth-token: http://localhost:8081/service
-ca-file: examples/certs/ca.pem
+ca-file: local/certs/ca.pem
 common-name: localhost
 jwks-url: http://localhost:8081/.well-known/jwks.json
 vault:

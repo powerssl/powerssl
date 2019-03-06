@@ -24,7 +24,7 @@ services:
       - "9090"
     restart: always
     volumes:
-      - "./examples/certs/ca.pem:/etc/powerssl/ca.pem:ro"
+      - "./local/certs/ca.pem:/etc/powerssl/ca.pem:ro"
   auth:
     environment:
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
@@ -39,7 +39,7 @@ services:
       - "9090"
     restart: always
     volumes:
-      - "./examples/certs/localhost-key.pem:/etc/powerssl/auth/cert-key.pem:ro"
+      - "./local/certs/localhost-key.pem:/etc/powerssl/auth/cert-key.pem:ro"
   controller:
     depends_on:
       - vault
@@ -61,7 +61,7 @@ services:
       - "9090"
     restart: always
     volumes:
-      - "./examples/certs/ca.pem:/etc/powerssl/ca.pem:ro"
+      - "./local/certs/ca.pem:/etc/powerssl/ca.pem:ro"
   integration-acme:
     environment:
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
@@ -75,7 +75,7 @@ services:
       - "9090"
     restart: always
     volumes:
-      - "./examples/certs/ca.pem:/etc/powerssl/ca.pem:ro"
+      - "./local/certs/ca.pem:/etc/powerssl/ca.pem:ro"
   signer:
     depends_on:
       - vault
@@ -94,7 +94,7 @@ services:
       - "9090"
     restart: always
     volumes:
-      - "./examples/certs/ca.pem:/etc/powerssl/ca.pem:ro"
+      - "./local/certs/ca.pem:/etc/powerssl/ca.pem:ro"
   webapp:
     environment:
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
@@ -108,7 +108,7 @@ services:
       - "9090"
     restart: always
     volumes:
-      - "./examples/certs/ca.pem:/etc/powerssl/ca.pem:ro"
+      - "./local/certs/ca.pem:/etc/powerssl/ca.pem:ro"
   postgres:
     image: postgres:11.1-alpine
     restart: always
@@ -125,8 +125,8 @@ services:
       - "8200:8200"
     restart: always
     volumes:
-      - ./examples/certs/vault-key.pem:/etc/certs/vault.key:ro
-      - ./examples/certs/vault.pem:/etc/certs/vault.crt:ro
+      - ./local/certs/vault-key.pem:/etc/certs/vault.key:ro
+      - ./local/certs/vault.pem:/etc/certs/vault.crt:ro
       - vault-data:/vault/file
   jaeger:
     environment:

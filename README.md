@@ -18,6 +18,8 @@ If you wish to work on Vault itself or any of its built-in systems, you'll
 first need [Go](https://www.golang.org) installed on your machine (version
 1.12+ is *required*).
 
+You can then download any required build tools by bootstrapping your environment:
+
 ```sh
 $ make bootstrap
 ...
@@ -41,12 +43,17 @@ $ make images
 ### Prepare for running locally
 
 ```sh
-$ mkdir /etc/powerssl
-$ cd /etc/powerssl
-$ powerutil ca init
-$ mkdir vault
-$ cd vault
-$ powerutil ca gen --ca /etc/powerssl/ca.pem --ca-key /etc/powerssl/ca-key.pem --hostname localhost
+make prepare-local-dev
+...
+```
+
+### Run locally without docker
+
+```sh
+$ go run powerssl.io/tools/dev-runner
+...
+$ powerutil vault --ca local/certs/ca.pem --ca-key local/certs/ca-key.pem
+...
 ```
 
 ### Run locally with docker compose
@@ -54,12 +61,6 @@ $ powerutil ca gen --ca /etc/powerssl/ca.pem --ca-key /etc/powerssl/ca-key.pem -
 ```sh
 $ docker-compose -d -f deployments/docker-compose.yml --project-directory . up
 ...
-$ deployments/init-vault.sh
+$ powerutil vault --ca local/certs/ca.pem --ca-key local/certs/ca-key.pem
 ...
-```
-
-### Run locally without docker
-
-```sh
-$ forego start -f deployments/Procfile
 ```

@@ -48,6 +48,10 @@ bootstrap:
 	@echo "On MacOS this can be achieved this way:"
 	@echo "$ brew install protobuf protoc-gen-go clang-format"
 
+.PHONY: prepare-local-dev
+prepare-local-dev:
+	$(MAKE) -C local/certs
+
 bin/protoc-gen-gogo:
 	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)/protoc-gen-gogo
 

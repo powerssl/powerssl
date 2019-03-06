@@ -6,8 +6,8 @@ ui = "true"
 
 listener "tcp" {
   address = "localhost:8200"
-  tls_cert_file = "examples/certs/localhost.pem"
-  tls_key_file = "examples/certs/localhost-key.pem"
+  tls_cert_file = "local/certs/localhost.pem"
+  tls_key_file = "local/certs/localhost-key.pem"
 }
 
 storage "file" {
