@@ -1,4 +1,7 @@
-addr: localhost:8082
-tls:
-  cert-file: /etc/powerssl/signer/cert.pem
-  private-key-file: /etc/powerssl/signer/cert-key.pem
+addr: localhost:8084
+metrics-addr: localhost:9094
+ca-file: examples/certs/ca.pem
+common-name: localhost
+vault:
+  url: https://localhost:8200
+  token: powerssl-signer

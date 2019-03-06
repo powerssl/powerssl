@@ -1,4 +1,5 @@
-addr: localhost:8080
-tls:
-  cert-file: /etc/powerssl/auth/cert.pem
-  private-key-file: /etc/powerssl/auth/cert-key.pem
+addr: localhost:8081
+metrics-addr: localhost:9091
+jwt:
+  private-key-file: examples/certs/ca-key.pem
+webapp-uri: http://localhost:8080

@@ -1,7 +1,11 @@
-addr: localhost:8081
+addr: localhost:8083
+metrics-addr: localhost:9093
 apiserver:
-  addr: localhost:8080
-  ca-file: /etc/powerssl/ca.pem
-tls:
-  cert-file: /etc/powerssl/controller/cert.pem
-  private-key-file: /etc/powerssl/controller/cert-key.pem
+  addr: localhost:8082
+  auth-token: http://localhost:8081/service
+ca-file: examples/certs/ca.pem
+common-name: localhost
+jwks-url: http://localhost:8081/.well-known/jwks.json
+vault:
+  url: https://localhost:8200
+  token: powerssl-controller

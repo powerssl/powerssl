@@ -1,13 +1,17 @@
-addr: localhost:8080
+addr: localhost:8082
+metrics-addr: localhost:9092
 controller:
-  addr: localhost:8081
-  ca-file: /etc/powerssl/ca.pem
+  addr: localhost:8083
+  auth-token: http://localhost:8081/service
+ca-file: examples/certs/ca.pem
+common-name: localhost
 db:
   dialect: sqlite3
   connection: /tmp/powerssl.sqlite3
   # dialect: postgres
   # https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
   # connection: user=root dbname=powerssl sslmode=disable
-tls:
-  cert-file: /etc/powerssl/api/cert.pem
-  private-key-file: /etc/powerssl/api/cert-key.pem
+jwks-url: http://localhost:8081/.well-known/jwks.json
+vault:
+  url: https://localhost:8200
+  token: powerssl-apiserver
