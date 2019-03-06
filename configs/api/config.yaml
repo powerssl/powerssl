@@ -7,7 +7,7 @@ ca-file: local/certs/ca.pem
 common-name: localhost
 db:
   dialect: sqlite3
-  connection: /tmp/powerssl.sqlite3
+  connection: local/powerssl.sqlite3
   # dialect: postgres
   # https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
   # connection: user=root dbname=powerssl sslmode=disable
