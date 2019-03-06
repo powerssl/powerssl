@@ -56,6 +56,8 @@ $ powerutil vault --ca local/certs/ca.pem --ca-key local/certs/ca-key.pem
 ...
 ```
 
+Visit [localhost:8080](http://localhost:8080) in your browser.
+
 ### Run locally with docker compose
 
 ```sh
@@ -64,3 +66,5 @@ $ docker-compose -d -f deployments/docker-compose.yml --project-directory . up
 $ powerutil vault --ca local/certs/ca.pem --ca-key local/certs/ca-key.pem
 ...
 ```
+
+Visit [localhost:8080](http://localhost:8080) in your browser.

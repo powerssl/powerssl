@@ -16,7 +16,7 @@ import (
 	"powerssl.io/internal/pkg/util"
 )
 
-func Run(httpAddr, metricsAddr, authURI string) {
+func Run(httpAddr, metricsAddr, authURI, apiAddr string) {
 	logger := util.NewLogger(os.Stdout)
 
 	g, ctx := errgroup.WithContext(context.Background())
@@ -31,7 +31,7 @@ func Run(httpAddr, metricsAddr, authURI string) {
 	}
 
 	g.Go(func() error {
-		return ServeHTTP(ctx, httpAddr, log.With(logger, "component", "http"), authURI)
+		return ServeHTTP(ctx, httpAddr, log.With(logger, "component", "http"), authURI, apiAddr)
 	})
 
 	if err := g.Wait(); err != nil {
@@ -43,14 +43,18 @@ func Run(httpAddr, metricsAddr, authURI string) {
 	}
 }
 
-func ServeHTTP(ctx context.Context, addr string, logger log.Logger, authURI string) error {
+func ServeHTTP(ctx context.Context, addr string, logger log.Logger, authURI, apiAddr string) error {
 	mux := http.NewServeMux()
 	tmpl, err := template.New("index", Asset).Parse("index.html")
 	if err != nil {
 		return err
 	}
+	data := map[string]interface{}{
+		"AuthURI": htmltemplate.URL(authURI),
+		"APIAddr": apiAddr,
+	}
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		if err := tmpl.Execute(w, map[string]interface{}{"AuthURI": htmltemplate.URL(authURI)}); err != nil {
+		if err := tmpl.Execute(w, data); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
