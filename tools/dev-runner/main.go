@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/ghodss/yaml"
 	"golang.org/x/sync/errgroup"
 
 	"powerssl.io/internal/pkg/util"
@@ -53,6 +54,33 @@ func main() {
 
 	go func() {
 		runComponent(ctx, watcher, of, "vault", "vault", "server -config configs/vault/config.hcl", 0)
+	}()
+
+	go func() {
+		time.Sleep(time.Second)
+		var command, args string
+		if _, err := os.Stat("local/vault/secret.yaml"); os.IsNotExist(err) {
+			command = "powerutil"
+			args = "vault --ca local/certs/ca.pem --ca-key local/certs/ca-key.pem"
+		} else {
+			d, err := ioutil.ReadFile("local/vault/secret.yaml")
+			if err != nil {
+				of.ErrorOutput(fmt.Sprintf("config error: %s", err))
+			}
+			var config map[string]interface{}
+			if err := yaml.Unmarshal(d, &config); err != nil {
+				of.ErrorOutput(fmt.Sprintf("config error: %s", err))
+			}
+
+			command = "vault"
+			args = fmt.Sprintf("operator unseal -address https://localhost:8200 -ca-cert local/certs/ca.pem %s", config["keys"].([]interface{})[0].(string))
+		}
+		out, err := exec.Command(command, strings.Fields(args)...).Output()
+		if err != nil {
+			of.ErrorOutput(fmt.Sprintf("error: %s", err))
+		}
+		of.SystemOutput(string(out))
+
 	}()
 
 	var i int = 1 // skip vault
