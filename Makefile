@@ -22,7 +22,6 @@ PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/timestamp.proto=github.com/g
 PROTOS := $(sort $(shell $(FIND_PROTO) -type f -name '*.proto' -print))
 
 EXTERNAL_TOOLS=\
-	github.com/ddollar/forego \
 	github.com/jteeuwen/go-bindata/... \
 	golang.org/x/tools/cmd/stringer
 
