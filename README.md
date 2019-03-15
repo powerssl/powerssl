@@ -50,7 +50,7 @@ make prepare-local-dev
 ### Run locally without docker
 
 ```sh
-$ go run powerssl.io/tools/dev-runner
+$ make run 
 ...
 ```
 

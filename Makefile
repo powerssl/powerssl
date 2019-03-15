@@ -52,6 +52,13 @@ bootstrap:
 prepare-local-dev:
 	$(MAKE) -C local/certs
 
+.PHONY: run
+run: bin/dev-runner
+	@bin/dev-runner
+
+bin/dev-runner:
+	go build -o bin/dev-runner powerssl.io/tools/dev-runner
+
 bin/protoc-gen-gogo:
 	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)/protoc-gen-gogo
 
