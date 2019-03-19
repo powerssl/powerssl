@@ -1,6 +1,7 @@
 api_addr = "https://localhost:8200"
 cluster_addr = "https://localhost:8201"
 default_lease_ttl = "168h"
+disable_mlock = "true"
 max_lease_ttl = "720h"
 ui = "true"
 

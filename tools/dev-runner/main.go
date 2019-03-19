@@ -5,10 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
-	"path/filepath"
-	"strings"
-	"sync"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -18,14 +14,6 @@ import (
 	"powerssl.io/internal/pkg/util"
 	"powerssl.io/tools/dev-runner/internal"
 )
-
-var components = map[string]string{
-	"auth":       "serve --config configs/auth/config.yaml",
-	"apiserver":  "serve --config configs/api/config.yaml",
-	"controller": "serve --config configs/controller/config.yaml",
-	"signer":     "serve --config configs/signer/config.yaml",
-	"webapp":     "serve --config configs/webapp/config.yaml",
-}
 
 func main() {
 	g, ctx := errgroup.WithContext(context.Background())
@@ -38,8 +26,8 @@ func main() {
 
 	{
 		var padding int = 10 // len(dev-runner)
-		for c := range components {
-			if l := len(c); l > padding {
+		for _, c := range components {
+			if l := len(c.Name()); l > padding {
 				padding = l
 			}
 		}
@@ -53,11 +41,14 @@ func main() {
 	defer watcher.Close()
 
 	go func() {
-		runComponent(ctx, watcher, of, "vault", "vault", "server -config configs/vault/config.hcl", 0)
+		comp := component{
+			command: "vault",
+			args:    "server -config configs/vault/config.hcl",
+		}
+		runComponent(ctx, watcher, of, comp, 0)
 	}()
 
 	go func() {
-		time.Sleep(time.Second)
 		var command, args string
 		if _, err := os.Stat("local/vault/secret.yaml"); os.IsNotExist(err) {
 			command = "powerutil"
@@ -75,25 +66,36 @@ func main() {
 			command = "vault"
 			args = fmt.Sprintf("operator unseal -address https://localhost:8200 -ca-cert local/certs/ca.pem %s", config["keys"].([]interface{})[0].(string))
 		}
-		out, err := exec.Command(command, strings.Fields(args)...).Output()
-		if err != nil {
-			of.ErrorOutput(fmt.Sprintf("error: %s", err))
+		time.Sleep(time.Second)
+
+		comp := component{
+			command: command,
+			args:    args,
 		}
-		of.SystemOutput(string(out))
+		cmd, pipeWait := comp.Command(of, 0)
+
+		finished := make(chan struct{})
+		if err := cmd.Start(); err != nil {
+			of.ErrorOutput(fmt.Sprintf("Failed to start %s: %s", comp.command, err))
+		}
+
+		go func() {
+			defer close(finished)
+			pipeWait.Wait()
+			cmd.Wait()
+		}()
 
 	}()
 
-	var i int = 1 // skip vault
-	for c, a := range components {
-		component, arg, idx := c, a, i
-		bin := filepath.Join("bin", fmt.Sprintf("powerssl-%s", component))
+	for i, c := range components {
+		comp := c
+		idx := i + 1
 		go func() {
-			if err := watcher.Add(bin); err != nil {
+			if err := watcher.Add(comp.command); err != nil {
 				of.ErrorOutput(fmt.Sprintf("watcher error: %s", err))
 			}
-			runComponent(ctx, watcher, of, component, bin, arg, idx)
+			runComponent(ctx, watcher, of, comp, idx)
 		}()
-		i++
 	}
 
 	if err := g.Wait(); err != nil {
@@ -105,28 +107,14 @@ func main() {
 	}
 }
 
-func runComponent(ctx context.Context, watcher *fsnotify.Watcher, of *internal.Outlet, component, bin, arg string, idx int) {
-	cmd := exec.Command(bin, strings.Fields(arg)...)
+func runComponent(ctx context.Context, watcher *fsnotify.Watcher, of *internal.Outlet, comp component, idx int) {
+	cmd, pipeWait := comp.Command(of, idx)
 
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		of.ErrorOutput(fmt.Sprintf("error: %s", err))
-	}
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		of.ErrorOutput(fmt.Sprintf("error: %s", err))
-	}
-
-	pipeWait := new(sync.WaitGroup)
-	pipeWait.Add(2)
-	go of.LineReader(pipeWait, component, idx, stdout, false)
-	go of.LineReader(pipeWait, component, idx, stderr, true)
-
-	of.SystemOutput(fmt.Sprintf("starting %s", component))
+	of.SystemOutput(fmt.Sprintf("starting %s", comp.command))
 
 	finished := make(chan struct{})
 	if err := cmd.Start(); err != nil {
-		of.ErrorOutput(fmt.Sprintf("Failed to start %s: %s", component, err))
+		of.ErrorOutput(fmt.Sprintf("Failed to start %s: %s", comp.command, err))
 	}
 
 	go func() {
@@ -139,9 +127,9 @@ func runComponent(ctx context.Context, watcher *fsnotify.Watcher, of *internal.O
 		select {
 		case <-finished:
 			time.Sleep(time.Second)
-			runComponent(ctx, watcher, of, component, bin, arg, idx)
+			runComponent(ctx, watcher, of, comp, idx)
 		case <-ctx.Done():
-			of.SystemOutput(fmt.Sprintf("Killing %s", component))
+			of.SystemOutput(fmt.Sprintf("Killing %s", comp.command))
 			cmd.Process.Kill()
 		}
 	}()
@@ -153,7 +141,7 @@ func runComponent(ctx context.Context, watcher *fsnotify.Watcher, of *internal.O
 				if !ok {
 					return
 				}
-				if event.Name != bin {
+				if event.Name != comp.command {
 					break
 				}
 				cmd.Process.Signal(os.Interrupt)
