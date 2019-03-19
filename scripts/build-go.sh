@@ -11,7 +11,7 @@ EXTLDFLAGS='-static'
 EXT=''
 
 if [ -z "${GOOS:-}" ]; then
-  case "$OSTYPE" in
+  case "${OSTYPE:-}" in
     darwin*) EXTLDFLAGS='' ;;
   esac
 elif [ "${GOOS}" == 'windows' ]; then
