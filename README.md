@@ -1,6 +1,6 @@
 # PowerSSL
 
--	Website: https://www.powerssl.io
+- Website: https://www.powerssl.io
 
 <img width="300" alt="PowerSSL Logo" src="https://docs.powerssl.io/assets/images/powerssl.png">
 
@@ -30,6 +30,12 @@ This will put the PowerSSL binaries in the `bin` folder:
 
 ```sh
 $ make build
+...
+```
+
+To install all user tools 
+```sh
+$ make install
 ...
 ```
 
