@@ -19,6 +19,10 @@ stages:
     - build $COMPONENT
   only:
     - branches
+  retry:
+    max: 2
+    when:
+      - always
 
 build builder:
   <<: *build_template
