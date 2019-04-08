@@ -47,6 +47,12 @@ bootstrap:
 	@echo "On MacOS this can be achieved this way:"
 	@echo "$ brew install protobuf protoc-gen-go clang-format"
 
+.PHONY: clear-local-dev
+clear-local-dev:
+	rm -f local/certs/*.pem local/certs/*.csr
+	rm -f local/powerssl.sqlite3
+	rm -rf local/vault
+
 .PHONY: prepare-local-dev
 prepare-local-dev:
 	$(MAKE) -C local/certs
@@ -124,9 +130,9 @@ vet:
 
 .PHONY: clean
 clean:
-	go clean powerssl.io/cmd/powerctl powerssl.io/cmd/powerssl-agent powerssl.io/cmd/powerssl-apiserver powerssl.io/cmd/powerssl-auth powerssl.io/cmd/powerssl-controller powerssl.io/cmd/powerssl-integration-acme powerssl.io/cmd/powerssl-integration-cloudflare powerssl.io/cmd/powerssl-signer powerssl.io/cmd/powerssl-webapp powerssl.io/cmd/powerutil
+	go clean powerssl.io/cmd/powerctl powerssl.io/cmd/powerssl-agent powerssl.io/cmd/powerssl-apiserver powerssl.io/cmd/powerssl-auth powerssl.io/cmd/powerssl-controller powerssl.io/cmd/powerssl-integration-acme powerssl.io/cmd/powerssl-integration-cloudflare powerssl.io/cmd/powerssl-signer powerssl.io/cmd/powerssl-webapp powerssl.io/cmd/powerutil powerssl.io/tools/gendocs powerssl.io/tools/dev-runner
 	rm -f bin/.go_protobuf_sources
-	rm -f bin/powerctl bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerssl-webapp bin/powerutil
+	rm -f bin/powerctl bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerssl-webapp bin/powerutil bin/dev-runner
 
 .PHONY: protobuf
 protobuf: bin/protoc-gen-gogo
