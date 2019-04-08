@@ -182,9 +182,9 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"powerssl-apiserver.hcl": powersslApiserverHcl,
+	"powerssl-apiserver.hcl":  powersslApiserverHcl,
 	"powerssl-controller.hcl": powersslControllerHcl,
-	"powerssl-signer.hcl": powersslSignerHcl,
+	"powerssl-signer.hcl":     powersslSignerHcl,
 }
 
 // AssetDir returns the file names below a certain
@@ -226,10 +226,11 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
+
 var _bintree = &bintree{nil, map[string]*bintree{
-	"powerssl-apiserver.hcl": &bintree{powersslApiserverHcl, map[string]*bintree{}},
+	"powerssl-apiserver.hcl":  &bintree{powersslApiserverHcl, map[string]*bintree{}},
 	"powerssl-controller.hcl": &bintree{powersslControllerHcl, map[string]*bintree{}},
-	"powerssl-signer.hcl": &bintree{powersslSignerHcl, map[string]*bintree{}},
+	"powerssl-signer.hcl":     &bintree{powersslSignerHcl, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory
@@ -278,4 +279,3 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
-

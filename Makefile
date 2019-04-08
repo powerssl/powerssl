@@ -149,6 +149,7 @@ protobuf: bin/protoc-gen-gogo
 .PHONY: generate
 generate:
 	go generate $$(go list ./...)
+	$(MAKE) fmt
 
 .PHONY: images
 images: agent-image apiserver-image auth-image builder-image controller-image envoy-image integration-acme-image integration-cloudflare-image powerctl-image signer-image webapp-image powerutil-image
