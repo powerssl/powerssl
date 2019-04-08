@@ -84,7 +84,6 @@ func main() {
 			pipeWait.Wait()
 			cmd.Wait()
 		}()
-
 	}()
 
 	for i, c := range components {
