@@ -3,14 +3,19 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/ghodss/yaml"
 	"golang.org/x/sync/errgroup"
 
+	"powerssl.io/internal/pkg/component"
 	"powerssl.io/internal/pkg/util"
 	"powerssl.io/tools/dev-runner/internal"
 )
@@ -26,8 +31,8 @@ func main() {
 
 	{
 		var padding int = 10 // len(dev-runner)
-		for _, c := range components {
-			if l := len(c.Name()); l > padding {
+		for _, c := range component.Components {
+			if l := len(c.String()); l > padding {
 				padding = l
 			}
 		}
@@ -41,9 +46,9 @@ func main() {
 	defer watcher.Close()
 
 	go func() {
-		comp := component{
-			command: "vault",
-			args:    "server -config configs/vault/config.hcl",
+		comp := component.Component{
+			Command: "vault",
+			Args:    "server -config configs/vault/config.hcl",
 		}
 		runComponent(ctx, watcher, of, comp, 0)
 	}()
@@ -68,15 +73,15 @@ func main() {
 		}
 		time.Sleep(time.Second)
 
-		comp := component{
-			command: command,
-			args:    args,
+		comp := component.Component{
+			Command: command,
+			Args:    args,
 		}
-		cmd, pipeWait := comp.Command(of, 0)
+		cmd, pipeWait := makeCmd(comp, comp.String(), 0, of)
 
 		finished := make(chan struct{})
 		if err := cmd.Start(); err != nil {
-			of.ErrorOutput(fmt.Sprintf("Failed to start %s: %s", comp.command, err))
+			of.ErrorOutput(fmt.Sprintf("Failed to start %s: %s", comp.Command, err))
 		}
 
 		go func() {
@@ -86,11 +91,11 @@ func main() {
 		}()
 	}()
 
-	for i, c := range components {
+	for i, c := range component.Components {
 		comp := c
 		idx := i + 1
 		go func() {
-			if err := watcher.Add(comp.command); err != nil {
+			if err := watcher.Add(comp.Command); err != nil {
 				of.ErrorOutput(fmt.Sprintf("watcher error: %s", err))
 			}
 			runComponent(ctx, watcher, of, comp, idx)
@@ -106,14 +111,35 @@ func main() {
 	}
 }
 
-func runComponent(ctx context.Context, watcher *fsnotify.Watcher, of *internal.Outlet, comp component, idx int) {
-	cmd, pipeWait := comp.Command(of, idx)
+func makeCmd(comp component.Component, name string, idx int, of *internal.Outlet) (*exec.Cmd, *sync.WaitGroup) {
+	cmd := exec.Command(comp.Command, strings.Fields(comp.Args)...)
+	cmd.Env = append(os.Environ(), comp.Env.Environ()...)
 
-	of.SystemOutput(fmt.Sprintf("starting %s", comp.command))
+	mustPipe := func(pr io.ReadCloser, err error) io.ReadCloser {
+		if err != nil {
+			of.ErrorOutput(fmt.Sprintf("error: %s", err))
+		}
+		return pr
+	}
+
+	stdout := mustPipe(cmd.StdoutPipe())
+	stderr := mustPipe(cmd.StderrPipe())
+	pipeWait := new(sync.WaitGroup)
+	pipeWait.Add(2)
+	go of.LineReader(pipeWait, name, 0, stdout, false)
+	go of.LineReader(pipeWait, name, 0, stderr, true)
+
+	return cmd, pipeWait
+}
+
+func runComponent(ctx context.Context, watcher *fsnotify.Watcher, of *internal.Outlet, comp component.Component, idx int) {
+	cmd, pipeWait := makeCmd(comp, comp.String(), idx, of)
+
+	of.SystemOutput(fmt.Sprintf("starting %s", comp.Command))
 
 	finished := make(chan struct{})
 	if err := cmd.Start(); err != nil {
-		of.ErrorOutput(fmt.Sprintf("Failed to start %s: %s", comp.command, err))
+		of.ErrorOutput(fmt.Sprintf("Failed to start %s: %s", comp.Command, err))
 	}
 
 	go func() {
@@ -128,7 +154,7 @@ func runComponent(ctx context.Context, watcher *fsnotify.Watcher, of *internal.O
 			time.Sleep(time.Second)
 			runComponent(ctx, watcher, of, comp, idx)
 		case <-ctx.Done():
-			of.SystemOutput(fmt.Sprintf("Killing %s", comp.command))
+			of.SystemOutput(fmt.Sprintf("Killing %s", comp.Command))
 			cmd.Process.Kill()
 		}
 	}()
@@ -140,7 +166,7 @@ func runComponent(ctx context.Context, watcher *fsnotify.Watcher, of *internal.O
 				if !ok {
 					return
 				}
-				if event.Name != comp.command {
+				if event.Name != comp.Command {
 					break
 				}
 				cmd.Process.Signal(os.Interrupt)
