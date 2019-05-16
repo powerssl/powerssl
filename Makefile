@@ -1,10 +1,7 @@
 PROTOC := $(shell which protoc)
 
-BIN_PATH := $(abspath bin)
 PKG_PATH := $(abspath pkg)
 PROTO_PATH := $(abspath api/protobuf-spec)
-
-export PATH := $(BIN_PATH):$(PATH)
 
 FIND_RELEVANT := find $(PKG_PATH)
 FIND_PROTO := find $(PROTO_PATH)
@@ -22,6 +19,7 @@ PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/timestamp.proto=github.com/g
 PROTOS := $(sort $(shell $(FIND_PROTO) -type f -name '*.proto' -print))
 
 EXTERNAL_TOOLS=\
+	github.com/gogo/protobuf/protoc-gen-gogo \
 	github.com/jteeuwen/go-bindata/... \
 	golang.org/x/tools/cmd/stringer
 
@@ -34,18 +32,39 @@ EXTERNAL_TOOLS=\
 .DEFAULT_GOAL := all
 all: build
 
-# bootstrap the build by downloading additional tools
+bin/%: .ALWAYS_REBUILD
+	@$(MAKE) build-${*}
+
 .PHONY: bootstrap
 bootstrap:
 	@for tool in  $(EXTERNAL_TOOLS) ; do \
 		echo "Installing/Updating $$tool" ; \
 		GO111MODULE=off go get -u $$tool; \
 	done
-	@echo
-	@echo "Make sure you have installed Protocol Buffers - Protocol Compiler and Protobuf Go Runtime"
-	@echo
-	@echo "On MacOS this can be achieved this way:"
-	@echo "$ brew install protobuf protoc-gen-go clang-format"
+
+.PHONY: build
+build: build-dev-runner build-powerctl build-powerssl-agent build-powerssl-apiserver build-powerssl-auth build-powerssl-controller build-powerssl-integration-acme build-powerssl-integration-cloudflare build-powerssl-signer build-powerssl-webapp build-powerutil
+
+.PHONY: build-%
+build-%:
+	COMPONENT=${*} scripts/build-go.sh
+
+.PHONY: build-dev-runner
+build-dev-runner:
+	go build -o bin/dev-runner powerssl.io/tools/dev-runner
+
+.PHONY: clean
+clean: clean-dev-runner clean-powerctl clean-powerssl-agent clean-powerssl-apiserver clean-powerssl-auth clean-powerssl-controller clean-powerssl-integration-acme clean-powerssl-integration-cloudflare clean-powerssl-signer clean-powerssl-webapp clean-powerutil
+
+.PHONY: clean-%
+clean-%:
+	go clean powerssl.io/cmd/${*}
+	rm -f bin/${*}
+
+.PHONY: clean-dev-runner
+clean-dev-runner:
+	go clean powerssl.io/tools/dev-runner
+	rm -f bin/dev-runner
 
 .PHONY: clear-local-dev
 clear-local-dev:
@@ -53,89 +72,28 @@ clear-local-dev:
 	rm -f local/powerssl.sqlite3
 	rm -rf local/vault
 
-.PHONY: prepare-local-dev
-prepare-local-dev:
-	$(MAKE) -C local/certs
-
-.PHONY: run
-run: bin/dev-runner
-	@bin/dev-runner
-
-bin/dev-runner:
-	go build -o bin/dev-runner powerssl.io/tools/dev-runner
-
-bin/protoc-gen-gogo:
-	go build -o bin/protoc-gen-gogo $$(go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)/protoc-gen-gogo
-
-bin/powerssl-agent: .ALWAYS_REBUILD
-	COMPONENT=powerssl-agent scripts/build-go.sh
-
-bin/powerssl-apiserver: .ALWAYS_REBUILD
-	COMPONENT=powerssl-apiserver CGO_ENABLED=1 scripts/build-go.sh
-
-bin/powerssl-auth: .ALWAYS_REBUILD
-	COMPONENT=powerssl-auth scripts/build-go.sh
-
-bin/powerssl-controller: .ALWAYS_REBUILD
-	COMPONENT=powerssl-controller scripts/build-go.sh
-
-bin/powerssl-integration-acme: .ALWAYS_REBUILD
-	COMPONENT=powerssl-integration-acme scripts/build-go.sh
-
-bin/powerssl-integration-cloudflare: .ALWAYS_REBUILD
-	COMPONENT=powerssl-integration-cloudflare scripts/build-go.sh
-
-bin/powerssl-signer: .ALWAYS_REBUILD
-	COMPONENT=powerssl-signer scripts/build-go.sh
-
-bin/powerssl-webapp: .ALWAYS_REBUILD
-	COMPONENT=powerssl-webapp scripts/build-go.sh
-
-bin/powerctl: .ALWAYS_REBUILD
-	COMPONENT=powerctl scripts/build-go.sh
-
-bin/powerutil: .ALWAYS_REBUILD
-	COMPONENT=powerutil scripts/build-go.sh
-
-.PHONY: build
-build: bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerssl-webapp bin/powerctl bin/powerutil
-
-.PHONY: docs
-docs:
-	go run powerssl.io/tools/gendocs
-
-.PHONY: install-agent
-install-agent:
-	COMPONENT=powerssl-agent scripts/install.sh
-
-.PHONY: install-powerctl
-install-powerctl:
-	COMPONENT=powerctl scripts/install.sh
-
-.PHONY: install-powerutil
-install-powerutil:
-	COMPONENT=powerutil scripts/install.sh
-
-.PHONY: install
-install: install-agent install-powerctl install-powerutil
-
 .PHONY: fmt
 fmt:
 	go fmt $$(go list ./...)
 	clang-format -i --style=Google $(PROTOS)
 
-.PHONY: vet
-vet:
-	go vet $$(go list ./...)
+.PHONY: generate
+generate:
+	go generate $$(go list ./...)
+	@$(MAKE) fmt
+	@if [ "${SKIP_DOCS}" == "" ]; then \
+		$(MAKE) generate-docs; \
+	fi
+	@if [ "${SKIP_PROTOBUF}" == "" ]; then \
+		$(MAKE) generate-protobuf; \
+	fi
 
-.PHONY: clean
-clean:
-	go clean powerssl.io/cmd/powerctl powerssl.io/cmd/powerssl-agent powerssl.io/cmd/powerssl-apiserver powerssl.io/cmd/powerssl-auth powerssl.io/cmd/powerssl-controller powerssl.io/cmd/powerssl-integration-acme powerssl.io/cmd/powerssl-integration-cloudflare powerssl.io/cmd/powerssl-signer powerssl.io/cmd/powerssl-webapp powerssl.io/cmd/powerutil powerssl.io/tools/gendocs powerssl.io/tools/dev-runner
-	rm -f bin/.go_protobuf_sources
-	rm -f bin/powerctl bin/powerssl-agent bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-integration-acme bin/powerssl-integration-cloudflare bin/powerssl-signer bin/powerssl-webapp bin/powerutil bin/dev-runner
+.PHONY: generate-docs
+generate-docs:
+	go run powerssl.io/tools/gendocs
 
-.PHONY: protobuf
-protobuf: bin/protoc-gen-gogo
+.PHONY: generate-protobuf
+generate-protobuf:
 	$(FIND_RELEVANT) -type f -name '*.pb.go' -exec rm {} +
 	@rm -f powerssl.io && ln -s . powerssl.io
 	set -e; for dir in $(sort $(dir $(PROTOS))); do \
@@ -146,58 +104,28 @@ protobuf: bin/protoc-gen-gogo
 	done
 	@rm -f powerssl.io
 
-.PHONY: generate
-generate:
-	go generate $$(go list ./...)
-	$(MAKE) fmt
+.PHONY: image-%
+image-%:
+	COMPONENT=${*} scripts/build-image.sh
 
 .PHONY: images
-images: agent-image apiserver-image auth-image builder-image controller-image envoy-image integration-acme-image integration-cloudflare-image powerctl-image signer-image webapp-image powerutil-image
+images: image-builder image-agent image-apiserver image-auth image-controller image-envoy image-integration-acme image-integration-cloudflare image-powerctl image-signer image-webapp image-powerutil
 
-.PHONY: agent-image
-agent-image:
-	COMPONENT=agent scripts/build-image.sh
+.PHONY: install
+install: install-powerctl install-powerssl-agent install-powerutil
 
-.PHONY: apiserver-image
-apiserver-image:
-	COMPONENT=apiserver scripts/build-image.sh
+.PHONY: install-%
+install-%:
+	COMPONENT=${*} scripts/install.sh
 
-.PHONY: auth-image
-auth-image:
-	COMPONENT=auth scripts/build-image.sh
+.PHONY: prepare-local-dev
+prepare-local-dev:
+	$(MAKE) -C local/certs
 
-.PHONY: builder-image
-builder-image:
-	COMPONENT=builder scripts/build-image.sh
+.PHONY: run
+run: bin/dev-runner
+	@bin/dev-runner
 
-.PHONY: controller-image
-controller-image:
-	COMPONENT=controller scripts/build-image.sh
-
-.PHONY: envoy-image
-envoy-image:
-	COMPONENT=envoy scripts/build-image.sh
-
-.PHONY: integration-acme-image
-integration-acme-image:
-	COMPONENT=integration-acme scripts/build-image.sh
-
-.PHONY: integration-cloudflare-image
-integration-cloudflare-image:
-	COMPONENT=integration-cloudflare scripts/build-image.sh
-
-.PHONY: powerctl-image
-powerctl-image:
-	COMPONENT=powerctl scripts/build-image.sh
-
-.PHONY: powerutil-image
-powerutil-image:
-	COMPONENT=powerutil scripts/build-image.sh
-
-.PHONY: signer-image
-signer-image:
-	COMPONENT=signer scripts/build-image.sh
-
-.PHONY: webapp-image
-webapp-image:
-	COMPONENT=webapp scripts/build-image.sh
+.PHONY: vet
+vet:
+	go vet $$(go list ./...)
