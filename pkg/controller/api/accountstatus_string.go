@@ -4,6 +4,15 @@ package api
 
 import "strconv"
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[AccountStatusValid-1]
+	_ = x[AccountStatusDeactivated-2]
+	_ = x[AccountStatusRevoked-3]
+}
+
 const _AccountStatus_name = "ValidDeactivatedRevoked"
 
 var _AccountStatus_index = [...]uint8{0, 5, 16, 23}

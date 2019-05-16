@@ -27,8 +27,9 @@ const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
 // A CertificateIssue ...
 type CertificateIssue struct {
 	// The resource name of the certificate issue.
-	// CertificateIssue names have the form `certificates/{certificate_id}/issues/{issue_id}`.
-	// The name is ignored when creating a certificate issue.
+	// CertificateIssue names have the form
+	// `certificates/{certificate_id}/issues/{issue_id}`. The name is ignored when
+	// creating a certificate issue.
 	Name                 string            `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	CreateTime           *types.Timestamp  `protobuf:"bytes,2,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
 	UpdateTime           *types.Timestamp  `protobuf:"bytes,3,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
@@ -519,11 +520,11 @@ type CertificateIssueServiceClient interface {
 	Delete(ctx context.Context, in *DeleteCertificateIssueRequest, opts ...grpc.CallOption) (*types.Empty, error)
 	// Gets a certificate. Returns NOT_FOUND if the certificate does not exist.
 	Get(ctx context.Context, in *GetCertificateIssueRequest, opts ...grpc.CallOption) (*CertificateIssue, error)
-	// Lists certificates. The order is unspecified but deterministic. Newly created
-	// certificates will not necessarily be added to the end of this list.
+	// Lists certificates. The order is unspecified but deterministic. Newly
+	// created certificates will not necessarily be added to the end of this list.
 	List(ctx context.Context, in *ListCertificateIssuesRequest, opts ...grpc.CallOption) (*ListCertificateIssuesResponse, error)
-	// Updates a certificate. Returns INVALID_ARGUMENT if the name of the certificate
-	// is non-empty and does equal the previous name.
+	// Updates a certificate. Returns INVALID_ARGUMENT if the name of the
+	// certificate is non-empty and does equal the previous name.
 	Update(ctx context.Context, in *UpdateCertificateIssueRequest, opts ...grpc.CallOption) (*CertificateIssue, error)
 }
 
@@ -588,11 +589,11 @@ type CertificateIssueServiceServer interface {
 	Delete(context.Context, *DeleteCertificateIssueRequest) (*types.Empty, error)
 	// Gets a certificate. Returns NOT_FOUND if the certificate does not exist.
 	Get(context.Context, *GetCertificateIssueRequest) (*CertificateIssue, error)
-	// Lists certificates. The order is unspecified but deterministic. Newly created
-	// certificates will not necessarily be added to the end of this list.
+	// Lists certificates. The order is unspecified but deterministic. Newly
+	// created certificates will not necessarily be added to the end of this list.
 	List(context.Context, *ListCertificateIssuesRequest) (*ListCertificateIssuesResponse, error)
-	// Updates a certificate. Returns INVALID_ARGUMENT if the name of the certificate
-	// is non-empty and does equal the previous name.
+	// Updates a certificate. Returns INVALID_ARGUMENT if the name of the
+	// certificate is non-empty and does equal the previous name.
 	Update(context.Context, *UpdateCertificateIssueRequest) (*CertificateIssue, error)
 }
 

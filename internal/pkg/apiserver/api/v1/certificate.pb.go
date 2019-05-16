@@ -586,11 +586,11 @@ type CertificateServiceClient interface {
 	Delete(ctx context.Context, in *DeleteCertificateRequest, opts ...grpc.CallOption) (*types.Empty, error)
 	// Gets a certificate. Returns NOT_FOUND if the certificate does not exist.
 	Get(ctx context.Context, in *GetCertificateRequest, opts ...grpc.CallOption) (*Certificate, error)
-	// Lists certificates. The order is unspecified but deterministic. Newly created
-	// certificates will not necessarily be added to the end of this list.
+	// Lists certificates. The order is unspecified but deterministic. Newly
+	// created certificates will not necessarily be added to the end of this list.
 	List(ctx context.Context, in *ListCertificatesRequest, opts ...grpc.CallOption) (*ListCertificatesResponse, error)
-	// Updates a certificate. Returns INVALID_ARGUMENT if the name of the certificate
-	// is non-empty and does equal the previous name.
+	// Updates a certificate. Returns INVALID_ARGUMENT if the name of the
+	// certificate is non-empty and does equal the previous name.
 	Update(ctx context.Context, in *UpdateCertificateRequest, opts ...grpc.CallOption) (*Certificate, error)
 }
 
@@ -655,11 +655,11 @@ type CertificateServiceServer interface {
 	Delete(context.Context, *DeleteCertificateRequest) (*types.Empty, error)
 	// Gets a certificate. Returns NOT_FOUND if the certificate does not exist.
 	Get(context.Context, *GetCertificateRequest) (*Certificate, error)
-	// Lists certificates. The order is unspecified but deterministic. Newly created
-	// certificates will not necessarily be added to the end of this list.
+	// Lists certificates. The order is unspecified but deterministic. Newly
+	// created certificates will not necessarily be added to the end of this list.
 	List(context.Context, *ListCertificatesRequest) (*ListCertificatesResponse, error)
-	// Updates a certificate. Returns INVALID_ARGUMENT if the name of the certificate
-	// is non-empty and does equal the previous name.
+	// Updates a certificate. Returns INVALID_ARGUMENT if the name of the
+	// certificate is non-empty and does equal the previous name.
 	Update(context.Context, *UpdateCertificateRequest) (*Certificate, error)
 }
 
