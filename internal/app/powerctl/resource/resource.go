@@ -76,7 +76,7 @@ type Resource struct {
 
 func ResourcesFromFile(filename string) ([]*Resource, error) {
 	if filename == "" {
-		return nil, errors.New("Please specify filename")
+		return nil, errors.New("please specify filename")
 	}
 
 	var in []byte
@@ -119,7 +119,7 @@ func ResourcesFromFile(filename string) ([]*Resource, error) {
 				return nil, err
 			}
 		default:
-			return nil, errors.New("Unknown input format")
+			return nil, errors.New("unknown input format")
 		}
 	}
 

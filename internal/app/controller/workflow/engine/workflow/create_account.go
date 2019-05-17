@@ -28,9 +28,9 @@ func (w CreateAccount) Run(ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
-	if createAccountResult.Error != nil {
-		// panic(err)
-	}
+	// if createAccountResult.Error != nil {
+	// 	panic(err)
+	// }
 	acmeAccount := &apiserverapi.ACMEAccount{
 		AccountURL: createAccountResult.Account.URL,
 		// Contacts:             createAccountResult.Account.Contacts,

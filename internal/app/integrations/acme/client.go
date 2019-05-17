@@ -9,11 +9,11 @@ import (
 )
 
 func NewClient(ctx context.Context, directoryURL string) (*acme.Client, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "NewClient")
+	span, _ := opentracing.StartSpanFromContext(ctx, "NewClient")
 	defer span.Finish()
 	client, err := acme.NewClient(directoryURL)
 	if err != nil {
-		return nil, fmt.Errorf("Error connecting to acme directory: %v", err)
+		return nil, fmt.Errorf("error connecting to acme directory: %v", err)
 	}
 	return &client, nil
 }

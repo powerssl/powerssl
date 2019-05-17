@@ -39,9 +39,10 @@ type Service interface {
 }
 
 func NewClientConn(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool) (*grpc.ClientConn, error) {
-	opts := []grpc.DialOption{
-		grpc.WithTimeout(time.Second),
-	}
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Second)
+	defer cancel()
+
+	var opts []grpc.DialOption
 	if insecure {
 		opts = append(opts, grpc.WithInsecure())
 	} else {
@@ -56,7 +57,7 @@ func NewClientConn(addr, certFile, serverNameOverride string, insecure, insecure
 		}
 		opts = append(opts, grpc.WithTransportCredentials(creds))
 	}
-	return grpc.Dial(addr, opts...)
+	return grpc.DialContext(ctx, addr, opts...)
 }
 
 func ServeGRPC(ctx context.Context, addr, certFile, keyFile, caFile, commonName, vaultURL, vaultToken, vaultRole string, insecure bool, logger log.Logger, services []Service) error {
@@ -83,7 +84,7 @@ func ServeGRPC(ctx context.Context, addr, certFile, keyFile, caFile, commonName,
 		var creds credentials.TransportCredentials
 		if certFile != "" && keyFile != "" {
 			if creds, err = credentials.NewServerTLSFromFile(certFile, keyFile); err != nil {
-				return fmt.Errorf("Failed to load TLS credentials %v", err)
+				return fmt.Errorf("failed to load TLS credentials %v", err)
 			}
 		} else {
 			certPool := x509.NewCertPool()
@@ -159,7 +160,7 @@ func recoveryHandler(logger log.Logger) func(interface{}) error {
 	return func(err interface{}) error {
 		logger.Log("err", err)
 		debug.PrintStack()
-		return errors.New("Unknown error")
+		return errors.New("unknown error")
 
 	}
 }

@@ -46,7 +46,7 @@ func (c *Client) Sys() *api.Sys {
 }
 
 func (c *Client) logicalWrite(ctx context.Context, operation, path string, data map[string]interface{}) (*api.Secret, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "vault")
+	span, _ := opentracing.StartSpanFromContext(ctx, "vault")
 	defer span.Finish()
 	span.SetTag("operation", operation)
 

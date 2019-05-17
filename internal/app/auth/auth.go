@@ -82,11 +82,11 @@ func jwksEndpoint(signKeys ...*rsa.PrivateKey) (func(w http.ResponseWriter, req 
 func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKeyFile, webappURI string) error {
 	signBytes, err := ioutil.ReadFile(jwtPrivateKeyFile)
 	if err != nil {
-		return fmt.Errorf("Failed to load signing key %v", err)
+		return fmt.Errorf("failed to load signing key %v", err)
 	}
 	signKey, err := jwt.ParseRSAPrivateKeyFromPEM(signBytes)
 	if err != nil {
-		return fmt.Errorf("Failed to load signing key %v", err)
+		return fmt.Errorf("failed to load signing key %v", err)
 	}
 
 	mux := http.NewServeMux()

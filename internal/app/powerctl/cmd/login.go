@@ -21,11 +21,11 @@ func newCmdLogin() *cobra.Command {
 			}
 
 			if viper.GetString("addr") == "" {
-				return fmt.Errorf("Address must be set")
+				return fmt.Errorf("address must be set")
 			}
 
 			if viper.GetString("auth-token") == "" {
-				return fmt.Errorf("Auth token must be set")
+				return fmt.Errorf("auth token must be set")
 			}
 
 			location := viper.ConfigFileUsed()

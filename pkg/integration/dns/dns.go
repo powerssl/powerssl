@@ -2,6 +2,7 @@ package dns
 
 import (
 	"context"
+	"fmt"
 
 	"powerssl.io/pkg/controller/api"
 )
@@ -24,19 +25,34 @@ func New(client interface{}, handler Integration) *integration {
 	}
 }
 
-func (i *integration) dnsCreateRecord(ctx context.Context, activity *api.Activity) error {
+func (i *integration) HandleActivity(ctx context.Context, activity *api.Activity) error {
+	var err error
+	switch activity.Name {
+	case api.Activity_DNS_CREATE_RECORD:
+		err = i.createRecord(ctx, activity)
+	case api.Activity_DNS_DELETE_RECORD:
+		err = i.deleteRecord(ctx, activity)
+	case api.Activity_DNS_VERIFY_DOMAIN:
+		err = i.verifyDomain(ctx, activity)
+	default:
+		err = fmt.Errorf("activity %s not implemented", activity.Name)
+	}
+	return err
+}
+
+func (i *integration) createRecord(ctx context.Context, activity *api.Activity) error {
 	i.handler.CreateRecord(ctx, "domain", "recordType", "content")
 
 	return nil
 }
 
-func (i *integration) dnsDeleteRecord(ctx context.Context, activity *api.Activity) error {
+func (i *integration) deleteRecord(ctx context.Context, activity *api.Activity) error {
 	i.handler.DeleteRecord(ctx, "domain", "recordType")
 
 	return nil
 }
 
-func (i *integration) dnsVerifyDomain(ctx context.Context, activity *api.Activity) error {
+func (i *integration) verifyDomain(ctx context.Context, activity *api.Activity) error {
 	i.handler.VerifyDomain(ctx, "domain")
 
 	return nil

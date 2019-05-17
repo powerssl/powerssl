@@ -19,10 +19,10 @@ func NewGRPCClient() (*apiserverclient.GRPCClient, error) {
 	insecureSkipTLSVerify := viper.GetBool("insecure-skip-tls-verify")
 	serverNameOverride := viper.GetString("server-name-override")
 	if addr == "" {
-		return nil, errors.New("Provide addr")
+		return nil, errors.New("provide addr")
 	}
 	if !insecure && !insecureSkipTLSVerify && certFile == "" {
-		return nil, errors.New("Provide ca-file")
+		return nil, errors.New("provide ca-file")
 	}
 	logger := util.NewLogger(os.Stdout)
 	tracer, _, _ := tracing.NewNoopTracer("powerctl", logger)

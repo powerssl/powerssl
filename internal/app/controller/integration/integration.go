@@ -11,7 +11,7 @@ import (
 	apiv1 "powerssl.io/internal/pkg/controller/api/v1"
 )
 
-var errUnknown = errors.New("Unknown error")
+var errUnknown = errors.New("unknown error")
 
 type IntegrationKind string
 

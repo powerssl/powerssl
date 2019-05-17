@@ -79,6 +79,9 @@ func RunVault(addr, ca, caKey string) error {
 			"recoveryKeys": recoveryKeys,
 			"rootToken":    rootToken,
 		})
+		if err != nil {
+			return err
+		}
 		if err := ioutil.WriteFile("local/vault/secret.yaml", secret, 0644); err != nil {
 			return err
 		}
@@ -117,10 +120,8 @@ func RunVault(addr, ca, caKey string) error {
 }
 
 func vaultInit(c *vault.Client) ([]string, []string, string, error) {
-	var SecretShares int
-	SecretShares = 1
-	var SecretThreshold int
-	SecretThreshold = 1
+	var SecretShares int = 1
+	var SecretThreshold int = 1
 	var StoredShares int
 	var PGPKeys []string
 	var RecoveryShares int
@@ -170,7 +171,7 @@ func vaultUnseal(c *vault.Client, keys []string) error {
 		if err != nil {
 			return err
 		}
-		if sealStatus.Sealed == false {
+		if !sealStatus.Sealed {
 			break
 		}
 	}

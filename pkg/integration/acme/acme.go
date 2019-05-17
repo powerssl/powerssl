@@ -74,7 +74,7 @@ func (i *integration) HandleActivity(ctx context.Context, activity *api.Activity
 	case api.Activity_ACME_VALIDATE_CHALLENGE:
 		err = i.validateChallenge(ctx, activity)
 	default:
-		err = fmt.Errorf("Activity %s not implemented", activity.Name)
+		err = fmt.Errorf("activity %s not implemented", activity.Name)
 	}
 	return err
 }
