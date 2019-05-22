@@ -26,4 +26,8 @@ case $COMPONENT in
     ;;
 esac
 
-docker build -f "build/docker/${DIR}/${DOCKERFILE}" -t "${TAG}" --build-arg="${BUILD_ARG}" .
+if [ -z "${BUILD_ARG}" ]; then
+  docker build -f "build/docker/${DIR}/${DOCKERFILE}" -t "${TAG}" .
+else
+  docker build -f "build/docker/${DIR}/${DOCKERFILE}" -t "${TAG}" --build-arg="${BUILD_ARG}" .
+fi
