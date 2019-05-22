@@ -1,14 +1,7 @@
-PROTOC := $(shell which protoc)
-
-PKG_PATH := $(abspath pkg)
-PROTO_PATH := $(abspath api/protobuf-spec)
-
-FIND_RELEVANT := find $(PKG_PATH)
-FIND_PROTO := find $(PROTO_PATH)
-
-GOGO_GOOGLEAPIS_PATH := $(shell go mod download -json github.com/gogo/googleapis | grep '"Dir"' | cut -d '"' -f 4)
-GOGO_PROTOBUF_PATH := $(shell go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)
-PROTOBUF_PATH := $(GOGO_PROTOBUF_PATH)/protobuf
+EXTERNAL_TOOLS=\
+	github.com/gogo/protobuf/protoc-gen-gogo \
+	github.com/jteeuwen/go-bindata/... \
+	golang.org/x/tools/cmd/stringer
 
 PROTO_MAPPINGS :=
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/api/annotations.proto=github.com/gogo/googleapis/google/api,
@@ -16,18 +9,34 @@ PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/empty.proto=github.com/gogo/
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/field_mask.proto=github.com/gogo/protobuf/types,
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,
 
-PROTOS := $(sort $(shell $(FIND_PROTO) -type f -name '*.proto' -print))
-
-EXTERNAL_TOOLS=\
-	github.com/gogo/protobuf/protoc-gen-gogo \
-	github.com/jteeuwen/go-bindata/... \
-	golang.org/x/tools/cmd/stringer
-
-
 .DELETE_ON_ERROR:
 
 .ALWAYS_REBUILD:
 .PHONY: .ALWAYS_REBUILD
+
+define delete_files
+$(shell find $(1) -type f -name '$(2)' -exec rm {} +)
+endef
+
+define files
+$(sort $(shell find $(1) -type f -name '$(2)' -print))
+endef
+
+define go_mod_dir
+$(shell go mod download -json $(1) | grep \"Dir\" | cut -d \" -f 4)
+endef
+
+define proto_dirs
+$(sort $(dir $(call proto_files)))
+endef
+
+define proto_files
+$(call files,api/protobuf-spec,*.proto)
+endef
+
+define strip_powerssl
+$(shell echo ${*} | sed 's/powerssl-//')
+endef
 
 .DEFAULT_GOAL := all
 all: build
@@ -75,7 +84,7 @@ clear-local-dev:
 .PHONY: fmt
 fmt:
 	go fmt $$(go list ./...)
-	clang-format -i --style=Google $(PROTOS)
+	clang-format -i --style=Google $(call proto_files)
 
 .PHONY: generate
 generate:
@@ -94,11 +103,11 @@ generate-docs:
 
 .PHONY: generate-protobuf
 generate-protobuf:
-	$(FIND_RELEVANT) -type f -name '*.pb.go' -exec rm {} +
+	$(call delete_files,pkg,*.pb.go)
 	@rm -f powerssl.io && ln -s . powerssl.io
-	set -e; for dir in $(sort $(dir $(PROTOS))); do \
-		$(PROTOC) \
-			-I$(PROTO_PATH):$(GOGO_GOOGLEAPIS_PATH):$(GOGO_PROTOBUF_PATH):$(PROTOBUF_PATH) \
+	set -e; for dir in $(call proto_dirs); do \
+		protoc \
+			-Iapi/protobuf-spec:$(call go_mod_dir,github.com/gogo/googleapis):$(call go_mod_dir,github.com/gogo/protobuf):$(call go_mod_dir,github.com/gogo/protobuf)/protobuf \
 			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:. \
 			$$dir/*.proto; \
 	done
@@ -106,10 +115,10 @@ generate-protobuf:
 
 .PHONY: image-%
 image-%:
-	COMPONENT=${*} scripts/build-image.sh
+	COMPONENT=${*} TAG=powerssl/$(call strip_powerssl,${*}):latest scripts/build-image.sh
 
 .PHONY: images
-images: image-builder image-agent image-apiserver image-auth image-controller image-envoy image-integration-acme image-integration-cloudflare image-powerctl image-signer image-webapp image-powerutil
+images: image-envoy image-powerctl image-powerssl-agent image-powerssl-apiserver image-powerssl-auth image-powerssl-controller image-powerssl-integration-acme image-powerssl-integration-cloudflare image-powerssl-signer image-powerssl-webapp image-powerutil
 
 .PHONY: install
 install: install-powerctl install-powerssl-agent install-powerutil
@@ -121,6 +130,10 @@ install-%:
 .PHONY: prepare-local-dev
 prepare-local-dev:
 	$(MAKE) -C local/certs
+
+.PHONY: release-image-%
+release-image-%:
+	docker push powerssl/$(call strip_powerssl,${*}):latest
 
 .PHONY: run
 run: bin/dev-runner

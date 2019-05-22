@@ -9,4 +9,3 @@ ARG COMPONENT
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /workspace/bin/${COMPONENT} /usr/local/bin/${COMPONENT}
 ENTRYPOINT ["/usr/local/bin/${COMPONENT}"]
-CMD ["run"]

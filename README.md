@@ -6,6 +6,8 @@
 
 PowerSSL is a certificate management platform... more description goes here.
 
+[![CircleCI](https://circleci.com/gh/powerssl/powerssl.svg?style=svg&circle-token=572c8a8bf77274579537593224433d5de2a0bf09)](https://circleci.com/gh/powerssl/powerssl)
+
 Getting Started & Documentation
 -------------------------------
 
@@ -67,7 +69,7 @@ Afterwards execute `powerctl login --ca-file $(pwd)/local/certs/ca.pem` from the
 ### Run locally with docker compose
 
 ```sh
-$ docker-compose -d -f deployments/docker-compose.yml --project-directory . up
+$ docker-compose -f deployments/docker-compose.yml --project-directory . up -d
 ...
 ```
 

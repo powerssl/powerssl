@@ -1,0 +1,229 @@
+version: 2.1
+commands:
+  build_component:
+    description: "Build component"
+    parameters:
+      component:
+        type: string
+      image:
+        default: false
+        type: boolean
+    steps:
+      - checkout
+      - when:
+          condition: "<<parameters.image>>"
+          steps:
+            - attach_workspace:
+                at: .
+            - run: "make image-<<parameters.component>>"
+            - run: |
+                docker login -u $DOCKER_USER -p $DOCKER_PASS
+                make release-image-<<parameters.component>>
+      - unless:
+          condition: "<<parameters.image>>"
+          steps:
+            - restore_cache:
+                key: go-mod-{{ .Environment.CACHE_VERSION }}-{{ checksum "go.sum" }}
+                name: "Restoring go modules Cache"
+            - run: "make build-<<parameters.component>>"
+            - persist_to_workspace:
+                root: .
+                paths:
+                  - bin/*
+            - store_artifacts:
+                destination: bin
+                path: bin
+executors:
+  golang-executor:
+    docker:
+      - image: circleci/golang:1.12
+jobs:
+  build_powerctl:
+    executor: golang-executor
+    steps:
+      - build_component:
+          component: powerctl
+  build_powerctl_image:
+    machine: true
+    steps:
+      - build_component:
+          component: powerctl
+          image: true
+  build_powerssl_agent:
+    executor: golang-executor
+    steps:
+      - build_component:
+          component: powerssl-agent
+  build_powerssl_agent_image:
+    machine: true
+    steps:
+      - build_component:
+          component: powerssl-agent
+          image: true
+  build_powerssl_apiserver:
+    executor: golang-executor
+    steps:
+      - build_component:
+          component: powerssl-apiserver
+  build_powerssl_apiserver_image:
+    machine: true
+    steps:
+      - build_component:
+          component: powerssl-apiserver
+          image: true
+  build_powerssl_auth:
+    executor: golang-executor
+    steps:
+      - build_component:
+          component: powerssl-auth
+  build_powerssl_auth_image:
+    machine: true
+    steps:
+      - build_component:
+          component: powerssl-auth
+          image: true
+  build_powerssl_controller:
+    executor: golang-executor
+    steps:
+      - build_component:
+          component: powerssl-controller
+  build_powerssl_controller_image:
+    machine: true
+    steps:
+      - build_component:
+          component: powerssl-controller
+          image: true
+  build_powerssl_integration_acme:
+    executor: golang-executor
+    steps:
+      - build_component:
+          component: powerssl-integration-acme
+  build_powerssl_integration_acme_image:
+    machine: true
+    steps:
+      - build_component:
+          component: powerssl-integration-acme
+          image: true
+  build_powerssl_integration_cloudflare:
+    executor: golang-executor
+    steps:
+      - build_component:
+          component: powerssl-integration-cloudflare
+  build_powerssl_integration_cloudflare_image:
+    machine: true
+    steps:
+      - build_component:
+          component: powerssl-integration-cloudflare
+          image: true
+  build_powerssl_signer:
+    executor: golang-executor
+    steps:
+      - build_component:
+          component: powerssl-signer
+  build_powerssl_signer_image:
+    machine: true
+    steps:
+      - build_component:
+          component: powerssl-signer
+          image: true
+  build_powerssl_webapp:
+    executor: golang-executor
+    steps:
+      - build_component:
+          component: powerssl-webapp
+  build_powerssl_webapp_image:
+    machine: true
+    steps:
+      - build_component:
+          component: powerssl-webapp
+          image: true
+  build_powerutil:
+    executor: golang-executor
+    steps:
+      - build_component:
+          component: powerutil
+  build_powerutil_image:
+    machine: true
+    steps:
+      - build_component:
+          component: powerutil
+          image: true
+  download_dependencies:
+    executor: golang-executor
+    steps:
+      - checkout
+      - restore_cache:
+          key: go-mod-{{ .Environment.CACHE_VERSION }}-{{ checksum "go.sum" }}
+          name: "Restoring go modules Cache"
+      - run:
+          command: go mod download
+      - save_cache:
+          key: go-mod-{{ .Environment.CACHE_VERSION }}-{{ checksum "go.sum" }}
+          name: "Saving go modules Cache"
+          paths:
+            - /go/pkg/mod
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - download_dependencies
+      - build_powerctl:
+          requires:
+            - download_dependencies
+      - build_powerctl_image:
+          requires:
+            - build_powerctl
+      - build_powerssl_agent:
+          requires:
+            - download_dependencies
+      - build_powerssl_agent_image:
+          requires:
+            - build_powerssl_agent
+      - build_powerssl_apiserver:
+          requires:
+            - download_dependencies
+      - build_powerssl_apiserver_image:
+          requires:
+            - build_powerssl_apiserver
+      - build_powerssl_auth:
+          requires:
+            - download_dependencies
+      - build_powerssl_auth_image:
+          requires:
+            - build_powerssl_auth
+      - build_powerssl_controller:
+          requires:
+            - download_dependencies
+      - build_powerssl_controller_image:
+          requires:
+            - build_powerssl_controller
+      - build_powerssl_integration_acme:
+          requires:
+            - download_dependencies
+      - build_powerssl_integration_acme_image:
+          requires:
+            - build_powerssl_integration_acme
+      - build_powerssl_integration_cloudflare:
+          requires:
+            - download_dependencies
+      - build_powerssl_integration_cloudflare_image:
+          requires:
+            - build_powerssl_integration_cloudflare
+      - build_powerssl_signer:
+          requires:
+            - download_dependencies
+      - build_powerssl_signer_image:
+          requires:
+            - build_powerssl_signer
+      - build_powerssl_webapp:
+          requires:
+            - download_dependencies
+      - build_powerssl_webapp_image:
+          requires:
+            - build_powerssl_webapp
+      - build_powerutil:
+          requires:
+            - download_dependencies
+      - build_powerutil_image:
+          requires:
+            - build_powerutil
