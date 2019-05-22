@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package powerssl.controller.v1;
 
-option go_package = "powerssl.io/internal/pkg/controller/api/v1;api";
+option go_package = "powerssl.io/powerssl/internal/pkg/controller/api/v1;api";
 
 message Activity {
   enum Name {

@@ -6,14 +6,14 @@ import (
 	"github.com/jinzhu/gorm"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
-	"powerssl.io/internal/app/apiserver/acmeaccount"
-	"powerssl.io/internal/app/apiserver/acmeserver"
-	"powerssl.io/internal/app/apiserver/certificate"
-	"powerssl.io/internal/app/apiserver/user"
-	"powerssl.io/internal/pkg/auth"
-	"powerssl.io/internal/pkg/util"
-	"powerssl.io/internal/pkg/vault"
-	controllerclient "powerssl.io/pkg/controller/client"
+	"powerssl.io/powerssl/internal/app/apiserver/acmeaccount"
+	"powerssl.io/powerssl/internal/app/apiserver/acmeserver"
+	"powerssl.io/powerssl/internal/app/apiserver/certificate"
+	"powerssl.io/powerssl/internal/app/apiserver/user"
+	"powerssl.io/powerssl/internal/pkg/auth"
+	"powerssl.io/powerssl/internal/pkg/util"
+	"powerssl.io/powerssl/internal/pkg/vault"
+	controllerclient "powerssl.io/powerssl/pkg/controller/client"
 )
 
 func makeServices(db *gorm.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *controllerclient.GRPCClient, vaultClient *vault.Client, jwtPublicKeyFile string) ([]util.Service, error) {

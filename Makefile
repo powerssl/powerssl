@@ -60,19 +60,19 @@ build-%:
 
 .PHONY: build-dev-runner
 build-dev-runner:
-	go build -o bin/dev-runner powerssl.io/tools/dev-runner
+	go build -o bin/dev-runner powerssl.io/powerssl/tools/dev-runner
 
 .PHONY: clean
 clean: clean-dev-runner clean-powerctl clean-powerssl-agent clean-powerssl-apiserver clean-powerssl-auth clean-powerssl-controller clean-powerssl-integration-acme clean-powerssl-integration-cloudflare clean-powerssl-signer clean-powerssl-webapp clean-powerutil
 
 .PHONY: clean-%
 clean-%:
-	go clean powerssl.io/cmd/${*}
+	go clean powerssl.io/powerssl/cmd/${*}
 	rm -f bin/${*}
 
 .PHONY: clean-dev-runner
 clean-dev-runner:
-	go clean powerssl.io/tools/dev-runner
+	go clean powerssl.io/powerssl/tools/dev-runner
 	rm -f bin/dev-runner
 
 .PHONY: clear-local-dev
@@ -99,7 +99,7 @@ generate:
 
 .PHONY: generate-docs
 generate-docs:
-	go run powerssl.io/tools/gendocs
+	go run powerssl.io/powerssl/tools/gendocs
 
 .PHONY: generate-protobuf
 generate-protobuf:

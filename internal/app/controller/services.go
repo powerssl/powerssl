@@ -5,12 +5,12 @@ import (
 	"github.com/go-kit/kit/metrics"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
-	"powerssl.io/internal/app/controller/acme"
-	"powerssl.io/internal/app/controller/integration"
-	"powerssl.io/internal/app/controller/workflow"
-	"powerssl.io/internal/pkg/auth"
-	"powerssl.io/internal/pkg/util"
-	apiserverclient "powerssl.io/pkg/apiserver/client"
+	"powerssl.io/powerssl/internal/app/controller/acme"
+	"powerssl.io/powerssl/internal/app/controller/integration"
+	"powerssl.io/powerssl/internal/app/controller/workflow"
+	"powerssl.io/powerssl/internal/pkg/auth"
+	"powerssl.io/powerssl/internal/pkg/util"
+	apiserverclient "powerssl.io/powerssl/pkg/apiserver/client"
 )
 
 func makeServices(logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *apiserverclient.GRPCClient, jwtPublicKeyFile string) ([]util.Service, error) {

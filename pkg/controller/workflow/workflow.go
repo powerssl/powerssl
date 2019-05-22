@@ -1,9 +1,9 @@
-package workflow // import "powerssl.io/pkg/controller/workflow"
+package workflow // import "powerssl.io/powerssl/pkg/controller/workflow"
 
 import (
 	"context"
 
-	"powerssl.io/pkg/controller/api"
+	"powerssl.io/powerssl/pkg/controller/api"
 )
 
 type Service interface {

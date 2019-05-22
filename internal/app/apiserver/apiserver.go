@@ -14,11 +14,11 @@ import (
 	otgorm "github.com/smacker/opentracing-gorm"
 	"golang.org/x/sync/errgroup"
 
-	"powerssl.io/internal/pkg/auth"
-	"powerssl.io/internal/pkg/tracing"
-	"powerssl.io/internal/pkg/util"
-	"powerssl.io/internal/pkg/vault"
-	controllerclient "powerssl.io/pkg/controller/client"
+	"powerssl.io/powerssl/internal/pkg/auth"
+	"powerssl.io/powerssl/internal/pkg/tracing"
+	"powerssl.io/powerssl/internal/pkg/util"
+	"powerssl.io/powerssl/internal/pkg/vault"
+	controllerclient "powerssl.io/powerssl/pkg/controller/client"
 )
 
 const component = "powerssl-apiserver"

@@ -1,4 +1,4 @@
-package api // import "powerssl.io/pkg/controller/api"
+package api // import "powerssl.io/powerssl/pkg/controller/api"
 
 type Error struct {
 	Message string

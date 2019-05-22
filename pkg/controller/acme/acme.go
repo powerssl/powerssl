@@ -1,10 +1,10 @@
-package acme // import "powerssl.io/pkg/controller/acme"
+package acme // import "powerssl.io/powerssl/pkg/controller/acme"
 
 import (
 	"context"
 	"crypto/x509"
 
-	"powerssl.io/pkg/controller/api"
+	"powerssl.io/powerssl/pkg/controller/api"
 )
 
 type Service interface {

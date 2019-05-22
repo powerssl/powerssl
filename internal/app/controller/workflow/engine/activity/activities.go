@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"powerssl.io/pkg/controller/api"
+	"powerssl.io/powerssl/pkg/controller/api"
 )
 
 var Activities activities

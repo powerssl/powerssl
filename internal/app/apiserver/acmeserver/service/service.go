@@ -10,10 +10,10 @@ import (
 	otgorm "github.com/smacker/opentracing-gorm"
 	"google.golang.org/grpc/codes"
 
-	"powerssl.io/internal/app/apiserver/acmeserver/model"
-	"powerssl.io/pkg/apiserver/acmeserver"
-	"powerssl.io/pkg/apiserver/api"
-	controllerclient "powerssl.io/pkg/controller/client"
+	"powerssl.io/powerssl/internal/app/apiserver/acmeserver/model"
+	"powerssl.io/powerssl/pkg/apiserver/acmeserver"
+	"powerssl.io/powerssl/pkg/apiserver/api"
+	controllerclient "powerssl.io/powerssl/pkg/controller/client"
 )
 
 var ErrUnimplemented = status.Error(codes.Unimplemented, "Coming soon")

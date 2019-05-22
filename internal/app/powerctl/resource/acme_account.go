@@ -12,9 +12,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"powerssl.io/internal/app/powerctl"
-	"powerssl.io/pkg/apiserver/api"
-	apiserverclient "powerssl.io/pkg/apiserver/client"
+	"powerssl.io/powerssl/internal/app/powerctl"
+	"powerssl.io/powerssl/pkg/apiserver/api"
+	apiserverclient "powerssl.io/powerssl/pkg/apiserver/client"
 )
 
 type acmeAccount struct{}

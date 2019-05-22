@@ -11,16 +11,16 @@ import (
 	"github.com/spf13/cobra/doc"
 	"gopkg.in/yaml.v2"
 
-	agent "powerssl.io/internal/app/agent/cmd"
-	apiserver "powerssl.io/internal/app/apiserver/cmd"
-	auth "powerssl.io/internal/app/auth/cmd"
-	controller "powerssl.io/internal/app/controller/cmd"
-	acmeintegration "powerssl.io/internal/app/integrations/acme/cmd"
-	cloudflareintegration "powerssl.io/internal/app/integrations/cloudflare/cmd"
-	powerctl "powerssl.io/internal/app/powerctl/cmd"
-	powerutil "powerssl.io/internal/app/powerutil/cmd"
-	signer "powerssl.io/internal/app/signer/cmd"
-	web "powerssl.io/internal/app/web/cmd"
+	agent "powerssl.io/powerssl/internal/app/agent/cmd"
+	apiserver "powerssl.io/powerssl/internal/app/apiserver/cmd"
+	auth "powerssl.io/powerssl/internal/app/auth/cmd"
+	controller "powerssl.io/powerssl/internal/app/controller/cmd"
+	acmeintegration "powerssl.io/powerssl/internal/app/integrations/acme/cmd"
+	cloudflareintegration "powerssl.io/powerssl/internal/app/integrations/cloudflare/cmd"
+	powerctl "powerssl.io/powerssl/internal/app/powerctl/cmd"
+	powerutil "powerssl.io/powerssl/internal/app/powerutil/cmd"
+	signer "powerssl.io/powerssl/internal/app/signer/cmd"
+	web "powerssl.io/powerssl/internal/app/web/cmd"
 )
 
 func main() {

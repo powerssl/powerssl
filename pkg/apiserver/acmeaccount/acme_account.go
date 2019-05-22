@@ -1,9 +1,9 @@
-package acmeaccount // import "powerssl.io/pkg/apiserver/acmeaccount"
+package acmeaccount // import "powerssl.io/powerssl/pkg/apiserver/acmeaccount"
 
 import (
 	"context"
 
-	"powerssl.io/pkg/apiserver/api"
+	"powerssl.io/powerssl/pkg/apiserver/api"
 )
 
 type Service interface {

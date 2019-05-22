@@ -12,9 +12,9 @@ import (
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 
-	"powerssl.io/internal/app/apiserver/certificate/endpoint"
-	apiv1 "powerssl.io/internal/pkg/apiserver/api/v1"
-	"powerssl.io/pkg/apiserver/certificate"
+	"powerssl.io/powerssl/internal/app/apiserver/certificate/endpoint"
+	apiv1 "powerssl.io/powerssl/internal/pkg/apiserver/api/v1"
+	"powerssl.io/powerssl/pkg/apiserver/certificate"
 )
 
 const serviceName = "powerssl.apiserver.v1.CertificateService"

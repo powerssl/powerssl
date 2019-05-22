@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"powerssl.io/pkg/controller/api"
+	"powerssl.io/powerssl/pkg/controller/api"
 )
 
 type Integration interface {

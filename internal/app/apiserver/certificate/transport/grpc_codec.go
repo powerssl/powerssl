@@ -5,9 +5,9 @@ import (
 
 	"github.com/gogo/protobuf/types"
 
-	"powerssl.io/internal/app/apiserver/certificate/endpoint"
-	apiv1 "powerssl.io/internal/pkg/apiserver/api/v1"
-	"powerssl.io/pkg/apiserver/api"
+	"powerssl.io/powerssl/internal/app/apiserver/certificate/endpoint"
+	apiv1 "powerssl.io/powerssl/internal/pkg/apiserver/api/v1"
+	"powerssl.io/powerssl/pkg/apiserver/api"
 )
 
 func decodeGRPCCertificate(certificate *apiv1.Certificate) (*api.Certificate, error) {

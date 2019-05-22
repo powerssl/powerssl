@@ -5,8 +5,8 @@ import (
 	"crypto/x509"
 	"fmt"
 
-	"powerssl.io/pkg/controller/acme"
-	"powerssl.io/pkg/controller/api"
+	"powerssl.io/powerssl/pkg/controller/acme"
+	"powerssl.io/powerssl/pkg/controller/api"
 )
 
 type Integration interface {
