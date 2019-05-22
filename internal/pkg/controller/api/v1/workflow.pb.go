@@ -8,6 +8,8 @@ import (
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -526,6 +528,14 @@ func (c *workflowServiceClient) Create(ctx context.Context, in *CreateWorkflowRe
 // WorkflowServiceServer is the server API for WorkflowService service.
 type WorkflowServiceServer interface {
 	Create(context.Context, *CreateWorkflowRequest) (*Workflow, error)
+}
+
+// UnimplementedWorkflowServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedWorkflowServiceServer struct {
+}
+
+func (*UnimplementedWorkflowServiceServer) Create(ctx context.Context, req *CreateWorkflowRequest) (*Workflow, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
 
 func RegisterWorkflowServiceServer(s *grpc.Server, srv WorkflowServiceServer) {

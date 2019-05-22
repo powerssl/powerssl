@@ -18,6 +18,7 @@ import (
 	"github.com/jinzhu/inflection"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/viper"
+	goyaml "gopkg.in/yaml.v2"
 
 	apiserverclient "powerssl.io/pkg/apiserver/client"
 )
@@ -109,6 +110,22 @@ func ResourcesFromFile(filename string) ([]*Resource, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		fmt.Println("XXXXXXXXXXXXXXXXXXXX")
+
+		dec := goyaml.NewDecoder(strings.NewReader(string(in)))
+		for {
+			var value interface{}
+			err := dec.Decode(&value)
+			if err != nil {
+				if err == io.EOF {
+					break
+				}
+			}
+			fmt.Printf("%#v\n", value)
+		}
+
+		fmt.Println("XXXXXXXXXXXXXXXXXXXX")
 
 		switch filepath.Ext(filename) {
 		case ".json":

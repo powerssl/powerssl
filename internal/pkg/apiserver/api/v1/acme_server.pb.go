@@ -10,6 +10,8 @@ import (
 	proto "github.com/gogo/protobuf/proto"
 	types "github.com/gogo/protobuf/types"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -500,6 +502,26 @@ type ACMEServerServiceServer interface {
 	Get(context.Context, *GetACMEServerRequest) (*ACMEServer, error)
 	List(context.Context, *ListACMEServersRequest) (*ListACMEServersResponse, error)
 	Update(context.Context, *UpdateACMEServerRequest) (*ACMEServer, error)
+}
+
+// UnimplementedACMEServerServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedACMEServerServiceServer struct {
+}
+
+func (*UnimplementedACMEServerServiceServer) Create(ctx context.Context, req *CreateACMEServerRequest) (*ACMEServer, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
+func (*UnimplementedACMEServerServiceServer) Delete(ctx context.Context, req *DeleteACMEServerRequest) (*types.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (*UnimplementedACMEServerServiceServer) Get(ctx context.Context, req *GetACMEServerRequest) (*ACMEServer, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (*UnimplementedACMEServerServiceServer) List(ctx context.Context, req *ListACMEServersRequest) (*ListACMEServersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
+}
+func (*UnimplementedACMEServerServiceServer) Update(ctx context.Context, req *UpdateACMEServerRequest) (*ACMEServer, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 
 func RegisterACMEServerServiceServer(s *grpc.Server, srv ACMEServerServiceServer) {
