@@ -104,14 +104,16 @@ generate-docs:
 .PHONY: generate-protobuf
 generate-protobuf:
 	$(call delete_files,pkg,*.pb.go)
-	@rm -f powerssl.io && ln -s . powerssl.io
-	set -e; for dir in $(call proto_dirs); do \
+	$(eval $@_TMP := $(shell mktemp -d))
+	mkdir $($@_TMP)/powerssl.io
+	ln -s $(abspath .) $($@_TMP)/powerssl.io/powerssl
+	for dir in $(call proto_dirs); do \
 		protoc \
 			-Iapi/protobuf-spec:$(call go_mod_dir,github.com/gogo/googleapis):$(call go_mod_dir,github.com/gogo/protobuf):$(call go_mod_dir,github.com/gogo/protobuf)/protobuf \
-			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:. \
+			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$($@_TMP) \
 			$$dir/*.proto; \
 	done
-	@rm -f powerssl.io
+	rm -rf $($@_TMP)
 
 .PHONY: image-%
 image-%:
