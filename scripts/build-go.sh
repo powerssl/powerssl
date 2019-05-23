@@ -19,4 +19,4 @@ elif [ "${GOOS}" == 'windows' ]; then
 fi
 
 CGO_ENABLED="${CGO_ENABLED:-0}"
-go build ${FORCE_REBUILD_ARG} -tags netgo -ldflags "-w -extldflags \"${EXTLDFLAGS}\"" -o "bin/${COMPONENT}${EXT}" "powerssl.io/cmd/${COMPONENT}"
+go build ${FORCE_REBUILD_ARG} -tags netgo -ldflags "-w -extldflags \"${EXTLDFLAGS}\"" -o "bin/${COMPONENT}${EXT}" "powerssl.io/powerssl/cmd/${COMPONENT}"

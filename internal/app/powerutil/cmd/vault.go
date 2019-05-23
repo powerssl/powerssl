@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"powerssl.io/internal/app/powerutil"
+	"powerssl.io/powerssl/internal/app/powerutil"
 )
 
 func newCmdVault() *cobra.Command {

@@ -8,11 +8,11 @@ import (
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 
-	"powerssl.io/internal/app/apiserver/acmeserver/endpoint"
-	"powerssl.io/internal/app/apiserver/acmeserver/service"
-	"powerssl.io/internal/app/apiserver/acmeserver/transport"
-	apiv1 "powerssl.io/internal/pkg/apiserver/api/v1"
-	controllerclient "powerssl.io/pkg/controller/client"
+	"powerssl.io/powerssl/internal/app/apiserver/acmeserver/endpoint"
+	"powerssl.io/powerssl/internal/app/apiserver/acmeserver/service"
+	"powerssl.io/powerssl/internal/app/apiserver/acmeserver/transport"
+	apiv1 "powerssl.io/powerssl/internal/pkg/apiserver/api/v1"
+	controllerclient "powerssl.io/powerssl/pkg/controller/client"
 )
 
 type ACMEServer struct {

@@ -10,8 +10,8 @@ import (
 	"github.com/gogo/protobuf/types"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
-	"powerssl.io/internal/app/controller/acme/endpoint"
-	apiv1 "powerssl.io/internal/pkg/controller/api/v1"
+	"powerssl.io/powerssl/internal/app/controller/acme/endpoint"
+	apiv1 "powerssl.io/powerssl/internal/pkg/controller/api/v1"
 )
 
 type grpcServer struct {

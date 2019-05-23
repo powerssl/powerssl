@@ -13,7 +13,7 @@ import (
 	"github.com/go-kit/kit/log"
 	"golang.org/x/sync/errgroup"
 
-	"powerssl.io/internal/pkg/util"
+	"powerssl.io/powerssl/internal/pkg/util"
 )
 
 func Run(httpAddr, metricsAddr, authURI, apiAddr string) {

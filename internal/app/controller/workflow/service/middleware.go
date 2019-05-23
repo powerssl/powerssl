@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-kit/kit/log"
 
-	"powerssl.io/pkg/controller/api"
-	"powerssl.io/pkg/controller/workflow"
+	"powerssl.io/powerssl/pkg/controller/api"
+	"powerssl.io/powerssl/pkg/controller/workflow"
 )
 
 type Middleware func(workflow.Service) workflow.Service

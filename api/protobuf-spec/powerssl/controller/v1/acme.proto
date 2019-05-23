@@ -5,7 +5,7 @@ package powerssl.controller.v1;
 import "google/protobuf/empty.proto";
 import "powerssl/controller/v1/meta.proto";
 
-option go_package = "powerssl.io/internal/pkg/controller/api/v1;api";
+option go_package = "powerssl.io/powerssl/internal/pkg/controller/api/v1;api";
 
 service ACMEService {
   rpc GetCreateAccountRequest(Activity)

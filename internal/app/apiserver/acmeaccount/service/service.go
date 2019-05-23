@@ -12,12 +12,12 @@ import (
 	otgorm "github.com/smacker/opentracing-gorm"
 	"google.golang.org/grpc/codes"
 
-	"powerssl.io/internal/app/apiserver/acmeaccount/model"
-	"powerssl.io/internal/pkg/vault"
-	"powerssl.io/pkg/apiserver/acmeaccount"
-	"powerssl.io/pkg/apiserver/api"
-	controllerapi "powerssl.io/pkg/controller/api"
-	controllerclient "powerssl.io/pkg/controller/client"
+	"powerssl.io/powerssl/internal/app/apiserver/acmeaccount/model"
+	"powerssl.io/powerssl/internal/pkg/vault"
+	"powerssl.io/powerssl/pkg/apiserver/acmeaccount"
+	"powerssl.io/powerssl/pkg/apiserver/api"
+	controllerapi "powerssl.io/powerssl/pkg/controller/api"
+	controllerclient "powerssl.io/powerssl/pkg/controller/client"
 )
 
 func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient, vaultClient *vault.Client) acmeaccount.Service {

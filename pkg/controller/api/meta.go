@@ -1,4 +1,4 @@
-package api // import "powerssl.io/pkg/controller/api"
+package api // import "powerssl.io/powerssl/pkg/controller/api"
 
 import (
 	"github.com/google/uuid"

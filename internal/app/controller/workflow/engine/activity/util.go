@@ -1,6 +1,6 @@
 package activity
 
-import "powerssl.io/pkg/controller/api"
+import "powerssl.io/powerssl/pkg/controller/api"
 
 func GetRequest(activity *api.Activity) (interface{}, error) {
 	a, err := Activities.GetByAPIActivity(activity)

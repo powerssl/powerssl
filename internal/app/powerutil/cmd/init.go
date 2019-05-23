@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"powerssl.io/internal/pkg/pki"
+	"powerssl.io/powerssl/internal/pkg/pki"
 )
 
 func newCmdCAInit() *cobra.Command {

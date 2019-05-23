@@ -15,9 +15,9 @@ import (
 	"github.com/ghodss/yaml"
 	"golang.org/x/sync/errgroup"
 
-	"powerssl.io/internal/pkg/component"
-	"powerssl.io/internal/pkg/util"
-	"powerssl.io/tools/dev-runner/internal"
+	"powerssl.io/powerssl/internal/pkg/component"
+	"powerssl.io/powerssl/internal/pkg/util"
+	"powerssl.io/powerssl/tools/dev-runner/internal"
 )
 
 func main() {

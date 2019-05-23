@@ -3,9 +3,9 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"powerssl.io/internal/app/powerctl"
-	"powerssl.io/internal/app/powerctl/resource"
-	apiserverclient "powerssl.io/pkg/apiserver/client"
+	"powerssl.io/powerssl/internal/app/powerctl"
+	"powerssl.io/powerssl/internal/app/powerctl/resource"
+	apiserverclient "powerssl.io/powerssl/pkg/apiserver/client"
 )
 
 func newCmdDelete() *cobra.Command {

@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"time"
 
-	"powerssl.io/pkg/controller/api"
+	"powerssl.io/powerssl/pkg/controller/api"
 )
 
 func (acme *ACME) CreateOrder(_ context.Context, directoryURL string, accountURL string, identifiers []*api.Identifier, notBefore, notAfter string) (*api.Order, error) {

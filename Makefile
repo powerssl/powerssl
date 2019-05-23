@@ -60,19 +60,19 @@ build-%:
 
 .PHONY: build-dev-runner
 build-dev-runner:
-	go build -o bin/dev-runner powerssl.io/tools/dev-runner
+	go build -o bin/dev-runner powerssl.io/powerssl/tools/dev-runner
 
 .PHONY: clean
 clean: clean-dev-runner clean-powerctl clean-powerssl-agent clean-powerssl-apiserver clean-powerssl-auth clean-powerssl-controller clean-powerssl-integration-acme clean-powerssl-integration-cloudflare clean-powerssl-signer clean-powerssl-webapp clean-powerutil
 
 .PHONY: clean-%
 clean-%:
-	go clean powerssl.io/cmd/${*}
+	go clean powerssl.io/powerssl/cmd/${*}
 	rm -f bin/${*}
 
 .PHONY: clean-dev-runner
 clean-dev-runner:
-	go clean powerssl.io/tools/dev-runner
+	go clean powerssl.io/powerssl/tools/dev-runner
 	rm -f bin/dev-runner
 
 .PHONY: clear-local-dev
@@ -99,19 +99,21 @@ generate:
 
 .PHONY: generate-docs
 generate-docs:
-	go run powerssl.io/tools/gendocs
+	go run powerssl.io/powerssl/tools/gendocs
 
 .PHONY: generate-protobuf
 generate-protobuf:
 	$(call delete_files,pkg,*.pb.go)
-	@rm -f powerssl.io && ln -s . powerssl.io
-	set -e; for dir in $(call proto_dirs); do \
+	$(eval $@_TMP := $(shell mktemp -d))
+	mkdir $($@_TMP)/powerssl.io
+	ln -s $(abspath .) $($@_TMP)/powerssl.io/powerssl
+	for dir in $(call proto_dirs); do \
 		protoc \
 			-Iapi/protobuf-spec:$(call go_mod_dir,github.com/gogo/googleapis):$(call go_mod_dir,github.com/gogo/protobuf):$(call go_mod_dir,github.com/gogo/protobuf)/protobuf \
-			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:. \
+			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$($@_TMP) \
 			$$dir/*.proto; \
 	done
-	@rm -f powerssl.io
+	rm -rf $($@_TMP)
 
 .PHONY: image-%
 image-%:

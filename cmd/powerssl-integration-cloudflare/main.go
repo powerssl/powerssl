@@ -1,6 +1,6 @@
 package main
 
-import "powerssl.io/internal/app/integrations/cloudflare/cmd"
+import "powerssl.io/powerssl/internal/app/integrations/cloudflare/cmd"
 
 func main() {
 	cmd.Execute()

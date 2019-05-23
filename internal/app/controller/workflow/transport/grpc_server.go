@@ -10,8 +10,8 @@ import (
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
-	"powerssl.io/internal/app/controller/workflow/endpoint"
-	apiv1 "powerssl.io/internal/pkg/controller/api/v1"
+	"powerssl.io/powerssl/internal/app/controller/workflow/endpoint"
+	apiv1 "powerssl.io/powerssl/internal/pkg/controller/api/v1"
 )
 
 type grpcServer struct {
