@@ -1,12 +1,10 @@
-# PowerSSL
+# PowerSSL [![CircleCI](https://circleci.com/gh/powerssl/powerssl.svg?style=svg&circle-token=572c8a8bf77274579537593224433d5de2a0bf09)](https://circleci.com/gh/powerssl/powerssl)
 
 - Website: https://www.powerssl.io
 
-<img width="300" alt="PowerSSL Logo" src="https://docs.powerssl.io/assets/images/powerssl.png">
+![PowerSSL Logo](https://docs.powerssl.io/assets/images/powerssl.png)
 
 PowerSSL is a certificate management platform... more description goes here.
-
-[![CircleCI](https://circleci.com/gh/powerssl/powerssl.svg?style=svg&circle-token=572c8a8bf77274579537593224433d5de2a0bf09)](https://circleci.com/gh/powerssl/powerssl)
 
 Getting Started & Documentation
 -------------------------------
