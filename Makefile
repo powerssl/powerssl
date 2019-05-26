@@ -62,6 +62,10 @@ build-%:
 build-dev-runner:
 	go build -o bin/dev-runner powerssl.io/powerssl/tools/dev-runner
 
+.PHONY: check-scripts
+check-scripts:
+	shellcheck scripts/*.sh
+
 .PHONY: clean
 clean: clean-dev-runner clean-powerctl clean-powerssl-agent clean-powerssl-apiserver clean-powerssl-auth clean-powerssl-controller clean-powerssl-integration-acme clean-powerssl-integration-cloudflare clean-powerssl-signer clean-powerssl-webapp clean-powerutil
 

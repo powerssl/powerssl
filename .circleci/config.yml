@@ -8,6 +8,9 @@ references:
       name: "Restoring go modules Cache"
   test_stage: &test_stage
       - verify_generated
+      - shellcheck/check
+orbs:
+  shellcheck: circleci/shellcheck@1.3.10
 commands:
   build_component:
     description: "Build component"
@@ -187,6 +190,8 @@ workflows:
       - verify_generated:
           requires:
             - download_dependencies
+      - shellcheck/check:
+          path: scripts
       - build_powerctl:
           requires: *test_stage
       - build_powerctl_image:
