@@ -87,19 +87,16 @@ fmt:
 	clang-format -i --style=Google $(call proto_files)
 
 .PHONY: generate
-generate:
-	go generate $$(go list ./...)
-	@$(MAKE) fmt
-	@if [ "${SKIP_DOCS}" == "" ]; then \
-		$(MAKE) generate-docs; \
-	fi
-	@if [ "${SKIP_PROTOBUF}" == "" ]; then \
-		$(MAKE) generate-protobuf; \
-	fi
+generate: generate-docs generate-docs generate-protobuf
 
 .PHONY: generate-docs
 generate-docs:
 	go run powerssl.io/powerssl/tools/gendocs
+
+.PHONY: generate-go
+generate-go:
+	go generate $$(go list ./...)
+	@$(MAKE) fmt
 
 .PHONY: generate-protobuf
 generate-protobuf:

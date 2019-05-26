@@ -1,4 +1,13 @@
 version: 2.1
+references:
+  go_modules_cache_key: &go_modules_cache_key
+    go-mod-{{ .Environment.CACHE_VERSION }}-{{ checksum "go.sum" }}
+  restore_go_modules: &restore_go_modules
+    restore_cache:
+      key: *go_modules_cache_key
+      name: "Restoring go modules Cache"
+  test_stage: &test_stage
+      - verify_generated
 commands:
   build_component:
     description: "Build component"
@@ -161,14 +170,25 @@ jobs:
           name: "Saving go modules Cache"
           paths:
             - /go/pkg/mod
+  verify_generated:
+    executor: golang-executor
+    steps:
+      - checkout
+      - *restore_go_modules
+      - run: sudo apt install clang-format protobuf-compiler
+      - run: make bootstrap
+      - run: make generate
+      - run: git diff --exit-code
 workflows:
   version: 2
   commit:
     jobs:
       - download_dependencies
-      - build_powerctl:
+      - verify_generated:
           requires:
             - download_dependencies
+      - build_powerctl:
+          requires: *test_stage
       - build_powerctl_image:
           filters:
             branches:
@@ -176,8 +196,7 @@ workflows:
           requires:
             - build_powerctl
       - build_powerssl_agent:
-          requires:
-            - download_dependencies
+          requires: *test_stage
       - build_powerssl_agent_image:
           filters:
             branches:
@@ -185,8 +204,7 @@ workflows:
           requires:
             - build_powerssl_agent
       - build_powerssl_apiserver:
-          requires:
-            - download_dependencies
+          requires: *test_stage
       - build_powerssl_apiserver_image:
           filters:
             branches:
@@ -194,8 +212,7 @@ workflows:
           requires:
             - build_powerssl_apiserver
       - build_powerssl_auth:
-          requires:
-            - download_dependencies
+          requires: *test_stage
       - build_powerssl_auth_image:
           filters:
             branches:
@@ -203,8 +220,7 @@ workflows:
           requires:
             - build_powerssl_auth
       - build_powerssl_controller:
-          requires:
-            - download_dependencies
+          requires: *test_stage
       - build_powerssl_controller_image:
           filters:
             branches:
@@ -212,8 +228,7 @@ workflows:
           requires:
             - build_powerssl_controller
       - build_powerssl_integration_acme:
-          requires:
-            - download_dependencies
+          requires: *test_stage
       - build_powerssl_integration_acme_image:
           filters:
             branches:
@@ -221,8 +236,7 @@ workflows:
           requires:
             - build_powerssl_integration_acme
       - build_powerssl_integration_cloudflare:
-          requires:
-            - download_dependencies
+          requires: *test_stage
       - build_powerssl_integration_cloudflare_image:
           filters:
             branches:
@@ -230,8 +244,7 @@ workflows:
           requires:
             - build_powerssl_integration_cloudflare
       - build_powerssl_signer:
-          requires:
-            - download_dependencies
+          requires: *test_stage
       - build_powerssl_signer_image:
           filters:
             branches:
@@ -239,8 +252,7 @@ workflows:
           requires:
             - build_powerssl_signer
       - build_powerssl_webapp:
-          requires:
-            - download_dependencies
+          requires: *test_stage
       - build_powerssl_webapp_image:
           filters:
             branches:
@@ -248,8 +260,7 @@ workflows:
           requires:
             - build_powerssl_webapp
       - build_powerutil:
-          requires:
-            - download_dependencies
+          requires: *test_stage
       - build_powerutil_image:
           filters:
             branches:
