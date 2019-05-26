@@ -20,7 +20,7 @@ import (
 	powerctl "powerssl.io/powerssl/internal/app/powerctl/cmd"
 	powerutil "powerssl.io/powerssl/internal/app/powerutil/cmd"
 	signer "powerssl.io/powerssl/internal/app/signer/cmd"
-	web "powerssl.io/powerssl/internal/app/web/cmd"
+	webapp "powerssl.io/powerssl/internal/app/webapp/cmd"
 )
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
 	check(doc.GenMarkdownTreeCustom(powerctl.NewCmdRoot(), "docs/powerctl", filePrepender, linkHandler))
 	check(doc.GenMarkdownTreeCustom(powerutil.NewCmdRoot(), "docs/powerutil", filePrepender, linkHandler))
 	check(doc.GenMarkdownTreeCustom(signer.NewCmdRoot(), "docs/powerssl-signer", filePrepender, linkHandler))
-	check(doc.GenMarkdownTreeCustom(web.NewCmdRoot(), "docs/powerssl-webapp", filePrepender, linkHandler))
+	check(doc.GenMarkdownTreeCustom(webapp.NewCmdRoot(), "docs/powerssl-webapp", filePrepender, linkHandler))
 
 	// NOTE: Strip timestamp from all generated docs.
 	files, err := filepath.Glob("docs/**/*.md")

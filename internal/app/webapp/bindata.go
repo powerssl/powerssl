@@ -3,7 +3,7 @@
 // ../../../web/app/index.html
 // DO NOT EDIT!
 
-package web
+package webapp
 
 import (
 	"bytes"

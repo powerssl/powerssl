@@ -7,6 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"powerssl.io/powerssl/internal/pkg/version"
 )
 
 var (
@@ -21,7 +23,7 @@ func NewCmdRoot() *cobra.Command {
 		Long: `powerssl-webapp provides PowerSSL WebApp.
 
 Find more information at: https://docs.powerssl.io/powerssl-webapp`,
-		Version: "0.1.0",
+		Version: version.String(),
 	}
 
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output")
