@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"powerssl.io/powerssl/internal/pkg/version"
 )
 
 func NewCmdRoot() *cobra.Command {
@@ -14,7 +16,7 @@ func NewCmdRoot() *cobra.Command {
 		Long: `powerutil provides PowerSSL utilities.
 
 Find more information at: https://docs.powerssl.io/powerutil`,
-		Version: "0.1.0",
+		Version: version.String(),
 	}
 
 	cmd.AddCommand(newCmdCA())

@@ -1,4 +1,5 @@
 EXTERNAL_TOOLS=\
+	github.com/ahmetb/govvv \
 	github.com/gogo/protobuf/protoc-gen-gogo \
 	github.com/jteeuwen/go-bindata/... \
 	golang.org/x/tools/cmd/stringer

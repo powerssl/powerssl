@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/viper"
 
 	"powerssl.io/powerssl/internal/app/powerctl/resource"
+	"powerssl.io/powerssl/internal/pkg/version"
 )
 
 var (
@@ -25,7 +26,7 @@ func NewCmdRoot() *cobra.Command {
 		Long: `powerctl controls PowerSSL.
 
 Find more information at: https://docs.powerssl.io/powerctl`,
-		Version: "0.1.0",
+		Version: version.String(),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			switch viper.GetString("output") {
 			case "json", "table", "yaml":
