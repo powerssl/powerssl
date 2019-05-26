@@ -2,9 +2,8 @@
 
 set -eux
 
-ln -s $GITHUB_WORKSPACE /go/src/powerssl.io
-cd /go/src/powerssl.io
-GO111MODULE=on make "bin/${POWERSSL_COMPONENT}"
+cd $GITHUB_WORKSPACE
+make "build-${POWERSSL_COMPONENT}"
 cd bin
 
 EVENT_DATA=$(cat $GITHUB_EVENT_PATH)
