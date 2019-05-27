@@ -46,14 +46,7 @@ $ make images
 ...
 ```
 
-### Prepare for running locally
-
-```sh
-make prepare-local-dev
-...
-```
-
-### Run locally without docker
+### Run locally
 
 ```sh
 $ make run 
@@ -63,12 +56,3 @@ $ make run
 Visit [localhost:8080](http://localhost:8080) in your browser.
 Perform a login on the command line.
 Afterwards execute `powerctl login --ca-file $(pwd)/local/certs/ca.pem` from the workspace dir.
-
-### Run locally with docker compose
-
-```sh
-$ docker-compose -f deployments/docker-compose.yml --project-directory . up -d
-...
-```
-
-Visit [localhost:8080](http://localhost:8080) in your browser.

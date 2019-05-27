@@ -1,3 +1,6 @@
+.DEFAULT_GOAL := all
+.DELETE_ON_ERROR:
+
 EXTERNAL_TOOLS=\
 	github.com/ahmetb/govvv \
 	github.com/gogo/protobuf/protoc-gen-gogo \
@@ -9,13 +12,6 @@ PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/api/annotations.proto=github.com/gogo
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types,
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/field_mask.proto=github.com/gogo/protobuf/types,
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,
-
-.DEFAULT_GOAL := all
-
-.DELETE_ON_ERROR:
-
-.ALWAYS_REBUILD:
-.PHONY: .ALWAYS_REBUILD
 
 define delete_files
 $(shell find $(1) -type f -name '$(2)' -exec rm {} +)
@@ -41,11 +37,18 @@ define strip_powerssl
 $(shell echo ${*} | sed 's/powerssl-//')
 endef
 
+bin/%:
+	@$(MAKE) build-${*}
+
+local/certs/%-key.pem local/certs/%.csr local/certs/%.pem: bin/powerutil local/certs/ca-key.pem local/certs/ca.pem
+	cd local/certs && $(PWD)/bin/powerutil ca gen --ca ca.pem --ca-key ca-key.pem --hostname ${*}
+
+local/certs/ca-key.pem local/certs/ca.csr local/certs/ca.pem: bin/powerutil
+	mkdir -p local/certs
+	cd local/certs && $(PWD)/bin/powerutil ca init
+
 .PHONY: all
 all: build
-
-bin/%: .ALWAYS_REBUILD
-	@$(MAKE) build-${*}
 
 .PHONY: bootstrap
 bootstrap:
@@ -92,11 +95,9 @@ clean-dev-runner:
 	go clean powerssl.io/powerssl/tools/dev-runner
 	rm -f bin/dev-runner
 
-.PHONY: clear-local-dev
-clear-local-dev:
-	rm -f local/certs/*.pem local/certs/*.csr
-	rm -f local/powerssl.sqlite3
-	rm -rf local/vault
+.PHONY: clear
+clear:
+	rm -rf local
 
 .PHONY: fmt
 fmt:
@@ -143,16 +144,12 @@ install: install-powerctl install-powerssl-agent install-powerutil
 install-%:
 	COMPONENT=${*} scripts/install.sh
 
-.PHONY: prepare-local-dev
-prepare-local-dev:
-	$(MAKE) -C local/certs
-
 .PHONY: release-image-%
 release-image-%:
 	docker push powerssl/$(call strip_powerssl,${*}):latest
 
 .PHONY: run
-run: bin/dev-runner
+run: bin/dev-runner bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-signer bin/powerssl-webapp local/certs/ca-key.pem local/certs/ca.pem local/certs/localhost-key.pem local/certs/localhost.pem local/certs/vault-key.pem local/certs/vault.pem
 	@bin/dev-runner
 
 .PHONY: test
