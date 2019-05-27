@@ -1,10 +1,5 @@
-#!/bin/sh
+#!/bin/bash
 
-set -eux
+set -euxo pipefail
 
-FORCE_REBUILD_ARG=''
-if [ -n "${FORCE_REBUILD:-}" ]; then
-  FORCE_REBUILD_ARG='-a'
-fi
-
-CGO_ENABLED=0 go install ${FORCE_REBUILD_ARG} -tags netgo -ldflags '-w -extldflags "-static"' "powerssl.io/powerssl/cmd/${COMPONENT}"
+env CGO_ENABLED="${CGO_ENABLED:-0}" go install ${FORCE_REBUILD:+-a} -tags netgo -ldflags "-w -extldflags \"-static\" $(govvv install -flags)" "powerssl.io/powerssl/cmd/$COMPONENT"

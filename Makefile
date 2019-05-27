@@ -1,4 +1,5 @@
 EXTERNAL_TOOLS=\
+	github.com/ahmetb/govvv \
 	github.com/gogo/protobuf/protoc-gen-gogo \
 	github.com/jteeuwen/go-bindata/... \
 	golang.org/x/tools/cmd/stringer
@@ -62,6 +63,10 @@ build-%:
 build-dev-runner:
 	go build -o bin/dev-runner powerssl.io/powerssl/tools/dev-runner
 
+.PHONY: check-scripts
+check-scripts:
+	shellcheck scripts/*.sh
+
 .PHONY: clean
 clean: clean-dev-runner clean-powerctl clean-powerssl-agent clean-powerssl-apiserver clean-powerssl-auth clean-powerssl-controller clean-powerssl-integration-acme clean-powerssl-integration-cloudflare clean-powerssl-signer clean-powerssl-webapp clean-powerutil
 
@@ -87,19 +92,16 @@ fmt:
 	clang-format -i --style=Google $(call proto_files)
 
 .PHONY: generate
-generate:
-	go generate $$(go list ./...)
-	@$(MAKE) fmt
-	@if [ "${SKIP_DOCS}" == "" ]; then \
-		$(MAKE) generate-docs; \
-	fi
-	@if [ "${SKIP_PROTOBUF}" == "" ]; then \
-		$(MAKE) generate-protobuf; \
-	fi
+generate: generate-docs generate-docs generate-protobuf
 
 .PHONY: generate-docs
 generate-docs:
 	go run powerssl.io/powerssl/tools/gendocs
+
+.PHONY: generate-go
+generate-go:
+	go generate $$(go list ./...)
+	@$(MAKE) fmt
 
 .PHONY: generate-protobuf
 generate-protobuf:

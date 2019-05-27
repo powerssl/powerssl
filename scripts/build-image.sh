@@ -1,33 +1,23 @@
-#!/bin/sh
+#!/bin/bash
 
-set -eux
+set -euxo pipefail
 
-BUILD_ARG=
-CIRCLECI=${CIRCLECI:-false}
-DIR=cli
-DOCKERFILE=Dockerfile
-
-if [ "${CIRCLECI}" = true ]; then
-  DOCKERFILE=Dockerfile.circleci
-fi
-
-case $COMPONENT in
-  powerssl-apiserver|powerssl-controller|powerssl-signer)      
-    BUILD_ARG="COMPONENT=${COMPONENT}"
-    DIR=grpc-server
-    ;;
-  powerssl-auth|powerssl-webapp)      
-    BUILD_ARG="COMPONENT=${COMPONENT}"
-    DIR=web-server
-    ;;
-  powerssl-integration-*)      
-    BUILD_ARG="INTEGRATION=$(echo "${COMPONENT}" | sed 's/powerssl-integration-//')"
-    DIR=integration
-    ;;
+case "$COMPONENT" in
+	powerssl-apiserver|powerssl-controller|powerssl-signer)      
+		BUILD_ARG="COMPONENT=$COMPONENT"
+		DIR=grpc-server
+		;;
+	powerssl-auth|powerssl-webapp)      
+		BUILD_ARG="COMPONENT=$COMPONENT"
+		DIR=web-server
+		;;
+	powerssl-integration-*)      
+		BUILD_ARG="INTEGRATION=${COMPONENT/powerssl-integration-/}"
+		DIR=integration
+		;;
+	*)
+		DIR=cli
+		;;
 esac
 
-if [ -z "${BUILD_ARG}" ]; then
-  docker build -f "build/docker/${DIR}/${DOCKERFILE}" -t "${TAG}" .
-else
-  docker build -f "build/docker/${DIR}/${DOCKERFILE}" -t "${TAG}" --build-arg="${BUILD_ARG}" .
-fi
+docker build -f "build/docker/$DIR/Dockerfile${CIRCLECI:+.circleci}" -t "$TAG" ${BUILD_ARG:+--build-arg=$BUILD_ARG} .

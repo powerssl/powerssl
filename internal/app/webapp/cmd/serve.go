@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"powerssl.io/powerssl/internal/app/web"
+	"powerssl.io/powerssl/internal/app/webapp"
 )
 
 func newCmdServe() *cobra.Command {
@@ -40,7 +40,7 @@ func newCmdServe() *cobra.Command {
 				os.Exit(1)
 			}
 
-			web.Run(addr, metricsAddr, authURI, apiAddr)
+			webapp.Run(addr, metricsAddr, authURI, apiAddr)
 		},
 	}
 

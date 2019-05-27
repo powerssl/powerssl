@@ -1,6 +1,6 @@
-//go:generate go-bindata -pkg web -prefix ../../../web/app ../../../web/app
+//go:generate go-bindata -pkg webapp -prefix ../../../web/app ../../../web/app
 
-package web
+package webapp
 
 import (
 	"context"
