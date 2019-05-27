@@ -28,7 +28,13 @@ func (w RequestCertificate) Run(ctx context.Context) {
 
 	{
 		a := activity.New(api.Activity_ACME_CREATE_ORDER)
-		a.SetInput(acme.CreateOrderInput{w.DirectoryURL, w.AccountURL, identifiers, w.NotBefore, w.NotAfter})
+		a.SetInput(acme.CreateOrderInput{
+			DirectoryURL: w.DirectoryURL,
+			AccountURL:   w.AccountURL,
+			Identifiers:  identifiers,
+			NotBefore:    w.NotBefore,
+			NotAfter:     w.NotAfter,
+		})
 		a.Execute(ctx)
 	}
 	for range []struct{}{} {

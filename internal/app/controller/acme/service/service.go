@@ -40,7 +40,10 @@ func (bs basicService) GetCreateAccountRequest(ctx context.Context, activity *ap
 }
 
 func (bs basicService) SetCreateAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error {
-	result := acme.CreateAccountResult{account, erro}
+	result := acme.CreateAccountResult{
+		Account: account,
+		Error:   erro,
+	}
 	return engineactivity.SetResult(activity, &result)
 }
 
@@ -101,7 +104,10 @@ func (bs basicService) GetCreateOrderRequest(ctx context.Context, activity *api.
 }
 
 func (bs basicService) SetCreateOrderResponse(ctx context.Context, activity *api.Activity, order *api.Order, erro *api.Error) error {
-	result := acme.CreateOrderResult{order, erro}
+	result := acme.CreateOrderResult{
+		Order: order,
+		Error: erro,
+	}
 	return engineactivity.SetResult(activity, &result)
 }
 

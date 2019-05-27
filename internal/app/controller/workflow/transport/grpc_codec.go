@@ -95,7 +95,7 @@ func encodeGRPCWorkflow(workflow *api.Workflow) (*apiv1.Workflow, error) {
 	case *api.CreateACMEAccountInput:
 		input := workflow.Input.(*api.CreateACMEAccountInput)
 		grpcWorkflow.Input = &apiv1.Workflow_CreateAcmeAccountInput{
-			&apiv1.CreateACMEAccountInput{
+			CreateAcmeAccountInput: &apiv1.CreateACMEAccountInput{
 				Account:              input.Account,
 				DirectoryUrl:         input.DirectoryURL,
 				TermsOfServiceAgreed: input.TermsOfServiceAgreed,
@@ -105,7 +105,7 @@ func encodeGRPCWorkflow(workflow *api.Workflow) (*apiv1.Workflow, error) {
 	case *api.RequestACMECertificateInput:
 		input := workflow.Input.(*api.RequestACMECertificateInput)
 		grpcWorkflow.Input = &apiv1.Workflow_RequestAcmeCertificateInput{
-			&apiv1.RequestACMECertificateInput{
+			RequestAcmeCertificateInput: &apiv1.RequestACMECertificateInput{
 				DirectoryUrl: input.DirectoryURL,
 				AccountUrl:   input.AccountURL,
 				Dnsnames:     input.Dnsnames,
