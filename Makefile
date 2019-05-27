@@ -10,6 +10,8 @@ PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/empty.proto=github.com/gogo/
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/field_mask.proto=github.com/gogo/protobuf/types,
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,
 
+.DEFAULT_GOAL := all
+
 .DELETE_ON_ERROR:
 
 .ALWAYS_REBUILD:
@@ -39,7 +41,7 @@ define strip_powerssl
 $(shell echo ${*} | sed 's/powerssl-//')
 endef
 
-.DEFAULT_GOAL := all
+.PHONY: all
 all: build
 
 bin/%: .ALWAYS_REBUILD
@@ -48,7 +50,7 @@ bin/%: .ALWAYS_REBUILD
 .PHONY: bootstrap
 bootstrap:
 	@for tool in  $(EXTERNAL_TOOLS) ; do \
-		echo "Installing/Updating $$tool" ; \
+		echo "Installing/Updating $$tool"; \
 		GO111MODULE=off go get -u $$tool; \
 	done
 
@@ -152,6 +154,14 @@ release-image-%:
 .PHONY: run
 run: bin/dev-runner
 	@bin/dev-runner
+
+.PHONY: test
+test:
+	go test $$(go list ./...)
+
+.PHONY: test-%
+test-%:
+	go test $$(go list ./... | grep $(call strip_powerssl,${*}))
 
 .PHONY: vet
 vet:
