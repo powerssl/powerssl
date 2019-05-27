@@ -63,6 +63,16 @@ build-%:
 build-dev-runner:
 	go build -o bin/dev-runner powerssl.io/powerssl/tools/dev-runner
 
+.PHONY: build-powerssl-apiserver
+build-powerssl-apiserver:
+ifneq ($(OS),Windows_NT)
+ifeq ($(shell uname -s),Darwin)
+	$(eval STATIC_ENABLED := 0)
+endif
+endif
+	# NOTE: Due to sqlite3 dependency in apiserver CGO must be enabled
+	CGO_ENABLED=1 COMPONENT=powerssl-apiserver STATIC_ENABLED=$(STATIC_ENABLED) scripts/build-go.sh
+
 .PHONY: check-scripts
 check-scripts:
 	shellcheck scripts/*.sh

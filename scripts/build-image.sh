@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euxo pipefail
+set -euo pipefail
 
 case "$COMPONENT" in
 	powerssl-apiserver|powerssl-controller|powerssl-signer)      
@@ -12,12 +12,14 @@ case "$COMPONENT" in
 		DIR=web-server
 		;;
 	powerssl-integration-*)      
-		BUILD_ARG="INTEGRATION=${COMPONENT/powerssl-integration-/}"
+		BUILD_ARG="INTEGRATION=${COMPONENT/powerssl-integration-}"
 		DIR=integration
 		;;
 	*)
 		DIR=cli
 		;;
 esac
+
+set -x
 
 docker build -f "build/docker/$DIR/Dockerfile${CIRCLECI:+.circleci}" -t "$TAG" ${BUILD_ARG:+--build-arg=$BUILD_ARG} .

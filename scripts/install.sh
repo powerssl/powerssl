@@ -1,5 +1,11 @@
 #!/bin/bash
 
-set -euxo pipefail
+set -euo pipefail
 
-env CGO_ENABLED="${CGO_ENABLED:-0}" go install ${FORCE_REBUILD:+-a} -tags netgo -ldflags "-w -extldflags \"-static\" $(govvv install -flags)" "powerssl.io/powerssl/cmd/$COMPONENT"
+if [ "${STATIC_ENABLED:=1}" == "0" ]; then
+	unset STATIC_ENABLED
+fi
+
+set -x
+
+env CGO_ENABLED="${CGO_ENABLED:-0}" go install ${FORCE_REBUILD:+-a} -tags netgo -ldflags "$(govvv build -flags -pkg powerssl.io/powerssl/internal/pkg/version)${DEBUG_ENABLED:+ -w}${STATIC_ENABLED:+ -extldflags \"-static\"}" "powerssl.io/powerssl/cmd/$COMPONENT"
