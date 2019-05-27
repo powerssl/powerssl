@@ -18,6 +18,8 @@ references:
   test_stage: &test_stage
       - verify_generated
       - shellcheck/check
+      - test
+      - vet
 orbs:
   docker-publish: circleci/docker-publish@0.1.7
   shellcheck: circleci/shellcheck@1.3.10
@@ -182,12 +184,30 @@ jobs:
       - run: make bootstrap
       - run: make generate
       - run: git diff --exit-code
+  test:
+    executor: golang-executor
+    steps:
+      - checkout
+      - *restore_go_modules
+      - run: make test
+  vet:
+    executor: golang-executor
+    steps:
+      - checkout
+      - *restore_go_modules
+      - run: make vet
 workflows:
   version: 2
   commit:
     jobs:
       - download_dependencies
       - verify_generated:
+          requires:
+            - download_dependencies
+      - test:
+          requires:
+            - download_dependencies
+      - vet:
           requires:
             - download_dependencies
       - shellcheck/check:
