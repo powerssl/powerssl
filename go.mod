@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
+	github.com/ahmetb/govvv v0.2.0
 	github.com/arschles/assert v1.0.0 // indirect
 	github.com/arschles/go-bindata-html-template v0.0.0-20170123182818-839a6918b9ff
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
@@ -31,6 +32,7 @@ require (
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a
 	github.com/jmoiron/sqlx v1.2.0 // indirect
 	github.com/johanbrandhorst/certify v1.2.0
+	github.com/jteeuwen/go-bindata v3.0.7+incompatible
 	github.com/kisielk/sqlstruct v0.0.0-20150923205031-648daed35d49 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/looplab/fsm v0.1.0
@@ -50,6 +52,7 @@ require (
 	github.com/uber/jaeger-lib v2.0.0+incompatible
 	go.uber.org/atomic v1.4.0 // indirect
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
+	golang.org/x/tools v0.0.0-20190312170243-e65039ee4138
 	google.golang.org/grpc v1.20.1
 	gopkg.in/square/go-jose.v2 v2.3.1
 	gopkg.in/yaml.v2 v2.2.2

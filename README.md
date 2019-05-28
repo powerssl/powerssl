@@ -18,13 +18,6 @@ If you wish to work on Vault itself or any of its built-in systems, you'll
 first need [Go](https://www.golang.org) installed on your machine (version
 1.12+ is *required*).
 
-You can then download any required build tools by bootstrapping your environment:
-
-```sh
-$ make bootstrap
-...
-```
-
 To compile a version of PowerSSL, run `make` or `make build`.
 This will put the PowerSSL binaries in the `bin` folder:
 
