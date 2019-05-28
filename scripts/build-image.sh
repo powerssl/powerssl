@@ -3,15 +3,15 @@
 set -euo pipefail
 
 case "$COMPONENT" in
-	powerssl-apiserver|powerssl-controller|powerssl-signer)      
+	powerssl-apiserver|powerssl-controller|powerssl-signer)
 		BUILD_ARG="COMPONENT=$COMPONENT"
 		DIR=grpc-server
 		;;
-	powerssl-auth|powerssl-webapp)      
+	powerssl-auth|powerssl-webapp)
 		BUILD_ARG="COMPONENT=$COMPONENT"
 		DIR=web-server
 		;;
-	powerssl-integration-*)      
+	powerssl-integration-*)
 		BUILD_ARG="INTEGRATION=${COMPONENT/powerssl-integration-}"
 		DIR=integration
 		;;
