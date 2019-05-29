@@ -181,7 +181,6 @@ jobs:
       - checkout
       - *restore_go_modules
       - run: sudo apt install clang-format protobuf-compiler
-      - run: make bootstrap
       - run: make generate
       - run: git diff --exit-code
   test:
