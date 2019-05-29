@@ -10,8 +10,6 @@ import (
 	proto "github.com/gogo/protobuf/proto"
 	types "github.com/gogo/protobuf/types"
 	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -597,26 +595,6 @@ type CertificateIssueServiceServer interface {
 	// Updates a certificate. Returns INVALID_ARGUMENT if the name of the
 	// certificate is non-empty and does equal the previous name.
 	Update(context.Context, *UpdateCertificateIssueRequest) (*CertificateIssue, error)
-}
-
-// UnimplementedCertificateIssueServiceServer can be embedded to have forward compatible implementations.
-type UnimplementedCertificateIssueServiceServer struct {
-}
-
-func (*UnimplementedCertificateIssueServiceServer) Create(ctx context.Context, req *CreateCertificateIssueRequest) (*CertificateIssue, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
-}
-func (*UnimplementedCertificateIssueServiceServer) Delete(ctx context.Context, req *DeleteCertificateIssueRequest) (*types.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
-}
-func (*UnimplementedCertificateIssueServiceServer) Get(ctx context.Context, req *GetCertificateIssueRequest) (*CertificateIssue, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
-}
-func (*UnimplementedCertificateIssueServiceServer) List(ctx context.Context, req *ListCertificateIssuesRequest) (*ListCertificateIssuesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
-}
-func (*UnimplementedCertificateIssueServiceServer) Update(ctx context.Context, req *UpdateCertificateIssueRequest) (*CertificateIssue, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 
 func RegisterCertificateIssueServiceServer(s *grpc.Server, srv CertificateIssueServiceServer) {
