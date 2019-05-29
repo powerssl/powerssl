@@ -1,0 +1,132 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "powerssl/controller/v1/integration.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {},
+  "definitions": {
+    "ActivityName": {
+      "type": "string",
+      "enum": [
+        "NAME_UNSPECIFIED",
+        "ACME_CREATE_ACCOUNT",
+        "ACME_CREATE_AUTHORIZATION",
+        "ACME_CREATE_ORDER",
+        "ACME_DEACTIVATE_ACCOUNT",
+        "ACME_DEACTIVATE_AUTHORIZATION",
+        "ACME_FINALIZE_ORDER",
+        "ACME_GET_AUTHORIZATION",
+        "ACME_GET_CERTIFICATE",
+        "ACME_GET_CHALLENGE",
+        "ACME_GET_ORDER",
+        "ACME_REKEY_ACCOUNT",
+        "ACME_REVOKE_CERTIFICATE",
+        "ACME_UPDATE_ACCOUNT",
+        "ACME_VALIDATE_CHALLENGE",
+        "DNS_CREATE_RECORD",
+        "DNS_DELETE_RECORD",
+        "DNS_VERIFY_DOMAIN"
+      ],
+      "default": "NAME_UNSPECIFIED"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "type_url": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "runtimeStreamError": {
+      "type": "object",
+      "properties": {
+        "grpc_code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "http_code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "http_status": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1Activity": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "name": {
+          "$ref": "#/definitions/ActivityName"
+        },
+        "workflow": {
+          "$ref": "#/definitions/v1ActivityWorkflow"
+        },
+        "signature": {
+          "type": "string"
+        }
+      }
+    },
+    "v1ActivityWorkflow": {
+      "type": "object",
+      "properties": {
+        "activities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "v1IntegrationKind": {
+      "type": "string",
+      "enum": [
+        "INTEGRATION_KIND_UNSPECIFIED",
+        "ACME",
+        "DNS"
+      ],
+      "default": "INTEGRATION_KIND_UNSPECIFIED"
+    }
+  },
+  "x-stream-definitions": {
+    "v1Activity": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "$ref": "#/definitions/v1Activity"
+        },
+        "error": {
+          "$ref": "#/definitions/runtimeStreamError"
+        }
+      },
+      "title": "Stream result of v1Activity"
+    }
+  }
+}

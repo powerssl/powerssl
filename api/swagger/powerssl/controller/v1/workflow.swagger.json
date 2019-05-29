@@ -1,0 +1,116 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "powerssl/controller/v1/workflow.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {},
+  "definitions": {
+    "WorkflowIntegrationFilter": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/v1IntegrationKind"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "controllerv1Workflow": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/definitions/v1WorkflowKind"
+        },
+        "integration_filters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WorkflowIntegrationFilter"
+          }
+        },
+        "create_acme_account_input": {
+          "$ref": "#/definitions/v1CreateACMEAccountInput"
+        },
+        "request_acme_certificate_input": {
+          "$ref": "#/definitions/v1RequestACMECertificateInput"
+        }
+      }
+    },
+    "v1CreateACMEAccountInput": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "type": "string"
+        },
+        "directory_url": {
+          "type": "string"
+        },
+        "terms_of_service_agreed": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "contacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "v1IntegrationKind": {
+      "type": "string",
+      "enum": [
+        "INTEGRATION_KIND_UNSPECIFIED",
+        "ACME",
+        "DNS"
+      ],
+      "default": "INTEGRATION_KIND_UNSPECIFIED"
+    },
+    "v1RequestACMECertificateInput": {
+      "type": "object",
+      "properties": {
+        "directory_url": {
+          "type": "string"
+        },
+        "account_url": {
+          "type": "string"
+        },
+        "dnsnames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "not_before": {
+          "type": "string"
+        },
+        "not_after": {
+          "type": "string"
+        }
+      }
+    },
+    "v1WorkflowKind": {
+      "type": "string",
+      "enum": [
+        "WORKFLOW_KIND_UNSPECIFIED",
+        "CREATE_ACME_ACCOUNT",
+        "REQUEST_ACME_CERTIFICATE"
+      ],
+      "default": "WORKFLOW_KIND_UNSPECIFIED"
+    }
+  }
+}

@@ -113,6 +113,8 @@ generate-protobuf:
 		protoc \
 			-Iapi/protobuf-spec:$(call go_mod_dir,github.com/gogo/googleapis):$(call go_mod_dir,github.com/gogo/protobuf):$(call go_mod_dir,github.com/gogo/protobuf)/protobuf \
 			--gogo_out=$(PROTO_MAPPINGS),plugins=grpc:$($@_TMP) \
+			--grpc-gateway_out=logtostderr=true:$($@_TMP) \
+			--swagger_out=logtostderr=true:api/swagger \
 			$$dir/*.proto; \
 	done
 	rm -rf $($@_TMP)
