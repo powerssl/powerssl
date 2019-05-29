@@ -1,6 +1,14 @@
 .DEFAULT_GOAL := all
 .DELETE_ON_ERROR:
 
+EXTERNAL_TOOLS=\
+	github.com/ahmetb/govvv \
+	github.com/gogo/protobuf/protoc-gen-gogo \
+	github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway \
+	github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger \
+	github.com/jteeuwen/go-bindata/go-bindata \
+	golang.org/x/tools/cmd/stringer
+
 PROTO_MAPPINGS :=
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/api/annotations.proto=github.com/gogo/googleapis/google/api,
 PROTO_MAPPINGS := $(PROTO_MAPPINGS)Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types,
@@ -43,6 +51,13 @@ local/certs/ca-key.pem local/certs/ca.csr local/certs/ca.pem: bin/powerutil
 
 .PHONY: all
 all: build
+
+.PHONY: bootstrap
+bootstrap:
+	@for tool in $(EXTERNAL_TOOLS); do \
+		echo "Installing/Updating $$tool"; \
+		go get $$tool; \
+	done
 
 .PHONY: build
 build: build-dev-runner build-powerctl build-powerssl-agent build-powerssl-apiserver build-powerssl-auth build-powerssl-controller build-powerssl-integration-acme build-powerssl-integration-cloudflare build-powerssl-signer build-powerssl-webapp build-powerutil
