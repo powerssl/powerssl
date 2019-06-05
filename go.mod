@@ -15,6 +15,7 @@ require (
 	github.com/eggsampler/acme v1.0.0
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/ghodss/yaml v1.0.0
+	github.com/go-bindata/go-bindata v3.1.1+incompatible
 	github.com/go-kit/kit v0.8.0
 	github.com/gogo/googleapis v1.2.0
 	github.com/gogo/protobuf v1.2.1
@@ -32,7 +33,6 @@ require (
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a
 	github.com/jmoiron/sqlx v1.2.0 // indirect
 	github.com/johanbrandhorst/certify v1.2.0
-	github.com/jteeuwen/go-bindata v3.0.7+incompatible
 	github.com/kisielk/sqlstruct v0.0.0-20150923205031-648daed35d49 // indirect
 	github.com/looplab/fsm v0.1.0
 	github.com/mattn/go-runewidth v0.0.4 // indirect
@@ -54,7 +54,7 @@ require (
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/sys v0.0.0-20190403152447-81d4e9dc473e // indirect
 	golang.org/x/text v0.3.1-0.20181227161524-e6919f6577db // indirect
-	golang.org/x/tools v0.0.0-20190529203303-fb6c8ffd2207
+	golang.org/x/tools v0.0.0-20190607135518-5aed7825b13e
 	google.golang.org/grpc v1.21.0
 	gopkg.in/square/go-jose.v2 v2.3.1
 	gopkg.in/yaml.v2 v2.2.2
