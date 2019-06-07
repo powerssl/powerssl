@@ -1,10 +1,6 @@
 package cmd
 
 import (
-	"context"
-	"flag"
-
-	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -16,42 +12,14 @@ func newCmdServe() *cobra.Command {
 		Use:   "serve",
 		Short: "Serve the gRPC Gateway",
 		Run: func(cmd *cobra.Command, args []string) {
-			// addr := viper.GetString("addr")
-			// apiserverAddr := viper.GetString("apiserver.addr")
-			// apiserverInsecure := viper.GetBool("apiserver.insecure")
-			// apiserverInsecureSkipTLSVerify := viper.GetBool("apiserver.insecure-skip-tls-verify")
-			// apiserverServerNameOverride := viper.GetString("apiserver.server-name-override")
-			// caFile := viper.GetString("ca-file")
+			addr := viper.GetString("addr")
+			apiserverAddr := viper.GetString("apiserver.addr")
+			apiserverInsecure := viper.GetBool("apiserver.insecure")
+			apiserverInsecureSkipTLSVerify := viper.GetBool("apiserver.insecure-skip-tls-verify")
+			apiserverServerNameOverride := viper.GetString("apiserver.server-name-override")
+			caFile := viper.GetString("ca-file")
 
-			// var _ = addr
-			// var _ = apiserverAddr
-			// var _ = apiserverInsecure
-			// var _ = apiserverInsecureSkipTLSVerify
-			// var _ = apiserverServerNameOverride
-			// var _ = caFile
-
-			var addr = flag.String("addr", "localhost:8080", "server addr")
-			var endpoint = flag.String("endpoint", "localhost:9090", "endpoint of the gRPC service")
-			var openapiDir = flag.String("openapi_dir", "api/openapi/powerssl/apiserver", "path to the directory which contains openapi definitions")
-
-			flag.Parse()
-			defer glog.Flush()
-
-			ctx := context.Background()
-			opts := grpcgateway.Options{
-				Addr: *addr,
-				GRPCServer: grpcgateway.Endpoint{
-					Addr:                  *endpoint,
-					CertFile:              "local/certs/ca.pem",
-					Insecure:              false,
-					InsecureSkipTLSVerify: true,
-					ServerNameOverride:    "",
-				},
-				OpenapiDir: *openapiDir,
-			}
-			if err := grpcgateway.Run(ctx, opts); err != nil {
-				glog.Fatal(err)
-			}
+			grpcgateway.Run(addr, caFile, apiserverAddr, apiserverServerNameOverride, apiserverInsecure, apiserverInsecureSkipTLSVerify)
 		},
 	}
 

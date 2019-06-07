@@ -20,7 +20,6 @@ require (
 	github.com/gogo/googleapis v1.2.0
 	github.com/gogo/protobuf v1.2.1
 	github.com/gogo/status v1.1.0
-	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/golang/protobuf v1.3.1
 	github.com/golangplus/bytes v0.0.0-20160111154220-45c989fe5450 // indirect
 	github.com/golangplus/fmt v0.0.0-20150411045040-2a5d6d7d2995 // indirect

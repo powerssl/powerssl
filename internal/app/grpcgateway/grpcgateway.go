@@ -1,95 +1,132 @@
+//go:generate go-bindata -fs -modtime 726710400 -o openapi/bindata.go -pkg openapi -prefix ../../../api/openapi ../../../api/openapi/...
+//go:generate go-bindata -fs -modtime 726710400 -o swaggerui/bindata.go -pkg swaggerui -prefix ../../../web/swagger-ui ../../../web/swagger-ui
+
 package grpcgateway
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"path"
+	"os"
 	"strings"
+	"time"
 
-	"github.com/golang/glog"
+	"github.com/go-kit/kit/log"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"golang.org/x/net/context"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 
+	"powerssl.io/powerssl/internal/app/grpcgateway/openapi"
+	"powerssl.io/powerssl/internal/app/grpcgateway/swaggerui"
 	apiv1 "powerssl.io/powerssl/internal/pkg/apiserver/api/v1"
 	"powerssl.io/powerssl/internal/pkg/util"
 )
 
-// Endpoint describes a gRPC endpoint
-type Endpoint struct {
-	Addr                  string
-	CertFile              string
-	Insecure              bool
-	InsecureSkipTLSVerify bool
-	ServerNameOverride    string
+type fileSystem struct {
+	fs http.FileSystem
 }
 
-// Options is a set of options to be passed to Run
-type Options struct {
-	// Addr is the address to listen
-	Addr string
+func (fs fileSystem) Open(path string) (http.File, error) {
+	f, err := fs.fs.Open(path)
+	if err != nil {
+		return nil, err
+	}
 
-	// GRPCServer defines an endpoint of a gRPC service
-	GRPCServer Endpoint
+	s, _ := f.Stat()
+	if s.IsDir() {
+		return nil, os.ErrNotExist
+	}
 
-	// OpenapiDir is a path to a directory from which the server
-	// serves openapi specs.
-	OpenapiDir string
-
-	// Mux is a list of options to be passed to the grpc-gateway multiplexer
-	Mux []runtime.ServeMuxOption
+	return f, nil
 }
 
 // Run starts a HTTP server and blocks while running if successful.
 // The server will be shutdown when "ctx" is canceled.
-func Run(ctx context.Context, opts Options) error {
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
+func Run(httpAddr, caFile, apiserverAddr, apiserverServerNameOverride string, apiserverInsecure, apiserverInsecureSkipTLSVerify bool) {
+	logger := util.NewLogger(os.Stdout)
 
-	conn, err := util.NewClientConn(opts.GRPCServer.Addr, opts.GRPCServer.CertFile, opts.GRPCServer.ServerNameOverride, opts.GRPCServer.Insecure, opts.GRPCServer.InsecureSkipTLSVerify)
+	g, ctx := errgroup.WithContext(context.Background())
+	g.Go(func() error {
+		return util.InterruptHandler(ctx, logger)
+	})
+
+	metricsAddr := ""
+	if metricsAddr != "" {
+		g.Go(func() error {
+			return util.ServeMetrics(ctx, metricsAddr, log.With(logger, "component", "metrics"))
+		})
+	}
+
+	conn, err := util.NewClientConn(apiserverAddr, caFile, apiserverServerNameOverride, apiserverInsecure, apiserverInsecureSkipTLSVerify)
+	if err != nil {
+		logger.Log("transport", "gRPC", "during", "Connect", "err", err)
+		os.Exit(1)
+	}
+
+	g.Go(func() error {
+		return ServeHTTP(ctx, httpAddr, log.With(logger, "component", "http"), conn)
+	})
+
+	if err := g.Wait(); err != nil {
+		switch err.(type) {
+		case util.InterruptError:
+		default:
+			logger.Log("err", err)
+		}
+	}
+}
+
+func ServeHTTP(ctx context.Context, addr string, logger log.Logger, conn *grpc.ClientConn) error {
+	swaggerUIConfigHandler, err := swaggerUIConfigEndpoint()
+	if err != nil {
+		panic(err)
+	}
+
+	gateway, err := newGateway(ctx, conn)
 	if err != nil {
 		return err
 	}
-	go func() {
-		<-ctx.Done()
-		if err := conn.Close(); err != nil {
-			glog.Errorf("Failed to close a client connection to the gRPC server: %v", err)
-		}
-	}()
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/openapi/", openapiServer(opts.OpenapiDir))
+	mux.Handle("/", gateway)
+	mux.Handle("/openapi/", http.StripPrefix("/openapi", http.FileServer(fileSystem{fs: openapi.AssetFile()})))
+	mux.Handle("/swagger-ui/", http.StripPrefix("/swagger-ui", http.FileServer(swaggerui.AssetFile())))
 	mux.HandleFunc("/healthz", healthzServer(conn))
+	mux.HandleFunc("/swagger-ui/config.json", swaggerUIConfigHandler)
 
-	gw, err := newGateway(ctx, conn, opts.Mux)
-	if err != nil {
-		return err
-	}
-	mux.Handle("/", gw)
-
-	s := &http.Server{
-		Addr:    opts.Addr,
+	srv := &http.Server{
+		Addr:    addr,
 		Handler: allowCORS(mux),
 	}
-	go func() {
-		<-ctx.Done()
-		glog.Infof("Shutting down the http server")
-		if err := s.Shutdown(context.Background()); err != nil {
-			glog.Errorf("Failed to shutdown http server: %v", err)
-		}
-	}()
 
-	glog.Infof("Starting listening at %s", opts.Addr)
-	if err := s.ListenAndServe(); err != http.ErrServerClosed {
-		glog.Errorf("Failed to listen and serve: %v", err)
-		return err
+	c := make(chan error)
+	go func() {
+		c <- srv.ListenAndServe()
+		close(c)
+	}()
+	logger.Log("listening", addr)
+	select {
+	case err := <-c:
+		logger.Log("err", err)
+		if err != http.ErrServerClosed {
+			return err
+		}
+		return nil
+	case <-ctx.Done():
+		logger.Log("err", ctx.Err())
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		if err := srv.Shutdown(shutdownCtx); err != nil {
+			return err
+		}
+		return ctx.Err()
 	}
-	return nil
 }
 
 // allowCORS allows Cross Origin Resoruce Sharing from any origin.
-// Don't do this without consideration in production systems.
+// TODO: Don't do this without consideration in production systems.
 func allowCORS(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if origin := r.Header.Get("Origin"); origin != "" {
@@ -116,8 +153,8 @@ func healthzServer(conn *grpc.ClientConn) http.HandlerFunc {
 }
 
 // newGateway returns a new gateway server which translates HTTP into gRPC.
-func newGateway(ctx context.Context, conn *grpc.ClientConn, opts []runtime.ServeMuxOption) (http.Handler, error) {
-	mux := runtime.NewServeMux(opts...)
+func newGateway(ctx context.Context, conn *grpc.ClientConn) (http.Handler, error) {
+	mux := runtime.NewServeMux()
 
 	for _, f := range []func(context.Context, *runtime.ServeMux, *grpc.ClientConn) error{
 		apiv1.RegisterACMEAccountServiceHandler,
@@ -134,29 +171,33 @@ func newGateway(ctx context.Context, conn *grpc.ClientConn, opts []runtime.Serve
 	return mux, nil
 }
 
-// openapiServer returns openapi specification files located under "/openapi/"
-func openapiServer(dir string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if !strings.HasSuffix(r.URL.Path, ".yaml") {
-			glog.Errorf("Not Found: %s", r.URL.Path)
-			http.NotFound(w, r)
-			return
-		}
-
-		glog.Infof("Serving %s", r.URL.Path)
-		p := strings.TrimPrefix(r.URL.Path, "/openapi/")
-		p = path.Join(dir, p)
-		http.ServeFile(w, r, p)
-	}
-}
-
 // preflightHandler adds the necessary headers in order to serve
 // CORS from any origin using the methods "GET", "HEAD", "POST", "PUT", "DELETE"
-// We insist, don't do this without consideration in production systems.
+// TODO: Don't do this without consideration in production systems.
 func preflightHandler(w http.ResponseWriter, r *http.Request) {
 	headers := []string{"Content-Type", "Accept", "Authorization"}
 	w.Header().Set("Access-Control-Allow-Headers", strings.Join(headers, ","))
 	methods := []string{"GET", "HEAD", "POST", "PUT", "DELETE"}
 	w.Header().Set("Access-Control-Allow-Methods", strings.Join(methods, ","))
-	glog.Infof("preflight request for %s", r.URL.Path)
+}
+
+func swaggerUIConfigEndpoint() (func(w http.ResponseWriter, req *http.Request), error) {
+	type url struct {
+		Name string `json:"name,omitempty"`
+		URL  string `json:"url,omitempty"`
+	}
+	var config struct {
+		URLs []url `json:"urls,omitempty"`
+	}
+	for _, assetName := range openapi.AssetNames() {
+		config.URLs = append(config.URLs, url{Name: assetName, URL: fmt.Sprintf("/openapi/%s", assetName)})
+	}
+	res, err := json.Marshal(config)
+	if err != nil {
+		return nil, err
+	}
+	return func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+		fmt.Fprintln(w, string(res))
+	}, nil
 }
