@@ -113,6 +113,17 @@ jobs:
       - build_component:
           component: powerssl-controller
           image: true
+  build_powerssl_grpcgateway:
+    executor: golang-executor
+    steps:
+      - build_component:
+          component: powerssl-grpcgateway
+  build_powerssl_grpcgateway_image:
+    machine: true
+    steps:
+      - build_component:
+          component: powerssl-grpcgateway
+          image: true
   build_powerssl_integration_acme:
     executor: golang-executor
     steps:
@@ -180,8 +191,26 @@ jobs:
     steps:
       - checkout
       - *restore_go_modules
-      - run: sudo apt install clang-format protobuf-compiler
-      - run: make generate
+      - run:
+          name: Install generate dependencies
+          command: sudo apt install clang-format protobuf-compiler
+      - run:
+          name: Install yq
+          command: |
+            sudo wget -O /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/2.4.0/yq_linux_amd64
+            sudo chmod +x /usr/local/bin/yq
+      - run:
+          name: Install swagger2openapi npm
+          command: |
+            curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+            sudo apt install nodejs
+            sudo npm install -g swagger2openapi
+      - run:
+          name: Install generate dependencies
+          command: make bootstrap
+      - run:
+          name: Generate code
+          command: make generate
       - run: git diff --exit-code
   test:
     executor: golang-executor
@@ -251,6 +280,14 @@ workflows:
               only: master
           requires:
             - build_powerssl_controller
+      - build_powerssl_grpcgateway:
+          requires: *test_stage
+      - build_powerssl_grpcgateway_image:
+          filters:
+            branches:
+              only: master
+          requires:
+            - build_powerssl_grpcgateway
       - build_powerssl_integration_acme:
           requires: *test_stage
       - build_powerssl_integration_acme_image:

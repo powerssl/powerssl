@@ -9,8 +9,6 @@ import (
 	proto "github.com/gogo/protobuf/proto"
 	types "github.com/gogo/protobuf/types"
 	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -2302,95 +2300,6 @@ type ACMEServiceServer interface {
 	SetGetCertificateResponse(context.Context, *SetGetCertificateResponseRequest) (*types.Empty, error)
 	GetRevokeCertificateRequest(context.Context, *Activity) (*GetRevokeCertificateRequestResponse, error)
 	SetRevokeCertificateResponse(context.Context, *SetRevokeCertificateResponseRequest) (*types.Empty, error)
-}
-
-// UnimplementedACMEServiceServer can be embedded to have forward compatible implementations.
-type UnimplementedACMEServiceServer struct {
-}
-
-func (*UnimplementedACMEServiceServer) GetCreateAccountRequest(ctx context.Context, req *Activity) (*GetCreateAccountRequestResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCreateAccountRequest not implemented")
-}
-func (*UnimplementedACMEServiceServer) SetCreateAccountResponse(ctx context.Context, req *SetCreateAccountResponseRequest) (*types.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetCreateAccountResponse not implemented")
-}
-func (*UnimplementedACMEServiceServer) GetDeactivateAccountRequest(ctx context.Context, req *Activity) (*GetDeactivateAccountRequestResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetDeactivateAccountRequest not implemented")
-}
-func (*UnimplementedACMEServiceServer) SetDeactivateAccountResponse(ctx context.Context, req *SetDeactivateAccountResponseRequest) (*types.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetDeactivateAccountResponse not implemented")
-}
-func (*UnimplementedACMEServiceServer) GetRekeyAccountRequest(ctx context.Context, req *Activity) (*GetRekeyAccountRequestResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRekeyAccountRequest not implemented")
-}
-func (*UnimplementedACMEServiceServer) SetRekeyAccountResponse(ctx context.Context, req *SetRekeyAccountResponseRequest) (*types.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetRekeyAccountResponse not implemented")
-}
-func (*UnimplementedACMEServiceServer) GetUpdateAccountRequest(ctx context.Context, req *Activity) (*GetUpdateAccountRequestResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUpdateAccountRequest not implemented")
-}
-func (*UnimplementedACMEServiceServer) SetUpdateAccountResponse(ctx context.Context, req *SetUpdateAccountResponseRequest) (*types.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetUpdateAccountResponse not implemented")
-}
-func (*UnimplementedACMEServiceServer) GetCreateOrderRequest(ctx context.Context, req *Activity) (*GetCreateOrderRequestResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCreateOrderRequest not implemented")
-}
-func (*UnimplementedACMEServiceServer) SetCreateOrderResponse(ctx context.Context, req *SetCreateOrderResponseRequest) (*types.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetCreateOrderResponse not implemented")
-}
-func (*UnimplementedACMEServiceServer) GetFinalizeOrderRequest(ctx context.Context, req *Activity) (*GetFinalizeOrderRequestResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetFinalizeOrderRequest not implemented")
-}
-func (*UnimplementedACMEServiceServer) SetFinalizeOrderResponse(ctx context.Context, req *SetFinalizeOrderResponseRequest) (*types.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetFinalizeOrderResponse not implemented")
-}
-func (*UnimplementedACMEServiceServer) GetGetOrderRequest(ctx context.Context, req *Activity) (*GetGetOrderRequestResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetGetOrderRequest not implemented")
-}
-func (*UnimplementedACMEServiceServer) SetGetOrderResponse(ctx context.Context, req *SetGetOrderResponseRequest) (*types.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetGetOrderResponse not implemented")
-}
-func (*UnimplementedACMEServiceServer) GetCreateAuthorizationRequest(ctx context.Context, req *Activity) (*GetCreateAuthorizationRequestResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCreateAuthorizationRequest not implemented")
-}
-func (*UnimplementedACMEServiceServer) SetCreateAuthorizationResponse(ctx context.Context, req *SetCreateAuthorizationResponseRequest) (*types.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetCreateAuthorizationResponse not implemented")
-}
-func (*UnimplementedACMEServiceServer) GetDeactivateAuthorizationRequest(ctx context.Context, req *Activity) (*GetDeactivateAuthorizationRequestResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetDeactivateAuthorizationRequest not implemented")
-}
-func (*UnimplementedACMEServiceServer) SetDeactivateAuthorizationResponse(ctx context.Context, req *SetDeactivateAuthorizationResponseRequest) (*types.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetDeactivateAuthorizationResponse not implemented")
-}
-func (*UnimplementedACMEServiceServer) GetGetAuthorizationRequest(ctx context.Context, req *Activity) (*GetGetAuthorizationRequestResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetGetAuthorizationRequest not implemented")
-}
-func (*UnimplementedACMEServiceServer) SetGetAuthorizationResponse(ctx context.Context, req *SetGetAuthorizationResponseRequest) (*types.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetGetAuthorizationResponse not implemented")
-}
-func (*UnimplementedACMEServiceServer) GetGetChallengeRequest(ctx context.Context, req *Activity) (*GetGetChallengeRequestResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetGetChallengeRequest not implemented")
-}
-func (*UnimplementedACMEServiceServer) SetGetChallengeResponse(ctx context.Context, req *SetGetChallengeResponseRequest) (*types.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetGetChallengeResponse not implemented")
-}
-func (*UnimplementedACMEServiceServer) GetValidateChallengeRequest(ctx context.Context, req *Activity) (*GetValidateChallengeRequestResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetValidateChallengeRequest not implemented")
-}
-func (*UnimplementedACMEServiceServer) SetValidateChallengeResponse(ctx context.Context, req *SetValidateChallengeResponseRequest) (*types.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetValidateChallengeResponse not implemented")
-}
-func (*UnimplementedACMEServiceServer) GetGetCertificateRequest(ctx context.Context, req *Activity) (*GetGetCertificateRequestResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetGetCertificateRequest not implemented")
-}
-func (*UnimplementedACMEServiceServer) SetGetCertificateResponse(ctx context.Context, req *SetGetCertificateResponseRequest) (*types.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetGetCertificateResponse not implemented")
-}
-func (*UnimplementedACMEServiceServer) GetRevokeCertificateRequest(ctx context.Context, req *Activity) (*GetRevokeCertificateRequestResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRevokeCertificateRequest not implemented")
-}
-func (*UnimplementedACMEServiceServer) SetRevokeCertificateResponse(ctx context.Context, req *SetRevokeCertificateResponseRequest) (*types.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetRevokeCertificateResponse not implemented")
 }
 
 func RegisterACMEServiceServer(s *grpc.Server, srv ACMEServiceServer) {

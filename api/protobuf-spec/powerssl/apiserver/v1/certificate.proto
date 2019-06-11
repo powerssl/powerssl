@@ -15,7 +15,7 @@ service CertificateService {
   rpc Create(CreateCertificateRequest) returns (Certificate) {
     option (google.api.http) = {
       post: "/v1/certificates"
-      body: "certificate"
+      body: "*"
     };
   }
 
@@ -46,7 +46,7 @@ service CertificateService {
   rpc Update(UpdateCertificateRequest) returns (Certificate) {
     option (google.api.http) = {
       put: "/v1/{name=certificates/*}"
-      body: "certificate"
+      body: "*"
     };
   }
 }

@@ -44,6 +44,17 @@ var Components = []Component{
 		},
 	},
 	{
+		Command: "bin/powerssl-grpcgateway",
+		Args:    "serve",
+		Env: Environment{
+			"POWERSSL_ADDR":                               "localhost:8085",
+			"POWERSSL_METRICS_ADDR":                       "localhost:9095",
+			"POWERSSL_APISERVER_ADDR":                     "localhost:8082",
+			"POWERSSL_CA_FILE":                            "local/certs/ca.pem",
+			"POWERSSL_APISERVER_INSECURE_SKIP_TLS_VERIFY": "true", // TODO: Does not work without yet.
+		},
+	},
+	{
 		Command: "bin/powerssl-signer",
 		Args:    "serve",
 		Env: Environment{

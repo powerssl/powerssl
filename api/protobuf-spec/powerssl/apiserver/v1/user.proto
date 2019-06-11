@@ -15,7 +15,7 @@ service UserService {
   rpc Create(CreateUserRequest) returns (User) {
     option (google.api.http) = {
       post: "/v1/users"
-      body: "user"
+      body: "*"
     };
   }
 
@@ -46,7 +46,7 @@ service UserService {
   rpc Update(UpdateUserRequest) returns (User) {
     option (google.api.http) = {
       put: "/v1/{name=users/*}"
-      body: "user"
+      body: "*"
     };
   }
 }
