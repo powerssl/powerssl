@@ -1,4 +1,4 @@
-//go:generate go-bindata -nometadata -pkg auth -prefix ../../../web/auth ../../../web/auth
+//go:generate gobin -m -run github.com/go-bindata/go-bindata/go-bindata -nometadata -pkg auth -prefix ../../../web/auth ../../../web/auth
 
 package auth
 

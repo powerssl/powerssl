@@ -1,4 +1,4 @@
-//go:generate go-bindata -nometadata -pkg webapp -prefix ../../../web/app ../../../web/app
+//go:generate gobin -m -run github.com/go-bindata/go-bindata/go-bindata -nometadata -pkg webapp -prefix ../../../web/app ../../../web/app
 
 package webapp
 
