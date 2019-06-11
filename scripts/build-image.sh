@@ -7,7 +7,7 @@ case "$COMPONENT" in
 		BUILD_ARG="COMPONENT=$COMPONENT"
 		DIR=grpc-server
 		;;
-	powerssl-auth|powerssl-webapp)
+	powerssl-auth|powerssl-grpcgateway|powerssl-webapp)
 		BUILD_ARG="COMPONENT=$COMPONENT"
 		DIR=web-server
 		;;
