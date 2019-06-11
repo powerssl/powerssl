@@ -1,5 +1,5 @@
-//go:generate go-bindata -fs -modtime 726710400 -o openapi/bindata.go -pkg openapi -prefix ../../../api/openapi ../../../api/openapi/...
-//go:generate go-bindata -fs -modtime 726710400 -o swaggerui/bindata.go -pkg swaggerui -prefix ../../../web/swagger-ui ../../../web/swagger-ui
+//go:generate gobin -m -run github.com/go-bindata/go-bindata/go-bindata -fs -modtime 726710400 -o openapi/bindata.go -pkg openapi -prefix ../../../api/openapi ../../../api/openapi/...
+//go:generate gobin -m -run github.com/go-bindata/go-bindata/go-bindata -fs -modtime 726710400 -o swaggerui/bindata.go -pkg swaggerui -prefix ../../../web/swagger-ui ../../../web/swagger-ui
 
 package grpcgateway
 

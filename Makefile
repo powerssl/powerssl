@@ -1,14 +1,6 @@
 .DEFAULT_GOAL := all
 .DELETE_ON_ERROR:
 
-EXTERNAL_TOOLS=\
-	github.com/ahmetb/govvv \
-	github.com/go-bindata/go-bindata/go-bindata \
-	github.com/gogo/protobuf/protoc-gen-gogo \
-	github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway \
-	github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger \
-	golang.org/x/tools/cmd/stringer
-
 define strip_powerssl
 $(shell echo ${*} | sed 's/powerssl-//')
 endef
@@ -28,10 +20,7 @@ all: build
 
 .PHONY: bootstrap
 bootstrap:
-	@for tool in $(EXTERNAL_TOOLS); do \
-		echo "Installing/Updating $$tool"; \
-		go get $$tool; \
-	done
+	GO111MODULE=off go get -u github.com/myitcv/gobin
 
 .PHONY: build
 build: build-dev-runner build-powerctl build-powerssl-agent build-powerssl-apiserver build-powerssl-auth build-powerssl-controller build-powerssl-grpcgateway build-powerssl-integration-acme build-powerssl-integration-cloudflare build-powerssl-signer build-powerssl-webapp build-powerutil

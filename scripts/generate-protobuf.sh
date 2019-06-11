@@ -27,6 +27,9 @@ trap 'rm -rf "$tmp"' EXIT
 mkdir "$tmp/powerssl.io"
 ln -s "$PWD" "$tmp/powerssl.io/powerssl"
 
+PATH="$(dirname "$(gobin -m -p github.com/gogo/protobuf/protoc-gen-gogo)"):$PATH"
+PATH="$(dirname "$(gobin -m -p github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway)"):$PATH"
+PATH="$(dirname "$(gobin -m -p github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger)"):$PATH"
 protoc --proto_path="$proto_path" --gogo_out="$mappings,plugins=grpc:$tmp" --grpc-gateway_out="logtostderr=true:$tmp" --swagger_out=logtostderr="true:$tmp" api/protobuf-spec/powerssl/apiserver/**/*.proto
 protoc --proto_path="$proto_path" --gogo_out="$mappings,plugins=grpc:$tmp" --grpc-gateway_out="logtostderr=true:$tmp" api/protobuf-spec/powerssl/controller/**/*.proto
 
