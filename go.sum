@@ -69,8 +69,8 @@ github.com/docker/go-units v0.3.3/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDD
 github.com/eapache/go-resiliency v1.1.0/go.mod h1:kFI+JgMyC7bLPUVY133qvEBtVayf5mFgVsvEsIPBvNs=
 github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21/go.mod h1:+020luEh2TKB4/GOp8oxxtq0Daoen/Cii55CzbTV6DU=
 github.com/eapache/queue v1.1.0/go.mod h1:6eCeP0CKFpHLu8blIFXhExK/dRa7WDZfr6jVFPTqq+I=
-github.com/eggsampler/acme v1.0.0 h1:sVHToytaPbCfxwbTzPcCGfe2ibs78Rh0Pt+cQzEXc0g=
-github.com/eggsampler/acme v1.0.0/go.mod h1:8WmHqL9DowF/uQ1AmTfPM7VeVGbhg/urRmS+vb2WlS4=
+github.com/eggsampler/acme/v2 v2.0.1 h1:SfhaHP/6jCWOEMdzWI/9pmNDm2yuCHd4agW7u29fEJY=
+github.com/eggsampler/acme/v2 v2.0.1/go.mod h1:kMR4S+ZCJtXb0WCg8MJkUKFQ0pyLEMQ9l5JA+CHvK2Y=
 github.com/envoyproxy/go-control-plane v0.6.9/go.mod h1:SBwIajubJHhxtWwsL9s8ss4safvEdbitLhGGK48rN6g=
 github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 h1:Yzb9+7DPaBjB8zlTR87/ElzFsnQfuHnVUVqpZZIcV5Y=
 github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5/go.mod h1:a2zkGnVExMxdzMo3M0Hi/3sEU+cWnZpSni0O6/Yb/P0=
