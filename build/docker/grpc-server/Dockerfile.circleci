@@ -5,9 +5,10 @@ RUN apk add --no-cache ca-certificates \
 
 FROM alpine:latest
 ARG COMPONENT
+ENV COMPONENT=${COMPONENT}
 COPY --from=vendor /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=vendor /usr/local/bin/grpc_health_probe /usr/local/bin/grpc_health_probe
 COPY bin/${COMPONENT} /usr/local/bin/${COMPONENT}
-ENTRYPOINT ["/usr/local/bin/${COMPONENT}"]
+ENTRYPOINT "/usr/local/bin/${COMPONENT}"
 CMD ["serve"]
 EXPOSE 8080/tcp 9090/tcp
