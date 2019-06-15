@@ -4,7 +4,7 @@
 
 ![PowerSSL Logo](https://docs.powerssl.io/assets/images/powerssl.png)
 
-PowerSSL is a certificate management platform... more description goes here.
+PowerSSL is a certificate management platform.
 
 Getting Started & Documentation
 -------------------------------
@@ -14,7 +14,7 @@ All documentation is available on the [PowerSSL documentation](https://docs.powe
 Developing PowerSSL
 -------------------
 
-If you wish to work on Vault itself or any of its built-in systems, you'll
+If you wish to work on PowerSSL itself or any of its built-in systems, you'll
 first need [Go](https://www.golang.org) installed on your machine (version
 1.12+ is *required*).
 
