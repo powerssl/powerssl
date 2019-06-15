@@ -12,7 +12,7 @@ require (
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/daviddengcn/go-colortext v0.0.0-20180409174941-186a3d44e920
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/eggsampler/acme v1.0.0
+	github.com/eggsampler/acme/v2 v2.0.1
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-bindata/go-bindata v3.1.1+incompatible
