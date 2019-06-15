@@ -3,7 +3,8 @@ RUN apk add --no-cache ca-certificates
 
 FROM alpine:latest
 ARG COMPONENT
+ENV COMPONENT=${COMPONENT}
 COPY --from=vendor /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY bin/${COMPONENT} /usr/local/bin/${COMPONENT}
-ENTRYPOINT ["/usr/local/bin/${COMPONENT}"]
+ENTRYPOINT "/usr/local/bin/${COMPONENT}"
 CMD ["run"]
