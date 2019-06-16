@@ -10,6 +10,7 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
 	github.com/cloudflare/cfssl v0.0.0-20190510060611-9c027c93ba9e
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
+	github.com/coreos/etcd v3.3.10+incompatible
 	github.com/daviddengcn/go-colortext v0.0.0-20180409174941-186a3d44e920
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eggsampler/acme/v2 v2.0.1

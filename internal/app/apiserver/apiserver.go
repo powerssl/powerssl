@@ -3,7 +3,9 @@ package apiserver
 import (
 	"context"
 	"os"
+	"time"
 
+	"github.com/coreos/etcd/clientv3"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/prometheus"
 	"github.com/jinzhu/gorm"
@@ -57,6 +59,20 @@ func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile s
 		validations.RegisterCallbacks(db)
 	}
 
+	var etcd *clientv3.Client
+	{
+		var err error
+		etcd, err = clientv3.New(clientv3.Config{
+			Endpoints:   []string{"localhost:2379"},
+			DialTimeout: 5 * time.Second,
+		})
+		if err != nil {
+			logger.Log("etcd", "during", "Connect", "err", err)
+			os.Exit(1)
+		}
+		defer etcd.Close()
+	}
+
 	var client *controllerclient.GRPCClient
 	{
 		token, err := auth.NewServiceToken(controllerAuthToken)
@@ -79,7 +95,7 @@ func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile s
 		}
 	}
 
-	services, err := makeServices(db, logger, tracer, duration, client, vaultClient, jwksURL)
+	services, err := makeServices(db, etcd, logger, tracer, duration, client, vaultClient, jwksURL)
 	if err != nil {
 		logger.Log("err", err)
 		os.Exit(1)

@@ -1,6 +1,7 @@
 package apiserver
 
 import (
+	"github.com/coreos/etcd/clientv3"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
 	"github.com/jinzhu/gorm"
@@ -16,7 +17,7 @@ import (
 	controllerclient "powerssl.io/powerssl/pkg/controller/client"
 )
 
-func makeServices(db *gorm.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *controllerclient.GRPCClient, vaultClient *vault.Client, jwtPublicKeyFile string) ([]util.Service, error) {
+func makeServices(db *gorm.DB, etcd *clientv3.Client, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *controllerclient.GRPCClient, vaultClient *vault.Client, jwtPublicKeyFile string) ([]util.Service, error) {
 	auth, err := auth.NewParser(jwtPublicKeyFile)
 	if err != nil {
 		return nil, err
