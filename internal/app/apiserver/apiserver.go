@@ -25,7 +25,7 @@ import (
 
 const component = "powerssl-apiserver"
 
-func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialect, dbConnection, metricsAddr, tracerImpl, caFile, controllerAddr, controllerServerNameOverride string, controllerInsecure, controllerInsecureSkipTLSVerify bool, jwksURL, controllerAuthToken string) {
+func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialect, dbConnection, metricsAddr, tracerImpl, caFile, controllerAddr, controllerServerNameOverride string, controllerInsecure, controllerInsecureSkipTLSVerify bool, jwksURL, controllerAuthToken string, etcdEndpoints []string) {
 	logger := util.NewLogger(os.Stdout)
 
 	g, ctx := errgroup.WithContext(context.Background())
@@ -62,8 +62,9 @@ func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile s
 	var etcd *clientv3.Client
 	{
 		var err error
+		// TODO: Add auth options here later as well
 		etcd, err = clientv3.New(clientv3.Config{
-			Endpoints:   []string{"localhost:2379"},
+			Endpoints:   etcdEndpoints,
 			DialTimeout: 5 * time.Second,
 		})
 		if err != nil {

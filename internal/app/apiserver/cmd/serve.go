@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -31,6 +32,7 @@ func newCmdServe() *cobra.Command {
 			tlsPrivateKeyFile := viper.GetString("tls.private-key-file")
 			vaultToken := viper.GetString("vault.token")
 			vaultURL := viper.GetString("vault.url")
+			etcdEndpointsStr := viper.GetString("etcd.endpoints")
 
 			var metricsAddr string
 			if !viper.GetBool("no-metrics") {
@@ -66,6 +68,15 @@ func newCmdServe() *cobra.Command {
 				ok = false
 				fmt.Println("Provide controller-addr")
 			}
+
+			var etcdEndpoints []string
+			if etcdEndpointsStr == "" {
+				ok = false
+				fmt.Println("Provide etcd-endpoints")
+			} else {
+				etcdEndpoints = strings.Split(etcdEndpointsStr, ",")
+			}
+
 			if !controllerInsecure && !controllerInsecureSkipTLSVerify && caFile == "" {
 				ok = false
 				fmt.Println("Provide ca-file")
@@ -74,7 +85,7 @@ func newCmdServe() *cobra.Command {
 				os.Exit(1)
 			}
 
-			apiserver.Run(addr, commonName, vaultURL, vaultToken, tlsCertFile, tlsPrivateKeyFile, insecure, dbDialect, dbConnection, metricsAddr, tracer, caFile, controllerAddr, controllerServerNameOverride, controllerInsecure, controllerInsecureSkipTLSVerify, jwksURL, controllerAuthToken)
+			apiserver.Run(addr, commonName, vaultURL, vaultToken, tlsCertFile, tlsPrivateKeyFile, insecure, dbDialect, dbConnection, metricsAddr, tracer, caFile, controllerAddr, controllerServerNameOverride, controllerInsecure, controllerInsecureSkipTLSVerify, jwksURL, controllerAuthToken, etcdEndpoints)
 		},
 	}
 
@@ -98,6 +109,7 @@ func newCmdServe() *cobra.Command {
 	cmd.Flags().StringP("tracer", "", "jaeger", "Tracing implementation")
 	cmd.Flags().StringP("vault-token", "", "", "Vault Token")
 	cmd.Flags().StringP("vault-url", "", "", "Vault URL")
+	cmd.Flags().StringP("etcd-endpoints", "", "127.0.0.1:2379", "Etcd store endpoints")
 
 	viper.BindPFlag("addr", cmd.Flags().Lookup("addr"))
 	viper.BindPFlag("ca-file", cmd.Flags().Lookup("ca-file"))
@@ -119,6 +131,7 @@ func newCmdServe() *cobra.Command {
 	viper.BindPFlag("tracer", cmd.Flags().Lookup("tracer"))
 	viper.BindPFlag("vault.token", cmd.Flags().Lookup("vault-token"))
 	viper.BindPFlag("vault.url", cmd.Flags().Lookup("vault-url"))
+	viper.BindPFlag("etcd.endpoints", cmd.Flags().Lookup("etcd-endpoints"))
 
 	return cmd
 }
