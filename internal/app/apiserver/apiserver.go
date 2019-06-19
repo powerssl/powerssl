@@ -23,15 +23,18 @@ import (
 
 const component = "powerssl-apiserver"
 
-func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile string, grpcInsecure bool, dbDialect, dbConnection, metricsAddr, tracerImpl, caFile, controllerAddr, controllerServerNameOverride string, controllerInsecure, controllerInsecureSkipTLSVerify bool, jwksURL, controllerAuthToken string) {
+func Run(cfg *Config) {
 	logger := util.NewLogger(os.Stdout)
+
+	cfg.ServerConfig.VaultRole = component
+	util.ValidateConfig(cfg, logger)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
 		return util.InterruptHandler(ctx, logger)
 	})
 
-	tracer, closer, err := tracing.Init(component, tracerImpl, log.With(logger, "component", "tracing"))
+	tracer, closer, err := tracing.Init(component, cfg.Tracer, log.With(logger, "component", "tracing"))
 	if err != nil {
 		logger.Log("component", "tracing", "err", err)
 		os.Exit(1)
@@ -48,8 +51,8 @@ func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile s
 	var db *gorm.DB
 	{
 		var err error
-		if db, err = gorm.Open(dbDialect, dbConnection); err != nil {
-			logger.Log("database", dbDialect, "during", "Open", "err", err)
+		if db, err = gorm.Open(cfg.DBDialect, cfg.DBConnection); err != nil {
+			logger.Log("database", cfg.DBDialect, "during", "Open", "err", err)
 			os.Exit(1)
 		}
 		defer db.Close()
@@ -59,12 +62,12 @@ func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile s
 
 	var client *controllerclient.GRPCClient
 	{
-		token, err := auth.NewServiceToken(controllerAuthToken)
+		token, err := auth.NewServiceToken(cfg.AuthToken)
 		if err != nil {
 			logger.Log("err", err)
 			os.Exit(1)
 		}
-		if client, err = controllerclient.NewGRPCClient(controllerAddr, caFile, controllerServerNameOverride, controllerInsecure, controllerInsecureSkipTLSVerify, token, logger, tracer); err != nil {
+		if client, err = controllerclient.NewGRPCClient(ctx, cfg.ControllerClientConfig, token, logger, tracer); err != nil {
 			logger.Log("transport", "gRPC", "during", "Connect", "err", err)
 			os.Exit(1)
 		}
@@ -73,26 +76,26 @@ func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile s
 	var vaultClient *vault.Client
 	{
 		var err error
-		if vaultClient, err = vault.New(vaultURL, vaultToken, caFile); err != nil {
+		if vaultClient, err = vault.New(cfg.VaultClientConfig.URL, cfg.VaultClientConfig.Token, cfg.VaultClientConfig.CAFile); err != nil {
 			logger.Log("err", err)
 			os.Exit(1)
 		}
 	}
 
-	services, err := makeServices(db, logger, tracer, duration, client, vaultClient, jwksURL)
+	services, err := makeServices(db, logger, tracer, duration, client, vaultClient, cfg.JWKSURL)
 	if err != nil {
 		logger.Log("err", err)
 		os.Exit(1)
 	}
 
-	if metricsAddr != "" {
+	if cfg.MetricsAddr != "" {
 		g.Go(func() error {
-			return util.ServeMetrics(ctx, metricsAddr, log.With(logger, "component", "metrics"))
+			return util.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
 		})
 	}
 
 	g.Go(func() error {
-		return util.ServeGRPC(ctx, grpcAddr, grpcCertFile, grpcKeyFile, caFile, commonName, vaultURL, vaultToken, component, grpcInsecure, log.With(logger, "transport", "gRPC"), services)
+		return util.ServeGRPC(ctx, cfg.ServerConfig, log.With(logger, "transport", "gRPC"), services)
 	})
 
 	if err := g.Wait(); err != nil {

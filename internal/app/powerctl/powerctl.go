@@ -1,6 +1,7 @@
 package powerctl
 
 import (
+	"context"
 	"errors"
 	"os"
 
@@ -14,17 +15,24 @@ import (
 func NewGRPCClient() (*apiserverclient.GRPCClient, error) {
 	addr := viper.GetString("addr")
 	authToken := viper.GetString("auth-token")
-	certFile := viper.GetString("ca-file")
+	caFle := viper.GetString("ca-file")
 	insecure := viper.GetBool("insecure")
 	insecureSkipTLSVerify := viper.GetBool("insecure-skip-tls-verify")
 	serverNameOverride := viper.GetString("server-name-override")
 	if addr == "" {
 		return nil, errors.New("provide addr")
 	}
-	if !insecure && !insecureSkipTLSVerify && certFile == "" {
+	if !insecure && !insecureSkipTLSVerify && caFle == "" {
 		return nil, errors.New("provide ca-file")
 	}
 	logger := util.NewLogger(os.Stdout)
 	tracer, _, _ := tracing.NewNoopTracer("powerctl", logger)
-	return apiserverclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, authToken, logger, tracer)
+	cfg := &util.ClientConfig{
+		Addr:                  addr,
+		CAFile:                caFle,
+		Insecure:              insecure,
+		InsecureSkipTLSVerify: insecureSkipTLSVerify,
+		ServerNameOverride:    serverNameOverride,
+	}
+	return apiserverclient.NewGRPCClient(context.TODO(), cfg, authToken, logger, tracer)
 }

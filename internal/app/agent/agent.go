@@ -11,8 +11,10 @@ import (
 	apiserverclient "powerssl.io/powerssl/pkg/apiserver/client"
 )
 
-func Run(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, authToken string) {
+func Run(cfg *Config) {
 	logger := util.NewLogger(os.Stdout)
+
+	util.ValidateConfig(cfg, logger)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
@@ -21,7 +23,7 @@ func Run(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVer
 
 	g.Go(func() error {
 		tracer, _, _ := tracing.NewNoopTracer("powerssl-agent", logger)
-		client, err := apiserverclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, authToken, logger, tracer)
+		client, err := apiserverclient.NewGRPCClient(ctx, cfg.APIServerClientConfig, cfg.AuthToken, logger, tracer)
 		if err != nil {
 			logger.Log("transport", "gRPC", "err", err)
 			os.Exit(1)

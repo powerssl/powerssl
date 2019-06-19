@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -11,36 +8,31 @@ import (
 )
 
 func newCmdServe() *cobra.Command {
+	var (
+		addr        string
+		apiAddr     string
+		authURI     string
+		metricsAddr string
+	)
+
 	cmd := &cobra.Command{
 		Use:   "serve",
 		Short: "Serve the API",
-		Run: func(cmd *cobra.Command, args []string) {
-			addr := viper.GetString("addr")
-			authURI := viper.GetString("auth-uri")
-			apiAddr := viper.GetString("api-addr")
-			var metricsAddr string
+		PreRun: func(cmd *cobra.Command, args []string) {
+			addr = viper.GetString("addr")
+			apiAddr = viper.GetString("api-addr")
+			authURI = viper.GetString("auth-uri")
 			if !viper.GetBool("no-metrics") {
 				metricsAddr = viper.GetString("metrics-addr")
 			}
-
-			ok := true
-			if addr == "" {
-				ok = false
-				fmt.Println("Provide addr")
-			}
-			if authURI == "" {
-				ok = false
-				fmt.Println("Provide auth-uri")
-			}
-			if apiAddr == "" {
-				ok = false
-				fmt.Println("Provide api-addr")
-			}
-			if !ok {
-				os.Exit(1)
-			}
-
-			webapp.Run(addr, metricsAddr, authURI, apiAddr)
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			webapp.Run(&webapp.Config{
+				Addr:        addr,
+				APIAddr:     apiAddr,
+				AuthURI:     authURI,
+				MetricsAddr: metricsAddr,
+			})
 		},
 	}
 

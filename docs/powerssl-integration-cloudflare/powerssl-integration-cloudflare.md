@@ -23,4 +23,4 @@ powerssl-integration-cloudflare provides PowerSSL Cloudflare integration.
 
 ### SEE ALSO
 
-* [powerssl-integration-cloudflare run](/powerssl-integration-cloudflare/run)	 - Run ACME integration
+* [powerssl-integration-cloudflare run](/powerssl-integration-cloudflare/run)	 - Run CloudFlare integration

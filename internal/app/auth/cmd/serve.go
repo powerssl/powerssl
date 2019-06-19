@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -11,36 +8,31 @@ import (
 )
 
 func newCmdServe() *cobra.Command {
+	var (
+		addr              string
+		jwtPrivateKeyFile string
+		metricsAddr       string
+		webAppURI         string
+	)
+
 	cmd := &cobra.Command{
 		Use:   "serve",
 		Short: "Serve the API",
-		Run: func(cmd *cobra.Command, args []string) {
-			addr := viper.GetString("addr")
-			var metricsAddr string
+		PreRun: func(cmd *cobra.Command, args []string) {
+			addr = viper.GetString("addr")
+			jwtPrivateKeyFile = viper.GetString("jwt.private-key-file")
 			if !viper.GetBool("no-metrics") {
 				metricsAddr = viper.GetString("metrics-addr")
 			}
-			jwtPrivateKeyFile := viper.GetString("jwt.private-key-file")
-			webappURI := viper.GetString("webapp-uri")
-
-			ok := true
-			if addr == "" {
-				ok = false
-				fmt.Println("Provide addr")
-			}
-			if jwtPrivateKeyFile == "" {
-				ok = false
-				fmt.Println("Provide jwt-private-key-file")
-			}
-			if webappURI == "" {
-				ok = false
-				fmt.Println("Provide webapp-uri")
-			}
-			if !ok {
-				os.Exit(1)
-			}
-
-			auth.Run(addr, metricsAddr, jwtPrivateKeyFile, webappURI)
+			webAppURI = viper.GetString("webapp-uri")
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			auth.Run(&auth.Config{
+				Addr:              addr,
+				JWTPrivateKeyFile: jwtPrivateKeyFile,
+				MetricsAddr:       metricsAddr,
+				WebAppURI:         webAppURI,
+			})
 		},
 	}
 

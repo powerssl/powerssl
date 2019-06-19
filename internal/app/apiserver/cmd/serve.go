@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -11,70 +8,85 @@ import (
 )
 
 func newCmdServe() *cobra.Command {
+	var (
+		addr                            string
+		caFile                          string
+		commonName                      string
+		controllerAddr                  string
+		authToken                       string
+		controllerInsecure              bool
+		controllerInsecureSkipTLSVerify bool
+		controllerServerNameOverride    string
+		dbConnection                    string
+		dbDialect                       string
+		insecure                        bool
+		jwksURL                         string
+		metricsAddr                     string
+		tlsCertFile                     string
+		tlsPrivateKeyFile               string
+		tracer                          string
+		vaultToken                      string
+		vaultURL                        string
+	)
+
 	cmd := &cobra.Command{
 		Use:   "serve",
 		Short: "Serve the API",
-		Run: func(cmd *cobra.Command, args []string) {
-			addr := viper.GetString("addr")
-			caFile := viper.GetString("ca-file")
-			commonName := viper.GetString("common-name")
-			controllerAddr := viper.GetString("controller.addr")
-			controllerAuthToken := viper.GetString("controller.auth-token")
-			controllerInsecure := viper.GetBool("controller.insecure")
-			controllerInsecureSkipTLSVerify := viper.GetBool("controller.insecure-skip-tls-verify")
-			controllerServerNameOverride := viper.GetString("controller.server-name-override")
-			dbConnection := viper.GetString("db.connection")
-			dbDialect := viper.GetString("db.dialect")
-			insecure := viper.GetBool("insecure")
-			jwksURL := viper.GetString("jwks-url")
-			tlsCertFile := viper.GetString("tls.cert-file")
-			tlsPrivateKeyFile := viper.GetString("tls.private-key-file")
-			vaultToken := viper.GetString("vault.token")
-			vaultURL := viper.GetString("vault.url")
-
-			var metricsAddr string
+		PreRun: func(cmd *cobra.Command, args []string) {
+			addr = viper.GetString("addr")
+			authToken = viper.GetString("auth-token")
+			caFile = viper.GetString("ca-file")
+			commonName = viper.GetString("common-name")
+			controllerAddr = viper.GetString("controller.addr")
+			controllerInsecure = viper.GetBool("controller.insecure")
+			controllerInsecureSkipTLSVerify = viper.GetBool("controller.insecure-skip-tls-verify")
+			controllerServerNameOverride = viper.GetString("controller.server-name-override")
+			dbConnection = viper.GetString("db.connection")
+			dbDialect = viper.GetString("db.dialect")
+			insecure = viper.GetBool("insecure")
+			jwksURL = viper.GetString("jwks-url")
 			if !viper.GetBool("no-metrics") {
 				metricsAddr = viper.GetString("metrics-addr")
 			}
-			var tracer string
+			tlsCertFile = viper.GetString("tls.cert-file")
+			tlsPrivateKeyFile = viper.GetString("tls.private-key-file")
 			if !viper.GetBool("no-tracing") {
 				tracer = viper.GetString("tracer")
 			}
-
-			ok := true
-			if addr == "" {
-				ok = false
-				fmt.Println("Provide addr")
-			}
-			if dbConnection == "" {
-				ok = false
-				fmt.Println("Provide db-connection")
-			}
-			if dbDialect == "" {
-				ok = false
-				fmt.Println("Provide db-dialect")
-			}
-			if !insecure && commonName == "" && (tlsCertFile == "" || tlsPrivateKeyFile == "") {
-				ok = false
-				fmt.Println("Provide common-name or tls-cert-file and tls-private-key")
-			}
-			if jwksURL == "" {
-				ok = false
-				fmt.Println("Provide jwks-url")
-			}
-			if controllerAddr == "" {
-				ok = false
-				fmt.Println("Provide controller-addr")
-			}
-			if !controllerInsecure && !controllerInsecureSkipTLSVerify && caFile == "" {
-				ok = false
-				fmt.Println("Provide ca-file")
-			}
-			if !ok {
-				os.Exit(1)
-			}
-
-			apiserver.Run(addr, commonName, vaultURL, vaultToken, tlsCertFile, tlsPrivateKeyFile, insecure, dbDialect, dbConnection, metricsAddr, tracer, caFile, controllerAddr, controllerServerNameOverride, controllerInsecure, controllerInsecureSkipTLSVerify, jwksURL, controllerAuthToken)
+			vaultToken = viper.GetString("vault.token")
+			vaultURL = viper.GetString("vault.url")
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			apiserver.Run(&apiserver.Config{
+				AuthToken: authToken,
+				ControllerClientConfig: &apiserver.ControllerClientConfig{
+					CAFile:                caFile,
+					Addr:                  controllerAddr,
+					Insecure:              controllerInsecure,
+					InsecureSkipTLSVerify: controllerInsecureSkipTLSVerify,
+					ServerNameOverride:    controllerServerNameOverride,
+				},
+				DBConnection: dbConnection,
+				DBDialect:    dbDialect,
+				JWKSURL:      jwksURL,
+				MetricsAddr:  metricsAddr,
+				ServerConfig: &apiserver.ServerConfig{
+					Addr:       addr,
+					CAFile:     caFile,
+					CertFile:   tlsCertFile,
+					CommonName: commonName,
+					Insecure:   insecure,
+					KeyFile:    tlsPrivateKeyFile,
+					VaultToken: vaultToken,
+					VaultURL:   vaultURL,
+				},
+				Tracer: tracer,
+				VaultClientConfig: &apiserver.VaultClientConfig{
+					CAFile: caFile,
+					Token:  vaultToken,
+					URL:    vaultURL,
+				},
+			})
 		},
 	}
 
@@ -84,10 +96,10 @@ func newCmdServe() *cobra.Command {
 	cmd.Flags().BoolP("no-metrics", "", false, "Do not serve metrics")
 	cmd.Flags().BoolP("no-tracing", "", false, "Do not trace")
 	cmd.Flags().StringP("addr", "", ":8080", "GRPC Addr")
+	cmd.Flags().StringP("auth-token", "", "", "Authentication token")
 	cmd.Flags().StringP("ca-file", "", "", "Certificate authority file")
 	cmd.Flags().StringP("common-name", "", "", "API Server common name")
 	cmd.Flags().StringP("controller-addr", "", "", "GRPC address of Controller")
-	cmd.Flags().StringP("controller-auth-token", "", "", "Controller authentication token")
 	cmd.Flags().StringP("controller-server-name-override", "", "", "It will override the virtual host name of authority")
 	cmd.Flags().StringP("db-connection", "", "/tmp/powerssl.sqlie3", "DB connection")
 	cmd.Flags().StringP("db-dialect", "", "sqlite3", "DB Dialect")
@@ -100,10 +112,10 @@ func newCmdServe() *cobra.Command {
 	cmd.Flags().StringP("vault-url", "", "", "Vault URL")
 
 	viper.BindPFlag("addr", cmd.Flags().Lookup("addr"))
+	viper.BindPFlag("auth-token", cmd.Flags().Lookup("auth-token"))
 	viper.BindPFlag("ca-file", cmd.Flags().Lookup("ca-file"))
 	viper.BindPFlag("common-name", cmd.Flags().Lookup("common-name"))
 	viper.BindPFlag("controller.addr", cmd.Flags().Lookup("controller-addr"))
-	viper.BindPFlag("controller.auth-token", cmd.Flags().Lookup("controller-auth-token"))
 	viper.BindPFlag("controller.insecure", cmd.Flags().Lookup("controller-insecure"))
 	viper.BindPFlag("controller.insecure-skip-tls-verify", cmd.Flags().Lookup("controller-insecure-skip-tls-verify"))
 	viper.BindPFlag("controller.server-name-override", cmd.Flags().Lookup("controller-server-name-override"))

@@ -15,15 +15,18 @@ import (
 
 const component = "powerssl-signer"
 
-func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile string, grpcInsecure bool, metricsAddr, tracerImpl, caFile string) {
+func Run(cfg *Config) {
 	logger := util.NewLogger(os.Stdout)
+
+	cfg.ServerConfig.VaultRole = component
+	util.ValidateConfig(cfg, logger)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
 		return util.InterruptHandler(ctx, logger)
 	})
 
-	tracer, closer, err := tracing.Init(component, tracerImpl, log.With(logger, "component", "tracing"))
+	tracer, closer, err := tracing.Init(component, cfg.Tracer, log.With(logger, "component", "tracing"))
 	if err != nil {
 		logger.Log("component", "tracing", "err", err)
 		os.Exit(1)
@@ -43,14 +46,14 @@ func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile s
 
 	var services []util.Service
 
-	if metricsAddr != "" {
+	if cfg.MetricsAddr != "" {
 		g.Go(func() error {
-			return util.ServeMetrics(ctx, metricsAddr, log.With(logger, "component", "metrics"))
+			return util.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
 		})
 	}
 
 	g.Go(func() error {
-		return util.ServeGRPC(ctx, grpcAddr, grpcCertFile, grpcKeyFile, caFile, commonName, vaultURL, vaultToken, component, grpcInsecure, log.With(logger, "transport", "gRPC"), services)
+		return util.ServeGRPC(ctx, cfg.ServerConfig, log.With(logger, "transport", "gRPC"), services)
 	})
 
 	if err := g.Wait(); err != nil {

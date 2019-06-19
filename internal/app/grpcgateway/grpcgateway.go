@@ -42,31 +42,34 @@ func (fs fileSystem) Open(path string) (http.File, error) {
 	return f, nil
 }
 
-// Run starts a HTTP server and blocks while running if successful.
-// The server will be shutdown when "ctx" is canceled.
-func Run(httpAddr, caFile, apiserverAddr, apiserverServerNameOverride string, apiserverInsecure, apiserverInsecureSkipTLSVerify bool) {
+func Run(cfg *Config) {
 	logger := util.NewLogger(os.Stdout)
+
+	util.ValidateConfig(cfg, logger)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
 		return util.InterruptHandler(ctx, logger)
 	})
 
-	metricsAddr := ""
-	if metricsAddr != "" {
+	var conn *grpc.ClientConn
+	{
+		var err error
+		conn, err = util.NewClientConn(ctx, cfg.APIServerClientConfig)
+		if err != nil {
+			logger.Log("transport", "gRPC", "during", "Connect", "err", err)
+			os.Exit(1)
+		}
+	}
+
+	if cfg.MetricsAddr != "" {
 		g.Go(func() error {
-			return util.ServeMetrics(ctx, metricsAddr, log.With(logger, "component", "metrics"))
+			return util.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
 		})
 	}
 
-	conn, err := util.NewClientConn(apiserverAddr, caFile, apiserverServerNameOverride, apiserverInsecure, apiserverInsecureSkipTLSVerify)
-	if err != nil {
-		logger.Log("transport", "gRPC", "during", "Connect", "err", err)
-		os.Exit(1)
-	}
-
 	g.Go(func() error {
-		return ServeHTTP(ctx, httpAddr, log.With(logger, "component", "http"), conn)
+		return ServeHTTP(ctx, cfg.Addr, log.With(logger, "component", "http"), conn)
 	})
 
 	if err := g.Wait(); err != nil {
@@ -81,7 +84,7 @@ func Run(httpAddr, caFile, apiserverAddr, apiserverServerNameOverride string, ap
 func ServeHTTP(ctx context.Context, addr string, logger log.Logger, conn *grpc.ClientConn) error {
 	swaggerUIConfigHandler, err := swaggerUIConfigEndpoint()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	gateway, err := newGateway(ctx, conn)

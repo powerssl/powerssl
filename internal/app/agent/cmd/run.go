@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -11,35 +8,37 @@ import (
 )
 
 func newCmdRun() *cobra.Command {
+	var (
+		addr                  string
+		authToken             string
+		caFile                string
+		insecure              bool
+		insecureSkipTLSVerify bool
+		serverNameOverride    string
+	)
+
 	cmd := &cobra.Command{
 		Use:   "run",
 		Short: "Run the Agent",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			addr = viper.GetString("addr")
+			authToken = viper.GetString("auth-token")
+			caFile = viper.GetString("ca-file")
+			insecure = viper.GetBool("insecure")
+			insecureSkipTLSVerify = viper.GetBool("insecure-skip-tls-verify")
+			serverNameOverride = viper.GetString("server-name-override")
+		},
 		Run: func(cmd *cobra.Command, args []string) {
-			addr := viper.GetString("addr")
-			authToken := viper.GetString("auth-token")
-			caFile := viper.GetString("ca-file")
-			insecure := viper.GetBool("insecure")
-			insecureSkipTLSVerify := viper.GetBool("insecure-skip-tls-verify")
-			serverNameOverride := viper.GetString("server-name-override")
-
-			ok := true
-			if addr == "" {
-				ok = false
-				fmt.Println("Provide addr")
-			}
-			if authToken == "" {
-				ok = false
-				fmt.Println("Provide auth-token")
-			}
-			if !insecure && !insecureSkipTLSVerify && caFile == "" {
-				ok = false
-				fmt.Println("Provide ca-file")
-			}
-			if !ok {
-				os.Exit(1)
-			}
-
-			agent.Run(addr, caFile, serverNameOverride, insecure, insecureSkipTLSVerify, authToken)
+			agent.Run(&agent.Config{
+				APIServerClientConfig: &agent.APIServerClientConfig{
+					Addr:                  addr,
+					CAFile:                caFile,
+					Insecure:              insecure,
+					InsecureSkipTLSVerify: insecureSkipTLSVerify,
+					ServerNameOverride:    serverNameOverride,
+				},
+				AuthToken: authToken,
+			})
 		},
 	}
 

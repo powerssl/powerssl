@@ -21,10 +21,10 @@ powerssl-apiserver serve [flags]
 
 ```
       --addr string                              GRPC Addr (default ":8080")
+      --auth-token string                        Authentication token
       --ca-file string                           Certificate authority file
       --common-name string                       API Server common name
       --controller-addr string                   GRPC address of Controller
-      --controller-auth-token string             Controller authentication token
       --controller-insecure                      Use insecure communication
       --controller-insecure-skip-tls-verify      Accepts any certificate presented by the server and any host name in that certificate
       --controller-server-name-override string   It will override the virtual host name of authority

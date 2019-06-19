@@ -23,4 +23,4 @@ powerssl-controller provides PowerSSL Controller.
 
 ### SEE ALSO
 
-* [powerssl-controller serve](/powerssl-controller/serve)	 - Serve the API
+* [powerssl-controller serve](/powerssl-controller/serve)	 - Serve the Controller

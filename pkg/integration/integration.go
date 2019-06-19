@@ -42,15 +42,17 @@ type integration struct {
 	handler Integration
 }
 
-func Run(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, metricsAddr, tracerImpl string, kind kind, name string, handler interface{}) {
+func Run(cfg *Config, kind kind, name string, handler interface{}) {
 	logger := util.NewLogger(os.Stdout)
+
+	util.ValidateConfig(cfg, logger)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
 		return util.InterruptHandler(ctx, logger)
 	})
 
-	tracer, closer, err := tracing.Init(fmt.Sprintf("powerssl-integration-%s", kind), tracerImpl, log.With(logger, "component", "tracing"))
+	tracer, closer, err := tracing.Init(fmt.Sprintf("powerssl-integration-%s", kind), cfg.Tracer, log.With(logger, "component", "tracing"))
 	if err != nil {
 		logger.Log("component", "tracing", "err", err)
 		os.Exit(1)
@@ -59,9 +61,8 @@ func Run(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVer
 
 	var client *controllerclient.GRPCClient
 	{
-		var authToken string
 		var err error
-		if client, err = controllerclient.NewGRPCClient(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify, authToken, logger, tracer); err != nil {
+		if client, err = controllerclient.NewGRPCClient(ctx, cfg.ControllerClientConfig, cfg.AuthToken, logger, tracer); err != nil {
 			logger.Log("transport", "gRPC", "during", "Connect", "err", err)
 			os.Exit(1)
 		}
@@ -77,9 +78,9 @@ func Run(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVer
 		// integrationhandler = integrationdns.New(client.DNS, handler.(integrationdns.Integration))
 	}
 
-	if metricsAddr != "" {
+	if cfg.MetricsAddr != "" {
 		g.Go(func() error {
-			return util.ServeMetrics(ctx, metricsAddr, log.With(logger, "component", "metrics"))
+			return util.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
 		})
 	}
 

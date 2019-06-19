@@ -21,6 +21,7 @@ powerssl-integration-acme run [flags]
 
 ```
       --addr string                   GRPC address of Controller
+      --auth-token string             Authentication token
       --ca-file string                Certificate authority file
   -h, --help                          help for run
       --insecure                      Use insecure communication
