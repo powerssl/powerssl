@@ -21,6 +21,7 @@ import (
 	"powerssl.io/powerssl/internal/app/grpcgateway/openapi"
 	"powerssl.io/powerssl/internal/app/grpcgateway/swaggerui"
 	apiv1 "powerssl.io/powerssl/internal/pkg/apiserver/api/v1"
+	"powerssl.io/powerssl/internal/pkg/transport"
 	"powerssl.io/powerssl/internal/pkg/util"
 )
 
@@ -55,7 +56,7 @@ func Run(cfg *Config) {
 	var conn *grpc.ClientConn
 	{
 		var err error
-		conn, err = util.NewClientConn(ctx, cfg.APIServerClientConfig)
+		conn, err = transport.NewClientConn(ctx, cfg.APIServerClientConfig)
 		if err != nil {
 			logger.Log("transport", "gRPC", "during", "Connect", "err", err)
 			os.Exit(1)
@@ -64,7 +65,7 @@ func Run(cfg *Config) {
 
 	if cfg.MetricsAddr != "" {
 		g.Go(func() error {
-			return util.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
 		})
 	}
 

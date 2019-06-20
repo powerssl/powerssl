@@ -11,7 +11,7 @@ import (
 	certificatetransport "powerssl.io/powerssl/internal/app/apiserver/certificate/transport"
 	usertransport "powerssl.io/powerssl/internal/app/apiserver/user/transport"
 	"powerssl.io/powerssl/internal/pkg/auth"
-	"powerssl.io/powerssl/internal/pkg/util"
+	"powerssl.io/powerssl/internal/pkg/transport"
 	"powerssl.io/powerssl/pkg/apiserver/acmeaccount"
 	"powerssl.io/powerssl/pkg/apiserver/acmeserver"
 	"powerssl.io/powerssl/pkg/apiserver/certificate"
@@ -25,8 +25,8 @@ type GRPCClient struct {
 	User        user.Service
 }
 
-func NewGRPCClient(ctx context.Context, cfg *util.ClientConfig, authToken string, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
-	conn, err := util.NewClientConn(ctx, cfg)
+func NewGRPCClient(ctx context.Context, cfg *transport.ClientConfig, authToken string, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
+	conn, err := transport.NewClientConn(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}

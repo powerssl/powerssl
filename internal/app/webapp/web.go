@@ -13,6 +13,7 @@ import (
 	"github.com/go-kit/kit/log"
 	"golang.org/x/sync/errgroup"
 
+	"powerssl.io/powerssl/internal/pkg/transport"
 	"powerssl.io/powerssl/internal/pkg/util"
 )
 
@@ -28,7 +29,7 @@ func Run(cfg *Config) {
 
 	if cfg.MetricsAddr != "" {
 		g.Go(func() error {
-			return util.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
 		})
 	}
 

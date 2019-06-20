@@ -10,6 +10,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"powerssl.io/powerssl/internal/pkg/tracing"
+	"powerssl.io/powerssl/internal/pkg/transport"
 	"powerssl.io/powerssl/internal/pkg/util"
 )
 
@@ -44,16 +45,16 @@ func Run(cfg *Config) {
 
 	var _ = duration // TODO
 
-	var services []util.Service
+	var services []transport.Service
 
 	if cfg.MetricsAddr != "" {
 		g.Go(func() error {
-			return util.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
 		})
 	}
 
 	g.Go(func() error {
-		return util.ServeGRPC(ctx, cfg.ServerConfig, log.With(logger, "transport", "gRPC"), services)
+		return transport.ServeGRPC(ctx, cfg.ServerConfig, log.With(logger, "transport", "gRPC"), services)
 	})
 
 	if err := g.Wait(); err != nil {

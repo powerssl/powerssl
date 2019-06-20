@@ -3,10 +3,10 @@ package integration
 import (
 	"gopkg.in/go-playground/validator.v9"
 
-	"powerssl.io/powerssl/internal/pkg/util"
+	"powerssl.io/powerssl/internal/pkg/transport"
 )
 
-type ControllerClientConfig = util.ClientConfig
+type ControllerClientConfig = transport.ClientConfig
 
 type Config struct {
 	AuthToken              string `validate:"required"`
@@ -17,6 +17,6 @@ type Config struct {
 
 func (cfg *Config) Validate() error {
 	validate := validator.New()
-	validate.RegisterStructValidation(util.ClientConfigValidator, util.ClientConfig{})
+	validate.RegisterStructValidation(transport.ClientConfigValidator, transport.ClientConfig{})
 	return validate.Struct(cfg)
 }

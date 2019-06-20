@@ -3,10 +3,10 @@ package grpcgateway
 import (
 	"gopkg.in/go-playground/validator.v9"
 
-	"powerssl.io/powerssl/internal/pkg/util"
+	"powerssl.io/powerssl/internal/pkg/transport"
 )
 
-type APIServerClientConfig = util.ClientConfig
+type APIServerClientConfig = transport.ClientConfig
 
 type Config struct {
 	APIServerClientConfig *APIServerClientConfig
@@ -16,6 +16,6 @@ type Config struct {
 
 func (cfg *Config) Validate() error {
 	validate := validator.New()
-	validate.RegisterStructValidation(util.ClientConfigValidator, util.ClientConfig{})
+	validate.RegisterStructValidation(transport.ClientConfigValidator, transport.ClientConfig{})
 	return validate.Struct(cfg)
 }

@@ -3,11 +3,11 @@ package apiserver
 import (
 	"gopkg.in/go-playground/validator.v9"
 
-	"powerssl.io/powerssl/internal/pkg/util"
+	"powerssl.io/powerssl/internal/pkg/transport"
 )
 
-type ControllerClientConfig = util.ClientConfig
-type ServerConfig = util.ServerConfig
+type ControllerClientConfig = transport.ClientConfig
+type ServerConfig = transport.ServerConfig
 
 type VaultClientConfig struct {
 	Token  string
@@ -29,7 +29,7 @@ type Config struct {
 
 func (cfg *Config) Validate() error {
 	validate := validator.New()
-	validate.RegisterStructValidation(util.ClientConfigValidator, util.ClientConfig{})
-	validate.RegisterStructValidation(util.ServerConfigValidator, util.ServerConfig{})
+	validate.RegisterStructValidation(transport.ClientConfigValidator, transport.ClientConfig{})
+	validate.RegisterStructValidation(transport.ServerConfigValidator, transport.ServerConfig{})
 	return validate.Struct(cfg)
 }

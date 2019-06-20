@@ -12,6 +12,7 @@ import (
 	workflowengine "powerssl.io/powerssl/internal/app/controller/workflow/engine"
 	"powerssl.io/powerssl/internal/pkg/auth"
 	"powerssl.io/powerssl/internal/pkg/tracing"
+	"powerssl.io/powerssl/internal/pkg/transport"
 	"powerssl.io/powerssl/internal/pkg/util"
 	apiserverclient "powerssl.io/powerssl/pkg/apiserver/client"
 )
@@ -70,12 +71,12 @@ func Run(cfg *Config) {
 
 	if cfg.MetricsAddr != "" {
 		g.Go(func() error {
-			return util.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
 		})
 	}
 
 	g.Go(func() error {
-		return util.ServeGRPC(ctx, cfg.ServerConfig, log.With(logger, "transport", "gRPC"), services)
+		return transport.ServeGRPC(ctx, cfg.ServerConfig, log.With(logger, "transport", "gRPC"), services)
 	})
 
 	if err := g.Wait(); err != nil {

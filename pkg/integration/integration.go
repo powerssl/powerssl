@@ -20,6 +20,7 @@ import (
 	integrationacme "powerssl.io/powerssl/pkg/integration/acme"
 	// integrationdns "powerssl.io/powerssl/pkg/integration/dns"
 	"powerssl.io/powerssl/internal/pkg/tracing"
+	"powerssl.io/powerssl/internal/pkg/transport"
 	"powerssl.io/powerssl/internal/pkg/util"
 )
 
@@ -80,7 +81,7 @@ func Run(cfg *Config, kind kind, name string, handler interface{}) {
 
 	if cfg.MetricsAddr != "" {
 		g.Go(func() error {
-			return util.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
 		})
 	}
 
