@@ -1,4 +1,4 @@
-package util
+package transport
 
 import (
 	"context"
@@ -25,7 +25,30 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+	"gopkg.in/go-playground/validator.v9"
 )
+
+type ServerConfig struct {
+	Addr       string
+	CAFile     string
+	CertFile   string
+	CommonName string
+	Insecure   bool
+	KeyFile    string
+	VaultRole  string
+	VaultToken string
+	VaultURL   string
+}
+
+func ServerConfigValidator(sl validator.StructLevel) {
+	cfg := sl.Current().Interface().(ServerConfig)
+
+	if !cfg.Insecure && cfg.CommonName == "" && (cfg.CertFile == "" || cfg.KeyFile == "") {
+		sl.ReportError(cfg.CommonName, "CommonName", "CommonName", "required", "CommonName or CertFile and KeyFile required")
+		sl.ReportError(cfg.CertFile, "CertFile", "CertFile", "required", "CommonName or CertFile and KeyFile required")
+		sl.ReportError(cfg.KeyFile, "KeyFile", "KeyFile", "required", "CommonName or CertFile and KeyFile required")
+	}
+}
 
 type keyGeneratorFunc func() (crypto.PrivateKey, error)
 
@@ -38,30 +61,8 @@ type Service interface {
 	ServiceName() string
 }
 
-func NewClientConn(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool) (*grpc.ClientConn, error) {
-	ctx, cancel := context.WithTimeout(context.TODO(), time.Second)
-	defer cancel()
-
-	var opts []grpc.DialOption
-	if insecure {
-		opts = append(opts, grpc.WithInsecure())
-	} else {
-		var creds credentials.TransportCredentials
-		if insecureSkipTLSVerify {
-			creds = credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})
-		} else {
-			var err error
-			if creds, err = credentials.NewClientTLSFromFile(certFile, serverNameOverride); err != nil {
-				return nil, err
-			}
-		}
-		opts = append(opts, grpc.WithTransportCredentials(creds))
-	}
-	return grpc.DialContext(ctx, addr, opts...)
-}
-
-func ServeGRPC(ctx context.Context, addr, certFile, keyFile, caFile, commonName, vaultURL, vaultToken, vaultRole string, insecure bool, logger log.Logger, services []Service) error {
-	listener, err := net.Listen("tcp", addr)
+func ServeGRPC(ctx context.Context, cfg *ServerConfig, logger log.Logger, services []Service) error {
+	listener, err := net.Listen("tcp", cfg.Addr)
 	if err != nil {
 		return err
 	}
@@ -80,29 +81,29 @@ func ServeGRPC(ctx context.Context, addr, certFile, keyFile, caFile, commonName,
 		),
 	}
 
-	if !insecure {
+	if !cfg.Insecure {
 		var creds credentials.TransportCredentials
-		if certFile != "" && keyFile != "" {
-			if creds, err = credentials.NewServerTLSFromFile(certFile, keyFile); err != nil {
+		if cfg.CertFile != "" && cfg.KeyFile != "" {
+			if creds, err = credentials.NewServerTLSFromFile(cfg.CertFile, cfg.KeyFile); err != nil {
 				return fmt.Errorf("failed to load TLS credentials %v", err)
 			}
 		} else {
 			certPool := x509.NewCertPool()
-			caData, err := ioutil.ReadFile(caFile)
+			caData, err := ioutil.ReadFile(cfg.CAFile)
 			if err != nil {
 				return err
 			}
 			certPool.AppendCertsFromPEM(caData)
-			url, err := url.Parse(vaultURL)
+			url, err := url.Parse(cfg.VaultURL)
 			if err != nil {
 				return err
 			}
 			c := &certify.Certify{
 				Cache:      certify.NewMemCache(),
-				CommonName: commonName,
+				CommonName: cfg.CommonName,
 				Issuer: &vault.Issuer{
-					Role:  vaultRole,
-					Token: vaultToken,
+					Role:  cfg.VaultRole,
+					Token: cfg.VaultToken,
 					URL:   url,
 					TLSConfig: &tls.Config{
 						RootCAs: certPool,
@@ -117,13 +118,13 @@ func ServeGRPC(ctx context.Context, addr, certFile, keyFile, caFile, commonName,
 			}
 			getCertificate := func(hello *tls.ClientHelloInfo) (cert *tls.Certificate, err error) {
 				// TODO: ???
-				hello.ServerName = commonName
+				hello.ServerName = cfg.CommonName
 				if cert, err = c.GetCertificate(hello); err != nil {
 					logger.Log("err", err)
 				}
 				return cert, err
 			}
-			if _, err := getCertificate(&tls.ClientHelloInfo{ServerName: commonName}); err != nil {
+			if _, err := getCertificate(&tls.ClientHelloInfo{ServerName: cfg.CommonName}); err != nil {
 				return err
 			}
 			creds = credentials.NewTLS(&tls.Config{GetCertificate: getCertificate})
@@ -144,7 +145,7 @@ func ServeGRPC(ctx context.Context, addr, certFile, keyFile, caFile, commonName,
 		c <- srv.Serve(listener)
 		close(c)
 	}()
-	logger.Log("listening", addr, "secure", !insecure)
+	logger.Log("listening", cfg.Addr, "secure", !cfg.Insecure)
 	select {
 	case err := <-c:
 		logger.Log("err", err)

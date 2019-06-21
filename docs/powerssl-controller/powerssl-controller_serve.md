@@ -7,11 +7,11 @@ title: serve
 ---
 ## powerssl-controller serve
 
-Serve the API
+Serve the Controller
 
 ### Synopsis
 
-Serve the API
+Serve the Controller
 
 ```
 powerssl-controller serve [flags]
@@ -22,10 +22,10 @@ powerssl-controller serve [flags]
 ```
       --addr string                             GRPC Addr (default ":8080")
       --apiserver-addr string                   GRPC address of API server
-      --apiserver-auth-token string             API server authentication token
       --apiserver-insecure                      Use insecure communication
       --apiserver-insecure-skip-tls-verify      Accepts any certificate presented by the server and any host name in that certificate
       --apiserver-server-name-override string   It will override the virtual host name of authority
+      --auth-token string                       Authentication token
       --ca-file string                          Certificate authority file
       --common-name string                      API Server common name
   -h, --help                                    help for serve

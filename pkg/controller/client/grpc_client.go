@@ -1,6 +1,8 @@
 package client // import "powerssl.io/powerssl/pkg/controller/client"
 
 import (
+	"context"
+
 	"github.com/go-kit/kit/log"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
@@ -8,7 +10,7 @@ import (
 	intregrationtransport "powerssl.io/powerssl/internal/app/controller/integration/transport"
 	workflowtransport "powerssl.io/powerssl/internal/app/controller/workflow/transport"
 	"powerssl.io/powerssl/internal/pkg/auth"
-	"powerssl.io/powerssl/internal/pkg/util"
+	"powerssl.io/powerssl/internal/pkg/transport"
 	"powerssl.io/powerssl/pkg/controller/acme"
 	"powerssl.io/powerssl/pkg/controller/integration"
 	"powerssl.io/powerssl/pkg/controller/workflow"
@@ -20,8 +22,8 @@ type GRPCClient struct {
 	Workflow    workflow.Service
 }
 
-func NewGRPCClient(addr, certFile, serverNameOverride string, insecure, insecureSkipTLSVerify bool, authToken string, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
-	conn, err := util.NewClientConn(addr, certFile, serverNameOverride, insecure, insecureSkipTLSVerify)
+func NewGRPCClient(ctx context.Context, cfg *transport.ClientConfig, authToken string, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
+	conn, err := transport.NewClientConn(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}

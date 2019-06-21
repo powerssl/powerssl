@@ -7,11 +7,11 @@ title: run
 ---
 ## powerssl-integration-cloudflare run
 
-Run ACME integration
+Run CloudFlare integration
 
 ### Synopsis
 
-Run ACME integration
+Run CloudFlare integration
 
 ```
 powerssl-integration-cloudflare run [flags]
@@ -21,6 +21,7 @@ powerssl-integration-cloudflare run [flags]
 
 ```
       --addr string                   GRPC address of Controller
+      --auth-token string             Authentication token
       --ca-file string                Certificate authority file
   -h, --help                          help for run
       --insecure                      Use insecure communication

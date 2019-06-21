@@ -13,25 +13,28 @@ import (
 	"github.com/go-kit/kit/log"
 	"golang.org/x/sync/errgroup"
 
+	"powerssl.io/powerssl/internal/pkg/transport"
 	"powerssl.io/powerssl/internal/pkg/util"
 )
 
-func Run(httpAddr, metricsAddr, authURI, apiAddr string) {
+func Run(cfg *Config) {
 	logger := util.NewLogger(os.Stdout)
+
+	util.ValidateConfig(cfg, logger)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
 		return util.InterruptHandler(ctx, logger)
 	})
 
-	if metricsAddr != "" {
+	if cfg.MetricsAddr != "" {
 		g.Go(func() error {
-			return util.ServeMetrics(ctx, metricsAddr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
 		})
 	}
 
 	g.Go(func() error {
-		return ServeHTTP(ctx, httpAddr, log.With(logger, "component", "http"), authURI, apiAddr)
+		return ServeHTTP(ctx, cfg.Addr, log.With(logger, "component", "http"), cfg.AuthURI, cfg.APIAddr)
 	})
 
 	if err := g.Wait(); err != nil {

@@ -28,6 +28,8 @@ powerssl-grpcgateway serve [flags]
       --apiserver-server-name-override string   It will override the virtual host name of authority
       --ca-file string                          Certificate authority file
   -h, --help                                    help for serve
+      --metrics-addr string                     HTTP Addr (default ":9090")
+      --no-metrics                              Do not serve metrics
 ```
 
 ### Options inherited from parent commands

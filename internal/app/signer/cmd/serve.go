@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -11,42 +8,53 @@ import (
 )
 
 func newCmdServe() *cobra.Command {
+	var (
+		addr              string
+		caFile            string
+		commonName        string
+		insecure          bool
+		metricsAddr       string
+		tlsCertFile       string
+		tlsPrivateKeyFile string
+		tracer            string
+		vaultToken        string
+		vaultURL          string
+	)
+
 	cmd := &cobra.Command{
 		Use:   "serve",
 		Short: "Serve the Signer",
-		Run: func(cmd *cobra.Command, args []string) {
-			addr := viper.GetString("addr")
-			caFile := viper.GetString("ca-file")
-			commonName := viper.GetString("common-name")
-			insecure := viper.GetBool("insecure")
-			tlsCertFile := viper.GetString("tls.cert-file")
-			tlsPrivateKeyFile := viper.GetString("tls.private-key-file")
-			vaultToken := viper.GetString("vault.token")
-			vaultURL := viper.GetString("vault.url")
-
-			var metricsAddr string
+		PreRun: func(cmd *cobra.Command, args []string) {
+			addr = viper.GetString("addr")
+			caFile = viper.GetString("ca-file")
+			commonName = viper.GetString("common-name")
+			insecure = viper.GetBool("insecure")
 			if !viper.GetBool("no-metrics") {
 				metricsAddr = viper.GetString("metrics-addr")
 			}
-			var tracer string
+			tlsCertFile = viper.GetString("tls.cert-file")
+			tlsPrivateKeyFile = viper.GetString("tls.private-key-file")
 			if !viper.GetBool("no-tracing") {
 				tracer = viper.GetString("tracer")
 			}
-
-			ok := true
-			if addr == "" {
-				ok = false
-				fmt.Println("Provide addr")
-			}
-			if !insecure && commonName == "" && (tlsCertFile == "" || tlsPrivateKeyFile == "") {
-				ok = false
-				fmt.Println("Provide common-name or tls-cert-file and tls-private-key")
-			}
-			if !ok {
-				os.Exit(1)
-			}
-
-			signer.Run(addr, commonName, vaultURL, vaultToken, tlsCertFile, tlsPrivateKeyFile, insecure, metricsAddr, tracer, caFile)
+			vaultToken = viper.GetString("vault.token")
+			vaultURL = viper.GetString("vault.url")
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			signer.Run(&signer.Config{
+				MetricsAddr: metricsAddr,
+				ServerConfig: &signer.ServerConfig{
+					Addr:       addr,
+					CAFile:     caFile,
+					CertFile:   tlsCertFile,
+					CommonName: commonName,
+					Insecure:   insecure,
+					KeyFile:    tlsPrivateKeyFile,
+					VaultToken: vaultToken,
+					VaultURL:   vaultURL,
+				},
+				Tracer: tracer,
+			})
 		},
 	}
 

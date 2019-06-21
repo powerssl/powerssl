@@ -17,6 +17,8 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-bindata/go-bindata v3.1.1+incompatible
 	github.com/go-kit/kit v0.8.0
+	github.com/go-playground/locales v0.12.1 // indirect
+	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/gogo/googleapis v1.2.0
 	github.com/gogo/protobuf v1.2.1
 	github.com/gogo/status v1.1.0
@@ -33,6 +35,7 @@ require (
 	github.com/jmoiron/sqlx v1.2.0 // indirect
 	github.com/johanbrandhorst/certify v1.2.0
 	github.com/kisielk/sqlstruct v0.0.0-20150923205031-648daed35d49 // indirect
+	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/looplab/fsm v0.1.0
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
@@ -55,6 +58,8 @@ require (
 	golang.org/x/text v0.3.1-0.20181227161524-e6919f6577db // indirect
 	golang.org/x/tools v0.0.0-20190607135518-5aed7825b13e
 	google.golang.org/grpc v1.21.0
+	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
+	gopkg.in/go-playground/validator.v9 v9.29.0
 	gopkg.in/square/go-jose.v2 v2.3.1
 	gopkg.in/yaml.v2 v2.2.2
 )

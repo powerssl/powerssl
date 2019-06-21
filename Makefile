@@ -36,7 +36,7 @@ build-dev-runner:
 .PHONY: build-powerssl-apiserver
 build-powerssl-apiserver:
 ifneq ($(OS),Windows_NT)
-ifeq ($(shell uname -s),Darwin)
+ifneq (,$(filter $(shell uname -s),Darwin Linux))
 	$(eval STATIC_ENABLED := 0)
 endif
 endif

@@ -12,21 +12,25 @@ import (
 	workflowengine "powerssl.io/powerssl/internal/app/controller/workflow/engine"
 	"powerssl.io/powerssl/internal/pkg/auth"
 	"powerssl.io/powerssl/internal/pkg/tracing"
+	"powerssl.io/powerssl/internal/pkg/transport"
 	"powerssl.io/powerssl/internal/pkg/util"
 	apiserverclient "powerssl.io/powerssl/pkg/apiserver/client"
 )
 
 const component = "powerssl-controller"
 
-func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile string, grpcInsecure bool, metricsAddr, tracerImpl, apiserverAddr, caFile, apiserverServerNameOverride string, apiserverInsecure, apiserverInsecureSkipTLSVerify bool, jwksURL, apiserverAuthToken string) {
+func Run(cfg *Config) {
 	logger := util.NewLogger(os.Stdout)
+
+	cfg.ServerConfig.VaultRole = component
+	util.ValidateConfig(cfg, logger)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
 		return util.InterruptHandler(ctx, logger)
 	})
 
-	tracer, closer, err := tracing.Init(component, tracerImpl, log.With(logger, "component", "tracing"))
+	tracer, closer, err := tracing.Init(component, cfg.Tracer, log.With(logger, "component", "tracing"))
 	if err != nil {
 		logger.Log("component", "tracing", "err", err)
 		os.Exit(1)
@@ -42,12 +46,12 @@ func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile s
 
 	var client *apiserverclient.GRPCClient
 	{
-		token, err := auth.NewServiceToken(apiserverAuthToken)
+		token, err := auth.NewServiceToken(cfg.AuthToken)
 		if err != nil {
 			logger.Log("err", err)
 			os.Exit(1)
 		}
-		if client, err = apiserverclient.NewGRPCClient(apiserverAddr, caFile, apiserverServerNameOverride, apiserverInsecure, apiserverInsecureSkipTLSVerify, token, logger, tracer); err != nil {
+		if client, err = apiserverclient.NewGRPCClient(ctx, cfg.APIServerClientConfig, token, logger, tracer); err != nil {
 			logger.Log("transport", "gRPC", "during", "Connect", "err", err)
 			os.Exit(1)
 		}
@@ -55,7 +59,7 @@ func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile s
 
 	engine := workflowengine.New()
 
-	services, err := makeServices(logger, tracer, duration, client, jwksURL)
+	services, err := makeServices(logger, tracer, duration, client, cfg.JWKSURL)
 	if err != nil {
 		logger.Log("err", err)
 		os.Exit(1)
@@ -65,14 +69,14 @@ func Run(grpcAddr, commonName, vaultURL, vaultToken, grpcCertFile, grpcKeyFile s
 		return engine.Run(ctx)
 	})
 
-	if metricsAddr != "" {
+	if cfg.MetricsAddr != "" {
 		g.Go(func() error {
-			return util.ServeMetrics(ctx, metricsAddr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
 		})
 	}
 
 	g.Go(func() error {
-		return util.ServeGRPC(ctx, grpcAddr, grpcCertFile, grpcKeyFile, caFile, commonName, vaultURL, vaultToken, component, grpcInsecure, log.With(logger, "transport", "gRPC"), services)
+		return transport.ServeGRPC(ctx, cfg.ServerConfig, log.With(logger, "transport", "gRPC"), services)
 	})
 
 	if err := g.Wait(); err != nil {

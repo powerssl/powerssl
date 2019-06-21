@@ -56,7 +56,7 @@ func main() {
 	go func() {
 		var command, args string
 		if _, err := os.Stat("local/vault/secret.yaml"); os.IsNotExist(err) {
-			command = "powerutil"
+			command = "bin/powerutil"
 			args = "vault --ca local/certs/ca.pem --ca-key local/certs/ca-key.pem"
 		} else {
 			d, err := ioutil.ReadFile("local/vault/secret.yaml")
