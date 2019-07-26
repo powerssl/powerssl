@@ -45,12 +45,14 @@ func main() {
 
 	interrupts := make(map[string]chan struct{}, len(component.Components)+1)
 
-	go func() {
+	g.Go(func() error {
 		for {
 			select {
+			case <-ctx.Done():
+				return nil
 			case event, ok := <-watcher.Events:
 				if !ok {
-					return
+					return nil
 				}
 				// if event.Op&fsnotify.Write != fsnotify.Write {
 				// 	break
@@ -61,19 +63,22 @@ func main() {
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
-					return
+					return nil
 				}
-				of.ErrorOutput(fmt.Sprintf("watcher error: %s", err))
+				return err
 			}
 		}
-	}()
+	})
 
 	var addComponent func(component.Component)
 	{
 		var idx int
 		addComponent = func(comp component.Component) {
+			i := idx
 			interrupts[comp.Command] = make(chan struct{})
-			observeComponent(ctx, of, comp, idx, interrupts[comp.Command])
+			g.Go(func() error {
+				return observeComponent(ctx, of, comp, i, interrupts[comp.Command])
+			})
 			idx++
 		}
 	}
@@ -90,7 +95,9 @@ func main() {
 		addComponent(comp)
 	}
 
-	go handleVault(of)
+	g.Go(func() error {
+		return handleVault(of)
+	})
 
 	if err := g.Wait(); err != nil {
 		switch err.(type) {
@@ -101,7 +108,7 @@ func main() {
 	}
 }
 
-func handleVault(of *internal.Outlet) {
+func handleVault(of *internal.Outlet) error {
 	var command, args string
 	if _, err := os.Stat("local/vault/secret.yaml"); os.IsNotExist(err) {
 		command = "bin/powerutil"
@@ -109,11 +116,11 @@ func handleVault(of *internal.Outlet) {
 	} else {
 		d, err := ioutil.ReadFile("local/vault/secret.yaml")
 		if err != nil {
-			of.ErrorOutput(fmt.Sprintf("config error: %s", err))
+			return fmt.Errorf("config error: %s", err)
 		}
 		var config map[string]interface{}
 		if err := yaml.Unmarshal(d, &config); err != nil {
-			of.ErrorOutput(fmt.Sprintf("config error: %s", err))
+			return fmt.Errorf("config error: %s", err)
 		}
 
 		command = "vault"
@@ -124,11 +131,16 @@ func handleVault(of *internal.Outlet) {
 		Command: command,
 		Args:    args,
 	}
-	cmd, _ := makeCmd(comp, 0, of)
+	cmd, _, err := makeCmd(comp, 0, of)
+	if err != nil {
+		return err
+	}
 
 	time.Sleep(time.Second)
 
 	if err := cmd.Start(); err != nil {
-		of.ErrorOutput(fmt.Sprintf("Failed to start %s: %s", comp.Command, err))
+		return fmt.Errorf("Failed to start %s: %s", comp.Command, err)
 	}
+
+	return nil
 }
