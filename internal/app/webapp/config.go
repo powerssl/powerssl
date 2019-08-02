@@ -5,9 +5,10 @@ import (
 )
 
 type Config struct {
-	Addr        string `validate:"required"`
 	APIAddr     string `validate:"required"`
+	Addr        string `validate:"required"`
 	AuthURI     string `validate:"required"`
+	GRPCWebURI  string `validate:"required"`
 	MetricsAddr string
 }
 
