@@ -200,10 +200,13 @@ jobs:
             sudo wget -O /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/2.4.0/yq_linux_amd64
             sudo chmod +x /usr/local/bin/yq
       - run:
-          name: Install swagger2openapi npm
+          name: Install nodejs and npm
           command: |
             curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
             sudo apt install nodejs
+      - run:
+          name: Install swagger2openapi npm
+          command: |
             sudo npm install -g swagger2openapi
       - run:
           name: Install generate dependencies

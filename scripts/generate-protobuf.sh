@@ -18,8 +18,8 @@ Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types,\
 Mgoogle/protobuf/field_mask.proto=github.com/gogo/protobuf/types,\
 Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types
 
-googleapis=$(go mod download -json github.com/gogo/googleapis | grep '"Dir"' | cut -d '"' -f 4)
-protobuf=$(go mod download -json github.com/gogo/protobuf | grep '"Dir"' | cut -d '"' -f 4)
+googleapis=$(go mod download -json github.com/gogo/googleapis | jq -r '.Dir')
+protobuf=$(go mod download -json github.com/gogo/protobuf | jq -r '.Dir')
 proto_path="api/protobuf-spec:$googleapis:$protobuf:$protobuf/protobuf"
 
 tmp=$(mktemp -d)
