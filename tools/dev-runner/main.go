@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/ghodss/yaml"
+	_ "github.com/improbable-eng/grpc-web/go/grpcweb"
 	"golang.org/x/sync/errgroup"
 
 	"powerssl.dev/powerssl/internal/pkg/component"
@@ -86,6 +88,24 @@ func main() {
 	addComponent(component.Component{
 		Command: "vault",
 		Args:    "server -config configs/vault/config.hcl",
+	})
+
+	addComponent(component.Component{
+		Command: "gobin",
+		Args: strings.Join([]string{
+			"-m",
+			"-run",
+			"github.com/improbable-eng/grpc-web/go/grpcwebproxy",
+			"--allowed_origins http://localhost:8080",
+			"--backend_addr localhost:8082",
+			"--backend_tls",
+			"--backend_tls_ca_files local/certs/ca.pem",
+			"--server_bind_address localhost",
+			"--server_http_debug_port 8087",
+			"--server_http_tls_port 8086",
+			"--server_tls_cert_file local/certs/localhost.pem",
+			"--server_tls_key_file local/certs/localhost-key.pem",
+		}, " "),
 	})
 
 	for _, comp := range component.Components {

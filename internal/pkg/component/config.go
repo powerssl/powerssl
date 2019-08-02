@@ -74,6 +74,7 @@ var Components = []Component{
 			"POWERSSL_ADDR":         "localhost:8080",
 			"POWERSSL_API_ADDR":     "localhost:8082",
 			"POWERSSL_AUTH_URI":     "http://localhost:8081",
+			"POWERSSL_GRPC_WEB_URI": "https://localhost:8086",
 			"POWERSSL_METRICS_ADDR": "localhost:9090",
 		},
 	},
