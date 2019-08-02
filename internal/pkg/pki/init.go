@@ -7,7 +7,7 @@ import (
 
 func Init(keyAlgo string, keySize int) ([]byte, []byte, []byte, error) {
 	req := csr.CertificateRequest{
-		KeyRequest: &csr.BasicKeyRequest{
+		KeyRequest: &csr.KeyRequest{
 			A: keyAlgo,
 			S: keySize,
 		},

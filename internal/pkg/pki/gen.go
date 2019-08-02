@@ -10,7 +10,7 @@ import (
 
 func Gen(ca, caKey, hostname, keyAlgo string, keySize int) ([]byte, []byte, []byte, error) {
 	req := csr.CertificateRequest{
-		KeyRequest: &csr.BasicKeyRequest{
+		KeyRequest: &csr.KeyRequest{
 			A: keyAlgo,
 			S: keySize,
 		},
