@@ -1,4 +1,4 @@
-package api // import "powerssl.io/powerssl/pkg/controller/api"
+package api // import "powerssl.dev/powerssl/pkg/controller/api"
 
 type WorkflowKind int32
 

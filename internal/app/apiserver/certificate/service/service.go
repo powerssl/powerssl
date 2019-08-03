@@ -10,11 +10,11 @@ import (
 	otgorm "github.com/smacker/opentracing-gorm"
 	"google.golang.org/grpc/codes"
 
-	"powerssl.io/powerssl/internal/app/apiserver/certificate/model"
-	"powerssl.io/powerssl/pkg/apiserver/api"
-	"powerssl.io/powerssl/pkg/apiserver/certificate"
-	controllerapi "powerssl.io/powerssl/pkg/controller/api"
-	controllerclient "powerssl.io/powerssl/pkg/controller/client"
+	"powerssl.dev/powerssl/internal/app/apiserver/certificate/model"
+	"powerssl.dev/powerssl/pkg/apiserver/api"
+	"powerssl.dev/powerssl/pkg/apiserver/certificate"
+	controllerapi "powerssl.dev/powerssl/pkg/controller/api"
+	controllerclient "powerssl.dev/powerssl/pkg/controller/client"
 )
 
 func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) certificate.Service {

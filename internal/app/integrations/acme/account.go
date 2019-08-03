@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"powerssl.io/powerssl/pkg/controller/api"
+	"powerssl.dev/powerssl/pkg/controller/api"
 )
 
 func (acme *ACME) CreateAccount(ctx context.Context, directoryURL string, termsOfServiceAgreed bool, contacts []string) (*api.Account, error) {

@@ -1,6 +1,3 @@
-//go:generate gobin -m -run github.com/go-bindata/go-bindata/go-bindata -fs -modtime 726710400 -o openapi/bindata.go -pkg openapi -prefix ../../../api/openapi ../../../api/openapi/...
-//go:generate gobin -m -run github.com/go-bindata/go-bindata/go-bindata -fs -modtime 726710400 -o swaggerui/bindata.go -pkg swaggerui -prefix ../../../web/swagger-ui ../../../web/swagger-ui
-
 package grpcgateway
 
 import (
@@ -18,11 +15,11 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 
-	"powerssl.io/powerssl/internal/app/grpcgateway/openapi"
-	"powerssl.io/powerssl/internal/app/grpcgateway/swaggerui"
-	apiv1 "powerssl.io/powerssl/internal/pkg/apiserver/api/v1"
-	"powerssl.io/powerssl/internal/pkg/transport"
-	"powerssl.io/powerssl/internal/pkg/util"
+	"powerssl.dev/powerssl/internal/app/grpcgateway/openapi"
+	"powerssl.dev/powerssl/internal/app/grpcgateway/swaggerui"
+	apiv1 "powerssl.dev/powerssl/internal/pkg/apiserver/api/v1"
+	"powerssl.dev/powerssl/internal/pkg/transport"
+	"powerssl.dev/powerssl/internal/pkg/util"
 )
 
 type fileSystem struct {

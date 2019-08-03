@@ -1,4 +1,4 @@
-module powerssl.io/powerssl
+module powerssl.dev/powerssl
 
 go 1.12
 

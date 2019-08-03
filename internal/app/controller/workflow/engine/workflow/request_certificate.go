@@ -3,9 +3,9 @@ package workflow
 import (
 	"context"
 
-	"powerssl.io/powerssl/internal/app/controller/workflow/engine/activity"
-	"powerssl.io/powerssl/internal/app/controller/workflow/engine/activity/acme"
-	"powerssl.io/powerssl/pkg/controller/api"
+	"powerssl.dev/powerssl/internal/app/controller/workflow/engine/activity"
+	"powerssl.dev/powerssl/internal/app/controller/workflow/engine/activity/acme"
+	"powerssl.dev/powerssl/pkg/controller/api"
 )
 
 type RequestCertificate struct {

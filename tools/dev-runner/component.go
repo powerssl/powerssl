@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"powerssl.io/powerssl/internal/pkg/component"
-	"powerssl.io/powerssl/tools/dev-runner/internal"
+	"powerssl.dev/powerssl/internal/pkg/component"
+	"powerssl.dev/powerssl/tools/dev-runner/internal"
 )
 
 func makeCmd(comp component.Component, idx int, of *internal.Outlet) (*exec.Cmd, *sync.WaitGroup, error) {

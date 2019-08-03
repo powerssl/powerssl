@@ -1,9 +1,9 @@
-package certificate // import "powerssl.io/powerssl/pkg/apiserver/certificate"
+package certificate // import "powerssl.dev/powerssl/pkg/apiserver/certificate"
 
 import (
 	"context"
 
-	"powerssl.io/powerssl/pkg/apiserver/api"
+	"powerssl.dev/powerssl/pkg/apiserver/api"
 )
 
 type Service interface {

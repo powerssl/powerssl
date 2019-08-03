@@ -1,6 +1,6 @@
 package acme
 
-import "powerssl.io/powerssl/pkg/controller/api"
+import "powerssl.dev/powerssl/pkg/controller/api"
 
 type CreateAccountInput struct {
 	DirectoryURL         string

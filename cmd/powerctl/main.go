@@ -1,6 +1,6 @@
 package main
 
-import "powerssl.io/powerssl/internal/app/powerctl/cmd"
+import "powerssl.dev/powerssl/internal/app/powerctl/cmd"
 
 func main() {
 	cmd.Execute()

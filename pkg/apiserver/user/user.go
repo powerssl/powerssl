@@ -1,9 +1,9 @@
-package user // import "powerssl.io/powerssl/pkg/apiserver/user"
+package user // import "powerssl.dev/powerssl/pkg/apiserver/user"
 
 import (
 	"context"
 
-	"powerssl.io/powerssl/pkg/apiserver/api"
+	"powerssl.dev/powerssl/pkg/apiserver/api"
 )
 
 type Service interface {

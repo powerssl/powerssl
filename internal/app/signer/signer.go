@@ -9,9 +9,9 @@ import (
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 
-	"powerssl.io/powerssl/internal/pkg/tracing"
-	"powerssl.io/powerssl/internal/pkg/transport"
-	"powerssl.io/powerssl/internal/pkg/util"
+	"powerssl.dev/powerssl/internal/pkg/tracing"
+	"powerssl.dev/powerssl/internal/pkg/transport"
+	"powerssl.dev/powerssl/internal/pkg/util"
 )
 
 const component = "powerssl-signer"

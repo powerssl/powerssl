@@ -8,4 +8,4 @@ fi
 
 set -x
 
-env CGO_ENABLED="${CGO_ENABLED:-0}" go build ${FORCE_REBUILD:+-a} -tags netgo -ldflags "$(gobin -m -run github.com/ahmetb/govvv build -flags -pkg powerssl.io/powerssl/internal/pkg/version)${DEBUG_ENABLED:+ -w}${STATIC_ENABLED:+ -extldflags \"-static\"}" -o "bin/$COMPONENT" "powerssl.io/powerssl/cmd/$COMPONENT"
+env CGO_ENABLED="${CGO_ENABLED:-0}" go build ${FORCE_REBUILD:+-a} -tags netgo -ldflags "$(gobin -m -run github.com/ahmetb/govvv build -flags -pkg powerssl.dev/powerssl/internal/pkg/version)${DEBUG_ENABLED:+ -w}${STATIC_ENABLED:+ -extldflags \"-static\"}" -o "bin/$COMPONENT" "powerssl.dev/powerssl/cmd/$COMPONENT"

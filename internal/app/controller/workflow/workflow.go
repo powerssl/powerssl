@@ -7,11 +7,11 @@ import (
 	"google.golang.org/grpc"
 
 	stdopentracing "github.com/opentracing/opentracing-go"
-	"powerssl.io/powerssl/internal/app/controller/workflow/endpoint"
-	service "powerssl.io/powerssl/internal/app/controller/workflow/service"
-	"powerssl.io/powerssl/internal/app/controller/workflow/transport"
-	apiv1 "powerssl.io/powerssl/internal/pkg/controller/api/v1"
-	apiserverclient "powerssl.io/powerssl/pkg/apiserver/client"
+	"powerssl.dev/powerssl/internal/app/controller/workflow/endpoint"
+	service "powerssl.dev/powerssl/internal/app/controller/workflow/service"
+	"powerssl.dev/powerssl/internal/app/controller/workflow/transport"
+	apiv1 "powerssl.dev/powerssl/internal/pkg/controller/api/v1"
+	apiserverclient "powerssl.dev/powerssl/pkg/apiserver/client"
 )
 
 type Workflow struct {

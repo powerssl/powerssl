@@ -13,8 +13,8 @@ import (
 	"github.com/go-kit/kit/log"
 	"golang.org/x/sync/errgroup"
 
-	"powerssl.io/powerssl/internal/pkg/transport"
-	"powerssl.io/powerssl/internal/pkg/util"
+	"powerssl.dev/powerssl/internal/pkg/transport"
+	"powerssl.dev/powerssl/internal/pkg/util"
 )
 
 func Run(cfg *Config) {

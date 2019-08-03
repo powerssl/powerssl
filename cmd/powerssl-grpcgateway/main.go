@@ -1,6 +1,6 @@
 package main
 
-import "powerssl.io/powerssl/internal/app/grpcgateway/cmd"
+import "powerssl.dev/powerssl/internal/app/grpcgateway/cmd"
 
 func main() {
 	cmd.Execute()

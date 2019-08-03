@@ -1,4 +1,4 @@
-package client // import "powerssl.io/powerssl/pkg/controller/client"
+package client // import "powerssl.dev/powerssl/pkg/controller/client"
 
 import (
 	"context"
@@ -6,14 +6,14 @@ import (
 	"github.com/go-kit/kit/log"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
-	acmetransport "powerssl.io/powerssl/internal/app/controller/acme/transport"
-	intregrationtransport "powerssl.io/powerssl/internal/app/controller/integration/transport"
-	workflowtransport "powerssl.io/powerssl/internal/app/controller/workflow/transport"
-	"powerssl.io/powerssl/internal/pkg/auth"
-	"powerssl.io/powerssl/internal/pkg/transport"
-	"powerssl.io/powerssl/pkg/controller/acme"
-	"powerssl.io/powerssl/pkg/controller/integration"
-	"powerssl.io/powerssl/pkg/controller/workflow"
+	acmetransport "powerssl.dev/powerssl/internal/app/controller/acme/transport"
+	intregrationtransport "powerssl.dev/powerssl/internal/app/controller/integration/transport"
+	workflowtransport "powerssl.dev/powerssl/internal/app/controller/workflow/transport"
+	"powerssl.dev/powerssl/internal/pkg/auth"
+	"powerssl.dev/powerssl/internal/pkg/transport"
+	"powerssl.dev/powerssl/pkg/controller/acme"
+	"powerssl.dev/powerssl/pkg/controller/integration"
+	"powerssl.dev/powerssl/pkg/controller/workflow"
 )
 
 type GRPCClient struct {

@@ -6,7 +6,7 @@ import (
 	"github.com/cloudflare/cfssl/cli"
 	"github.com/spf13/cobra"
 
-	"powerssl.io/powerssl/internal/pkg/pki"
+	"powerssl.dev/powerssl/internal/pkg/pki"
 )
 
 func newCmdCASign() *cobra.Command {

@@ -1,4 +1,4 @@
-package integration
+package integration // import "powerssl.dev/powerssl/pkg/integration"
 
 import (
 	"context"
@@ -13,15 +13,15 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 	"golang.org/x/sync/errgroup"
 
-	acmetransport "powerssl.io/powerssl/internal/app/controller/acme/transport" // TODO: Wrong package
-	apiv1 "powerssl.io/powerssl/internal/pkg/controller/api/v1"
-	"powerssl.io/powerssl/pkg/controller/api"
-	controllerclient "powerssl.io/powerssl/pkg/controller/client"
-	integrationacme "powerssl.io/powerssl/pkg/integration/acme"
-	// integrationdns "powerssl.io/powerssl/pkg/integration/dns"
-	"powerssl.io/powerssl/internal/pkg/tracing"
-	"powerssl.io/powerssl/internal/pkg/transport"
-	"powerssl.io/powerssl/internal/pkg/util"
+	acmetransport "powerssl.dev/powerssl/internal/app/controller/acme/transport" // TODO: Wrong package
+	apiv1 "powerssl.dev/powerssl/internal/pkg/controller/api/v1"
+	"powerssl.dev/powerssl/pkg/controller/api"
+	controllerclient "powerssl.dev/powerssl/pkg/controller/client"
+	integrationacme "powerssl.dev/powerssl/pkg/integration/acme"
+	// integrationdns "powerssl.dev/powerssl/pkg/integration/dns"
+	"powerssl.dev/powerssl/internal/pkg/tracing"
+	"powerssl.dev/powerssl/internal/pkg/transport"
+	"powerssl.dev/powerssl/internal/pkg/util"
 )
 
 type kind string

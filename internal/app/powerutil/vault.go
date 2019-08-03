@@ -8,9 +8,9 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/hashicorp/vault/api"
 
-	"powerssl.io/powerssl/internal/app/powerutil/policy"
-	"powerssl.io/powerssl/internal/pkg/pki"
-	"powerssl.io/powerssl/internal/pkg/vault"
+	"powerssl.dev/powerssl/internal/app/powerutil/policy"
+	"powerssl.dev/powerssl/internal/pkg/pki"
+	"powerssl.dev/powerssl/internal/pkg/vault"
 )
 
 const (

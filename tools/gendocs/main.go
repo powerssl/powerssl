@@ -12,17 +12,17 @@ import (
 	"github.com/spf13/cobra/doc"
 	"gopkg.in/yaml.v2"
 
-	agent "powerssl.io/powerssl/internal/app/agent/cmd"
-	apiserver "powerssl.io/powerssl/internal/app/apiserver/cmd"
-	auth "powerssl.io/powerssl/internal/app/auth/cmd"
-	controller "powerssl.io/powerssl/internal/app/controller/cmd"
-	grpcgateway "powerssl.io/powerssl/internal/app/grpcgateway/cmd"
-	acmeintegration "powerssl.io/powerssl/internal/app/integrations/acme/cmd"
-	cloudflareintegration "powerssl.io/powerssl/internal/app/integrations/cloudflare/cmd"
-	powerctl "powerssl.io/powerssl/internal/app/powerctl/cmd"
-	powerutil "powerssl.io/powerssl/internal/app/powerutil/cmd"
-	signer "powerssl.io/powerssl/internal/app/signer/cmd"
-	webapp "powerssl.io/powerssl/internal/app/webapp/cmd"
+	agent "powerssl.dev/powerssl/internal/app/agent/cmd"
+	apiserver "powerssl.dev/powerssl/internal/app/apiserver/cmd"
+	auth "powerssl.dev/powerssl/internal/app/auth/cmd"
+	controller "powerssl.dev/powerssl/internal/app/controller/cmd"
+	grpcgateway "powerssl.dev/powerssl/internal/app/grpcgateway/cmd"
+	acmeintegration "powerssl.dev/powerssl/internal/app/integrations/acme/cmd"
+	cloudflareintegration "powerssl.dev/powerssl/internal/app/integrations/cloudflare/cmd"
+	powerctl "powerssl.dev/powerssl/internal/app/powerctl/cmd"
+	powerutil "powerssl.dev/powerssl/internal/app/powerutil/cmd"
+	signer "powerssl.dev/powerssl/internal/app/signer/cmd"
+	webapp "powerssl.dev/powerssl/internal/app/webapp/cmd"
 )
 
 func main() {

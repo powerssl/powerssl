@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"powerssl.io/powerssl/internal/pkg/version"
+	"powerssl.dev/powerssl/internal/pkg/version"
 )
 
 func NewCmdRoot() *cobra.Command {

@@ -31,7 +31,7 @@ build-%:
 
 .PHONY: build-dev-runner
 build-dev-runner:
-	go build -o bin/dev-runner powerssl.io/powerssl/tools/dev-runner
+	go build -o bin/dev-runner powerssl.dev/powerssl/tools/dev-runner
 
 .PHONY: build-powerssl-apiserver
 build-powerssl-apiserver:
@@ -52,12 +52,12 @@ clean: clean-dev-runner clean-powerctl clean-powerssl-agent clean-powerssl-apise
 
 .PHONY: clean-%
 clean-%:
-	go clean powerssl.io/powerssl/cmd/${*}
+	go clean powerssl.dev/powerssl/cmd/${*}
 	rm -f bin/${*}
 
 .PHONY: clean-dev-runner
 clean-dev-runner:
-	go clean powerssl.io/powerssl/tools/dev-runner
+	go clean powerssl.dev/powerssl/tools/dev-runner
 	rm -f bin/dev-runner
 
 .PHONY: clear
@@ -74,7 +74,7 @@ generate: generate-protobuf generate-go generate-docs
 
 .PHONY: generate-docs
 generate-docs:
-	go run powerssl.io/powerssl/tools/gendocs
+	go run powerssl.dev/powerssl/tools/gendocs
 
 .PHONY: generate-go
 generate-go:
@@ -96,7 +96,7 @@ install: install-powerctl install-powerssl-agent install-powerutil
 
 .PHONY: install-%
 install-%:
-	COMPONENT=${*} scripts/install.sh
+	COMPONENT=${*} scripts/install-go.sh
 
 .PHONY: release-image-%
 release-image-%:

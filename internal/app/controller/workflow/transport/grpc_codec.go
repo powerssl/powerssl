@@ -3,9 +3,9 @@ package transport
 import (
 	"context"
 
-	"powerssl.io/powerssl/internal/app/controller/workflow/endpoint"
-	apiv1 "powerssl.io/powerssl/internal/pkg/controller/api/v1"
-	"powerssl.io/powerssl/pkg/controller/api"
+	"powerssl.dev/powerssl/internal/app/controller/workflow/endpoint"
+	apiv1 "powerssl.dev/powerssl/internal/pkg/controller/api/v1"
+	"powerssl.dev/powerssl/pkg/controller/api"
 )
 
 func decodeGRPCWorkflowIntegrationFilter(workflowIntegrationFilter *apiv1.Workflow_IntegrationFilter) (*api.WorkflowIntegrationFilter, error) {
