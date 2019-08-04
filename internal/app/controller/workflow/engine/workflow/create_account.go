@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"powerssl.io/powerssl/internal/app/controller/workflow/engine/activity"
-	"powerssl.io/powerssl/internal/app/controller/workflow/engine/activity/acme"
-	apiserverapi "powerssl.io/powerssl/pkg/apiserver/api"
-	apiserverclient "powerssl.io/powerssl/pkg/apiserver/client"
+	"powerssl.dev/powerssl/internal/app/controller/workflow/engine/activity"
+	"powerssl.dev/powerssl/internal/app/controller/workflow/engine/activity/acme"
+	apiserverapi "powerssl.dev/powerssl/pkg/apiserver/api"
+	apiserverclient "powerssl.dev/powerssl/pkg/apiserver/client"
 )
 
 type CreateAccount struct {

@@ -1,4 +1,4 @@
-package acme
+package acme // import "powerssl.dev/powerssl/pkg/integration/acme"
 
 import "time"
 

@@ -6,9 +6,9 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"powerssl.io/powerssl/internal/pkg/tracing"
-	"powerssl.io/powerssl/internal/pkg/util"
-	apiserverclient "powerssl.io/powerssl/pkg/apiserver/client"
+	"powerssl.dev/powerssl/internal/pkg/tracing"
+	"powerssl.dev/powerssl/internal/pkg/util"
+	apiserverclient "powerssl.dev/powerssl/pkg/apiserver/client"
 )
 
 func Run(cfg *Config) {

@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 
-	"powerssl.io/powerssl/pkg/controller/api"
+	"powerssl.dev/powerssl/pkg/controller/api"
 )
 
 type Definition interface {

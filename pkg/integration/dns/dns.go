@@ -1,10 +1,10 @@
-package dns
+package dns // import "powerssl.dev/powerssl/pkg/integration/dns"
 
 import (
 	"context"
 	"fmt"
 
-	"powerssl.io/powerssl/pkg/controller/api"
+	"powerssl.dev/powerssl/pkg/controller/api"
 )
 
 type Integration interface {

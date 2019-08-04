@@ -3,7 +3,7 @@ package agent
 import (
 	"gopkg.in/go-playground/validator.v9"
 
-	"powerssl.io/powerssl/internal/pkg/transport"
+	"powerssl.dev/powerssl/internal/pkg/transport"
 )
 
 type APIServerClientConfig = transport.ClientConfig

@@ -5,9 +5,9 @@ import (
 
 	"github.com/gogo/protobuf/types"
 
-	"powerssl.io/powerssl/internal/app/apiserver/acmeaccount/endpoint"
-	apiv1 "powerssl.io/powerssl/internal/pkg/apiserver/api/v1"
-	"powerssl.io/powerssl/pkg/apiserver/api"
+	"powerssl.dev/powerssl/internal/app/apiserver/acmeaccount/endpoint"
+	apiv1 "powerssl.dev/powerssl/internal/pkg/apiserver/api/v1"
+	"powerssl.dev/powerssl/pkg/apiserver/api"
 )
 
 func decodeGRPCACMEAccount(acmeAccount *apiv1.ACMEAccount) (*api.ACMEAccount, error) {

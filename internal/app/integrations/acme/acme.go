@@ -3,7 +3,7 @@ package acme
 import (
 	"errors"
 
-	integrationacme "powerssl.io/powerssl/pkg/integration/acme"
+	integrationacme "powerssl.dev/powerssl/pkg/integration/acme"
 )
 
 var ErrNotImplemented = errors.New("not implemented")

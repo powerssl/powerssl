@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"powerssl.io/powerssl/internal/pkg/version"
+	"powerssl.dev/powerssl/internal/pkg/version"
 )
 
 var (

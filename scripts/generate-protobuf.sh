@@ -24,8 +24,8 @@ proto_path="api/protobuf-spec:$googleapis:$protobuf:$protobuf/protobuf"
 
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
-mkdir "$tmp/powerssl.io"
-ln -s "$PWD" "$tmp/powerssl.io/powerssl"
+mkdir "$tmp/powerssl.dev"
+ln -s "$PWD" "$tmp/powerssl.dev/powerssl"
 
 PATH="$(dirname "$(gobin -m -p github.com/gogo/protobuf/protoc-gen-gogo)"):$PATH"
 PATH="$(dirname "$(gobin -m -p github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway)"):$PATH"

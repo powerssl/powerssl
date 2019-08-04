@@ -20,7 +20,7 @@ import (
 	"github.com/spf13/viper"
 	goyaml "gopkg.in/yaml.v2"
 
-	apiserverclient "powerssl.io/powerssl/pkg/apiserver/client"
+	apiserverclient "powerssl.dev/powerssl/pkg/apiserver/client"
 )
 
 type ResourceHandler interface {

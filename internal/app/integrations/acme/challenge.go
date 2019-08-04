@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"powerssl.io/powerssl/pkg/controller/api"
+	"powerssl.dev/powerssl/pkg/controller/api"
 )
 
 func (acme *ACME) GetChallenge(_ context.Context, accountURL string, challengeURL string) (*api.Challenge, error) {

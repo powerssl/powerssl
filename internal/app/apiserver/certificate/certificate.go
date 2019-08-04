@@ -8,11 +8,11 @@ import (
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 
-	"powerssl.io/powerssl/internal/app/apiserver/certificate/endpoint"
-	"powerssl.io/powerssl/internal/app/apiserver/certificate/service"
-	"powerssl.io/powerssl/internal/app/apiserver/certificate/transport"
-	apiv1 "powerssl.io/powerssl/internal/pkg/apiserver/api/v1"
-	controllerclient "powerssl.io/powerssl/pkg/controller/client"
+	"powerssl.dev/powerssl/internal/app/apiserver/certificate/endpoint"
+	"powerssl.dev/powerssl/internal/app/apiserver/certificate/service"
+	"powerssl.dev/powerssl/internal/app/apiserver/certificate/transport"
+	apiv1 "powerssl.dev/powerssl/internal/pkg/apiserver/api/v1"
+	controllerclient "powerssl.dev/powerssl/pkg/controller/client"
 )
 
 type Certificate struct {

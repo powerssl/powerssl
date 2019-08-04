@@ -1,4 +1,4 @@
-package api // import "powerssl.io/powerssl/pkg/apiserver/api"
+package api // import "powerssl.dev/powerssl/pkg/apiserver/api"
 
 import "time"
 

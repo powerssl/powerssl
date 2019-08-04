@@ -1,4 +1,4 @@
-package client // import "powerssl.io/powerssl/pkg/apiserver/client"
+package client // import "powerssl.dev/powerssl/pkg/apiserver/client"
 
 import (
 	"context"
@@ -6,16 +6,16 @@ import (
 	"github.com/go-kit/kit/log"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
-	acmeaccounttransport "powerssl.io/powerssl/internal/app/apiserver/acmeaccount/transport"
-	acmeservertransport "powerssl.io/powerssl/internal/app/apiserver/acmeserver/transport"
-	certificatetransport "powerssl.io/powerssl/internal/app/apiserver/certificate/transport"
-	usertransport "powerssl.io/powerssl/internal/app/apiserver/user/transport"
-	"powerssl.io/powerssl/internal/pkg/auth"
-	"powerssl.io/powerssl/internal/pkg/transport"
-	"powerssl.io/powerssl/pkg/apiserver/acmeaccount"
-	"powerssl.io/powerssl/pkg/apiserver/acmeserver"
-	"powerssl.io/powerssl/pkg/apiserver/certificate"
-	"powerssl.io/powerssl/pkg/apiserver/user"
+	acmeaccounttransport "powerssl.dev/powerssl/internal/app/apiserver/acmeaccount/transport"
+	acmeservertransport "powerssl.dev/powerssl/internal/app/apiserver/acmeserver/transport"
+	certificatetransport "powerssl.dev/powerssl/internal/app/apiserver/certificate/transport"
+	usertransport "powerssl.dev/powerssl/internal/app/apiserver/user/transport"
+	"powerssl.dev/powerssl/internal/pkg/auth"
+	"powerssl.dev/powerssl/internal/pkg/transport"
+	"powerssl.dev/powerssl/pkg/apiserver/acmeaccount"
+	"powerssl.dev/powerssl/pkg/apiserver/acmeserver"
+	"powerssl.dev/powerssl/pkg/apiserver/certificate"
+	"powerssl.dev/powerssl/pkg/apiserver/user"
 )
 
 type GRPCClient struct {

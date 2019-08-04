@@ -5,9 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"powerssl.io/powerssl/internal/app/powerctl"
-	"powerssl.io/powerssl/internal/app/powerctl/resource"
-	apiserverclient "powerssl.io/powerssl/pkg/apiserver/client"
+	"powerssl.dev/powerssl/internal/app/powerctl"
+	"powerssl.dev/powerssl/internal/app/powerctl/resource"
+	apiserverclient "powerssl.dev/powerssl/pkg/apiserver/client"
 )
 
 func newCmdCreate() *cobra.Command {

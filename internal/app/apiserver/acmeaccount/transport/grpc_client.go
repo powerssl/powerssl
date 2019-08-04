@@ -12,9 +12,9 @@ import (
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 
-	"powerssl.io/powerssl/internal/app/apiserver/acmeaccount/endpoint"
-	apiv1 "powerssl.io/powerssl/internal/pkg/apiserver/api/v1"
-	"powerssl.io/powerssl/pkg/apiserver/acmeaccount"
+	"powerssl.dev/powerssl/internal/app/apiserver/acmeaccount/endpoint"
+	apiv1 "powerssl.dev/powerssl/internal/pkg/apiserver/api/v1"
+	"powerssl.dev/powerssl/pkg/apiserver/acmeaccount"
 )
 
 const serviceName = "powerssl.apiserver.v1.ACMEAccountService"

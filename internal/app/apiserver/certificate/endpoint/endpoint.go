@@ -9,9 +9,9 @@ import (
 	"github.com/go-kit/kit/tracing/opentracing"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
-	"powerssl.io/powerssl/internal/pkg/middleware"
-	"powerssl.io/powerssl/pkg/apiserver/api"
-	"powerssl.io/powerssl/pkg/apiserver/certificate"
+	"powerssl.dev/powerssl/internal/pkg/middleware"
+	"powerssl.dev/powerssl/pkg/apiserver/api"
+	"powerssl.dev/powerssl/pkg/apiserver/certificate"
 )
 
 type Endpoints struct {

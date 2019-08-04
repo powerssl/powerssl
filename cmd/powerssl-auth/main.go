@@ -1,6 +1,6 @@
 package main
 
-import "powerssl.io/powerssl/internal/app/auth/cmd"
+import "powerssl.dev/powerssl/internal/app/auth/cmd"
 
 func main() {
 	cmd.Execute()

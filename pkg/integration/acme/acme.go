@@ -1,12 +1,12 @@
-package acme
+package acme // import "powerssl.dev/powerssl/pkg/integration/acme"
 
 import (
 	"context"
 	"crypto/x509"
 	"fmt"
 
-	"powerssl.io/powerssl/pkg/controller/acme"
-	"powerssl.io/powerssl/pkg/controller/api"
+	"powerssl.dev/powerssl/pkg/controller/acme"
+	"powerssl.dev/powerssl/pkg/controller/api"
 )
 
 type Integration interface {

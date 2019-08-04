@@ -6,10 +6,10 @@ import (
 	"google.golang.org/grpc"
 
 	stdopentracing "github.com/opentracing/opentracing-go"
-	"powerssl.io/powerssl/internal/app/controller/acme/endpoint"
-	service "powerssl.io/powerssl/internal/app/controller/acme/service"
-	"powerssl.io/powerssl/internal/app/controller/acme/transport"
-	apiv1 "powerssl.io/powerssl/internal/pkg/controller/api/v1"
+	"powerssl.dev/powerssl/internal/app/controller/acme/endpoint"
+	service "powerssl.dev/powerssl/internal/app/controller/acme/service"
+	"powerssl.dev/powerssl/internal/app/controller/acme/transport"
+	apiv1 "powerssl.dev/powerssl/internal/pkg/controller/api/v1"
 )
 
 type ACME struct {

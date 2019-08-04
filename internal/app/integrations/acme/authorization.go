@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"powerssl.io/powerssl/pkg/controller/api"
+	"powerssl.dev/powerssl/pkg/controller/api"
 )
 
 func (acme *ACME) CreateAuthorization(_ context.Context, directoryURL string, accountURL string, identifier *api.Identifier) (*api.Authorization, error) {

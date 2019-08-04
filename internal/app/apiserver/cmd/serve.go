@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"powerssl.io/powerssl/internal/app/apiserver"
+	"powerssl.dev/powerssl/internal/app/apiserver"
 )
 
 func newCmdServe() *cobra.Command {

@@ -6,10 +6,10 @@ import (
 
 	"github.com/go-kit/kit/log"
 
-	engineactivity "powerssl.io/powerssl/internal/app/controller/workflow/engine/activity"
-	"powerssl.io/powerssl/internal/app/controller/workflow/engine/activity/acme"
-	service "powerssl.io/powerssl/pkg/controller/acme"
-	"powerssl.io/powerssl/pkg/controller/api"
+	engineactivity "powerssl.dev/powerssl/internal/app/controller/workflow/engine/activity"
+	"powerssl.dev/powerssl/internal/app/controller/workflow/engine/activity/acme"
+	service "powerssl.dev/powerssl/pkg/controller/acme"
+	"powerssl.dev/powerssl/pkg/controller/api"
 )
 
 func New(logger log.Logger) service.Service {
