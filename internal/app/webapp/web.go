@@ -1,20 +1,21 @@
-//go:generate gobin -m -run github.com/go-bindata/go-bindata/go-bindata -nometadata -pkg webapp -prefix ../../../web/app ../../../web/app
-
 package webapp
 
 import (
+	"bytes"
 	"context"
-	htmltemplate "html/template"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/arschles/go-bindata-html-template"
+	bindatahtmltemplate "github.com/arschles/go-bindata-html-template"
 	"github.com/go-kit/kit/log"
 	"golang.org/x/sync/errgroup"
 
+	"powerssl.dev/powerssl/internal/app/webapp/asset"
+	"powerssl.dev/powerssl/internal/app/webapp/template"
 	"powerssl.dev/powerssl/internal/pkg/transport"
 	"powerssl.dev/powerssl/internal/pkg/util"
+	utilhttp "powerssl.dev/powerssl/internal/pkg/util/http"
 )
 
 func Run(cfg *Config) {
@@ -34,7 +35,7 @@ func Run(cfg *Config) {
 	}
 
 	g.Go(func() error {
-		return ServeHTTP(ctx, cfg.Addr, log.With(logger, "component", "http"), cfg.AuthURI, cfg.APIAddr)
+		return ServeHTTP(ctx, cfg.Addr, log.With(logger, "component", "http"), cfg.AuthURI, cfg.APIAddr, cfg.GRPCWebURI)
 	})
 
 	if err := g.Wait(); err != nil {
@@ -46,21 +47,36 @@ func Run(cfg *Config) {
 	}
 }
 
-func ServeHTTP(ctx context.Context, addr string, logger log.Logger, authURI, apiAddr string) error {
-	mux := http.NewServeMux()
-	tmpl, err := template.New("index", Asset).Parse("index.html")
-	if err != nil {
-		return err
-	}
-	data := map[string]interface{}{
-		"AuthURI": htmltemplate.URL(authURI),
-		"APIAddr": apiAddr,
-	}
-	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		if err := tmpl.Execute(w, data); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+func ServeHTTP(ctx context.Context, addr string, logger log.Logger, authURI, apiAddr, grpcWebURI string) error {
+	var buffer []byte
+	{
+		tmpl := bindatahtmltemplate.Must(bindatahtmltemplate.New("index", template.Asset).Parse("index.html"))
+		data := map[string]interface{}{
+			"APIAddr":    apiAddr,
+			"AuthURI":    authURI,
+			"GRPCWebURI": grpcWebURI,
 		}
+		var buf bytes.Buffer
+		if err := tmpl.Execute(&buf, data); err != nil {
+			return err
+		}
+		buffer = buf.Bytes()
+	}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+		if req.URL.Path == "/" {
+			w.Write(buffer)
+			return
+		}
+		if req.URL.Path == "/favicon.ico" {
+			w.Header().Add("content-type", "image/x-icon")
+			w.Write(asset.MustAsset("favicon.ico"))
+			return
+		}
+		http.NotFound(w, req)
 	})
+	mux.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(utilhttp.NewFileSystem(asset.AssetFile()))))
 	srv := http.Server{
 		Addr:    addr,
 		Handler: mux,

@@ -107,7 +107,10 @@ func request_ACMEServerService_List_0(ctx context.Context, marshaler runtime.Mar
 	var protoReq ListACMEServersRequest
 	var metadata runtime.ServerMetadata
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_ACMEServerService_List_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ACMEServerService_List_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -293,15 +296,15 @@ func RegisterACMEServerServiceHandlerClient(ctx context.Context, mux *runtime.Se
 }
 
 var (
-	pattern_ACMEServerService_Create_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "acmeServers"}, ""))
+	pattern_ACMEServerService_Create_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "acmeServers"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_ACMEServerService_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 2, 5, 2}, []string{"v1", "acmeServers", "name"}, ""))
+	pattern_ACMEServerService_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 2, 5, 2}, []string{"v1", "acmeServers", "name"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_ACMEServerService_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 2, 5, 2}, []string{"v1", "acmeServers", "name"}, ""))
+	pattern_ACMEServerService_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 2, 5, 2}, []string{"v1", "acmeServers", "name"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_ACMEServerService_List_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "acmeServers"}, ""))
+	pattern_ACMEServerService_List_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "acmeServers"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_ACMEServerService_Update_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 2, 5, 2}, []string{"v1", "acmeServers", "name"}, ""))
+	pattern_ACMEServerService_Update_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 2, 5, 2}, []string{"v1", "acmeServers", "name"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

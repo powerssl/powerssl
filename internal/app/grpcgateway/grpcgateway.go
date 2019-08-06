@@ -20,25 +20,8 @@ import (
 	apiv1 "powerssl.dev/powerssl/internal/pkg/apiserver/api/v1"
 	"powerssl.dev/powerssl/internal/pkg/transport"
 	"powerssl.dev/powerssl/internal/pkg/util"
+	utilhttp "powerssl.dev/powerssl/internal/pkg/util/http"
 )
-
-type fileSystem struct {
-	fs http.FileSystem
-}
-
-func (fs fileSystem) Open(path string) (http.File, error) {
-	f, err := fs.fs.Open(path)
-	if err != nil {
-		return nil, err
-	}
-
-	s, _ := f.Stat()
-	if s.IsDir() {
-		return nil, os.ErrNotExist
-	}
-
-	return f, nil
-}
 
 func Run(cfg *Config) {
 	logger := util.NewLogger(os.Stdout)
@@ -92,7 +75,7 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, conn *grpc.C
 
 	mux := http.NewServeMux()
 	mux.Handle("/", gateway)
-	mux.Handle("/openapi/", http.StripPrefix("/openapi", http.FileServer(fileSystem{fs: openapi.AssetFile()})))
+	mux.Handle("/openapi/", http.StripPrefix("/openapi", http.FileServer(utilhttp.NewFileSystem(openapi.AssetFile()))))
 	mux.Handle("/swagger-ui/", http.StripPrefix("/swagger-ui", http.FileServer(swaggerui.AssetFile())))
 	mux.HandleFunc("/healthz", healthzServer(conn))
 	mux.HandleFunc("/swagger-ui/config.json", swaggerUIConfigHandler)

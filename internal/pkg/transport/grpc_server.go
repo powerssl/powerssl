@@ -124,9 +124,10 @@ func ServeGRPC(ctx context.Context, cfg *ServerConfig, logger log.Logger, servic
 				}
 				return cert, err
 			}
-			if _, err := getCertificate(&tls.ClientHelloInfo{ServerName: cfg.CommonName}); err != nil {
-				return err
-			}
+			// TODO: This was priming the server before the first reqeust. Certify is now failing with this.
+			// if _, err := getCertificate(&tls.ClientHelloInfo{ServerName: cfg.CommonName}); err != nil {
+			// 	return err
+			// }
 			creds = credentials.NewTLS(&tls.Config{GetCertificate: getCertificate})
 		}
 		options = append(options, grpc.Creds(creds))

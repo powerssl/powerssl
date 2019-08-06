@@ -1,30 +1,31 @@
-//go:generate gobin -m -run github.com/go-bindata/go-bindata/go-bindata -nometadata -pkg auth -prefix ../../../web/auth ../../../web/auth
-
 package auth
 
 import (
+	"bytes"
 	"context"
 	"crypto"
 	"crypto/rsa"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	htmltemplate "html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/arschles/go-bindata-html-template"
+	bindatahtmltemplate "github.com/arschles/go-bindata-html-template"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-kit/kit/log"
 	"github.com/pborman/uuid"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/square/go-jose.v2"
 
+	"powerssl.dev/powerssl/internal/app/auth/asset"
+	"powerssl.dev/powerssl/internal/app/auth/template"
 	"powerssl.dev/powerssl/internal/pkg/auth"
 	"powerssl.dev/powerssl/internal/pkg/transport"
 	"powerssl.dev/powerssl/internal/pkg/util"
+	utilhttp "powerssl.dev/powerssl/internal/pkg/util/http"
 )
 
 func Run(cfg *Config) {
@@ -92,15 +93,31 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 		return fmt.Errorf("failed to load signing key %v", err)
 	}
 
-	mux := http.NewServeMux()
-	tmpl, err := template.New("index", Asset).Parse("index.html")
-	if err != nil {
-		return err
-	}
-	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		if err := tmpl.Execute(w, map[string]interface{}{"WebAppURI": htmltemplate.URL(webappURI)}); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+	var buffer []byte
+	{
+		tmpl := bindatahtmltemplate.Must(bindatahtmltemplate.New("index", template.Asset).Parse("index.html"))
+		data := map[string]interface{}{
+			"WebAppURI": webappURI,
 		}
+		var buf bytes.Buffer
+		if err := tmpl.Execute(&buf, data); err != nil {
+			return err
+		}
+		buffer = buf.Bytes()
+	}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+		if req.URL.Path == "/" {
+			w.Write(buffer)
+			return
+		}
+		if req.URL.Path == "/favicon.ico" {
+			w.Header().Add("content-type", "image/x-icon")
+			w.Write(asset.MustAsset("favicon.ico"))
+			return
+		}
+		http.NotFound(w, req)
 	})
 	jwksHandler, err := jwksEndpoint(signKey)
 	if err != nil {
@@ -136,6 +153,7 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 		w.Header().Add("Content-Type", "application/jwt")
 		fmt.Fprint(w, tokenString)
 	})
+	mux.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(utilhttp.NewFileSystem(asset.AssetFile()))))
 	srv := http.Server{
 		Addr:    addr,
 		Handler: mux,

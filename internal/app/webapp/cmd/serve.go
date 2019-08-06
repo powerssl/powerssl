@@ -12,6 +12,7 @@ func newCmdServe() *cobra.Command {
 		addr        string
 		apiAddr     string
 		authURI     string
+		grpcWebURI  string
 		metricsAddr string
 	)
 
@@ -22,6 +23,7 @@ func newCmdServe() *cobra.Command {
 			addr = viper.GetString("addr")
 			apiAddr = viper.GetString("api-addr")
 			authURI = viper.GetString("auth-uri")
+			grpcWebURI = viper.GetString("grpc-web-uri")
 			if !viper.GetBool("no-metrics") {
 				metricsAddr = viper.GetString("metrics-addr")
 			}
@@ -31,6 +33,7 @@ func newCmdServe() *cobra.Command {
 				Addr:        addr,
 				APIAddr:     apiAddr,
 				AuthURI:     authURI,
+				GRPCWebURI:  grpcWebURI,
 				MetricsAddr: metricsAddr,
 			})
 		},
@@ -40,11 +43,13 @@ func newCmdServe() *cobra.Command {
 	cmd.Flags().StringP("addr", "", ":8080", "Addr")
 	cmd.Flags().StringP("api-addr", "", "", "API Addr")
 	cmd.Flags().StringP("auth-uri", "", "", "Auth URI")
+	cmd.Flags().StringP("grpc-web-uri", "", "", "gRPC-Web URI")
 	cmd.Flags().StringP("metrics-addr", "", ":9090", "HTTP Addr")
 
 	viper.BindPFlag("addr", cmd.Flags().Lookup("addr"))
 	viper.BindPFlag("api-addr", cmd.Flags().Lookup("api-addr"))
 	viper.BindPFlag("auth-uri", cmd.Flags().Lookup("auth-uri"))
+	viper.BindPFlag("grpc-web-uri", cmd.Flags().Lookup("grpc-web-uri"))
 	viper.BindPFlag("metrics-addr", cmd.Flags().Lookup("metrics-addr"))
 	viper.BindPFlag("no-metrics", cmd.Flags().Lookup("no-metrics"))
 
