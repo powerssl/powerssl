@@ -45,7 +45,7 @@ commands:
           condition: "<<parameters.image>>"
           steps:
             - *restore_go_modules
-            - run: "make build-<<parameters.component>>"
+            - run: "make bootstrap build-<<parameters.component>>"
             - persist_to_workspace:
                 root: .
                 paths:
