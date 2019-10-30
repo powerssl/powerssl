@@ -56,10 +56,10 @@ commands:
 executors:
   golang-executor:
     docker:
-      - image: circleci/golang:1.12
+      - image: circleci/golang:1.13
   golang-node-executor:
     docker:
-      - image: circleci/golang:1.12-node
+      - image: circleci/golang:1.13-node
 jobs:
   build_powerctl:
     executor: golang-executor
