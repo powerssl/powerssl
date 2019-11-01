@@ -8,6 +8,8 @@ import (
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -20,7 +22,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type IntegrationKind int32
 
@@ -186,6 +188,14 @@ func (x *integrationServiceRegisterClient) Recv() (*Activity, error) {
 // IntegrationServiceServer is the server API for IntegrationService service.
 type IntegrationServiceServer interface {
 	Register(*RegisterIntegrationRequest, IntegrationService_RegisterServer) error
+}
+
+// UnimplementedIntegrationServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedIntegrationServiceServer struct {
+}
+
+func (*UnimplementedIntegrationServiceServer) Register(req *RegisterIntegrationRequest, srv IntegrationService_RegisterServer) error {
+	return status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
 
 func RegisterIntegrationServiceServer(s *grpc.Server, srv IntegrationServiceServer) {

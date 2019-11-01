@@ -13,6 +13,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/golang/protobuf/descriptor"
 	"github.com/golang/protobuf/proto"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/utilities"
@@ -22,11 +23,13 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// Suppress "imported and not used" errors
 var _ codes.Code
 var _ io.Reader
 var _ status.Status
 var _ = runtime.String
 var _ = utilities.NewDoubleArray
+var _ = descriptor.ForMessage
 
 func request_ACMEAccountService_Create_0(ctx context.Context, marshaler runtime.Marshaler, client ACMEAccountServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq CreateACMEAccountRequest
@@ -63,6 +66,41 @@ func request_ACMEAccountService_Create_0(ctx context.Context, marshaler runtime.
 
 }
 
+func local_request_ACMEAccountService_Create_0(ctx context.Context, marshaler runtime.Marshaler, server ACMEAccountServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq CreateACMEAccountRequest
+	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["parent"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "parent")
+	}
+
+	protoReq.Parent, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "parent", err)
+	}
+
+	msg, err := server.Create(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
 func request_ACMEAccountService_Delete_0(ctx context.Context, marshaler runtime.Marshaler, client ACMEAccountServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq DeleteACMEAccountRequest
 	var metadata runtime.ServerMetadata
@@ -90,6 +128,33 @@ func request_ACMEAccountService_Delete_0(ctx context.Context, marshaler runtime.
 
 }
 
+func local_request_ACMEAccountService_Delete_0(ctx context.Context, marshaler runtime.Marshaler, server ACMEAccountServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq DeleteACMEAccountRequest
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+	}
+
+	msg, err := server.Delete(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
 func request_ACMEAccountService_Get_0(ctx context.Context, marshaler runtime.Marshaler, client ACMEAccountServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetACMEAccountRequest
 	var metadata runtime.ServerMetadata
@@ -113,6 +178,33 @@ func request_ACMEAccountService_Get_0(ctx context.Context, marshaler runtime.Mar
 	}
 
 	msg, err := client.Get(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_ACMEAccountService_Get_0(ctx context.Context, marshaler runtime.Marshaler, server ACMEAccountServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetACMEAccountRequest
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+	}
+
+	msg, err := server.Get(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -155,6 +247,37 @@ func request_ACMEAccountService_List_0(ctx context.Context, marshaler runtime.Ma
 
 }
 
+func local_request_ACMEAccountService_List_0(ctx context.Context, marshaler runtime.Marshaler, server ACMEAccountServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListACMEAccountsRequest
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["parent"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "parent")
+	}
+
+	protoReq.Parent, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "parent", err)
+	}
+
+	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_ACMEAccountService_List_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := server.List(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
 func request_ACMEAccountService_Update_0(ctx context.Context, marshaler runtime.Marshaler, client ACMEAccountServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq UpdateACMEAccountRequest
 	var metadata runtime.ServerMetadata
@@ -188,6 +311,149 @@ func request_ACMEAccountService_Update_0(ctx context.Context, marshaler runtime.
 	msg, err := client.Update(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
+}
+
+func local_request_ACMEAccountService_Update_0(ctx context.Context, marshaler runtime.Marshaler, server ACMEAccountServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq UpdateACMEAccountRequest
+	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+	}
+
+	msg, err := server.Update(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
+// RegisterACMEAccountServiceHandlerServer registers the http handlers for service ACMEAccountService to "mux".
+// UnaryRPC     :call ACMEAccountServiceServer directly.
+// StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
+func RegisterACMEAccountServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server ACMEAccountServiceServer) error {
+
+	mux.Handle("POST", pattern_ACMEAccountService_Create_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_ACMEAccountService_Create_0(rctx, inboundMarshaler, server, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_ACMEAccountService_Create_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("DELETE", pattern_ACMEAccountService_Delete_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_ACMEAccountService_Delete_0(rctx, inboundMarshaler, server, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_ACMEAccountService_Delete_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_ACMEAccountService_Get_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_ACMEAccountService_Get_0(rctx, inboundMarshaler, server, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_ACMEAccountService_Get_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_ACMEAccountService_List_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_ACMEAccountService_List_0(rctx, inboundMarshaler, server, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_ACMEAccountService_List_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("PUT", pattern_ACMEAccountService_Update_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_ACMEAccountService_Update_0(rctx, inboundMarshaler, server, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_ACMEAccountService_Update_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	return nil
 }
 
 // RegisterACMEAccountServiceHandlerFromEndpoint is same as RegisterACMEAccountServiceHandler but

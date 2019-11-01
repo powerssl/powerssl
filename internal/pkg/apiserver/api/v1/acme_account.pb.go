@@ -10,6 +10,8 @@ import (
 	proto "github.com/gogo/protobuf/proto"
 	types "github.com/gogo/protobuf/types"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -22,7 +24,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type ACMEAccount struct {
 	Name                 string            `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -558,6 +560,26 @@ type ACMEAccountServiceServer interface {
 	Get(context.Context, *GetACMEAccountRequest) (*ACMEAccount, error)
 	List(context.Context, *ListACMEAccountsRequest) (*ListACMEAccountsResponse, error)
 	Update(context.Context, *UpdateACMEAccountRequest) (*ACMEAccount, error)
+}
+
+// UnimplementedACMEAccountServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedACMEAccountServiceServer struct {
+}
+
+func (*UnimplementedACMEAccountServiceServer) Create(ctx context.Context, req *CreateACMEAccountRequest) (*ACMEAccount, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
+func (*UnimplementedACMEAccountServiceServer) Delete(ctx context.Context, req *DeleteACMEAccountRequest) (*types.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (*UnimplementedACMEAccountServiceServer) Get(ctx context.Context, req *GetACMEAccountRequest) (*ACMEAccount, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (*UnimplementedACMEAccountServiceServer) List(ctx context.Context, req *ListACMEAccountsRequest) (*ListACMEAccountsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
+}
+func (*UnimplementedACMEAccountServiceServer) Update(ctx context.Context, req *UpdateACMEAccountRequest) (*ACMEAccount, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 
 func RegisterACMEAccountServiceServer(s *grpc.Server, srv ACMEAccountServiceServer) {
