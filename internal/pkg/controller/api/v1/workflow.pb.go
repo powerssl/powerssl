@@ -8,6 +8,8 @@ import (
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -20,7 +22,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type WorkflowKind int32
 
@@ -130,10 +132,10 @@ type isWorkflow_Input interface {
 }
 
 type Workflow_CreateAcmeAccountInput struct {
-	CreateAcmeAccountInput *CreateACMEAccountInput `protobuf:"bytes,11,opt,name=create_acme_account_input,json=createAcmeAccountInput,proto3,oneof"`
+	CreateAcmeAccountInput *CreateACMEAccountInput `protobuf:"bytes,11,opt,name=create_acme_account_input,json=createAcmeAccountInput,proto3,oneof" json:"create_acme_account_input,omitempty"`
 }
 type Workflow_RequestAcmeCertificateInput struct {
-	RequestAcmeCertificateInput *RequestACMECertificateInput `protobuf:"bytes,12,opt,name=request_acme_certificate_input,json=requestAcmeCertificateInput,proto3,oneof"`
+	RequestAcmeCertificateInput *RequestACMECertificateInput `protobuf:"bytes,12,opt,name=request_acme_certificate_input,json=requestAcmeCertificateInput,proto3,oneof" json:"request_acme_certificate_input,omitempty"`
 }
 
 func (*Workflow_CreateAcmeAccountInput) isWorkflow_Input()      {}
@@ -181,78 +183,12 @@ func (m *Workflow) GetRequestAcmeCertificateInput() *RequestACMECertificateInput
 	return nil
 }
 
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*Workflow) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _Workflow_OneofMarshaler, _Workflow_OneofUnmarshaler, _Workflow_OneofSizer, []interface{}{
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*Workflow) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
 		(*Workflow_CreateAcmeAccountInput)(nil),
 		(*Workflow_RequestAcmeCertificateInput)(nil),
 	}
-}
-
-func _Workflow_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*Workflow)
-	// input
-	switch x := m.Input.(type) {
-	case *Workflow_CreateAcmeAccountInput:
-		_ = b.EncodeVarint(11<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.CreateAcmeAccountInput); err != nil {
-			return err
-		}
-	case *Workflow_RequestAcmeCertificateInput:
-		_ = b.EncodeVarint(12<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.RequestAcmeCertificateInput); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("Workflow.Input has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _Workflow_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*Workflow)
-	switch tag {
-	case 11: // input.create_acme_account_input
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(CreateACMEAccountInput)
-		err := b.DecodeMessage(msg)
-		m.Input = &Workflow_CreateAcmeAccountInput{msg}
-		return true, err
-	case 12: // input.request_acme_certificate_input
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(RequestACMECertificateInput)
-		err := b.DecodeMessage(msg)
-		m.Input = &Workflow_RequestAcmeCertificateInput{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _Workflow_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*Workflow)
-	// input
-	switch x := m.Input.(type) {
-	case *Workflow_CreateAcmeAccountInput:
-		s := proto.Size(x.CreateAcmeAccountInput)
-		n += 1 // tag and wire
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *Workflow_RequestAcmeCertificateInput:
-		s := proto.Size(x.RequestAcmeCertificateInput)
-		n += 1 // tag and wire
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
 }
 
 type Workflow_IntegrationFilter struct {
@@ -526,6 +462,14 @@ func (c *workflowServiceClient) Create(ctx context.Context, in *CreateWorkflowRe
 // WorkflowServiceServer is the server API for WorkflowService service.
 type WorkflowServiceServer interface {
 	Create(context.Context, *CreateWorkflowRequest) (*Workflow, error)
+}
+
+// UnimplementedWorkflowServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedWorkflowServiceServer struct {
+}
+
+func (*UnimplementedWorkflowServiceServer) Create(ctx context.Context, req *CreateWorkflowRequest) (*Workflow, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
 
 func RegisterWorkflowServiceServer(s *grpc.Server, srv WorkflowServiceServer) {

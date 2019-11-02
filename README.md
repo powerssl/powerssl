@@ -16,7 +16,7 @@ Developing PowerSSL
 
 If you wish to work on PowerSSL itself or any of its built-in systems, you'll
 first need [Go](https://www.golang.org) installed on your machine (version
-1.12+ is *required*).
+1.13+ is *required*).
 
 You can then download any required build tools by bootstrapping your environment:
 
