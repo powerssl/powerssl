@@ -226,7 +226,7 @@ jobs:
       - run: make vet
 workflows:
   version: 2
-  commit:
+  build:
     jobs:
       - download_dependencies
       - verify_generated:
