@@ -22,7 +22,7 @@ references:
       - vet
 orbs:
   docker-publish: circleci/docker-publish@0.1.7
-  shellcheck: circleci/shellcheck@1.3.10
+  shellcheck: circleci/shellcheck@2.2.2
 commands:
   build_component:
     description: "Build component"
@@ -56,10 +56,10 @@ commands:
 executors:
   golang-executor:
     docker:
-      - image: circleci/golang:1.13
+      - image: circleci/golang:1.15
   golang-node-executor:
     docker:
-      - image: circleci/golang:1.13-node
+      - image: circleci/golang:1.15-node
 jobs:
   build_powerctl:
     executor: golang-executor
@@ -239,7 +239,7 @@ workflows:
           requires:
             - download_dependencies
       - shellcheck/check:
-          path: scripts
+          dir: scripts
       - build_powerctl:
           requires: *test_stage
       - build_powerctl_image:
