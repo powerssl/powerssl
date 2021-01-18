@@ -32,6 +32,8 @@ powerssl-apiserver serve [flags]
       --metrics-addr string                      HTTP Addr (default ":9090")
       --no-metrics                               Do not serve metrics
       --no-tracing                               Do not trace
+      --temporal-host-port string                Host and port for this client to connect to (default "localhost:7233")
+      --temporal-namespace string                Namespace name for this client to work with (default "powerssl")
       --tls-cert-file string                     File containing the default x509 Certificate for GRPC
       --tls-private-key-file string              File containing the default x509 private key matching --tls-cert-file
       --tracer string                            Tracing implementation (default "jaeger")

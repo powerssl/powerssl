@@ -6,6 +6,7 @@ import (
 	"github.com/go-kit/kit/metrics"
 	"github.com/jinzhu/gorm"
 	stdopentracing "github.com/opentracing/opentracing-go"
+	temporalclient "go.temporal.io/sdk/client"
 	"google.golang.org/grpc"
 
 	"powerssl.dev/powerssl/internal/app/apiserver/acmeaccount/endpoint"
@@ -22,8 +23,8 @@ type ACMEAccount struct {
 	tracer    stdopentracing.Tracer
 }
 
-func New(db *gorm.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *controllerclient.GRPCClient, vaultClient *vault.Client, auth kitendpoint.Middleware) *ACMEAccount {
-	svc := service.New(db, logger, client, vaultClient)
+func New(db *gorm.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *controllerclient.GRPCClient, temporalClient temporalclient.Client, vaultClient *vault.Client, auth kitendpoint.Middleware) *ACMEAccount {
+	svc := service.New(db, logger, client, temporalClient, vaultClient)
 	endpoints := endpoint.NewEndpoints(svc, logger, tracer, duration, auth)
 
 	return &ACMEAccount{

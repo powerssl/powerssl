@@ -10,9 +10,11 @@ import (
 	"github.com/gogo/status"
 	"github.com/jinzhu/gorm"
 	otgorm "github.com/smacker/opentracing-gorm"
+	temporalclient "go.temporal.io/sdk/client"
 	"google.golang.org/grpc/codes"
 
 	"powerssl.dev/powerssl/internal/app/apiserver/acmeaccount/model"
+	"powerssl.dev/powerssl/internal/pkg/temporal"
 	"powerssl.dev/powerssl/internal/pkg/vault"
 	"powerssl.dev/powerssl/pkg/apiserver/acmeaccount"
 	"powerssl.dev/powerssl/pkg/apiserver/api"
@@ -20,11 +22,11 @@ import (
 	controllerclient "powerssl.dev/powerssl/pkg/controller/client"
 )
 
-func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient, vaultClient *vault.Client) acmeaccount.Service {
+func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient, temporalClient temporalclient.Client, vaultClient *vault.Client) acmeaccount.Service {
 	db.AutoMigrate(&model.ACMEAccount{})
 	var svc acmeaccount.Service
 	{
-		svc = NewBasicService(db, logger, client, vaultClient)
+		svc = NewBasicService(db, logger, client, temporalClient, vaultClient)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
@@ -32,14 +34,16 @@ func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient, va
 
 type basicService struct {
 	controllerClient *controllerclient.GRPCClient
+	temporalClient   temporalclient.Client
 	db               *gorm.DB
 	logger           log.Logger
 	vaultClient      *vault.Client
 }
 
-func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient, vaultClient *vault.Client) acmeaccount.Service {
+func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient, temporalClient temporalclient.Client, vaultClient *vault.Client) acmeaccount.Service {
 	return basicService{
 		controllerClient: client,
+		temporalClient:   temporalClient,
 		vaultClient:      vaultClient,
 		db:               db,
 		logger:           logger,
@@ -65,6 +69,7 @@ func (bs basicService) Create(ctx context.Context, parent string, acmeAccount *a
 	if err := bs.vaultClient.CreateTransitKey(ctx, account.ID); err != nil {
 		return nil, err
 	}
+
 
 	workflow, err := bs.controllerClient.Workflow.Create(ctx, &controllerapi.Workflow{
 		Kind: controllerapi.WorkflowKindCreateACMEAccount,
