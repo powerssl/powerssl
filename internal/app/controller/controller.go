@@ -13,6 +13,8 @@ import (
 	temporalworker "go.temporal.io/sdk/worker"
 	"golang.org/x/sync/errgroup"
 
+	"powerssl.dev/powerssl/internal/app/controller/activity"
+	"powerssl.dev/powerssl/internal/app/controller/workflow"
 	workflowengine "powerssl.dev/powerssl/internal/app/controller/workflow/engine"
 	"powerssl.dev/powerssl/internal/pkg/auth"
 	"powerssl.dev/powerssl/internal/pkg/temporal"
@@ -105,6 +107,8 @@ func Run(cfg *Config) {
 
 	g.Go(func() error {
 		worker := temporalworker.New(temporalClient, temporal.TaskQueue, temporalworker.Options{})
+		worker.RegisterActivity(activity.CreateAccount)
+		worker.RegisterWorkflow(workflow.CreateAccount)
 		interruptCh := make(chan interface{}, 1)
 		go func() {
 			s := <-ctx.Done()

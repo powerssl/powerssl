@@ -70,6 +70,16 @@ func (bs basicService) Create(ctx context.Context, parent string, acmeAccount *a
 		return nil, err
 	}
 
+	directoryURL := acmeServer.DirectoryURL
+	termsOfServiceAgreed := account.TermsOfServiceAgreed
+	contacts := strings.Split(account.Contacts, ",")
+	_, err = bs.temporalClient.ExecuteWorkflow(ctx, temporalclient.StartWorkflowOptions{
+		ID:        fmt.Sprintf("%s/create-account", account.Name()),
+		TaskQueue: temporal.TaskQueue,
+	}, "CreateAccount", directoryURL, termsOfServiceAgreed, contacts)
+	if err != nil {
+		return nil, err
+	}
 
 	workflow, err := bs.controllerClient.Workflow.Create(ctx, &controllerapi.Workflow{
 		Kind: controllerapi.WorkflowKindCreateACMEAccount,
