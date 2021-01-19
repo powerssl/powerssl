@@ -9,6 +9,11 @@ import (
 type APIServerClientConfig = transport.ClientConfig
 type ServerConfig = transport.ServerConfig
 
+type TemporalClientConfig struct {
+	HostPort  string
+	Namespace string
+}
+
 type VaultClientConfig struct {
 	Token  string
 	URL    string
@@ -21,6 +26,7 @@ type Config struct {
 	JWKSURL               string `validate:"required"`
 	MetricsAddr           string
 	ServerConfig          *ServerConfig
+	TemporalClientConfig   *TemporalClientConfig
 	Tracer                string
 	VaultClientConfig     *VaultClientConfig
 }

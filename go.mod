@@ -3,13 +3,13 @@ module powerssl.dev/powerssl
 go 1.15
 
 require (
+	github.com/HdrHistogram/hdrhistogram-go v1.0.1 // indirect
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
 	github.com/ahmetb/govvv v0.3.0
 	github.com/arschles/assert v1.0.0 // indirect
 	github.com/arschles/go-bindata-html-template v0.0.0-20170123182818-839a6918b9ff
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
 	github.com/cloudflare/cfssl v1.5.0
-	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/daviddengcn/go-colortext v1.0.0
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -38,8 +38,8 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mwitkow/grpc-proxy v0.0.0-20181017164139-0f1106ef9c76 // indirect
 	github.com/olekukonko/tablewriter v0.0.1
-	github.com/opentracing/opentracing-go v1.1.0
-	github.com/pborman/uuid v1.2.0
+	github.com/opentracing/opentracing-go v1.2.0
+	github.com/pborman/uuid v1.2.1
 	github.com/prometheus/client_golang v1.2.1
 	github.com/qor/qor v0.0.0-20191022064424-b3deff729f68 // indirect
 	github.com/qor/validations v0.0.0-20171228122639-f364bca61b46
@@ -47,10 +47,10 @@ require (
 	github.com/smacker/opentracing-gorm v0.0.0-20181207094635-cd4974441042
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.7.1
-	github.com/uber-go/atomic v0.0.0-00010101000000-000000000000 // indirect
+	github.com/uber-go/tally v3.3.17+incompatible
 	github.com/uber/jaeger-client-go v2.25.0+incompatible
 	github.com/uber/jaeger-lib v2.4.0+incompatible
-	github.com/zmap/zlint v0.0.0-20190806154020-fd021b4cfbeb // indirect
+	go.temporal.io/sdk v1.3.0
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
 	golang.org/x/tools v0.0.0-20210115202250-e0d201561e39

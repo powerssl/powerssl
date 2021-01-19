@@ -3,14 +3,19 @@ package controller
 import (
 	"context"
 	"os"
+	"time"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/prometheus"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
+	"github.com/uber-go/tally"
+	temporalclient "go.temporal.io/sdk/client"
+	temporalworker "go.temporal.io/sdk/worker"
 	"golang.org/x/sync/errgroup"
 
 	workflowengine "powerssl.dev/powerssl/internal/app/controller/workflow/engine"
 	"powerssl.dev/powerssl/internal/pkg/auth"
+	"powerssl.dev/powerssl/internal/pkg/temporal"
 	"powerssl.dev/powerssl/internal/pkg/tracing"
 	"powerssl.dev/powerssl/internal/pkg/transport"
 	"powerssl.dev/powerssl/internal/pkg/util"
@@ -57,6 +62,25 @@ func Run(cfg *Config) {
 		}
 	}
 
+	var temporalClient temporalclient.Client
+	{
+		scope, _ := tally.NewRootScope(tally.ScopeOptions{Separator: "_"}, time.Second)
+		var err error
+		if temporalClient, err = temporalclient.NewClient(temporalclient.Options{
+			HostPort:     cfg.TemporalClientConfig.HostPort,
+			Namespace:    cfg.TemporalClientConfig.Namespace,
+			MetricsScope: scope,
+			Tracer:       tracer,
+			//Logger:            logger,
+			//Identity:          "",
+			//ConnectionOptions: temporalclient.ConnectionOptions{},
+		}); err != nil {
+			logger.Log("err", err)
+			os.Exit(1)
+		}
+		defer temporalClient.Close()
+	}
+
 	engine := workflowengine.New()
 
 	services, err := makeServices(logger, tracer, duration, client, cfg.JWKSURL)
@@ -77,6 +101,17 @@ func Run(cfg *Config) {
 
 	g.Go(func() error {
 		return transport.ServeGRPC(ctx, cfg.ServerConfig, log.With(logger, "transport", "gRPC"), services)
+	})
+
+	g.Go(func() error {
+		worker := temporalworker.New(temporalClient, temporal.TaskQueue, temporalworker.Options{})
+		interruptCh := make(chan interface{}, 1)
+		go func() {
+			s := <-ctx.Done()
+			interruptCh <- s
+			close(interruptCh)
+		}()
+		return worker.Run(interruptCh)
 	})
 
 	if err := g.Wait(); err != nil {

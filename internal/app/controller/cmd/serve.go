@@ -3,7 +3,6 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
 	"powerssl.dev/powerssl/internal/app/controller"
 )
 
@@ -20,6 +19,8 @@ func newCmdServe() *cobra.Command {
 		insecure                       bool
 		jwksURL                        string
 		metricsAddr                    string
+		temporalHostPort               string
+		temporalNamespace              string
 		tlsCertFile                    string
 		tlsPrivateKeyFile              string
 		tracer                         string
@@ -44,6 +45,8 @@ func newCmdServe() *cobra.Command {
 			if !viper.GetBool("no-metrics") {
 				metricsAddr = viper.GetString("metrics-addr")
 			}
+			temporalHostPort = viper.GetString("temporal.host-port")
+			temporalNamespace = viper.GetString("temporal.namespace")
 			tlsCertFile = viper.GetString("tls.cert-file")
 			tlsPrivateKeyFile = viper.GetString("tls.private-key-file")
 			if !viper.GetBool("no-tracing") {
@@ -74,6 +77,10 @@ func newCmdServe() *cobra.Command {
 					VaultToken: vaultToken,
 					VaultURL:   vaultURL,
 				},
+				TemporalClientConfig: &controller.TemporalClientConfig{
+					HostPort: temporalHostPort,
+					Namespace: temporalNamespace,
+				},
 				Tracer: tracer,
 				VaultClientConfig: &controller.VaultClientConfig{
 					CAFile: caFile,
@@ -97,6 +104,8 @@ func newCmdServe() *cobra.Command {
 	cmd.Flags().StringP("common-name", "", "", "API Server common name")
 	cmd.Flags().StringP("jwks-url", "", "", "JWKS URL")
 	cmd.Flags().StringP("metrics-addr", "", ":9090", "HTTP Addr")
+	cmd.Flags().StringP("temporal-host-port", "", "localhost:7233", "Host and port for this client to connect to")
+	cmd.Flags().StringP("temporal-namespace", "", "powerssl", "Namespace name for this client to work with")
 	cmd.Flags().StringP("tls-cert-file", "", "", "File containing the default x509 Certificate for GRPC.")
 	cmd.Flags().StringP("tls-private-key-file", "", "", "File containing the default x509 private key matching --tls-cert-file.")
 	cmd.Flags().StringP("tracer", "", "jaeger", "Tracing implementation")
@@ -116,6 +125,8 @@ func newCmdServe() *cobra.Command {
 	viper.BindPFlag("metrics-addr", cmd.Flags().Lookup("metrics-addr"))
 	viper.BindPFlag("no-metrics", cmd.Flags().Lookup("no-metrics"))
 	viper.BindPFlag("no-tracing", cmd.Flags().Lookup("no-tracing"))
+	viper.BindPFlag("temporal.host-port", cmd.Flags().Lookup("temporal-host-port"))
+	viper.BindPFlag("temporal.namespace", cmd.Flags().Lookup("temporal-namespace"))
 	viper.BindPFlag("tls.cert-file", cmd.Flags().Lookup("tls-cert-file"))
 	viper.BindPFlag("tls.private-key-file", cmd.Flags().Lookup("tls-private-key-file"))
 	viper.BindPFlag("tracer", cmd.Flags().Lookup("tracer"))
