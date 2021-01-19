@@ -10,10 +10,6 @@ title: ca
 
 CA
 
-### Synopsis
-
-CA
-
 ### Options
 
 ```

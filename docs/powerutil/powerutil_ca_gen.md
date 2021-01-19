@@ -10,10 +10,6 @@ title: gen
 
 Generate certificate
 
-### Synopsis
-
-Generate certificate
-
 ```
 powerutil ca gen [flags]
 ```

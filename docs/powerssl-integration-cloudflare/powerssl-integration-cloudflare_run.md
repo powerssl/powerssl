@@ -9,10 +9,6 @@ title: run
 
 Run CloudFlare integration
 
-### Synopsis
-
-Run CloudFlare integration
-
 ```
 powerssl-integration-cloudflare run [flags]
 ```

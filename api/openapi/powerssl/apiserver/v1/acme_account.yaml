@@ -5,7 +5,7 @@ info:
 paths:
   /v1/{name}:
     get:
-      operationId: Get
+      operationId: ACMEAccountService_Get
       responses:
         "200":
           description: A successful response.
@@ -13,20 +13,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1ACMEAccount'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: name
-        in: path
-        required: true
-        example: acmeServers/*/acmeAccounts/*
-        schema:
-          type: string
-          pattern: ^acmeServers\/\w+\/acmeAccounts\/\w+$
+        - name: name
+          in: path
+          required: true
+          example: acmeServers/*/acmeAccounts/*
+          schema:
+            type: string
+            pattern: ^acmeServers\/\w+\/acmeAccounts\/\w+$
       tags:
-      - ACMEAccountService
+        - ACMEAccountService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
     delete:
-      operationId: Delete
+      operationId: ACMEAccountService_Delete
       responses:
         "200":
           description: A successful response.
@@ -34,20 +40,26 @@ paths:
             application/json:
               schema:
                 properties: {}
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: name
-        in: path
-        required: true
-        example: acmeServers/*/acmeAccounts/*
-        schema:
-          type: string
-          pattern: ^acmeServers\/\w+\/acmeAccounts\/\w+$
+        - name: name
+          in: path
+          required: true
+          example: acmeServers/*/acmeAccounts/*
+          schema:
+            type: string
+            pattern: ^acmeServers\/\w+\/acmeAccounts\/\w+$
       tags:
-      - ACMEAccountService
+        - ACMEAccountService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
     put:
-      operationId: Update
+      operationId: ACMEAccountService_Update
       responses:
         "200":
           description: A successful response.
@@ -55,14 +67,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1ACMEAccount'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: name
-        in: path
-        required: true
-        example: acmeServers/*/acmeAccounts/*
-        schema:
-          type: string
-          pattern: ^acmeServers\/\w+\/acmeAccounts\/\w+$
+        - name: name
+          in: path
+          required: true
+          example: acmeServers/*/acmeAccounts/*
+          schema:
+            type: string
+            pattern: ^acmeServers\/\w+\/acmeAccounts\/\w+$
       requestBody:
         content:
           application/json:
@@ -70,12 +88,12 @@ paths:
               $ref: '#/components/schemas/v1UpdateACMEAccountRequest'
         required: true
       tags:
-      - ACMEAccountService
+        - ACMEAccountService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
   /v1/{parent}/acmeAccounts:
     get:
-      operationId: List
+      operationId: ACMEAccountService_List
       responses:
         "200":
           description: A successful response.
@@ -83,31 +101,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1ListACMEAccountsResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: parent
-        in: path
-        required: true
-        example: acmeServers/*
-        schema:
-          type: string
-          pattern: ^acmeServers\/\w+$
-      - name: page_size
-        in: query
-        required: false
-        schema:
-          type: integer
-          format: int32
-      - name: page_token
-        in: query
-        required: false
-        schema:
-          type: string
+        - name: parent
+          in: path
+          required: true
+          example: acmeServers/*
+          schema:
+            type: string
+            pattern: ^acmeServers\/\w+$
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: page_token
+          in: query
+          required: false
+          schema:
+            type: string
       tags:
-      - ACMEAccountService
+        - ACMEAccountService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
     post:
-      operationId: Create
+      operationId: ACMEAccountService_Create
       responses:
         "200":
           description: A successful response.
@@ -115,14 +139,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1ACMEAccount'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: parent
-        in: path
-        required: true
-        example: acmeServers/*
-        schema:
-          type: string
-          pattern: ^acmeServers\/\w+$
+        - name: parent
+          in: path
+          required: true
+          example: acmeServers/*
+          schema:
+            type: string
+            pattern: ^acmeServers\/\w+$
       requestBody:
         content:
           application/json:
@@ -130,11 +160,19 @@ paths:
               $ref: '#/components/schemas/v1CreateACMEAccountRequest'
         required: true
       tags:
-      - ACMEAccountService
+        - ACMEAccountService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
 components:
   schemas:
+    protobufAny:
+      type: object
+      properties:
+        type_url:
+          type: string
+        value:
+          type: string
+          format: byte
     protobufFieldMask:
       type: object
       properties:
@@ -342,6 +380,20 @@ components:
         request should verify the included field paths, and return an
         `INVALID_ARGUMENT` error if any path is duplicated or unmappable.
       title: '`FieldMask` represents a set of symbolic field paths, for example:'
+    runtimeError:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/protobufAny'
     v1ACMEAccount:
       type: object
       properties:
@@ -365,7 +417,6 @@ components:
             type: string
         terms_of_service_agreed:
           type: boolean
-          format: boolean
         contacts:
           type: array
           items:

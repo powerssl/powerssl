@@ -9,10 +9,6 @@ title: run
 
 Run the Agent
 
-### Synopsis
-
-Run the Agent
-
 ```
 powerssl-agent run [flags]
 ```

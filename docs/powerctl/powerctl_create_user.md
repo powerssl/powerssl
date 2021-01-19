@@ -10,10 +10,6 @@ title: user
 
 Create ACME server
 
-### Synopsis
-
-Create ACME server
-
 ```
 powerctl create user [flags]
 ```

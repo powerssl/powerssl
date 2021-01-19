@@ -9,10 +9,6 @@ title: describe
 
 Describe resource
 
-### Synopsis
-
-Describe resource
-
 ```
 powerctl describe [flags]
 ```

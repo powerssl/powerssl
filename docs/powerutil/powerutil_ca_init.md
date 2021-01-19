@@ -10,10 +10,6 @@ title: init
 
 Init certificate authority
 
-### Synopsis
-
-Init certificate authority
-
 ```
 powerutil ca init [flags]
 ```

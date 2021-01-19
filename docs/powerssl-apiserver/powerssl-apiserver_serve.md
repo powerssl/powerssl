@@ -9,10 +9,6 @@ title: serve
 
 Serve the API
 
-### Synopsis
-
-Serve the API
-
 ```
 powerssl-apiserver serve [flags]
 ```

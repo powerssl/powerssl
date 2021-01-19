@@ -9,10 +9,6 @@ title: login
 
 Login to PowerSSL
 
-### Synopsis
-
-Login to PowerSSL
-
 ```
 powerctl login [flags]
 ```

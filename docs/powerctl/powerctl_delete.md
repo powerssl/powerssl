@@ -9,10 +9,6 @@ title: delete
 
 Delete resource
 
-### Synopsis
-
-Delete resource
-
 ```
 powerctl delete [flags]
 ```

@@ -878,8 +878,10 @@ type GetDeactivateAuthorizationRequestResponse struct {
 func (m *GetDeactivateAuthorizationRequestResponse) Reset() {
 	*m = GetDeactivateAuthorizationRequestResponse{}
 }
-func (m *GetDeactivateAuthorizationRequestResponse) String() string { return proto.CompactTextString(m) }
-func (*GetDeactivateAuthorizationRequestResponse) ProtoMessage()    {}
+func (m *GetDeactivateAuthorizationRequestResponse) String() string {
+	return proto.CompactTextString(m)
+}
+func (*GetDeactivateAuthorizationRequestResponse) ProtoMessage() {}
 func (*GetDeactivateAuthorizationRequestResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_c3baa0ebc6f5ba0c, []int{16}
 }
@@ -918,8 +920,10 @@ type SetDeactivateAuthorizationResponseRequest struct {
 func (m *SetDeactivateAuthorizationResponseRequest) Reset() {
 	*m = SetDeactivateAuthorizationResponseRequest{}
 }
-func (m *SetDeactivateAuthorizationResponseRequest) String() string { return proto.CompactTextString(m) }
-func (*SetDeactivateAuthorizationResponseRequest) ProtoMessage()    {}
+func (m *SetDeactivateAuthorizationResponseRequest) String() string {
+	return proto.CompactTextString(m)
+}
+func (*SetDeactivateAuthorizationResponseRequest) ProtoMessage() {}
 func (*SetDeactivateAuthorizationResponseRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_c3baa0ebc6f5ba0c, []int{17}
 }

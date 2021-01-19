@@ -8,7 +8,7 @@ paths:
       summary: |-
         Lists certificates. The order is unspecified but deterministic. Newly
         created certificates will not necessarily be added to the end of this list.
-      operationId: List
+      operationId: CertificateService_List
       responses:
         "200":
           description: A successful response.
@@ -16,33 +16,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1ListCertificatesResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: page_size
-        description: |-
-          Requested page size. Server may return fewer certificates than requested.
-          If unspecified, server will pick an appropriate default.
-        in: query
-        required: false
-        schema:
-          type: integer
-          format: int32
-      - name: page_token
-        description: |-
-          A token identifying a page of results the server should return.
-          Typically, this is the value of
-          [ListCertificatesResponse.next_page_token][powerssl.apiserver.v1.ListCertificatesResponse.next_page_token].
-          returned from the previous call to `List` method.
-        in: query
-        required: false
-        schema:
-          type: string
+        - name: page_size
+          description: |-
+            Requested page size. Server may return fewer certificates than requested.
+            If unspecified, server will pick an appropriate default.
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: page_token
+          description: |-
+            A token identifying a page of results the server should return.
+            Typically, this is the value of
+            [ListCertificatesResponse.next_page_token][powerssl.apiserver.v1.ListCertificatesResponse.next_page_token].
+            returned from the previous call to `List` method.
+          in: query
+          required: false
+          schema:
+            type: string
       tags:
-      - CertificateService
+        - CertificateService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
     post:
       summary: Creates a certificate, and returns the new Certificate.
-      operationId: Create
+      operationId: CertificateService_Create
       responses:
         "200":
           description: A successful response.
@@ -50,6 +56,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1Certificate'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       requestBody:
         content:
           application/json:
@@ -57,13 +69,13 @@ paths:
               $ref: '#/components/schemas/v1CreateCertificateRequest'
         required: true
       tags:
-      - CertificateService
+        - CertificateService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
   /v1/{name}:
     get:
       summary: Gets a certificate. Returns NOT_FOUND if the certificate does not exist.
-      operationId: Get
+      operationId: CertificateService_Get
       responses:
         "200":
           description: A successful response.
@@ -71,23 +83,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1Certificate'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: name
-        description: The name of the certificate to retrieve.
-        in: path
-        required: true
-        example: certificates/*
-        schema:
-          type: string
-          pattern: ^certificates\/\w+$
+        - name: name
+          description: The name of the certificate to retrieve.
+          in: path
+          required: true
+          example: certificates/*
+          schema:
+            type: string
+            pattern: ^certificates\/\w+$
       tags:
-      - CertificateService
+        - CertificateService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
     delete:
-      summary: Deletes a certificate. Returns NOT_FOUND if the certificate does not
-        exist.
-      operationId: Delete
+      summary: Deletes a certificate. Returns NOT_FOUND if the certificate does not exist.
+      operationId: CertificateService_Delete
       responses:
         "200":
           description: A successful response.
@@ -95,24 +112,30 @@ paths:
             application/json:
               schema:
                 properties: {}
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: name
-        description: The name of the certificate to delete.
-        in: path
-        required: true
-        example: certificates/*
-        schema:
-          type: string
-          pattern: ^certificates\/\w+$
+        - name: name
+          description: The name of the certificate to delete.
+          in: path
+          required: true
+          example: certificates/*
+          schema:
+            type: string
+            pattern: ^certificates\/\w+$
       tags:
-      - CertificateService
+        - CertificateService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
     put:
       summary: |-
         Updates a certificate. Returns INVALID_ARGUMENT if the name of the
         certificate is non-empty and does equal the previous name.
-      operationId: Update
+      operationId: CertificateService_Update
       responses:
         "200":
           description: A successful response.
@@ -120,15 +143,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1Certificate'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: name
-        description: The name of the certificate to update.
-        in: path
-        required: true
-        example: certificates/*
-        schema:
-          type: string
-          pattern: ^certificates\/\w+$
+        - name: name
+          description: The name of the certificate to update.
+          in: path
+          required: true
+          example: certificates/*
+          schema:
+            type: string
+            pattern: ^certificates\/\w+$
       requestBody:
         content:
           application/json:
@@ -136,11 +165,19 @@ paths:
               $ref: '#/components/schemas/v1UpdateCertificateRequest'
         required: true
       tags:
-      - CertificateService
+        - CertificateService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
 components:
   schemas:
+    protobufAny:
+      type: object
+      properties:
+        type_url:
+          type: string
+        value:
+          type: string
+          format: byte
     protobufFieldMask:
       type: object
       properties:
@@ -348,6 +385,20 @@ components:
         request should verify the included field paths, and return an
         `INVALID_ARGUMENT` error if any path is duplicated or unmappable.
       title: '`FieldMask` represents a set of symbolic field paths, for example:'
+    runtimeError:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/protobufAny'
     v1Certificate:
       type: object
       properties:
@@ -386,7 +437,6 @@ components:
           $ref: '#/components/schemas/v1DigestAlgorithm'
         auto_renew:
           type: boolean
-          format: boolean
       description: A Certificate ...
     v1CreateCertificateRequest:
       type: object
@@ -397,15 +447,15 @@ components:
     v1DigestAlgorithm:
       type: string
       enum:
-      - DIGEST_ALGORITHM_UNSPECIFIED
-      - SHA1
-      - SHA256
+        - DIGEST_ALGORITHM_UNSPECIFIED
+        - SHA1
+        - SHA256
       default: DIGEST_ALGORITHM_UNSPECIFIED
     v1KeyAlgorithm:
       type: string
       enum:
-      - KEY_ALGORITHM_UNSPECIFIED
-      - RSA
+        - KEY_ALGORITHM_UNSPECIFIED
+        - RSA
       default: KEY_ALGORITHM_UNSPECIFIED
     v1ListCertificatesResponse:
       type: object

@@ -5,7 +5,7 @@ info:
 paths:
   /v1/acmeServers:
     get:
-      operationId: List
+      operationId: ACMEServerService_List
       responses:
         "200":
           description: A successful response.
@@ -13,24 +13,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1ListACMEServersResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: page_size
-        in: query
-        required: false
-        schema:
-          type: integer
-          format: int32
-      - name: page_token
-        in: query
-        required: false
-        schema:
-          type: string
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: page_token
+          in: query
+          required: false
+          schema:
+            type: string
       tags:
-      - ACMEServerService
+        - ACMEServerService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
     post:
-      operationId: Create
+      operationId: ACMEServerService_Create
       responses:
         "200":
           description: A successful response.
@@ -38,6 +44,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1ACMEServer'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       requestBody:
         content:
           application/json:
@@ -45,12 +57,12 @@ paths:
               $ref: '#/components/schemas/v1CreateACMEServerRequest'
         required: true
       tags:
-      - ACMEServerService
+        - ACMEServerService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
   /v1/{name}:
     get:
-      operationId: Get
+      operationId: ACMEServerService_Get
       responses:
         "200":
           description: A successful response.
@@ -58,20 +70,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1ACMEServer'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: name
-        in: path
-        required: true
-        example: acmeServers/*
-        schema:
-          type: string
-          pattern: ^acmeServers\/\w+$
+        - name: name
+          in: path
+          required: true
+          example: acmeServers/*
+          schema:
+            type: string
+            pattern: ^acmeServers\/\w+$
       tags:
-      - ACMEServerService
+        - ACMEServerService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
     delete:
-      operationId: Delete
+      operationId: ACMEServerService_Delete
       responses:
         "200":
           description: A successful response.
@@ -79,20 +97,26 @@ paths:
             application/json:
               schema:
                 properties: {}
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: name
-        in: path
-        required: true
-        example: acmeServers/*
-        schema:
-          type: string
-          pattern: ^acmeServers\/\w+$
+        - name: name
+          in: path
+          required: true
+          example: acmeServers/*
+          schema:
+            type: string
+            pattern: ^acmeServers\/\w+$
       tags:
-      - ACMEServerService
+        - ACMEServerService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
     put:
-      operationId: Update
+      operationId: ACMEServerService_Update
       responses:
         "200":
           description: A successful response.
@@ -100,14 +124,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1ACMEServer'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: name
-        in: path
-        required: true
-        example: acmeServers/*
-        schema:
-          type: string
-          pattern: ^acmeServers\/\w+$
+        - name: name
+          in: path
+          required: true
+          example: acmeServers/*
+          schema:
+            type: string
+            pattern: ^acmeServers\/\w+$
       requestBody:
         content:
           application/json:
@@ -115,11 +145,19 @@ paths:
               $ref: '#/components/schemas/v1UpdateACMEServerRequest'
         required: true
       tags:
-      - ACMEServerService
+        - ACMEServerService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
 components:
   schemas:
+    protobufAny:
+      type: object
+      properties:
+        type_url:
+          type: string
+        value:
+          type: string
+          format: byte
     protobufFieldMask:
       type: object
       properties:
@@ -327,6 +365,20 @@ components:
         request should verify the included field paths, and return an
         `INVALID_ARGUMENT` error if any path is duplicated or unmappable.
       title: '`FieldMask` represents a set of symbolic field paths, for example:'
+    runtimeError:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/protobufAny'
     v1ACMEServer:
       type: object
       properties:

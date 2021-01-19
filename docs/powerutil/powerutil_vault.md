@@ -9,10 +9,6 @@ title: vault
 
 Vault migrations
 
-### Synopsis
-
-Vault migrations
-
 ```
 powerutil vault [flags]
 ```

@@ -6,7 +6,7 @@ paths:
   /v1/{name}:
     get:
       summary: Gets a certificate. Returns NOT_FOUND if the certificate does not exist.
-      operationId: Get
+      operationId: CertificateIssueService_Get
       responses:
         "200":
           description: A successful response.
@@ -14,22 +14,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1CertificateIssue'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: name
-        in: path
-        required: true
-        example: certificates/*/issues/*
-        schema:
-          type: string
-          pattern: ^certificates\/\w+\/issues\/\w+$
+        - name: name
+          in: path
+          required: true
+          example: certificates/*/issues/*
+          schema:
+            type: string
+            pattern: ^certificates\/\w+\/issues\/\w+$
       tags:
-      - CertificateIssueService
+        - CertificateIssueService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
     delete:
-      summary: Deletes a certificate. Returns NOT_FOUND if the certificate does not
-        exist.
-      operationId: Delete
+      summary: Deletes a certificate. Returns NOT_FOUND if the certificate does not exist.
+      operationId: CertificateIssueService_Delete
       responses:
         "200":
           description: A successful response.
@@ -37,23 +42,29 @@ paths:
             application/json:
               schema:
                 properties: {}
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: name
-        in: path
-        required: true
-        example: certificates/*/issues/*
-        schema:
-          type: string
-          pattern: ^certificates\/\w+\/issues\/\w+$
+        - name: name
+          in: path
+          required: true
+          example: certificates/*/issues/*
+          schema:
+            type: string
+            pattern: ^certificates\/\w+\/issues\/\w+$
       tags:
-      - CertificateIssueService
+        - CertificateIssueService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
     put:
       summary: |-
         Updates a certificate. Returns INVALID_ARGUMENT if the name of the
         certificate is non-empty and does equal the previous name.
-      operationId: Update
+      operationId: CertificateIssueService_Update
       responses:
         "200":
           description: A successful response.
@@ -61,14 +72,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1CertificateIssue'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: name
-        in: path
-        required: true
-        example: certificates/*/issues/*
-        schema:
-          type: string
-          pattern: ^certificates\/\w+\/issues\/\w+$
+        - name: name
+          in: path
+          required: true
+          example: certificates/*/issues/*
+          schema:
+            type: string
+            pattern: ^certificates\/\w+\/issues\/\w+$
       requestBody:
         content:
           application/json:
@@ -76,15 +93,15 @@ paths:
               $ref: '#/components/schemas/v1UpdateCertificateIssueRequest'
         required: true
       tags:
-      - CertificateIssueService
+        - CertificateIssueService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
   /v1/{parent}/issues:
     get:
       summary: |-
         Lists certificates. The order is unspecified but deterministic. Newly
         created certificates will not necessarily be added to the end of this list.
-      operationId: List
+      operationId: CertificateIssueService_List
       responses:
         "200":
           description: A successful response.
@@ -92,32 +109,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1ListCertificateIssuesResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: parent
-        in: path
-        required: true
-        example: certificates/*
-        schema:
-          type: string
-          pattern: ^certificates\/\w+$
-      - name: page_size
-        in: query
-        required: false
-        schema:
-          type: integer
-          format: int32
-      - name: page_token
-        in: query
-        required: false
-        schema:
-          type: string
+        - name: parent
+          in: path
+          required: true
+          example: certificates/*
+          schema:
+            type: string
+            pattern: ^certificates\/\w+$
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: page_token
+          in: query
+          required: false
+          schema:
+            type: string
       tags:
-      - CertificateIssueService
+        - CertificateIssueService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
     post:
       summary: Creates a certificate, and returns the new CertificateIssue.
-      operationId: Create
+      operationId: CertificateIssueService_Create
       responses:
         "200":
           description: A successful response.
@@ -125,14 +148,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1CertificateIssue'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
       parameters:
-      - name: parent
-        in: path
-        required: true
-        example: certificates/*
-        schema:
-          type: string
-          pattern: ^certificates\/\w+$
+        - name: parent
+          in: path
+          required: true
+          example: certificates/*
+          schema:
+            type: string
+            pattern: ^certificates\/\w+$
       requestBody:
         content:
           application/json:
@@ -140,11 +169,19 @@ paths:
               $ref: '#/components/schemas/v1CreateCertificateIssueRequest'
         required: true
       tags:
-      - CertificateIssueService
+        - CertificateIssueService
       security:
-      - bearerAuth: []
+        - bearerAuth: []
 components:
   schemas:
+    protobufAny:
+      type: object
+      properties:
+        type_url:
+          type: string
+        value:
+          type: string
+          format: byte
     protobufFieldMask:
       type: object
       properties:
@@ -352,6 +389,20 @@ components:
         request should verify the included field paths, and return an
         `INVALID_ARGUMENT` error if any path is duplicated or unmappable.
       title: '`FieldMask` represents a set of symbolic field paths, for example:'
+    runtimeError:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/protobufAny'
     v1CertificateIssue:
       type: object
       properties:
@@ -391,7 +442,6 @@ components:
           type: string
         auto_renew:
           type: boolean
-          format: boolean
       description: A CertificateIssue ...
     v1CreateCertificateIssueRequest:
       type: object

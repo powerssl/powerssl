@@ -9,10 +9,6 @@ title: run
 
 Run ACME integration
 
-### Synopsis
-
-Run ACME integration
-
 ```
 powerssl-integration-acme run [flags]
 ```

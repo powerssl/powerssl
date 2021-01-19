@@ -10,10 +10,6 @@ title: create
 
 Create resource
 
-### Synopsis
-
-Create resource
-
 ```
 powerctl create [flags]
 ```

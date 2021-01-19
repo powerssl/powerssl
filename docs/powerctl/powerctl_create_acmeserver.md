@@ -10,10 +10,6 @@ title: acmeserver
 
 Create ACME server
 
-### Synopsis
-
-Create ACME server
-
 ```
 powerctl create acmeserver [flags]
 ```

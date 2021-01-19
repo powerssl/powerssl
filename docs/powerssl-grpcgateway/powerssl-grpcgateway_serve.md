@@ -9,10 +9,6 @@ title: serve
 
 Serve the gRPC Gateway
 
-### Synopsis
-
-Serve the gRPC Gateway
-
 ```
 powerssl-grpcgateway serve [flags]
 ```

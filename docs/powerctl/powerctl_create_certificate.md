@@ -10,10 +10,6 @@ title: certificate
 
 Create Certificate
 
-### Synopsis
-
-Create Certificate
-
 ```
 powerctl create certificate [flags]
 ```

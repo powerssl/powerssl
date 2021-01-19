@@ -56,5 +56,5 @@ do
   file=${file/.swagger}
   file=${file/$tmp/api/openapi}
   mkdir -p "$(dirname "$file")"
-  yq r "$ofile" > "${file/json/yaml}"
+  yq eval -P "$ofile" > "${file/json/yaml}"
 done <   <(find "$tmp" -type f -name '*.swagger.json' -print0)

@@ -9,10 +9,6 @@ title: serve
 
 Serve the Signer
 
-### Synopsis
-
-Serve the Signer
-
 ```
 powerssl-signer serve [flags]
 ```

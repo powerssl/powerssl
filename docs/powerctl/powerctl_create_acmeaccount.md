@@ -10,10 +10,6 @@ title: acmeaccount
 
 Create ACME account
 
-### Synopsis
-
-Create ACME account
-
 ```
 powerctl create acmeaccount [flags]
 ```

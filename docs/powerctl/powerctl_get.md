@@ -9,10 +9,6 @@ title: get
 
 Get resource
 
-### Synopsis
-
-Get resource
-
 ```
 powerctl get [flags]
 ```

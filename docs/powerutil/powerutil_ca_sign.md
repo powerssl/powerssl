@@ -10,10 +10,6 @@ title: sign
 
 Signs a certificate by a given CA and CA key
 
-### Synopsis
-
-Signs a certificate by a given CA and CA key
-
 ```
 powerutil ca sign [flags]
 ```

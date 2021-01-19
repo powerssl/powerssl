@@ -9,10 +9,6 @@ title: serve
 
 Serve the Controller
 
-### Synopsis
-
-Serve the Controller
-
 ```
 powerssl-controller serve [flags]
 ```
