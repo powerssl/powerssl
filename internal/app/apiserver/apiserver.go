@@ -3,7 +3,6 @@ package apiserver
 import (
 	"context"
 	"os"
-	"time"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/prometheus"
@@ -13,11 +12,10 @@ import (
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/qor/validations"
 	otgorm "github.com/smacker/opentracing-gorm"
-	"github.com/uber-go/tally"
-	temporalclient "go.temporal.io/sdk/client"
 	"golang.org/x/sync/errgroup"
 
 	"powerssl.dev/powerssl/internal/pkg/auth"
+	temporalclient "powerssl.dev/powerssl/internal/pkg/temporal/client"
 	"powerssl.dev/powerssl/internal/pkg/tracing"
 	"powerssl.dev/powerssl/internal/pkg/transport"
 	"powerssl.dev/powerssl/internal/pkg/util"
@@ -79,17 +77,12 @@ func Run(cfg *Config) {
 
 	var temporalClient temporalclient.Client
 	{
-		scope, _ := tally.NewRootScope(tally.ScopeOptions{Separator: "_"}, time.Second)
 		var err error
-		if temporalClient, err = temporalclient.NewClient(temporalclient.Options{
-			HostPort:     cfg.TemporalClientConfig.HostPort,
-			Namespace:    cfg.TemporalClientConfig.Namespace,
-			MetricsScope: scope,
-			Tracer:       tracer,
-			//Logger:            logger,
-			//Identity:          "",
-			//ConnectionOptions: temporalclient.ConnectionOptions{},
-		}); err != nil {
+		if temporalClient, err = temporalclient.NewClient(temporalclient.Config{
+			CAFile:    cfg.VaultClientConfig.CAFile, // TODO Wrong cfg path
+			HostPort:  cfg.TemporalClientConfig.HostPort,
+			Namespace: cfg.TemporalClientConfig.Namespace,
+		}, nil, tracer); err != nil {
 			logger.Log("err", err)
 			os.Exit(1)
 		}
