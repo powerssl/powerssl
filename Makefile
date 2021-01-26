@@ -23,7 +23,7 @@ bootstrap:
 	GO111MODULE=off go get -u github.com/myitcv/gobin
 
 .PHONY: build
-build: build-dev-runner build-powerctl build-powerssl-agent build-powerssl-apiserver build-powerssl-auth build-powerssl-controller build-powerssl-grpcgateway build-powerssl-integration-acme build-powerssl-integration-cloudflare build-powerssl-signer build-powerssl-webapp build-powerutil
+build: build-dev-runner build-powerctl build-powerssl-agent build-powerssl-apiserver build-powerssl-auth build-powerssl-controller build-powerssl-grpcgateway build-powerssl-integration-acme build-powerssl-integration-cloudflare build-powerssl-signer build-powerssl-temporalserver build-powerssl-webapp build-powerssl-worker build-powerutil
 
 .PHONY: build-%
 build-%:
@@ -48,7 +48,7 @@ check-scripts:
 	shellcheck scripts/*.sh
 
 .PHONY: clean
-clean: clean-dev-runner clean-powerctl clean-powerssl-agent clean-powerssl-apiserver clean-powerssl-auth clean-powerssl-controller clean-powerssl-grpcgateway clean-powerssl-integration-acme clean-powerssl-integration-cloudflare clean-powerssl-signer clean-powerssl-webapp clean-powerutil
+clean: clean-dev-runner clean-powerctl clean-powerssl-agent clean-powerssl-apiserver clean-powerssl-auth clean-powerssl-controller clean-powerssl-grpcgateway clean-powerssl-integration-acme clean-powerssl-integration-cloudflare clean-powerssl-signer clean-powerssl-temporalserver clean-powerssl-webapp clean-powerssl-worker clean-powerutil
 
 .PHONY: clean-%
 clean-%:
@@ -89,7 +89,7 @@ image-%:
 	COMPONENT=${*} TAG=powerssl/$(call strip_powerssl,${*}):latest scripts/build-image.sh
 
 .PHONY: images
-images: image-envoy image-powerctl image-powerssl-agent image-powerssl-apiserver image-powerssl-auth image-powerssl-controller image-powerssl-grpcgateway image-powerssl-integration-acme image-powerssl-integration-cloudflare image-powerssl-signer image-powerssl-webapp image-powerutil
+images: image-envoy image-powerctl image-powerssl-agent image-powerssl-apiserver image-powerssl-auth image-powerssl-controller image-powerssl-grpcgateway image-powerssl-integration-acme image-powerssl-integration-cloudflare image-powerssl-signer image-powerssl-temporalserver image-powerssl-webapp image-powerssl-worker image-powerutil
 
 .PHONY: install
 install: install-powerctl install-powerssl-agent install-powerutil
@@ -103,7 +103,7 @@ release-image-%:
 	docker push powerssl/$(call strip_powerssl,${*}):latest
 
 .PHONY: run
-run: bin/dev-runner bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-grpcgateway bin/powerssl-signer bin/powerssl-webapp local/certs/ca-key.pem local/certs/ca.pem local/certs/localhost-key.pem local/certs/localhost.pem local/certs/vault-key.pem local/certs/vault.pem
+run: bin/dev-runner bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-grpcgateway bin/powerssl-signer bin/powerssl-temporalserver bin/powerssl-webapp bin/powerssl-worker local/certs/ca-key.pem local/certs/ca.pem local/certs/localhost-key.pem local/certs/localhost.pem local/certs/vault-key.pem local/certs/vault.pem
 	@bin/dev-runner
 
 .PHONY: test
