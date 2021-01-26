@@ -21,7 +21,6 @@ require (
 	github.com/go-pg/pg/v10 v10.7.4
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
-	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/gogo/googleapis v1.4.0
 	github.com/gogo/protobuf v1.3.2
 	github.com/gogo/status v1.1.0
@@ -36,11 +35,10 @@ require (
 	github.com/johanbrandhorst/certify v1.6.0
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/looplab/fsm v0.1.0
-	github.com/mattn/go-runewidth v0.0.5 // indirect
 	github.com/mattn/go-sqlite3 v1.11.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mwitkow/grpc-proxy v0.0.0-20181017164139-0f1106ef9c76 // indirect
-	github.com/olekukonko/tablewriter v0.0.1
+	github.com/olekukonko/tablewriter v0.0.4
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pborman/uuid v1.2.1
 	github.com/prometheus/client_golang v1.2.1
@@ -51,6 +49,7 @@ require (
 	github.com/uber/jaeger-client-go v2.25.0+incompatible
 	github.com/uber/jaeger-lib v2.4.0+incompatible
 	go.temporal.io/sdk v1.3.0
+	go.temporal.io/server v1.6.1
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
 	golang.org/x/tools v0.0.0-20210115202250-e0d201561e39

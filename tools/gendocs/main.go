@@ -22,6 +22,7 @@ import (
 	powerctl "powerssl.dev/powerssl/internal/app/powerctl/cmd"
 	powerutil "powerssl.dev/powerssl/internal/app/powerutil/cmd"
 	signer "powerssl.dev/powerssl/internal/app/signer/cmd"
+	temporalserver "powerssl.dev/powerssl/internal/app/temporalserver/cmd"
 	webapp "powerssl.dev/powerssl/internal/app/webapp/cmd"
 )
 
@@ -37,6 +38,7 @@ func main() {
 		powerctl.NewCmdRoot,
 		powerutil.NewCmdRoot,
 		signer.NewCmdRoot,
+		temporalserver.NewCmdRoot,
 		webapp.NewCmdRoot,
 	} {
 		cmd := f()

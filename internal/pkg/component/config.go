@@ -67,6 +67,14 @@ var Components = []Component{
 		},
 	},
 	{
+		Command: "bin/powerssl-temporalserver",
+		Args:    "run",
+		Env: Environment{
+			"POWERSSL_CONFIG_DIR": "configs/temporal",
+			"POWERSSL_ENV":        "development",
+		},
+	},
+	{
 		Command: "bin/powerssl-webapp",
 		Args:    "serve",
 		Env: Environment{
