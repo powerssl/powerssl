@@ -94,6 +94,12 @@ func main() {
 
 	addComponent(component.Component{
 		Name:    "postgres",
+		Command: "docker",
+		Args:    "run --rm -e POSTGRES_PASSWORD=powerssl -e POSTGRES_DB=powerssl -e POSTGRES_USER=powerssl -p 5432:5432 postgres:13.1-alpine",
+	})
+
+	addComponent(component.Component{
+		Name:    "grpcwebproxy",
 		Command: "gobin",
 		Args: strings.Join([]string{
 			"-m",
@@ -119,6 +125,10 @@ func main() {
 	}
 
 	g.Go(func() error {
+		return handleTemporal(of)
+	})
+
+	g.Go(func() error {
 		return handleVault(of)
 	})
 
@@ -129,6 +139,54 @@ func main() {
 			of.ErrorOutput(fmt.Sprintf("error: %s", err))
 		}
 	}
+}
+
+func handleTemporal(of *internal.Outlet) error {
+	handleTemporalMigrate := func(of *internal.Outlet) error {
+		comp := component.Component{
+			Name:    "powerssl-temporalserver",
+			Command: "bin/powerutil",
+			Args:    "temporal migrate --host 127.0.0.1 --password powerssl --plugin postgres --port 5432 --user powerssl --docker",
+		}
+		cmd, _, err := makeCmd(comp, 0, of)
+		if err != nil {
+			return err
+		}
+
+		if err := cmd.Start(); err != nil {
+			return fmt.Errorf("failed to start %s: %s", comp.Command, err)
+		}
+
+		return nil
+	}
+
+	handleTemporalRegisterNamespace := func(of *internal.Outlet) error {
+		comp := component.Component{
+			Name:    "powerssl-temporalserver",
+			Command: "bin/powerutil",
+			Args:    "temporal register-namespace --address 127.0.0.1:7233 --namespace powerssl --tls-cert-path local/certs/localhost.pem --tls-key-path local/certs/localhost-key.pem --tls-ca-path local/certs/ca.pem --tls-enable-host-verification --tls-server-name localhost",
+		}
+		cmd, _, err := makeCmd(comp, 0, of)
+		if err != nil {
+			return err
+		}
+
+		if err := cmd.Start(); err != nil {
+			return fmt.Errorf("failed to start %s: %s", comp.Command, err)
+		}
+
+		return nil
+	}
+
+	time.Sleep(time.Second * 5)
+
+	if err := handleTemporalMigrate(of); err != nil {
+		return err
+	}
+
+	time.Sleep(time.Second * 5)
+
+	return handleTemporalRegisterNamespace(of)
 }
 
 func handleVault(of *internal.Outlet) error {
