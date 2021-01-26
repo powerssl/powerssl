@@ -6,7 +6,6 @@ require (
 	github.com/HdrHistogram/hdrhistogram-go v1.0.1 // indirect
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
 	github.com/ahmetb/govvv v0.3.0
-	github.com/apache/thrift v0.12.0 // indirect
 	github.com/arschles/assert v1.0.0 // indirect
 	github.com/arschles/go-bindata-html-template v0.0.0-20170123182818-839a6918b9ff
 	github.com/cloudflare/cfssl v1.5.0
@@ -62,5 +61,3 @@ require (
 	gopkg.in/square/go-jose.v2 v2.5.1
 	gopkg.in/yaml.v2 v2.4.0
 )
-
-replace github.com/uber-go/atomic => go.uber.org/atomic v1.5.0
