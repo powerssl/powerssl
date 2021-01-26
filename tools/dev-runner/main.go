@@ -42,7 +42,9 @@ func main() {
 		if watcher, err = fsnotify.NewWatcher(); err != nil {
 			of.ErrorOutput(fmt.Sprintf("watcher error: %s", err))
 		}
-		defer watcher.Close()
+		defer func() {
+			_ = watcher.Close()
+		}()
 	}
 
 	interrupts := make(map[string]chan struct{}, len(component.Components)+1)
@@ -91,6 +93,7 @@ func main() {
 	})
 
 	addComponent(component.Component{
+		Name:    "postgres",
 		Command: "gobin",
 		Args: strings.Join([]string{
 			"-m",
@@ -148,6 +151,7 @@ func handleVault(of *internal.Outlet) error {
 	}
 
 	comp := component.Component{
+		Name:    "vault",
 		Command: command,
 		Args:    args,
 	}
@@ -159,7 +163,7 @@ func handleVault(of *internal.Outlet) error {
 	time.Sleep(time.Second)
 
 	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("Failed to start %s: %s", comp.Command, err)
+		return fmt.Errorf("failed to start %s: %s", comp.Command, err)
 	}
 
 	return nil

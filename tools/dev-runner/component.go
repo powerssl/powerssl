@@ -51,15 +51,15 @@ func observeComponent(ctx context.Context, of *internal.Outlet, comp component.C
 		interrupted = false
 		killed = false
 
-		of.SystemOutput(fmt.Sprintf("Starting %s", comp.Command))
+		of.SystemOutput(fmt.Sprintf("Starting %s", comp.String()))
 		if err := cmd.Start(); err != nil {
-			return fmt.Errorf("Failed to start %s: %s", comp.Command, err)
+			return fmt.Errorf("failed to start %s: %s", comp.String(), err)
 		}
 
 		go func() {
 			defer close(finished)
 			pipeWait.Wait()
-			cmd.Wait()
+			_ = cmd.Wait()
 		}()
 
 		return nil
@@ -74,22 +74,28 @@ func observeComponent(ctx context.Context, of *internal.Outlet, comp component.C
 			if interrupted || cmd.Process == nil {
 				break
 			}
-			of.SystemOutput(fmt.Sprintf("Interrupting %s", comp.Command))
-			cmd.Process.Signal(os.Interrupt)
+			of.SystemOutput(fmt.Sprintf("Interrupting %s", comp.String()))
+			if err := cmd.Process.Signal(os.Interrupt); err != nil {
+				of.SystemOutput(fmt.Sprintf("Failed to signal %s", comp.String()))
+				return err
+			}
 			interrupted = true
 		case <-ctx.Done():
 			if killed || cmd.Process == nil {
 				break
 			}
-			of.SystemOutput(fmt.Sprintf("Killing %s", comp.Command))
-			cmd.Process.Kill()
+			of.SystemOutput(fmt.Sprintf("Killing %s", comp.String()))
+			if err := cmd.Process.Kill(); err != nil {
+				of.SystemOutput(fmt.Sprintf("Failed to kill %s", comp.String()))
+				return err
+			}
 			killed = true
 		case <-finished:
 			if killed {
-				of.SystemOutput(fmt.Sprintf("Killed %s", comp.Command))
+				of.SystemOutput(fmt.Sprintf("Killed %s", comp.String()))
 				return nil
 			}
-			time.Sleep(time.Second / 10)
+			time.Sleep(time.Millisecond * 500)
 			if err := start(); err != nil {
 				return err
 			}

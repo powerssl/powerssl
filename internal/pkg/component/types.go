@@ -16,15 +16,19 @@ func (e Environment) Environ() []string {
 }
 
 type Component struct {
+	Name    string      `json:"name,omitempty"`
 	Command string      `json:"command,omitempty"`
 	Args    string      `json:"args,omitempty"`
 	Env     Environment `json:"env,omitempty"`
 }
 
-func (c Component) String() string {
-	return strings.TrimPrefix(c.Command, "bin/")
-}
-
 func (c Component) Image() string {
 	return strings.ReplaceAll(c.String(), "-", "/") + ":latest"
+}
+
+func (c Component) String() string {
+	if c.Name == "" {
+		return strings.TrimPrefix(c.Command, "bin/")
+	}
+	return c.Name
 }
