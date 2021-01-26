@@ -20,6 +20,7 @@ Find more information at: https://docs.powerssl.io/powerutil`,
 	}
 
 	cmd.AddCommand(newCmdCA())
+	cmd.AddCommand(newCmdTemporal())
 	cmd.AddCommand(newCmdVault())
 
 	return cmd

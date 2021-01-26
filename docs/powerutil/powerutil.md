@@ -22,4 +22,5 @@ powerutil provides PowerSSL utilities.
 ### SEE ALSO
 
 * [powerutil ca](/powerutil/ca)	 - CA
+* [powerutil temporal](/powerutil/temporal)	 - Temporal
 * [powerutil vault](/powerutil/vault)	 - Vault migrations
