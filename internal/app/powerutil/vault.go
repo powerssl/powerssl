@@ -3,6 +3,7 @@ package powerutil
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/ghodss/yaml"
@@ -80,6 +81,9 @@ func RunVault(addr, ca, caKey string) error {
 			"rootToken":    rootToken,
 		})
 		if err != nil {
+			return err
+		}
+		if err := os.MkdirAll("local/vault", 0755); err != nil {
 			return err
 		}
 		if err := ioutil.WriteFile("local/vault/secret.yaml", secret, 0644); err != nil {

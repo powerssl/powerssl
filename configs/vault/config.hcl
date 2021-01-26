@@ -11,6 +11,6 @@ listener "tcp" {
   tls_key_file = "local/certs/localhost-key.pem"
 }
 
-storage "file" {
-  path = "local/vault/file"
+storage "postgresql" {
+  connection_url = "postgres://powerssl:powerssl@localhost:5432/vault?sslmode=disable"
 }
