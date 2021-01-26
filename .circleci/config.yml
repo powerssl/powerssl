@@ -160,6 +160,17 @@ jobs:
       - build_component:
           component: powerssl-signer
           image: true
+  build_powerssl_temporalserver:
+    executor: golang-executor
+    steps:
+      - build_component:
+          component: powerssl-temporalserver
+  build_powerssl_temporalserver_image:
+    machine: true
+    steps:
+      - build_component:
+          component: powerssl-temporalserver
+          image: true
   build_powerssl_webapp:
     executor: golang-executor
     steps:
@@ -170,6 +181,17 @@ jobs:
     steps:
       - build_component:
           component: powerssl-webapp
+          image: true
+  build_powerssl_worker:
+    executor: golang-executor
+    steps:
+      - build_component:
+          component: powerssl-worker
+  build_powerssl_worker_image:
+    machine: true
+    steps:
+      - build_component:
+          component: powerssl-worker
           image: true
   build_powerutil:
     executor: golang-executor
@@ -312,6 +334,14 @@ workflows:
               only: master
           requires:
             - build_powerssl_signer
+      - build_powerssl_temporalserver:
+          requires: *test_stage
+      - build_powerssl_temporalserver_image:
+          filters:
+            branches:
+              only: master
+          requires:
+            - build_powerssl_temporalserver
       - build_powerssl_webapp:
           requires: *test_stage
       - build_powerssl_webapp_image:
@@ -320,6 +350,14 @@ workflows:
               only: master
           requires:
             - build_powerssl_webapp
+      - build_powerssl_worker:
+          requires: *test_stage
+      - build_powerssl_worker_image:
+          filters:
+            branches:
+              only: master
+          requires:
+            - build_powerssl_worker
       - build_powerutil:
           requires: *test_stage
       - build_powerutil_image:
