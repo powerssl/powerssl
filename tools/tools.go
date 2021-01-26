@@ -10,4 +10,5 @@ import (
 	_ "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger"
 	_ "github.com/improbable-eng/grpc-web/go/grpcwebproxy"
 	_ "golang.org/x/tools/cmd/stringer"
+ 	_ "github.com/golang-migrate/migrate"
 )
