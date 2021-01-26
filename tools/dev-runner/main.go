@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -11,6 +12,8 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/ghodss/yaml"
 	_ "github.com/improbable-eng/grpc-web/go/grpcweb"
+	_ "github.com/lib/pq"
+	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 
 	"powerssl.dev/powerssl/internal/pkg/component"
@@ -19,7 +22,9 @@ import (
 )
 
 func main() {
-	g, ctx := errgroup.WithContext(context.Background())
+	var g *errgroup.Group
+	ctx, cancel := context.WithCancel(context.Background())
+	g, ctx = errgroup.WithContext(ctx)
 	g.Go(func() error {
 		logger := util.NewLogger(ioutil.Discard)
 		return util.InterruptHandler(ctx, logger)
@@ -87,16 +92,67 @@ func main() {
 		}
 	}
 
+	wd, _ := os.Getwd()
+	addComponent(component.Component{
+		Name:    "postgres",
+		Command: "docker",
+		Args:    fmt.Sprintf("run --rm -e POSTGRES_PASSWORD=powerssl -e POSTGRES_DB=powerssl -e POSTGRES_USER=powerssl -e PGDATA=/var/lib/postgresql/data/pgdata -p 5432:5432 -v %s/local/postgresql/data:/var/lib/postgresql/data postgres:13.1", wd),
+	})
+
+	if err := internal.WaitForService("localhost:5432", time.Minute); err != nil {
+		of.SystemOutput(err.Error())
+		cancel()
+	}
+
+	if err := handlePostgres(of); err != nil {
+		cancel()
+		of.ErrorOutput(err.Error())
+	}
+
 	addComponent(component.Component{
 		Command: "vault",
 		Args:    "server -config configs/vault/config.hcl",
 	})
 
-	addComponent(component.Component{
-		Name:    "postgres",
-		Command: "docker",
-		Args:    "run --rm -e POSTGRES_PASSWORD=powerssl -e POSTGRES_DB=powerssl -e POSTGRES_USER=powerssl -p 5432:5432 postgres:13.1-alpine",
-	})
+	if err := internal.WaitForService("localhost:8200", time.Minute); err != nil {
+		cancel()
+		of.ErrorOutput(err.Error())
+	}
+
+	if err := handleVault(of); err != nil {
+		cancel()
+		of.ErrorOutput(err.Error())
+	}
+
+	for _, comp := range component.Components {
+		if comp.Command != "bin/powerssl-temporalserver" {
+			continue
+		}
+		if err := watcher.Add(comp.Command); err != nil {
+			of.ErrorOutput(fmt.Sprintf("watcher error: %s", err))
+		}
+		addComponent(comp)
+	}
+
+	if err := internal.WaitForService("localhost:7233", time.Minute); err != nil {
+		cancel()
+		of.ErrorOutput(err.Error())
+	}
+
+	if err := handleTemporal(of); err != nil {
+			cancel()
+			of.ErrorOutput(err.Error())
+	}
+
+	for _, comp := range component.Components {
+		if comp.Command == "bin/powerssl-temporalserver" {
+			continue
+		}
+		if err := watcher.Add(comp.Command); err != nil {
+			of.ErrorOutput(fmt.Sprintf("watcher error: %s", err))
+		}
+		addComponent(comp)
+	}
 
 	addComponent(component.Component{
 		Name:    "grpcwebproxy",
@@ -117,21 +173,6 @@ func main() {
 		}, " "),
 	})
 
-	for _, comp := range component.Components {
-		if err := watcher.Add(comp.Command); err != nil {
-			of.ErrorOutput(fmt.Sprintf("watcher error: %s", err))
-		}
-		addComponent(comp)
-	}
-
-	g.Go(func() error {
-		return handleTemporal(of)
-	})
-
-	g.Go(func() error {
-		return handleVault(of)
-	})
-
 	if err := g.Wait(); err != nil {
 		switch err.(type) {
 		case util.InterruptError:
@@ -141,52 +182,125 @@ func main() {
 	}
 }
 
+func handlePostgres(of *internal.Outlet) error {
+	{
+		var err error
+		var db *sql.DB
+		var rows *sql.Rows
+		if db, err = sql.Open("postgres", "postgresql://powerssl:powerssl@localhost:5432/?sslmode=disable"); err != nil {
+			return errors.Wrap(err, "connecting default database")
+		}
+		defer func() {
+			_ = db.Close()
+		}()
+		for {
+			err := db.Ping()
+			if err == nil {
+				break
+			}
+			time.Sleep(time.Second)
+		}
+		of.SystemOutput("Create database: powerssl")
+		if rows, err = db.Query("CREATE DATABASE powerssl;"); err != nil {
+			if !strings.Contains(err.Error(), "already exists") {
+				return errors.Wrap(err, "creating database powerssl")
+			}
+		}
+		defer func() {
+			if rows != nil {
+				_ = rows.Close()
+			}
+		}()
+		of.SystemOutput("Create database: temporal")
+		if rows, err = db.Query("CREATE DATABASE temporal;"); err != nil {
+			if !strings.Contains(err.Error(), "already exists") {
+				return errors.Wrap(err, "creating database temporal")
+			}
+		}
+		defer func() {
+			if rows != nil {
+				_ = rows.Close()
+			}
+		}()
+		of.SystemOutput("Create database: vault")
+		if rows, err = db.Query("CREATE DATABASE vault;"); err != nil {
+			if !strings.Contains(err.Error(), "already exists") {
+				return errors.Wrap(err, "creating database vault")
+			}
+		}
+		defer func() {
+			if rows != nil {
+				_ = rows.Close()
+			}
+		}()
+		_ = db.Close()
+	}
+	{
+		var err error
+		var db *sql.DB
+		var rows *sql.Rows
+		if db, err = sql.Open("postgres", "postgresql://powerssl:powerssl@localhost:5432/vault?sslmode=disable"); err != nil {
+			return errors.Wrap(err, "connecting vault database")
+		}
+		defer func() {
+			_ = db.Close()
+		}()
+		for {
+			err := db.Ping()
+			if err == nil {
+				break
+			}
+			time.Sleep(time.Second)
+		}
+		of.SystemOutput("Create table: vault_kv_store")
+		of.SystemOutput("Create index: parent_path_idx")
+		if rows, err = db.Query("CREATE TABLE vault_kv_store(parent_path TEXT COLLATE \"C\" NOT NULL, path TEXT COLLATE \"C\", key TEXT COLLATE \"C\", value BYTEA, CONSTRAINT pkey PRIMARY KEY (path, key)); CREATE INDEX parent_path_idx ON vault_kv_store (parent_path);"); err != nil {
+			if !strings.Contains(err.Error(), "already exists") {
+				return errors.Wrap(err, "creating vault table and index")
+			}
+		}
+		defer func() {
+			if rows != nil {
+				_ = rows.Close()
+			}
+		}()
+		_ = db.Close()
+	}
+	{
+		comp := component.Component{
+			Name:    "powerssl-temporalserver",
+			Command: "bin/powerutil",
+			Args:    "temporal migrate --host localhost --password powerssl --plugin postgres --port 5432 --user powerssl --docker",
+		}
+		cmd, _, err := makeCmd(comp, 0, of)
+		if err != nil {
+			return err
+		}
+		if err := cmd.Start(); err != nil {
+			return fmt.Errorf("failed to start %s: %s", comp.Command, err)
+		}
+		if err := cmd.Wait(); err != nil {
+			return fmt.Errorf("failed to wait %s: %s", comp.Command, err)
+		}
+	}
+	return nil
+}
+
 func handleTemporal(of *internal.Outlet) error {
-	handleTemporalMigrate := func(of *internal.Outlet) error {
-		comp := component.Component{
-			Name:    "powerssl-temporalserver",
-			Command: "bin/powerutil",
-			Args:    "temporal migrate --host 127.0.0.1 --password powerssl --plugin postgres --port 5432 --user powerssl --docker",
-		}
-		cmd, _, err := makeCmd(comp, 0, of)
-		if err != nil {
-			return err
-		}
-
-		if err := cmd.Start(); err != nil {
-			return fmt.Errorf("failed to start %s: %s", comp.Command, err)
-		}
-
-		return nil
+	comp := component.Component{
+		Name:    "powerssl-temporalserver",
+		Command: "bin/powerutil",
+		Args:    "temporal register-namespace --address localhost:7233 --namespace powerssl --tls-cert-path local/certs/localhost.pem --tls-key-path local/certs/localhost-key.pem --tls-ca-path local/certs/ca.pem --tls-enable-host-verification --tls-server-name localhost",
 	}
-
-	handleTemporalRegisterNamespace := func(of *internal.Outlet) error {
-		comp := component.Component{
-			Name:    "powerssl-temporalserver",
-			Command: "bin/powerutil",
-			Args:    "temporal register-namespace --address 127.0.0.1:7233 --namespace powerssl --tls-cert-path local/certs/localhost.pem --tls-key-path local/certs/localhost-key.pem --tls-ca-path local/certs/ca.pem --tls-enable-host-verification --tls-server-name localhost",
-		}
-		cmd, _, err := makeCmd(comp, 0, of)
-		if err != nil {
-			return err
-		}
-
-		if err := cmd.Start(); err != nil {
-			return fmt.Errorf("failed to start %s: %s", comp.Command, err)
-		}
-
-		return nil
-	}
-
-	time.Sleep(time.Second * 5)
-
-	if err := handleTemporalMigrate(of); err != nil {
+	cmd, _, err := makeCmd(comp, 0, of)
+	if err != nil {
 		return err
 	}
-
-	time.Sleep(time.Second * 5)
-
-	return handleTemporalRegisterNamespace(of)
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("failed to start %s: %s", comp.Command, err)
+	}
+	_ = cmd.Wait()
+	return nil
 }
 
 func handleVault(of *internal.Outlet) error {
@@ -217,12 +331,11 @@ func handleVault(of *internal.Outlet) error {
 	if err != nil {
 		return err
 	}
-
-	time.Sleep(time.Second)
-
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start %s: %s", comp.Command, err)
 	}
-
+	if err := cmd.Wait(); err != nil {
+		return fmt.Errorf("failed to wait %s: %s", comp.Command, err)
+	}
 	return nil
 }

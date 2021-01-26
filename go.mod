@@ -6,6 +6,7 @@ require (
 	github.com/HdrHistogram/hdrhistogram-go v1.0.1 // indirect
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
 	github.com/ahmetb/govvv v0.3.0
+	github.com/apache/thrift v0.12.0 // indirect
 	github.com/arschles/assert v1.0.0 // indirect
 	github.com/arschles/go-bindata-html-template v0.0.0-20170123182818-839a6918b9ff
 	github.com/cloudflare/cfssl v1.5.0
@@ -34,6 +35,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0
 	github.com/johanbrandhorst/certify v1.6.0
 	github.com/leodido/go-urn v1.2.0 // indirect
+	github.com/lib/pq v1.9.0
 	github.com/looplab/fsm v0.1.0
 	github.com/mattn/go-sqlite3 v1.11.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
@@ -41,6 +43,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pborman/uuid v1.2.1
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.2.1
 	github.com/rs/cors v1.7.0 // indirect
 	github.com/spf13/cobra v1.1.1
