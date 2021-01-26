@@ -6,7 +6,6 @@ import (
 	"powerssl.dev/powerssl/internal/pkg/transport"
 )
 
-type ControllerClientConfig = transport.ClientConfig
 type ServerConfig = transport.ServerConfig
 
 type TemporalClientConfig struct {
@@ -21,8 +20,6 @@ type VaultClientConfig struct {
 }
 
 type Config struct {
-	AuthToken              string
-	ControllerClientConfig *ControllerClientConfig
 	DBConnection           string `validate:"required"`
 	DBDialect              string `validate:"required"`
 	JWKSURL                string `validate:"required"`
@@ -35,7 +32,6 @@ type Config struct {
 
 func (cfg *Config) Validate() error {
 	validate := validator.New()
-	validate.RegisterStructValidation(transport.ClientConfigValidator, transport.ClientConfig{})
 	validate.RegisterStructValidation(transport.ServerConfigValidator, transport.ServerConfig{})
 	return validate.Struct(cfg)
 }

@@ -2,25 +2,22 @@ package apiserver
 
 import (
 	"context"
+	"io"
 	"os"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/prometheus"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/go-pg/pg/extra/pgotel"
+	"github.com/go-pg/pg/v10"
+	"github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
-	"github.com/qor/validations"
-	otgorm "github.com/smacker/opentracing-gorm"
 	"golang.org/x/sync/errgroup"
 
-	"powerssl.dev/powerssl/internal/pkg/auth"
 	temporalclient "powerssl.dev/powerssl/internal/pkg/temporal/client"
 	"powerssl.dev/powerssl/internal/pkg/tracing"
 	"powerssl.dev/powerssl/internal/pkg/transport"
 	"powerssl.dev/powerssl/internal/pkg/util"
 	"powerssl.dev/powerssl/internal/pkg/vault"
-	controllerclient "powerssl.dev/powerssl/pkg/controller/client"
 )
 
 const component = "powerssl-apiserver"
@@ -36,41 +33,35 @@ func Run(cfg *Config) {
 		return util.InterruptHandler(ctx, logger)
 	})
 
-	tracer, closer, err := tracing.Init(component, cfg.Tracer, log.With(logger, "component", "tracing"))
-	if err != nil {
-		logger.Log("component", "tracing", "err", err)
-		os.Exit(1)
-	}
-	defer closer.Close()
-
-	duration := prometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
-		Namespace: "powerssl_io",
-		Subsystem: "api",
-		Name:      "request_duration_seconds",
-		Help:      "Request duration in seconds.",
-	}, []string{"method", "success"})
-
-	var db *gorm.DB
+	var tracer opentracing.Tracer
 	{
 		var err error
-		if db, err = gorm.Open(cfg.DBDialect, cfg.DBConnection); err != nil {
-			logger.Log("database", cfg.DBDialect, "during", "Open", "err", err)
+		var closer io.Closer
+		if tracer, closer, err = tracing.Init(component, cfg.Tracer, log.With(logger, "component", "tracing")); err != nil {
+			_ = logger.Log("component", "tracing", "err", err)
 			os.Exit(1)
 		}
-		defer db.Close()
-		otgorm.AddGormCallbacks(db)
-		validations.RegisterCallbacks(db)
+		defer func() {
+			_ = closer.Close()
+		}()
 	}
 
-	var client *controllerclient.GRPCClient
+	var db *pg.DB
 	{
-		token, err := auth.NewServiceToken(cfg.AuthToken)
-		if err != nil {
-			logger.Log("err", err)
+		var err error
+		var opt *pg.Options
+		if opt, err = pg.ParseURL(cfg.DBConnection); err != nil {
+			_ = logger.Log("err", err)
 			os.Exit(1)
 		}
-		if client, err = controllerclient.NewGRPCClient(ctx, cfg.ControllerClientConfig, token, logger, tracer); err != nil {
-			logger.Log("transport", "gRPC", "during", "Connect", "err", err)
+		db = pg.Connect(opt)
+		defer func() {
+			_ = db.Close()
+		}()
+		db.AddQueryHook(pgotel.TracingHook{})
+		// TODO: Get rid of it
+		if err := createTables(db); err != nil {
+			_ = logger.Log("err", err)
 			os.Exit(1)
 		}
 	}
@@ -83,7 +74,7 @@ func Run(cfg *Config) {
 			HostPort:  cfg.TemporalClientConfig.HostPort,
 			Namespace: cfg.TemporalClientConfig.Namespace,
 		}, nil, tracer); err != nil {
-			logger.Log("err", err)
+			_ = logger.Log("err", err)
 			os.Exit(1)
 		}
 		defer temporalClient.Close()
@@ -93,14 +84,21 @@ func Run(cfg *Config) {
 	{
 		var err error
 		if vaultClient, err = vault.New(cfg.VaultClientConfig.URL, cfg.VaultClientConfig.Token, cfg.VaultClientConfig.CAFile); err != nil {
-			logger.Log("err", err)
+			_ = logger.Log("err", err)
 			os.Exit(1)
 		}
 	}
 
-	services, err := makeServices(db, logger, tracer, duration, client, temporalClient, vaultClient, cfg.JWKSURL)
+	duration := prometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
+		Namespace: "powerssl_io",
+		Subsystem: "api",
+		Name:      "request_duration_seconds",
+		Help:      "Request duration in seconds.",
+	}, []string{"method", "success"})
+
+	services, err := makeServices(db, logger, tracer, duration, temporalClient, vaultClient, cfg.JWKSURL)
 	if err != nil {
-		logger.Log("err", err)
+		_ = logger.Log("err", err)
 		os.Exit(1)
 	}
 
@@ -118,7 +116,7 @@ func Run(cfg *Config) {
 		switch err.(type) {
 		case util.InterruptError:
 		default:
-			logger.Log("err", err)
+			_ = logger.Log("err", err)
 		}
 	}
 }

@@ -4,7 +4,7 @@ import (
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
-	"github.com/jinzhu/gorm"
+	"github.com/go-pg/pg/v10"
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 
@@ -12,7 +12,6 @@ import (
 	"powerssl.dev/powerssl/internal/app/apiserver/certificate/service"
 	"powerssl.dev/powerssl/internal/app/apiserver/certificate/transport"
 	apiv1 "powerssl.dev/powerssl/internal/pkg/apiserver/api/v1"
-	controllerclient "powerssl.dev/powerssl/pkg/controller/client"
 )
 
 type Certificate struct {
@@ -21,8 +20,8 @@ type Certificate struct {
 	tracer    stdopentracing.Tracer
 }
 
-func New(db *gorm.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, client *controllerclient.GRPCClient, auth kitendpoint.Middleware) *Certificate {
-	svc := service.New(db, logger, client)
+func New(db *pg.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, auth kitendpoint.Middleware) *Certificate {
+	svc := service.New(db, logger)
 	endpoints := endpoint.NewEndpoints(svc, logger, tracer, duration, auth)
 
 	return &Certificate{

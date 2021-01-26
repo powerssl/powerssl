@@ -1,12 +1,13 @@
 package model
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/go-pg/pg/v10"
 	"github.com/gogo/status"
-	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc/codes"
 
 	acmeserver "powerssl.dev/powerssl/internal/app/apiserver/acmeserver/model"
@@ -15,10 +16,10 @@ import (
 )
 
 type ACMEAccount struct {
-	ID        string `gorm:"primary_key"`
+	ID        string `pg:",pk"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt *time.Time `sql:"index"`
+	DeletedAt time.Time `pg:",soft_delete"`
 
 	DisplayName          string
 	Title                string
@@ -27,19 +28,15 @@ type ACMEAccount struct {
 	TermsOfServiceAgreed bool
 	Contacts             string
 	AccountURL           string
+
+	ACMEServer *acmeserver.ACMEServer `pg:"rel:has-one"`
 }
 
-func (a *ACMEAccount) ACMEServer(db *gorm.DB, s string) (*acmeserver.ACMEServer, error) {
-	acmeServer := &acmeserver.ACMEServer{}
-	if db.Model(a).Select(s).Related(&acmeServer).RecordNotFound() {
-		return nil, fmt.Errorf("ACME server not found")
-	}
-	return acmeServer, nil
-}
+var _ pg.BeforeInsertHook = (*ACMEAccount)(nil)
 
-func (*ACMEAccount) BeforeCreate(scope *gorm.Scope) error {
-	scope.SetColumn("ID", uid.New())
-	return nil
+func (acmeAccount *ACMEAccount) BeforeInsert(ctx context.Context) (context.Context, error) {
+	acmeAccount.ID = uid.New()
+	return ctx, nil
 }
 
 func (a *ACMEAccount) Name() string {
@@ -67,14 +64,20 @@ func (a *ACMEAccount) ToAPI() *api.ACMEAccount {
 	}
 }
 
-func (a *ACMEAccount) Validate(db *gorm.DB) {
+// TODO: Find better way
+// TODO: Doesn't get called
+func (a *ACMEAccount) Validate(db *pg.DB) (map[string]error, bool) {
+	var errors map[string]error
+
 	if !a.TermsOfServiceAgreed {
-		db.AddError(status.Error(codes.InvalidArgument, "terms of service need to be agreed"))
+		errors["TermsOfServiceAgreed"] = status.Error(codes.InvalidArgument, "terms of service need to be agreed")
 	}
 
-	if _, err := a.ACMEServer(db, "id"); err != nil {
-		db.AddError(err)
+	if a.ACMEServer == nil {
+		errors["TermsOfServiceAgreed"] = status.Error(codes.NotFound, "ACME server not found")
 	}
+
+	return errors, len(errors) == 0
 }
 
 type ACMEAccounts []*ACMEAccount
@@ -87,27 +90,33 @@ func (a ACMEAccounts) ToAPI() []*api.ACMEAccount {
 	return accounts
 }
 
-func FindACMEAccountByName(name string, db *gorm.DB) (*ACMEAccount, error) {
+func FindACMEAccountByName(name string, db *pg.DB) (*ACMEAccount, error) {
 	s := strings.Split(name, "/")
 	if len(s) != 4 || s[0] != "acmeServers" || s[2] != "acmeAccounts" {
 		return nil, status.Error(codes.InvalidArgument, "malformed name")
 	}
 	acmeServerID, acmeAccountID := s[1], s[3]
 
-	q := db.Where("id = ?", acmeAccountID)
+	var acmeAccount ACMEAccount
+	q := db.Model(&acmeAccount).Where("id = ?", acmeAccountID).Limit(1)
 	if s[1] != "-" {
-		acmeServer := &acmeserver.ACMEServer{}
-		if db.Select("id").Where("id = ?", acmeServerID).First(&acmeServer).RecordNotFound() {
-			return nil, status.Error(codes.NotFound, "parent not found")
+		var acmeServer acmeserver.ACMEServer
+		if err := db.Model(&acmeServer).Column("id").Where("id = ?", acmeServerID).Limit(1).Select(); err != nil {
+			if err == pg.ErrNoRows {
+				return nil, status.Error(codes.NotFound, "parent not found")
+			}
+			return nil, err
 		}
 		q = q.Where("acme_server_id = ?", acmeServer.ID)
 	}
 
-	acmeAccount := &ACMEAccount{}
-	if q.First(&acmeAccount).RecordNotFound() {
-		return nil, status.Error(codes.NotFound, "not found")
+	if err := q.Select(); err != nil {
+		if err == pg.ErrNoRows {
+			return nil, status.Error(codes.NotFound, "not found")
+		}
+		return nil, err
 	}
-	return acmeAccount, nil
+	return &acmeAccount, nil
 }
 
 func NewACMEAccountFromAPI(parent string, acmeAccount *api.ACMEAccount) (*ACMEAccount, error) {

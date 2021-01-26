@@ -5,102 +5,77 @@ import (
 	"strconv"
 
 	"github.com/go-kit/kit/log"
+	"github.com/go-pg/pg/v10"
 	"github.com/gogo/status"
-	"github.com/jinzhu/gorm"
-	otgorm "github.com/smacker/opentracing-gorm"
 	"google.golang.org/grpc/codes"
 
 	"powerssl.dev/powerssl/internal/app/apiserver/certificate/model"
 	"powerssl.dev/powerssl/pkg/apiserver/api"
 	"powerssl.dev/powerssl/pkg/apiserver/certificate"
-	controllerapi "powerssl.dev/powerssl/pkg/controller/api"
-	controllerclient "powerssl.dev/powerssl/pkg/controller/client"
 )
 
-func New(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) certificate.Service {
-	db.AutoMigrate(&model.Certificate{})
+func New(db *pg.DB, logger log.Logger) certificate.Service {
 	var svc certificate.Service
 	{
-		svc = NewBasicService(db, logger, client)
+		svc = NewBasicService(db, logger)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
 }
 
 type basicService struct {
-	controllerclient *controllerclient.GRPCClient
-	db               *gorm.DB
-	logger           log.Logger
+	db     *pg.DB
+	logger log.Logger
 }
 
-func NewBasicService(db *gorm.DB, logger log.Logger, client *controllerclient.GRPCClient) certificate.Service {
+func NewBasicService(db *pg.DB, logger log.Logger) certificate.Service {
 	return basicService{
-		controllerclient: client,
-		db:               db,
-		logger:           logger,
+		db:     db,
+		logger: logger,
 	}
 }
 
-func (bs basicService) Create(ctx context.Context, certificate *api.Certificate) (*api.Certificate, error) {
-	db := otgorm.SetSpanToGorm(ctx, bs.db)
-
-	tx := db.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-
-	cert := model.NewCertificateFromAPI(certificate)
-	if err := tx.Create(cert).Error; err != nil {
-		tx.Rollback()
+func (bs basicService) Create(ctx context.Context, apicertificate *api.Certificate) (*api.Certificate, error) {
+	certificate := model.NewCertificateFromAPI(apicertificate)
+	if err := bs.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
+		_, err := tx.Model(certificate).Insert()
+		return err
+	}); err != nil {
 		return nil, err
 	}
-
-	workflow, err := bs.controllerclient.Workflow.Create(ctx, &controllerapi.Workflow{
-		Kind: controllerapi.WorkflowKindRequestACMECertificate,
-		IntegrationFilters: []*controllerapi.WorkflowIntegrationFilter{
-			&controllerapi.WorkflowIntegrationFilter{},
-		},
-		Input: &controllerapi.RequestACMECertificateInput{
-			DirectoryURL: "https://example.com/directory",
-			AccountURL:   "https://example.com/acct/123",
-			Dnsnames:     []string{"example.com", "example.net"},
-			NotBefore:    "",
-			NotAfter:     "",
-		},
-	})
-	if err != nil {
-		st := status.Convert(err)
-		bs.logger.Log("err", "rpc", "code", st.Code(), "message", st.Message())
-		return nil, status.Error(st.Code(), st.Message())
-	}
-	bs.logger.Log("workflow", workflow.Name)
-
-	if err := tx.Commit().Error; err != nil {
-		return nil, err
-	}
-
-	return cert.ToAPI(), nil
+	return certificate.ToAPI(), nil
+	//workflow, err := bs.controllerclient.Workflow.Create(ctx, &controllerapi.Workflow{
+	//	Kind: controllerapi.WorkflowKindRequestACMECertificate,
+	//	IntegrationFilters: []*controllerapi.WorkflowIntegrationFilter{
+	//		&controllerapi.WorkflowIntegrationFilter{},
+	//	},
+	//	Input: &controllerapi.RequestACMECertificateInput{
+	//		DirectoryURL: "https://example.com/directory",
+	//		AccountURL:   "https://example.com/acct/123",
+	//		Dnsnames:     []string{"example.com", "example.net"},
+	//		NotBefore:    "",
+	//		NotAfter:     "",
+	//	},
+	//})
+	//if err != nil {
+	//	st := status.Convert(err)
+	//	bs.logger.Log("err", "rpc", "code", st.Code(), "message", st.Message())
+	//	return nil, status.Error(st.Code(), st.Message())
+	//}
+	//bs.logger.Log("workflow", workflow.Name)
 }
 
 func (bs basicService) Delete(ctx context.Context, name string) error {
-	db := otgorm.SetSpanToGorm(ctx, bs.db)
-
-	certificate, err := model.FindCertificateByName(name, db)
+	certificate, err := model.FindCertificateByName(name, bs.db)
 	if err != nil {
 		return err
 	}
-	return db.Delete(certificate).Error
+	_, err = bs.db.Model(certificate).Delete()
+	return err
 }
 
 func (bs basicService) Get(ctx context.Context, name string) (*api.Certificate, error) {
-	db := otgorm.SetSpanToGorm(ctx, bs.db)
-
-	certificate, err := model.FindCertificateByName(name, db)
+	certificate, err := model.FindCertificateByName(name, bs.db)
 	if err != nil {
 		return nil, err
 	}
@@ -108,8 +83,6 @@ func (bs basicService) Get(ctx context.Context, name string) (*api.Certificate, 
 }
 
 func (bs basicService) List(ctx context.Context, pageSize int, pageToken string) ([]*api.Certificate, string, error) {
-	db := otgorm.SetSpanToGorm(ctx, bs.db)
-
 	var (
 		certificates  model.Certificates
 		nextPageToken string
@@ -127,7 +100,7 @@ func (bs basicService) List(ctx context.Context, pageSize int, pageToken string)
 			return nil, "", status.Error(codes.InvalidArgument, "malformed page token")
 		}
 	}
-	if err := db.Limit(pageSize + 1).Offset(offset).Find(&certificates).Error; err != nil {
+	if err := bs.db.Model(&certificates).Limit(pageSize + 1).Offset(offset).Select(); err != nil {
 		return nil, "", err
 	}
 	if len(certificates) > pageSize {
@@ -142,16 +115,14 @@ func (bs basicService) List(ctx context.Context, pageSize int, pageToken string)
 }
 
 func (bs basicService) Update(ctx context.Context, name string, certificate *api.Certificate) (*api.Certificate, error) {
-	db := otgorm.SetSpanToGorm(ctx, bs.db)
-
-	cert, err := model.FindCertificateByName(name, db)
+	cert, err := model.FindCertificateByName(name, bs.db)
 	if err != nil {
 		return nil, err
 	}
-	if err := db.Model(cert).Updates(model.NewCertificateFromAPI(certificate)).Error; err != nil {
+	if _, err := bs.db.Model(cert).WherePK().Update(model.NewCertificateFromAPI(certificate)); err != nil {
 		return nil, err
 	}
-	cert, err = model.FindCertificateByName(name, db)
+	cert, err = model.FindCertificateByName(name, bs.db) // TODO Check if needed
 	if err != nil {
 		return nil, err
 	}

@@ -1,12 +1,13 @@
 package model
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/go-pg/pg/v10"
 	"github.com/gogo/status"
-	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc/codes"
 
 	"powerssl.dev/powerssl/internal/pkg/uid"
@@ -14,10 +15,10 @@ import (
 )
 
 type Certificate struct {
-	ID        string `gorm:"primary_key"`
+	ID        string `pg:",pk"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt *time.Time `sql:"index"`
+	DeletedAt time.Time `pg:",soft_delete"`
 
 	DisplayName     string
 	Title           string
@@ -29,13 +30,15 @@ type Certificate struct {
 	AutoRenew       bool
 }
 
-func (*Certificate) BeforeCreate(scope *gorm.Scope) error {
-	scope.SetColumn("ID", uid.New())
-	return nil
-}
-
 func (c *Certificate) Name() string {
 	return fmt.Sprintf("certificates/%s", c.ID)
+}
+
+var _ pg.BeforeInsertHook = (*Certificate)(nil)
+
+func (certificate *Certificate) BeforeInsert(ctx context.Context) (context.Context, error) {
+	certificate.ID = uid.New()
+	return ctx, nil
 }
 
 func (c *Certificate) ToAPI() *api.Certificate {
@@ -67,15 +70,18 @@ func (c Certificates) ToAPI() []*api.Certificate {
 	return certs
 }
 
-func FindCertificateByName(name string, db *gorm.DB) (*Certificate, error) {
+func FindCertificateByName(name string, db *pg.DB) (*Certificate, error) {
 	s := strings.Split(name, "/")
 	if len(s) != 2 {
 		return nil, status.Error(codes.InvalidArgument, "malformed name")
 	}
 
 	certificate := &Certificate{}
-	if db.Where("id = ?", s[1]).First(&certificate).RecordNotFound() {
-		return nil, status.Error(codes.NotFound, "not found")
+	if err := db.Model(certificate).Where("id = ?", s[1]).Limit(1).Select(); err != nil {
+		if err == pg.ErrNoRows {
+			return nil, status.Error(codes.NotFound, "not found")
+		}
+		return nil, err
 	}
 	return certificate, nil
 }

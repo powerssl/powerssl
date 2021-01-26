@@ -1,12 +1,13 @@
 package model
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/go-pg/pg/v10"
 	"github.com/gogo/status"
-	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc/codes"
 
 	"powerssl.dev/powerssl/internal/pkg/uid"
@@ -14,19 +15,21 @@ import (
 )
 
 type ACMEServer struct {
-	ID        string `gorm:"primary_key"`
+	ID        string `pg:",pk"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt *time.Time `sql:"index"`
+	DeletedAt time.Time `pg:",soft_delete"`
 
 	DisplayName     string
 	DirectoryURL    string
 	IntegrationName string
 }
 
-func (*ACMEServer) BeforeCreate(scope *gorm.Scope) error {
-	scope.SetColumn("ID", uid.New())
-	return nil
+var _ pg.BeforeInsertHook = (*ACMEServer)(nil)
+
+func (acmeServer *ACMEServer) BeforeInsert(ctx context.Context) (context.Context, error) {
+	acmeServer.ID = uid.New()
+	return ctx, nil
 }
 
 func (a *ACMEServer) Name() string {
@@ -56,15 +59,18 @@ func (a ACMEServers) ToAPI() []*api.ACMEServer {
 	return servers
 }
 
-func FindACMEServerByName(name string, db *gorm.DB) (*ACMEServer, error) {
+func FindACMEServerByName(name string, db *pg.DB) (*ACMEServer, error) {
 	s := strings.Split(name, "/")
 	if len(s) != 2 {
 		return nil, status.Error(codes.InvalidArgument, "malformed name")
 	}
 
 	acmeServer := &ACMEServer{}
-	if db.Where("id = ?", s[1]).First(&acmeServer).RecordNotFound() {
-		return nil, status.Error(codes.NotFound, "not found")
+	if err := db.Model(acmeServer).Where("id = ?", s[1]).Limit(1).Select(); err != nil {
+		if err == pg.ErrNoRows {
+			return nil, status.Error(codes.NotFound, "not found")
+		}
+		return nil, err
 	}
 	return acmeServer, nil
 }
