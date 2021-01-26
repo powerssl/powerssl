@@ -24,6 +24,7 @@ import (
 	signer "powerssl.dev/powerssl/internal/app/signer/cmd"
 	temporalserver "powerssl.dev/powerssl/internal/app/temporalserver/cmd"
 	webapp "powerssl.dev/powerssl/internal/app/webapp/cmd"
+	worker "powerssl.dev/powerssl/internal/app/worker/cmd"
 )
 
 func main() {
@@ -40,6 +41,7 @@ func main() {
 		signer.NewCmdRoot,
 		temporalserver.NewCmdRoot,
 		webapp.NewCmdRoot,
+		worker.NewCmdRoot,
 	} {
 		cmd := f()
 		if err := doc.GenMarkdownTreeCustom(cmd, "docs/"+cmd.Use, filePrepender, linkHandler); err != nil {

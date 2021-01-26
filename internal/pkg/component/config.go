@@ -86,4 +86,18 @@ var Components = []Component{
 			"POWERSSL_METRICS_ADDR": "localhost:9090",
 		},
 	},
+	{
+		Command: "bin/powerssl-worker",
+		Args:    "run",
+		Env: Environment{
+			"POWERSSL_APISERVER_ADDR": "localhost:8082",
+			"POWERSSL_AUTH_TOKEN":     "http://localhost:8081/service",
+			"POWERSSL_CA_FILE":        "local/certs/ca.pem",
+			"POWERSSL_COMMON_NAME":    "localhost",
+			"POWERSSL_JWKS_URL":       "http://localhost:8081/.well-known/jwks.json",
+			"POWERSSL_METRICS_ADDR":   "localhost:9096",
+			"POWERSSL_VAULT_TOKEN":    "powerssl-worker",
+			"POWERSSL_VAULT_URL":      "https://localhost:8200",
+		},
+	},
 }
