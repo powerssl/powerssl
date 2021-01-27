@@ -10,9 +10,6 @@ import (
 	temporalworker "go.temporal.io/sdk/worker"
 	"golang.org/x/sync/errgroup"
 
-	"powerssl.dev/powerssl/internal/app/controller/activity"
-	"powerssl.dev/powerssl/internal/app/controller/workflow"
-	workflowengine "powerssl.dev/powerssl/internal/app/controller/workflow/engine"
 	"powerssl.dev/powerssl/internal/pkg/auth"
 	"powerssl.dev/powerssl/internal/pkg/temporal"
 	temporalclient "powerssl.dev/powerssl/internal/pkg/temporal/client"
@@ -76,17 +73,11 @@ func Run(cfg *Config) {
 		defer temporalClient.Close()
 	}
 
-	engine := workflowengine.New()
-
 	services, err := makeServices(logger, tracer, duration, client, cfg.JWKSURL)
 	if err != nil {
 		logger.Log("err", err)
 		os.Exit(1)
 	}
-
-	g.Go(func() error {
-		return engine.Run(ctx)
-	})
 
 	if cfg.MetricsAddr != "" {
 		g.Go(func() error {
@@ -100,8 +91,6 @@ func Run(cfg *Config) {
 
 	g.Go(func() error {
 		worker := temporalworker.New(temporalClient, temporal.TaskQueue, temporalworker.Options{})
-		worker.RegisterActivity(activity.CreateAccount)
-		worker.RegisterWorkflow(workflow.CreateAccount)
 		interruptCh := make(chan interface{}, 1)
 		go func() {
 			s := <-ctx.Done()
