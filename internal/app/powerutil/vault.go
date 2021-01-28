@@ -248,6 +248,9 @@ func vaultInitPKI(c *vault.Client, addr, ca, caKey string) error {
 		if err != nil {
 			return err
 		}
+		if err := ioutil.WriteFile("local/certs/intermediate.pem", pem, 0644); err != nil {
+			return err
+		}
 		cert = string(pem)
 	}
 
