@@ -8,11 +8,11 @@ import (
 	temporalworker "go.temporal.io/sdk/worker"
 	"golang.org/x/sync/errgroup"
 
-	"powerssl.dev/powerssl/internal/app/worker/activity"
-	"powerssl.dev/powerssl/internal/app/worker/workflow"
 	"powerssl.dev/powerssl/internal/pkg/auth"
 	"powerssl.dev/powerssl/internal/pkg/temporal"
+	"powerssl.dev/powerssl/internal/pkg/temporal/activity"
 	temporalclient "powerssl.dev/powerssl/internal/pkg/temporal/client"
+	"powerssl.dev/powerssl/internal/pkg/temporal/workflow"
 	"powerssl.dev/powerssl/internal/pkg/tracing"
 	"powerssl.dev/powerssl/internal/pkg/transport"
 	"powerssl.dev/powerssl/internal/pkg/util"

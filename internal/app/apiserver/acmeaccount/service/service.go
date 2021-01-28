@@ -18,6 +18,7 @@ import (
 	"powerssl.dev/powerssl/internal/pkg/vault"
 	"powerssl.dev/powerssl/pkg/apiserver/acmeaccount"
 	"powerssl.dev/powerssl/pkg/apiserver/api"
+	"powerssl.dev/powerssl/internal/pkg/temporal/workflow"
 )
 
 func New(db *pg.DB, logger log.Logger, temporalClient temporalclient.Client, vaultClient *vault.Client) acmeaccount.Service {
@@ -62,13 +63,15 @@ func (bs basicService) Create(ctx context.Context, parent string, apiacmeaccount
 		if err := bs.vaultClient.CreateTransitKey(ctx, acmeAccount.ID); err != nil {
 			return err
 		}
-		directoryURL := acmeServer.DirectoryURL
-		termsOfServiceAgreed := acmeAccount.TermsOfServiceAgreed
-		contacts := strings.Split(acmeAccount.Contacts, ",")
 		_, err = bs.temporalClient.ExecuteWorkflow(ctx, temporalclient.StartWorkflowOptions{
 			ID:        fmt.Sprintf("%s/create-account", acmeAccount.Name()),
 			TaskQueue: temporal.TaskQueue,
-		}, "CreateAccount", acmeAccount.Name(), directoryURL, termsOfServiceAgreed, contacts)
+		}, workflow.CreateAccount, workflow.CreateAccountParams{
+			Account:              acmeAccount.Name(),
+			DirectoryURL:         acmeServer.DirectoryURL,
+			TermsOfServiceAgreed: acmeAccount.TermsOfServiceAgreed,
+			Contacts:             strings.Split(acmeAccount.Contacts, ","),
+		})
 		if err != nil {
 			return err
 		}
