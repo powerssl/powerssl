@@ -46,7 +46,7 @@ func newCmdMigrateDown(databaseURL *string) *cobra.Command {
 	var limit = -1
 
 	cmd := &cobra.Command{
-		Use:   "down",
+		Use:   "down [--all | -a | N]",
 		Short: "Apply all or N down migrations",
 		PreRunE: migratePreRunE(databaseURL, &m, func(cmd *cobra.Command, args []string) error {
 			if all && len(args) > 0 {
@@ -105,7 +105,7 @@ func newCmdMigrateDrop(databaseURL *string) *cobra.Command {
 	var force bool
 
 	cmd := &cobra.Command{
-		Use:   "drop",
+		Use:   "drop [--force | -f]",
 		Short: "Drop everything inside database",
 		PreRunE: migratePreRunE(databaseURL, &m, func(cmd *cobra.Command, args []string) error {
 			if !force {
@@ -140,7 +140,7 @@ func newCmdMigrateForce(databaseURL *string) *cobra.Command {
 	var v int
 
 	cmd := &cobra.Command{
-		Use:   "force",
+		Use:   "force V",
 		Short: "Set version V but don't run migration (ignores dirty state)",
 		PreRunE: migratePreRunE(databaseURL, &m, func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
@@ -170,7 +170,7 @@ func newCmdMigrateGoto(databaseURL *string) *cobra.Command {
 	var v uint
 
 	cmd := &cobra.Command{
-		Use:   "goto",
+		Use:   "goto V",
 		Short: "Migrate to version V",
 		PreRunE: migratePreRunE(databaseURL, &m, func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
@@ -202,7 +202,7 @@ func newCmdMigrateUp(databaseURL *string) *cobra.Command {
 	var limit = -1
 
 	cmd := &cobra.Command{
-		Use:   "up",
+		Use:   "up [N]",
 		Short: "Apply all or N up migrations",
 		PreRunE: migratePreRunE(databaseURL, &m, func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
