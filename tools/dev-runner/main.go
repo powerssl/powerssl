@@ -268,6 +268,23 @@ func handlePostgres(of *internal.Outlet) error {
 	}
 	{
 		comp := component.Component{
+			Name:    "powerssl-apiserver",
+			Command: "bin/powerutil",
+			Args:    "migrate --database-url postgres://powerssl:powerssl@localhost:5432/powerssl?sslmode=disable up",
+		}
+		cmd, _, err := makeCmd(comp, 0, of)
+		if err != nil {
+			return err
+		}
+		if err := cmd.Start(); err != nil {
+			return fmt.Errorf("failed to start %s: %s", comp.Command, err)
+		}
+		if err := cmd.Wait(); err != nil {
+			return fmt.Errorf("failed to wait %s: %s", comp.Command, err)
+		}
+	}
+	{
+		comp := component.Component{
 			Name:    "powerssl-temporalserver",
 			Command: "bin/powerutil",
 			Args:    "temporal migrate --host localhost --password powerssl --plugin postgres --port 5432 --user powerssl --docker",
