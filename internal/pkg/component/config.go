@@ -11,6 +11,7 @@ var Components = []Component{
 			"POWERSSL_COMMON_NAME":     "localhost",
 			"POWERSSL_CONTROLLER_ADDR": "localhost:8083",
 			"POWERSSL_DB_CONNECTION":   "postgresql://powerssl:powerssl@localhost:5432/powerssl?sslmode=disable",
+			"POWERSSL_DB_DIALECT":      "postgres",
 			"POWERSSL_JWKS_URL":        "http://localhost:8081/.well-known/jwks.json",
 			"POWERSSL_METRICS_ADDR":    "localhost:9092",
 			"POWERSSL_VAULT_TOKEN":     "powerssl-apiserver",

@@ -140,8 +140,8 @@ func main() {
 	}
 
 	if err := handleTemporal(of); err != nil {
-			cancel()
-			of.ErrorOutput(err.Error())
+		cancel()
+		of.ErrorOutput(err.Error())
 	}
 
 	for _, comp := range component.Components {
@@ -186,7 +186,6 @@ func handlePostgres(of *internal.Outlet) error {
 	{
 		var err error
 		var db *sql.DB
-		var rows *sql.Rows
 		if db, err = sql.Open("postgres", "postgresql://powerssl:powerssl@localhost:5432/?sslmode=disable"); err != nil {
 			return errors.Wrap(err, "connecting default database")
 		}
@@ -194,51 +193,34 @@ func handlePostgres(of *internal.Outlet) error {
 			_ = db.Close()
 		}()
 		for {
-			err := db.Ping()
-			if err == nil {
+			if err := db.Ping(); err == nil {
 				break
 			}
 			time.Sleep(time.Second)
 		}
 		of.SystemOutput("Create database: powerssl")
-		if rows, err = db.Query("CREATE DATABASE powerssl;"); err != nil {
+		if _, err = db.Exec("CREATE DATABASE powerssl;"); err != nil {
 			if !strings.Contains(err.Error(), "already exists") {
 				return errors.Wrap(err, "creating database powerssl")
 			}
 		}
-		defer func() {
-			if rows != nil {
-				_ = rows.Close()
-			}
-		}()
 		of.SystemOutput("Create database: temporal")
-		if rows, err = db.Query("CREATE DATABASE temporal;"); err != nil {
+		if _, err = db.Exec("CREATE DATABASE temporal;"); err != nil {
 			if !strings.Contains(err.Error(), "already exists") {
 				return errors.Wrap(err, "creating database temporal")
 			}
 		}
-		defer func() {
-			if rows != nil {
-				_ = rows.Close()
-			}
-		}()
 		of.SystemOutput("Create database: vault")
-		if rows, err = db.Query("CREATE DATABASE vault;"); err != nil {
+		if _, err = db.Exec("CREATE DATABASE vault;"); err != nil {
 			if !strings.Contains(err.Error(), "already exists") {
 				return errors.Wrap(err, "creating database vault")
 			}
 		}
-		defer func() {
-			if rows != nil {
-				_ = rows.Close()
-			}
-		}()
 		_ = db.Close()
 	}
 	{
 		var err error
 		var db *sql.DB
-		var rows *sql.Rows
 		if db, err = sql.Open("postgres", "postgresql://powerssl:powerssl@localhost:5432/vault?sslmode=disable"); err != nil {
 			return errors.Wrap(err, "connecting vault database")
 		}
@@ -246,24 +228,18 @@ func handlePostgres(of *internal.Outlet) error {
 			_ = db.Close()
 		}()
 		for {
-			err := db.Ping()
-			if err == nil {
+			if err := db.Ping(); err == nil {
 				break
 			}
 			time.Sleep(time.Second)
 		}
 		of.SystemOutput("Create table: vault_kv_store")
 		of.SystemOutput("Create index: parent_path_idx")
-		if rows, err = db.Query("CREATE TABLE vault_kv_store(parent_path TEXT COLLATE \"C\" NOT NULL, path TEXT COLLATE \"C\", key TEXT COLLATE \"C\", value BYTEA, CONSTRAINT pkey PRIMARY KEY (path, key)); CREATE INDEX parent_path_idx ON vault_kv_store (parent_path);"); err != nil {
+		if _, err = db.Exec("CREATE TABLE vault_kv_store(parent_path TEXT COLLATE \"C\" NOT NULL, path TEXT COLLATE \"C\", key TEXT COLLATE \"C\", value BYTEA, CONSTRAINT pkey PRIMARY KEY (path, key)); CREATE INDEX parent_path_idx ON vault_kv_store (parent_path);"); err != nil {
 			if !strings.Contains(err.Error(), "already exists") {
 				return errors.Wrap(err, "creating vault table and index")
 			}
 		}
-		defer func() {
-			if rows != nil {
-				_ = rows.Close()
-			}
-		}()
 		_ = db.Close()
 	}
 	{
