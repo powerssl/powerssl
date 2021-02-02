@@ -1,7 +1,9 @@
 // Code generated for package asset by go-bindata DO NOT EDIT. (@generated)
 // sources:
-// ../../../../db/migrations/20210130204142_create.down.sql
-// ../../../../db/migrations/20210130204142_create.up.sql
+// ../../../../db/migrations/20210130204142_create_acme_servers_table.down.sql
+// ../../../../db/migrations/20210130204142_create_acme_servers_table.up.sql
+// ../../../../db/migrations/20210202110208_create_acme_accounts_table.down.sql
+// ../../../../db/migrations/20210202110208_create_acme_accounts_table.up.sql
 package asset
 
 import (
@@ -166,42 +168,82 @@ func AssetFile() http.FileSystem {
 	return &assetOperator{}
 }
 
-var __20210130204142_createDownSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x72\x09\xf2\x0f\x50\x08\x71\x74\xf2\x71\x55\x48\x4c\xce\x4d\x8d\x2f\x4e\x2d\x2a\x4b\x2d\x2a\xb6\xe6\x02\x04\x00\x00\xff\xff\x40\xfb\xa3\x94\x19\x00\x00\x00")
+var __20210130204142_create_acme_servers_tableDownSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x4a\x29\xca\x2f\x50\x28\x49\x4c\xca\x49\x55\x48\x4c\xce\x4d\x8d\x2f\x4e\x2d\x2a\x4b\x2d\x2a\xb6\xe6\x02\x04\x00\x00\xff\xff\x15\x02\x83\x08\x19\x00\x00\x00")
 
-func _20210130204142_createDownSqlBytes() ([]byte, error) {
+func _20210130204142_create_acme_servers_tableDownSqlBytes() ([]byte, error) {
 	return bindataRead(
-		__20210130204142_createDownSql,
-		"20210130204142_create.down.sql",
+		__20210130204142_create_acme_servers_tableDownSql,
+		"20210130204142_create_acme_servers_table.down.sql",
 	)
 }
 
-func _20210130204142_createDownSql() (*asset, error) {
-	bytes, err := _20210130204142_createDownSqlBytes()
+func _20210130204142_create_acme_servers_tableDownSql() (*asset, error) {
+	bytes, err := _20210130204142_create_acme_servers_tableDownSqlBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "20210130204142_create.down.sql", size: 25, mode: os.FileMode(420), modTime: time.Unix(726710400, 0)}
+	info := bindataFileInfo{name: "20210130204142_create_acme_servers_table.down.sql", size: 25, mode: os.FileMode(420), modTime: time.Unix(726710400, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var __20210130204142_createUpSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x94\xce\xb1\x6a\xc3\x30\x14\x85\xe1\xdd\x4f\x71\xc8\x64\x43\xbb\x75\xcb\xa4\x26\x0a\x15\xb5\xe5\x20\xcb\x6d\x32\x09\x61\x5d\x82\xc0\xb1\x8d\x24\x07\xf2\xf6\xa5\xa1\xf1\x52\x5a\xc8\xfe\x9d\x7b\xff\x8d\xe2\x4c\x73\xf0\x83\xe6\xb2\x11\xb5\x84\xd8\x41\xd6\x1a\xfc\x20\x1a\xdd\x60\x35\xcf\xde\x3d\x8f\x31\x4e\xab\x75\x96\xfd\x60\xcd\x5e\x4b\x0e\xdb\x9d\xc9\x44\x0a\x17\x0a\x11\x79\x06\x00\xde\xa1\x6d\xc5\x16\x5b\xbe\x63\x6d\xa9\xf1\x3d\x36\x27\x1a\x28\xd8\x44\xe6\xf2\x92\x17\x4f\x37\xe7\x7c\x9c\x7a\x7b\x35\x83\x3d\x13\x3e\x98\xda\xbc\x31\x75\xfb\x2a\xdb\xb2\xbc\x93\x40\x5d\x1a\xc3\xd5\xcc\xa1\xff\xc3\xf8\x21\xd1\x29\xd8\xe4\xc7\xe1\xbf\x53\x5d\x20\x9b\xc8\x19\x9b\xa0\x45\xc5\x1b\xcd\xaa\xfd\x42\x96\x56\x59\x7f\xde\xf3\xe6\xc9\xba\x87\x06\x8e\x7a\xfa\x3d\x58\x02\xf6\x4a\x54\x4c\x1d\xf1\xce\x8f\xc8\xbd\x2b\xb2\x62\x9d\x7d\x05\x00\x00\xff\xff\x58\x6d\x14\x11\x78\x01\x00\x00")
+var __20210130204142_create_acme_servers_tableUpSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x94\x8e\x4b\x6a\xc3\x40\x10\x44\xf7\x3a\x45\x2d\x25\xc8\x0d\x72\x98\xa1\x33\xdd\x49\x1a\xcf\x8f\x9e\x1e\x99\xb9\xbd\xc1\x02\x6d\x84\x0d\xde\x16\xef\x15\x2f\x9a\x90\x0b\x9c\x7e\x92\x80\x62\x96\xd0\xc5\x76\xb1\x8e\x75\x01\x00\x65\x8c\xa1\x8c\x52\x1d\x65\xa4\xf4\xf5\x5c\x59\x7b\x4b\x34\x43\xa1\x2c\xd8\xc9\xe2\x3f\xd9\x05\x31\x89\x5e\x6d\x86\x61\xe9\x05\xa3\xc5\xe5\xcf\xc8\xb5\x96\x77\x57\x47\x23\x07\x72\xb8\x66\xe9\x4e\xb9\x9d\x08\x58\x7e\x69\x24\x47\xa9\xf7\x75\x3b\x84\xd1\xf8\x33\x81\x25\xc9\x55\x38\x03\x9a\x69\x26\x9b\xb8\xc9\xc4\xaa\xbc\x2d\xdb\xf7\xf2\x08\x00\x00\xff\xff\xb9\xc3\x5e\x64\x39\x01\x00\x00")
 
-func _20210130204142_createUpSqlBytes() ([]byte, error) {
+func _20210130204142_create_acme_servers_tableUpSqlBytes() ([]byte, error) {
 	return bindataRead(
-		__20210130204142_createUpSql,
-		"20210130204142_create.up.sql",
+		__20210130204142_create_acme_servers_tableUpSql,
+		"20210130204142_create_acme_servers_table.up.sql",
 	)
 }
 
-func _20210130204142_createUpSql() (*asset, error) {
-	bytes, err := _20210130204142_createUpSqlBytes()
+func _20210130204142_create_acme_servers_tableUpSql() (*asset, error) {
+	bytes, err := _20210130204142_create_acme_servers_tableUpSqlBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "20210130204142_create.up.sql", size: 376, mode: os.FileMode(420), modTime: time.Unix(726710400, 0)}
+	info := bindataFileInfo{name: "20210130204142_create_acme_servers_table.up.sql", size: 313, mode: os.FileMode(420), modTime: time.Unix(726710400, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __20210202110208_create_acme_accounts_tableDownSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x4a\x29\xca\x2f\x50\x28\x49\x4c\xca\x49\x55\x48\x4c\xce\x4d\x8d\x4f\x4c\x4e\xce\x2f\xcd\x2b\x29\xb6\xe6\x02\x04\x00\x00\xff\xff\xe6\x3a\xd1\xce\x1a\x00\x00\x00")
+
+func _20210202110208_create_acme_accounts_tableDownSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__20210202110208_create_acme_accounts_tableDownSql,
+		"20210202110208_create_acme_accounts_table.down.sql",
+	)
+}
+
+func _20210202110208_create_acme_accounts_tableDownSql() (*asset, error) {
+	bytes, err := _20210202110208_create_acme_accounts_tableDownSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "20210202110208_create_acme_accounts_table.down.sql", size: 26, mode: os.FileMode(420), modTime: time.Unix(726710400, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __20210202110208_create_acme_accounts_tableUpSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xac\x92\x5b\x6a\xed\x30\x0c\x45\xff\x33\x0a\x7d\x26\x70\x67\x70\x07\x63\x74\xa4\x9d\x56\xd4\x8f\x20\xcb\xa7\x64\xf6\x85\xd3\x07\x85\x42\x93\x40\xfd\x6b\xaf\xe5\xbd\x91\xc4\xc1\x01\x0a\xbe\x65\x10\x4b\x41\x62\x91\x36\x6a\x74\x9a\x27\xfa\xf5\x98\xd2\x18\xa6\x54\x5b\x50\x1d\x39\xff\x3b\x78\xff\xb0\x77\xf8\x1d\x9e\x3e\x59\xc7\x0a\x47\x15\xf4\xef\xd7\xfd\x48\xa5\xd6\xb7\xcc\x7b\xaa\x5c\x40\x77\x76\x79\x66\x3f\x9d\x23\x2c\xf2\x75\x4a\xd1\xc5\x6d\x0b\x6b\xf5\xfa\x8f\xf0\xd2\x53\x5b\x1f\xf5\x4c\x90\xf8\xc9\x01\xa5\x5b\x6b\x19\x5c\x4f\x7b\xa4\xd5\x60\x89\x7e\x39\xc0\xc7\x4c\xd3\xf0\x7c\x99\x7d\xdf\x10\x4d\x1c\x14\x56\xd0\x83\xcb\xf6\x05\x93\x62\xe5\x91\x83\x6a\x7b\x9d\x97\x23\xd5\xd8\xf4\xaf\x54\x8a\x8c\x9f\xaa\x13\x75\x36\xb7\xc2\xbe\xd3\x0b\x76\x9a\x4d\x97\x69\xf9\x3f\xbd\x05\x00\x00\xff\xff\xb1\x30\x5e\x94\x05\x03\x00\x00")
+
+func _20210202110208_create_acme_accounts_tableUpSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__20210202110208_create_acme_accounts_tableUpSql,
+		"20210202110208_create_acme_accounts_table.up.sql",
+	)
+}
+
+func _20210202110208_create_acme_accounts_tableUpSql() (*asset, error) {
+	bytes, err := _20210202110208_create_acme_accounts_tableUpSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "20210202110208_create_acme_accounts_table.up.sql", size: 773, mode: os.FileMode(420), modTime: time.Unix(726710400, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -258,8 +300,10 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"20210130204142_create.down.sql": _20210130204142_createDownSql,
-	"20210130204142_create.up.sql":   _20210130204142_createUpSql,
+	"20210130204142_create_acme_servers_table.down.sql":  _20210130204142_create_acme_servers_tableDownSql,
+	"20210130204142_create_acme_servers_table.up.sql":    _20210130204142_create_acme_servers_tableUpSql,
+	"20210202110208_create_acme_accounts_table.down.sql": _20210202110208_create_acme_accounts_tableDownSql,
+	"20210202110208_create_acme_accounts_table.up.sql":   _20210202110208_create_acme_accounts_tableUpSql,
 }
 
 // AssetDir returns the file names below a certain
@@ -303,8 +347,10 @@ type bintree struct {
 }
 
 var _bintree = &bintree{nil, map[string]*bintree{
-	"20210130204142_create.down.sql": &bintree{_20210130204142_createDownSql, map[string]*bintree{}},
-	"20210130204142_create.up.sql":   &bintree{_20210130204142_createUpSql, map[string]*bintree{}},
+	"20210130204142_create_acme_servers_table.down.sql":  &bintree{_20210130204142_create_acme_servers_tableDownSql, map[string]*bintree{}},
+	"20210130204142_create_acme_servers_table.up.sql":    &bintree{_20210130204142_create_acme_servers_tableUpSql, map[string]*bintree{}},
+	"20210202110208_create_acme_accounts_table.down.sql": &bintree{_20210202110208_create_acme_accounts_tableDownSql, map[string]*bintree{}},
+	"20210202110208_create_acme_accounts_table.up.sql":   &bintree{_20210202110208_create_acme_accounts_tableUpSql, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory
