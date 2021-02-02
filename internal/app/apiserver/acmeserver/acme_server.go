@@ -1,7 +1,6 @@
 package acmeserver
 
 import (
-	"github.com/freerware/work/v4/unit"
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
@@ -21,8 +20,8 @@ type ACMEServer struct {
 	tracer    stdopentracing.Tracer
 }
 
-func New(uniter unit.Uniter, repositories *repository.Repositories, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, auth kitendpoint.Middleware) *ACMEServer {
-	svc := service.New(uniter, repositories, logger)
+func New(repositories *repository.Repositories, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, auth kitendpoint.Middleware) *ACMEServer {
+	svc := service.New(repositories, logger)
 	endpoints := endpoint.NewEndpoints(svc, logger, tracer, duration, auth)
 
 	return &ACMEServer{

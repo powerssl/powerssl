@@ -3,10 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
-	"powerssl.dev/powerssl/internal/app/apiserver/unitofwork"
 	"strings"
 
-	"github.com/freerware/work/v4/unit"
 	"github.com/go-kit/kit/log"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -14,6 +12,7 @@ import (
 
 	"powerssl.dev/powerssl/internal/app/apiserver/model"
 	"powerssl.dev/powerssl/internal/app/apiserver/repository"
+	"powerssl.dev/powerssl/internal/app/apiserver/unitofwork"
 	"powerssl.dev/powerssl/internal/pkg/temporal"
 	"powerssl.dev/powerssl/internal/pkg/temporal/workflow"
 	"powerssl.dev/powerssl/internal/pkg/vault"
@@ -21,11 +20,11 @@ import (
 	"powerssl.dev/powerssl/pkg/apiserver/api"
 )
 
-func New(uniter unit.Uniter, repositories *repository.Repositories, logger log.Logger, temporalClient temporalclient.Client, vaultClient *vault.Client) acmeaccount.Service {
+func New(repositories *repository.Repositories, logger log.Logger, temporalClient temporalclient.Client, vaultClient *vault.Client) acmeaccount.Service {
 	var svc acmeaccount.Service
 	{
 		svc = NewBasicService(repositories, logger, temporalClient, vaultClient)
-		svc = UnitOfWorkMiddleware(uniter, logger)(svc)
+		svc = UnitOfWorkMiddleware(repositories, logger)(svc)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
@@ -117,7 +116,7 @@ func (s basicService) Update(ctx context.Context, name string, updateMask []stri
 	//	}
 	//}
 	var updatedACMEAccount *model.ACMEAccount
-	updatedACMEAccount, err  = model.NewACMEAccountFromAPI(acmeAccount.ACMEServer.Name(), apiACMEAccount, acmeAccount.ID)
+	updatedACMEAccount, err = model.NewACMEAccountFromAPI(acmeAccount.ACMEServer.Name(), apiACMEAccount, acmeAccount.ID)
 	if err = unitofwork.GetUnit(ctx).Alter(updatedACMEAccount); err != nil {
 		return nil, err
 	}

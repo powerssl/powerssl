@@ -3,10 +3,8 @@ package service
 import (
 	"context"
 
-	"github.com/freerware/work/v4/unit"
 	"github.com/go-kit/kit/log"
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 
 	"powerssl.dev/powerssl/internal/app/apiserver/model"
 	"powerssl.dev/powerssl/internal/app/apiserver/repository"
@@ -15,11 +13,11 @@ import (
 	"powerssl.dev/powerssl/pkg/apiserver/api"
 )
 
-func New(uniter unit.Uniter, repositories *repository.Repositories, logger log.Logger) acmeserver.Service {
+func New(repositories *repository.Repositories, logger log.Logger) acmeserver.Service {
 	var svc acmeserver.Service
 	{
 		svc = NewBasicService(repositories, logger)
-		svc = UnitOfWorkMiddleware(uniter, logger)(svc)
+		svc = UnitOfWorkMiddleware(repositories, logger)(svc)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
@@ -66,11 +64,10 @@ func (s basicService) Get(ctx context.Context, name string) (_ *api.ACMEServer, 
 
 func (s basicService) List(ctx context.Context, pageSize int, pageToken string) (_ []*api.ACMEServer, _ string, err error) {
 	var acmeServers *model.ACMEServers
-	if acmeServers, err = s.ACMEServers.GetAll(ctx); err != nil {
-		return nil, "", errors.Wrap(err, "getting all acme servers")
+	var nextPageToken string
+	if acmeServers, nextPageToken, err = s.ACMEServers.GetRange(ctx, pageSize, pageToken); err != nil {
+		return nil, "", err
 	}
-	// TODO: paging
-	_, nextPageToken := pageSize, pageToken
 	return acmeServers.ToAPI(), nextPageToken, nil
 }
 

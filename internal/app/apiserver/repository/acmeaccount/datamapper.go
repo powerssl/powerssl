@@ -1,4 +1,4 @@
-package datamapper
+package acmeaccount
 
 import (
 	"context"
@@ -17,19 +17,19 @@ func acmeAccounts(entities []interface{}) model.ACMEAccounts {
 	return acmeAccounts
 }
 
-type acmeAccountDataMapper struct {
+type DataMapper struct {
 	logger *zap.Logger
 }
 
-var _ unit.DataMapper = &acmeAccountDataMapper{}
+var _ unit.DataMapper = &DataMapper{}
 
-func NewACMEAccountDataMapper(logger *zap.Logger) *acmeAccountDataMapper {
-	return &acmeAccountDataMapper{
+func NewDataMapper(logger *zap.Logger) *DataMapper {
+	return &DataMapper{
 		logger: logger,
 	}
 }
 
-func (m acmeAccountDataMapper) Insert(ctx context.Context, mCtx unit.MapperContext, entities ...interface{}) error {
+func (m DataMapper) Insert(ctx context.Context, mCtx unit.MapperContext, entities ...interface{}) error {
 	for _, acmeAccount := range acmeAccounts(entities) {
 		m.logger.Sugar().Debug("DEBUG", acmeAccount)
 		if _, err := mCtx.Tx.ExecContext(ctx,
@@ -41,7 +41,7 @@ func (m acmeAccountDataMapper) Insert(ctx context.Context, mCtx unit.MapperConte
 	return nil
 }
 
-func (m acmeAccountDataMapper) Update(ctx context.Context, mCtx unit.MapperContext, entities ...interface{}) error {
+func (m DataMapper) Update(ctx context.Context, mCtx unit.MapperContext, entities ...interface{}) error {
 	for _, acmeAccount := range acmeAccounts(entities) {
 		if _, err := mCtx.Tx.ExecContext(ctx,
 			`update acme_accounts set display_name = $1, title = $2, description = $3, terms_of_service_agreed = $4, contacts = $5, account_url = $6, updated_at = now() where id = $4`,
@@ -52,7 +52,7 @@ func (m acmeAccountDataMapper) Update(ctx context.Context, mCtx unit.MapperConte
 	return nil
 }
 
-func (m acmeAccountDataMapper) Delete(ctx context.Context, mCtx unit.MapperContext, entities ...interface{}) error {
+func (m DataMapper) Delete(ctx context.Context, mCtx unit.MapperContext, entities ...interface{}) error {
 	for _, acmeAccount := range acmeAccounts(entities) {
 		if _, err := mCtx.Tx.ExecContext(ctx,
 			`update acme_accounts set deleted_at = now() where id = $1`,

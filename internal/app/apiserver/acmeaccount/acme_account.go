@@ -1,7 +1,6 @@
 package acmeaccount
 
 import (
-	"github.com/freerware/work/v4/unit"
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
@@ -23,8 +22,8 @@ type ACMEAccount struct {
 	tracer    stdopentracing.Tracer
 }
 
-func New(uniter unit.Uniter, repositories *repository.Repositories, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, temporalClient temporalclient.Client, vaultClient *vault.Client, auth kitendpoint.Middleware) *ACMEAccount {
-	svc := service.New(uniter, repositories, logger, temporalClient, vaultClient)
+func New(repositories *repository.Repositories, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, temporalClient temporalclient.Client, vaultClient *vault.Client, auth kitendpoint.Middleware) *ACMEAccount {
+	svc := service.New(repositories, logger, temporalClient, vaultClient)
 	endpoints := endpoint.NewEndpoints(svc, logger, tracer, duration, auth)
 
 	return &ACMEAccount{

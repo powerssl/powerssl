@@ -5,33 +5,33 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/gogo/status"
-	"github.com/jmoiron/sqlx"
 	"google.golang.org/grpc/codes"
 
+	"powerssl.dev/powerssl/internal/app/apiserver/repository"
 	"powerssl.dev/powerssl/pkg/apiserver/api"
 	"powerssl.dev/powerssl/pkg/apiserver/certificate"
 )
 
 var ErrUnimplemented = status.Error(codes.Unimplemented, "Coming soon")
 
-func New(db *sqlx.DB, logger log.Logger) certificate.Service {
+func New(repositories *repository.Repositories, logger log.Logger) certificate.Service {
 	var svc certificate.Service
 	{
-		svc = NewBasicService(db, logger)
+		svc = NewBasicService(repositories, logger)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
 }
 
 type basicService struct {
-	db     *sqlx.DB
+	*repository.Repositories
 	logger log.Logger
 }
 
-func NewBasicService(db *sqlx.DB, logger log.Logger) certificate.Service {
+func NewBasicService(repositories *repository.Repositories, logger log.Logger) certificate.Service {
 	return basicService{
-		db:     db,
-		logger: logger,
+		Repositories: repositories,
+		logger:       logger,
 	}
 }
 

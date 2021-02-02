@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"context"
+	"github.com/go-kit/kit/endpoint"
 	"io"
 	"os"
 
@@ -11,8 +12,15 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
+	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
+	"powerssl.dev/powerssl/internal/app/apiserver/acmeaccount"
+	"powerssl.dev/powerssl/internal/app/apiserver/acmeserver"
+	"powerssl.dev/powerssl/internal/app/apiserver/certificate"
+	"powerssl.dev/powerssl/internal/app/apiserver/repository"
+	"powerssl.dev/powerssl/internal/app/apiserver/user"
+	"powerssl.dev/powerssl/internal/pkg/auth"
 	temporalclient "powerssl.dev/powerssl/internal/pkg/temporal/client"
 	"powerssl.dev/powerssl/internal/pkg/tracing"
 	"powerssl.dev/powerssl/internal/pkg/transport"
@@ -46,8 +54,9 @@ func Run(cfg *Config) {
 		}()
 	}
 
-	var db *sqlx.DB
+	var repositories *repository.Repositories
 	{
+		var db *sqlx.DB
 		var err error
 		if db, err = sqlx.Connect(cfg.DBDialect, cfg.DBConnection); err != nil {
 			_ = logger.Log("database", cfg.DBDialect, "err", err)
@@ -56,6 +65,8 @@ func Run(cfg *Config) {
 		defer func() {
 			_ = db.Close()
 		}()
+		zapLogger, _ := zap.NewDevelopment() // TODO
+		repositories = repository.NewRepositories(db, zapLogger)
 	}
 
 	var temporalClient temporalclient.Client
@@ -88,10 +99,13 @@ func Run(cfg *Config) {
 		Help:      "Request duration in seconds.",
 	}, []string{"method", "success"})
 
-	services, err := makeServices(db, logger, tracer, duration, temporalClient, vaultClient, cfg.JWKSURL)
-	if err != nil {
-		_ = logger.Log("err", err)
-		os.Exit(1)
+	var authMiddleware endpoint.Middleware
+	{
+		var err error
+		if authMiddleware, err = auth.NewParser(cfg.JWKSURL); err != nil {
+			_ = logger.Log("err", err)
+			os.Exit(1)
+		}
 	}
 
 	if cfg.MetricsAddr != "" {
@@ -101,7 +115,12 @@ func Run(cfg *Config) {
 	}
 
 	g.Go(func() error {
-		return transport.ServeGRPC(ctx, cfg.ServerConfig, log.With(logger, "transport", "gRPC"), services)
+		return transport.ServeGRPC(ctx, cfg.ServerConfig, log.With(logger, "transport", "gRPC"), []transport.Service{
+			acmeaccount.New(repositories, logger, tracer, duration, temporalClient, vaultClient, authMiddleware),
+			acmeserver.New(repositories, logger, tracer, duration, authMiddleware),
+			certificate.New(repositories, logger, tracer, duration, authMiddleware),
+			user.New(repositories, logger, tracer, duration, authMiddleware),
+		})
 	})
 
 	if err := g.Wait(); err != nil {

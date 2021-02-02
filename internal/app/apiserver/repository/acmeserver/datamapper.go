@@ -1,4 +1,4 @@
-package datamapper
+package acmeserver
 
 import (
 	"context"
@@ -17,19 +17,19 @@ func acmeServers(entities []interface{}) model.ACMEServers {
 	return acmeServers
 }
 
-type acmeServerDataMapper struct {
+type DataMapper struct {
 	logger *zap.Logger
 }
 
-var _ unit.DataMapper = &acmeServerDataMapper{}
+var _ unit.DataMapper = &DataMapper{}
 
-func NewACMEServerDataMapper(logger *zap.Logger) *acmeServerDataMapper {
-	return &acmeServerDataMapper{
+func NewDataMapper(logger *zap.Logger) *DataMapper {
+	return &DataMapper{
 		logger: logger,
 	}
 }
 
-func (m acmeServerDataMapper) Insert(ctx context.Context, mCtx unit.MapperContext, entities ...interface{}) error {
+func (m DataMapper) Insert(ctx context.Context, mCtx unit.MapperContext, entities ...interface{}) error {
 	for _, acmeServer := range acmeServers(entities) {
 		if _, err := mCtx.Tx.ExecContext(ctx,
 			`insert into acme_servers (id, display_name, directory_url, integration_name) values ($1, $2, $3, $4)`,
@@ -40,7 +40,7 @@ func (m acmeServerDataMapper) Insert(ctx context.Context, mCtx unit.MapperContex
 	return nil
 }
 
-func (m acmeServerDataMapper) Update(ctx context.Context, mCtx unit.MapperContext, entities ...interface{}) error {
+func (m DataMapper) Update(ctx context.Context, mCtx unit.MapperContext, entities ...interface{}) error {
 	for _, acmeServer := range acmeServers(entities) {
 		if _, err := mCtx.Tx.ExecContext(ctx,
 			`update acme_servers set display_name = $1, directory_url = $2, integration_name = $3, updated_at = now() where id = $4`,
@@ -51,7 +51,7 @@ func (m acmeServerDataMapper) Update(ctx context.Context, mCtx unit.MapperContex
 	return nil
 }
 
-func (m acmeServerDataMapper) Delete(ctx context.Context, mCtx unit.MapperContext, entities ...interface{}) error {
+func (m DataMapper) Delete(ctx context.Context, mCtx unit.MapperContext, entities ...interface{}) error {
 	for _, acmeServer := range acmeServers(entities) {
 		if _, err := mCtx.Tx.ExecContext(ctx,
 			`update acme_servers set deleted_at = now() where id = $1`,

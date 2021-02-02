@@ -6,23 +6,25 @@ import (
 
 	"github.com/gogo/status"
 	"github.com/jmoiron/sqlx"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 
 	"powerssl.dev/powerssl/internal/app/apiserver/model"
-	"powerssl.dev/powerssl/internal/app/apiserver/repository"
+	"powerssl.dev/powerssl/internal/app/apiserver/repository/interface"
 	"powerssl.dev/powerssl/internal/app/apiserver/unitofwork"
 )
 
 type Repository struct {
-	db           *sqlx.DB
-	repositories *repository.Repositories
+	db     *sqlx.DB
+	logger *zap.Logger
 }
 
-var _ repository.ACMEAccountRepository = &Repository{}
+var _ _interface.ACMEAccountRepository = &Repository{}
 
-func NewRepository(db *sqlx.DB) *Repository {
+func NewRepository(db *sqlx.DB, logger *zap.Logger) *Repository {
 	return &Repository{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 }
 

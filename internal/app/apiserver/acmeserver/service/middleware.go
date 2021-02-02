@@ -6,6 +6,7 @@ import (
 	"github.com/freerware/work/v4/unit"
 	"github.com/go-kit/kit/log"
 
+	"powerssl.dev/powerssl/internal/app/apiserver/repository"
 	"powerssl.dev/powerssl/internal/app/apiserver/unitofwork"
 	"powerssl.dev/powerssl/pkg/apiserver/acmeserver"
 	"powerssl.dev/powerssl/pkg/apiserver/api"
@@ -13,21 +14,21 @@ import (
 
 type Middleware func(acmeserver.Service) acmeserver.Service
 
-func UnitOfWorkMiddleware(uniter unit.Uniter, logger log.Logger) Middleware {
+func UnitOfWorkMiddleware(repositories *repository.Repositories, logger log.Logger) Middleware {
 	return func(next acmeserver.Service) acmeserver.Service {
-		return unitOfWorkMiddleware{logger, uniter, next}
+		return unitOfWorkMiddleware{repositories, logger, next}
 	}
 }
 
 type unitOfWorkMiddleware struct {
+	*repository.Repositories
 	logger log.Logger
-	uniter unit.Uniter
 	next   acmeserver.Service
 }
 
 func (u unitOfWorkMiddleware) Create(ctx context.Context, acmeServer *api.ACMEServer) (_ *api.ACMEServer, err error) {
 	var unit unit.Unit
-	if unit, err = u.uniter.Unit(); err != nil {
+	if unit, err = u.UnitOfWork(); err != nil {
 		return nil, err
 	}
 	if ctx, err = unitofwork.SetUnit(ctx, unit); err != nil {
@@ -43,7 +44,7 @@ func (u unitOfWorkMiddleware) Create(ctx context.Context, acmeServer *api.ACMESe
 
 func (u unitOfWorkMiddleware) Delete(ctx context.Context, name string) (err error) {
 	var unit unit.Unit
-	if unit, err = u.uniter.Unit(); err != nil {
+	if unit, err = u.UnitOfWork(); err != nil {
 		return err
 	}
 	if ctx, err = unitofwork.SetUnit(ctx, unit); err != nil {
@@ -59,7 +60,7 @@ func (u unitOfWorkMiddleware) Delete(ctx context.Context, name string) (err erro
 
 func (u unitOfWorkMiddleware) Get(ctx context.Context, name string) (_ *api.ACMEServer, err error) {
 	var unit unit.Unit
-	if unit, err = u.uniter.Unit(); err != nil {
+	if unit, err = u.UnitOfWork(); err != nil {
 		return nil, err
 	}
 	if ctx, err = unitofwork.SetUnit(ctx, unit); err != nil {
@@ -75,7 +76,7 @@ func (u unitOfWorkMiddleware) Get(ctx context.Context, name string) (_ *api.ACME
 
 func (u unitOfWorkMiddleware) List(ctx context.Context, pageSize int, pageToken string) (_ []*api.ACMEServer, _ string, err error) {
 	var unit unit.Unit
-	if unit, err = u.uniter.Unit(); err != nil {
+	if unit, err = u.UnitOfWork(); err != nil {
 		return nil, "", err
 	}
 	if ctx, err = unitofwork.SetUnit(ctx, unit); err != nil {
@@ -91,7 +92,7 @@ func (u unitOfWorkMiddleware) List(ctx context.Context, pageSize int, pageToken 
 
 func (u unitOfWorkMiddleware) Update(ctx context.Context, name string, acmeServer *api.ACMEServer) (_ *api.ACMEServer, err error) {
 	var unit unit.Unit
-	if unit, err = u.uniter.Unit(); err != nil {
+	if unit, err = u.UnitOfWork(); err != nil {
 		return nil, err
 	}
 	if ctx, err = unitofwork.SetUnit(ctx, unit); err != nil {
