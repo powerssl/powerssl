@@ -3,153 +3,123 @@ package service
 import (
 	"context"
 	"fmt"
-	"strconv"
+	"powerssl.dev/powerssl/internal/app/apiserver/unitofwork"
 	"strings"
 
+	"github.com/freerware/work/v4/unit"
 	"github.com/go-kit/kit/log"
-	"github.com/go-pg/pg/v10"
-	"github.com/gogo/status"
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	temporalclient "go.temporal.io/sdk/client"
-	"google.golang.org/grpc/codes"
 
-	"powerssl.dev/powerssl/internal/app/apiserver/acmeaccount/model"
-	acmeservermodel "powerssl.dev/powerssl/internal/app/apiserver/acmeserver/model"
+	"powerssl.dev/powerssl/internal/app/apiserver/model"
+	"powerssl.dev/powerssl/internal/app/apiserver/repository"
 	"powerssl.dev/powerssl/internal/pkg/temporal"
+	"powerssl.dev/powerssl/internal/pkg/temporal/workflow"
 	"powerssl.dev/powerssl/internal/pkg/vault"
 	"powerssl.dev/powerssl/pkg/apiserver/acmeaccount"
 	"powerssl.dev/powerssl/pkg/apiserver/api"
-	"powerssl.dev/powerssl/internal/pkg/temporal/workflow"
 )
 
-func New(db *pg.DB, logger log.Logger, temporalClient temporalclient.Client, vaultClient *vault.Client) acmeaccount.Service {
+func New(uniter unit.Uniter, repositories *repository.Repositories, logger log.Logger, temporalClient temporalclient.Client, vaultClient *vault.Client) acmeaccount.Service {
 	var svc acmeaccount.Service
 	{
-		svc = NewBasicService(db, logger, temporalClient, vaultClient)
+		svc = NewBasicService(repositories, logger, temporalClient, vaultClient)
+		svc = UnitOfWorkMiddleware(uniter, logger)(svc)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
 }
 
 type basicService struct {
-	temporalClient temporalclient.Client
-	db             *pg.DB
-	logger         log.Logger
-	vaultClient    *vault.Client
+	*repository.Repositories
+	logger   log.Logger
+	temporal temporalclient.Client
+	vault    *vault.Client
 }
 
-func NewBasicService(db *pg.DB, logger log.Logger, temporalClient temporalclient.Client, vaultClient *vault.Client) acmeaccount.Service {
+func NewBasicService(repositories *repository.Repositories, logger log.Logger, temporalClient temporalclient.Client, vaultClient *vault.Client) acmeaccount.Service {
 	return basicService{
-		temporalClient: temporalClient,
-		vaultClient:    vaultClient,
-		db:             db,
-		logger:         logger,
+		Repositories: repositories,
+		logger:       logger,
+		temporal:     temporalClient,
+		vault:        vaultClient,
 	}
 }
 
-func (bs basicService) Create(ctx context.Context, parent string, apiacmeaccount *api.ACMEAccount) (*api.ACMEAccount, error) {
-	acmeServer, err := acmeservermodel.FindACMEServerByName(parent, bs.db)
-	if err != nil {
+func (s basicService) Create(ctx context.Context, parent string, apiACMEAccount *api.ACMEAccount) (_ *api.ACMEAccount, err error) {
+	var acmeAccount *model.ACMEAccount
+	if acmeAccount, err = model.NewACMEAccountFromAPI(parent, apiACMEAccount, uuid.New().String()); err != nil {
 		return nil, err
 	}
-	acmeAccount, err := model.NewACMEAccountFromAPI(parent, apiacmeaccount)
-	if err != nil {
+	if acmeAccount.ACMEServer, err = s.ACMEServers.FindByName(ctx, parent); err != nil {
 		return nil, err
 	}
-	if err := bs.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
-		_, err := tx.Model(acmeAccount).Insert()
-		if err != nil {
-			return err
-		}
-		if err := bs.vaultClient.CreateTransitKey(ctx, acmeAccount.ID); err != nil {
-			return err
-		}
-		_, err = bs.temporalClient.ExecuteWorkflow(ctx, temporalclient.StartWorkflowOptions{
-			ID:        fmt.Sprintf("%s/create-account", acmeAccount.Name()),
-			TaskQueue: temporal.TaskQueue,
-		}, workflow.CreateAccount, workflow.CreateAccountParams{
-			Account:              acmeAccount.Name(),
-			DirectoryURL:         acmeServer.DirectoryURL,
-			TermsOfServiceAgreed: acmeAccount.TermsOfServiceAgreed,
-			Contacts:             strings.Split(acmeAccount.Contacts, ","),
-		})
-		if err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
+	if err = s.ACMEAccounts.Add(ctx, acmeAccount); err != nil {
 		return nil, err
 	}
+	if err := s.vault.CreateTransitKey(ctx, acmeAccount.ID); err != nil {
+		return nil, err
+	}
+	_, err = s.temporal.ExecuteWorkflow(ctx, temporalclient.StartWorkflowOptions{
+		ID:        fmt.Sprintf("%s/create-account", acmeAccount.Name()),
+		TaskQueue: temporal.TaskQueue,
+	}, workflow.CreateAccount, workflow.CreateAccountParams{
+		Account:              acmeAccount.Name(),
+		DirectoryURL:         acmeAccount.ACMEServer.DirectoryURL,
+		TermsOfServiceAgreed: acmeAccount.TermsOfServiceAgreed,
+		Contacts:             strings.Split(acmeAccount.Contacts, ","),
+	})
 	return acmeAccount.ToAPI(), nil
 }
 
-func (bs basicService) Delete(ctx context.Context, name string) error {
-	acmeAccount, err := model.FindACMEAccountByName(name, bs.db)
-	if err != nil {
+func (s basicService) Delete(ctx context.Context, name string) (err error) {
+	var acmeAccount *model.ACMEAccount
+	if acmeAccount, err = s.ACMEAccounts.FindByName(ctx, name); err != nil {
 		return err
 	}
-	_, err = bs.db.Model(acmeAccount).Delete()
-	return err
+	if err = s.ACMEAccounts.Remove(ctx, acmeAccount); err != nil {
+		return err
+	}
+	return nil
 }
 
-func (bs basicService) Get(ctx context.Context, name string) (*api.ACMEAccount, error) {
-	acmeAccount, err := model.FindACMEAccountByName(name, bs.db)
-	if err != nil {
+func (s basicService) Get(ctx context.Context, name string) (_ *api.ACMEAccount, err error) {
+	var acmeAccount *model.ACMEAccount
+	if acmeAccount, err = s.ACMEAccounts.FindByName(ctx, name); err != nil {
 		return nil, err
 	}
 	return acmeAccount.ToAPI(), nil
 }
 
-func (bs basicService) List(ctx context.Context, parent string, pageSize int, pageToken string) ([]*api.ACMEAccount, string, error) {
-	if pageSize < 1 {
-		pageSize = 10
-	} else if pageSize > 20 {
-		pageSize = 20
+func (s basicService) List(ctx context.Context, parent string, pageSize int, pageToken string) (_ []*api.ACMEAccount, _ string, err error) {
+	var acmeAccounts *model.ACMEAccounts
+	if acmeAccounts, err = s.ACMEAccounts.GetAll(ctx); err != nil {
+		return nil, "", errors.Wrap(err, "getting all acme accounts")
 	}
-	offset := -1
-	if pageToken != "" {
-		var err error
-		offset, err = strconv.Atoi(pageToken)
-		if err != nil {
-			return nil, "", status.Error(codes.InvalidArgument, "malformed page token")
-		}
-	}
-	var acmeAccounts model.ACMEAccounts
-	if err := bs.db.Model(&acmeAccounts).Limit(pageSize + 1).Offset(offset).Select(); err != nil {
-		return nil, "", err
-	}
-	var nextPageToken string
-	if len(acmeAccounts) > pageSize {
-		acmeAccounts = acmeAccounts[:len(acmeAccounts)-1]
-		if offset == -1 {
-			nextPageToken = strconv.Itoa(pageSize)
-		} else {
-			nextPageToken = strconv.Itoa(offset + pageSize)
-		}
-	}
+	// TODO: paging
+	_, nextPageToken := pageSize, pageToken
 	return acmeAccounts.ToAPI(), nextPageToken, nil
 }
 
-func (bs basicService) Update(ctx context.Context, name string, updateMask []string, acmeAccount *api.ACMEAccount) (*api.ACMEAccount, error) {
-	dbACMEAccount, err := model.FindACMEAccountByName(name, bs.db)
-	if err != nil {
+func (s basicService) Update(ctx context.Context, name string, updateMask []string, apiACMEAccount *api.ACMEAccount) (_ *api.ACMEAccount, err error) {
+	var acmeAccount *model.ACMEAccount
+	if acmeAccount, err = s.ACMEAccounts.FindByName(ctx, name); err != nil {
 		return nil, err
 	}
-	var updates []string
-	for _, path := range updateMask {
-		switch path {
-		case "account_url", "contacts":
-			updates = append(updates, path)
-		default:
-			// TODO: error
-		}
-	}
-	updateACMEAccount, err := model.NewACMEAccountFromAPI(fmt.Sprintf("acmeServers/%s", dbACMEAccount.ACMEServerID), acmeAccount)
-	if err != nil {
+	//var updates []string
+	//for _, path := range updateMask {
+	//	switch path {
+	//	case "account_url", "contacts":
+	//		updates = append(updates, path)
+	//	default:
+	//		// TODO: error
+	//	}
+	//}
+	var updatedACMEAccount *model.ACMEAccount
+	updatedACMEAccount, err  = model.NewACMEAccountFromAPI(acmeAccount.ACMEServer.Name(), apiACMEAccount, acmeAccount.ID)
+	if err = unitofwork.GetUnit(ctx).Alter(updatedACMEAccount); err != nil {
 		return nil, err
 	}
-	// TODO: Compare name with acmeAccount.Name (empty or match)
-	if _, err := bs.db.Model(updateACMEAccount).Column(updates...).WherePK().Update(); err != nil {
-		return nil, err
-	}
-	return dbACMEAccount.ToAPI(), nil
+	return acmeAccount.ToAPI(), nil
 }

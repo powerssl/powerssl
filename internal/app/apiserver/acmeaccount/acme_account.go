@@ -1,10 +1,10 @@
 package acmeaccount
 
 import (
+	"github.com/freerware/work/v4/unit"
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
-	"github.com/go-pg/pg/v10"
 	stdopentracing "github.com/opentracing/opentracing-go"
 	temporalclient "go.temporal.io/sdk/client"
 	"google.golang.org/grpc"
@@ -12,6 +12,7 @@ import (
 	"powerssl.dev/powerssl/internal/app/apiserver/acmeaccount/endpoint"
 	"powerssl.dev/powerssl/internal/app/apiserver/acmeaccount/service"
 	"powerssl.dev/powerssl/internal/app/apiserver/acmeaccount/transport"
+	"powerssl.dev/powerssl/internal/app/apiserver/repository"
 	apiv1 "powerssl.dev/powerssl/internal/pkg/apiserver/api/v1"
 	"powerssl.dev/powerssl/internal/pkg/vault"
 )
@@ -22,8 +23,8 @@ type ACMEAccount struct {
 	tracer    stdopentracing.Tracer
 }
 
-func New(db *pg.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, temporalClient temporalclient.Client, vaultClient *vault.Client, auth kitendpoint.Middleware) *ACMEAccount {
-	svc := service.New(db, logger, temporalClient, vaultClient)
+func New(uniter unit.Uniter, repositories *repository.Repositories, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, temporalClient temporalclient.Client, vaultClient *vault.Client, auth kitendpoint.Middleware) *ACMEAccount {
+	svc := service.New(uniter, repositories, logger, temporalClient, vaultClient)
 	endpoints := endpoint.NewEndpoints(svc, logger, tracer, duration, auth)
 
 	return &ACMEAccount{
