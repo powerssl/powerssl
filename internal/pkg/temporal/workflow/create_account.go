@@ -3,16 +3,17 @@ package workflow
 import (
 	"time"
 
-	temporalworkflow "go.temporal.io/sdk/workflow"
 	temporal "go.temporal.io/sdk/temporal"
+	temporalworkflow "go.temporal.io/sdk/workflow"
 
 	"powerssl.dev/powerssl/internal/pkg/temporal/activity"
 )
 
 type CreateAccountParams struct {
-	Account, DirectoryURL string
+	Account              string
+	DirectoryURL         string
 	TermsOfServiceAgreed bool
-	Contacts []string
+	Contacts             []string
 }
 
 func CreateAccount(ctx temporalworkflow.Context, params CreateAccountParams) error {
