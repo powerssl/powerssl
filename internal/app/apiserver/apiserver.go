@@ -2,10 +2,10 @@ package apiserver
 
 import (
 	"context"
-	"github.com/go-kit/kit/endpoint"
 	"io"
 	"os"
 
+	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/prometheus"
 	"github.com/jmoiron/sqlx"
@@ -99,7 +99,7 @@ func Run(cfg *Config) {
 		Help:      "Request duration in seconds.",
 	}, []string{"method", "success"})
 
-	var authMiddleware endpoint.Middleware
+	var authMiddleware kitendpoint.Middleware
 	{
 		var err error
 		if authMiddleware, err = auth.NewParser(cfg.JWKSURL); err != nil {
