@@ -8,7 +8,6 @@ import (
 
 	acmetransport "powerssl.dev/powerssl/internal/app/controller/acme/transport"
 	intregrationtransport "powerssl.dev/powerssl/internal/app/controller/integration/transport"
-	workflowtransport "powerssl.dev/powerssl/internal/app/controller/workflow/transport"
 	"powerssl.dev/powerssl/internal/pkg/auth"
 	"powerssl.dev/powerssl/internal/pkg/transport"
 	"powerssl.dev/powerssl/pkg/controller/acme"
@@ -28,9 +27,9 @@ func NewGRPCClient(ctx context.Context, cfg *transport.ClientConfig, authToken s
 		return nil, err
 	}
 	authSigner := auth.NewSigner(authToken)
+	var _ = authSigner
 	return &GRPCClient{
 		ACME:        acmetransport.NewGRPCClient(conn, logger, tracer),
 		Integration: intregrationtransport.NewGRPCClient(conn, logger),
-		Workflow:    workflowtransport.NewGRPCClient(conn, logger, tracer, authSigner),
 	}, nil
 }
