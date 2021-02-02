@@ -4,7 +4,7 @@ import (
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
-	"github.com/go-pg/pg/v10"
+	"github.com/jmoiron/sqlx"
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 
@@ -20,7 +20,7 @@ type Certificate struct {
 	tracer    stdopentracing.Tracer
 }
 
-func New(db *pg.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, auth kitendpoint.Middleware) *Certificate {
+func New(db *sqlx.DB, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, auth kitendpoint.Middleware) *Certificate {
 	svc := service.New(db, logger)
 	endpoints := endpoint.NewEndpoints(svc, logger, tracer, duration, auth)
 

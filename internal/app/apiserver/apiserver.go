@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/prometheus"
-	"github.com/go-pg/pg/extra/pgotel"
-	"github.com/go-pg/pg/v10"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
@@ -46,24 +46,16 @@ func Run(cfg *Config) {
 		}()
 	}
 
-	var db *pg.DB
+	var db *sqlx.DB
 	{
 		var err error
-		var opt *pg.Options
-		if opt, err = pg.ParseURL(cfg.DBConnection); err != nil {
-			_ = logger.Log("err", err)
+		if db, err = sqlx.Connect(cfg.DBDialect, cfg.DBConnection); err != nil {
+			_ = logger.Log("database", cfg.DBDialect, "err", err)
 			os.Exit(1)
 		}
-		db = pg.Connect(opt)
 		defer func() {
 			_ = db.Close()
 		}()
-		db.AddQueryHook(pgotel.TracingHook{})
-		// TODO: Get rid of it
-		if err := createTables(db); err != nil {
-			_ = logger.Log("err", err)
-			os.Exit(1)
-		}
 	}
 
 	var temporalClient temporalclient.Client

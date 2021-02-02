@@ -13,11 +13,11 @@ require (
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eggsampler/acme/v2 v2.0.1
+	github.com/freerware/work/v4 v4.0.0-beta
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/go-kit/kit v0.9.0
-	github.com/go-pg/pg/extra/pgotel v0.2.0
 	github.com/go-pg/pg/v10 v10.7.4
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
@@ -33,6 +33,7 @@ require (
 	github.com/hashicorp/vault v1.1.1
 	github.com/improbable-eng/grpc-web v0.13.0
 	github.com/jinzhu/inflection v1.0.0
+	github.com/jmoiron/sqlx v1.2.1-0.20200615141059-0794cb1f47ee
 	github.com/johanbrandhorst/certify v1.6.0
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/lib/pq v1.9.0
@@ -53,6 +54,7 @@ require (
 	github.com/uber/jaeger-lib v2.4.0+incompatible
 	go.temporal.io/sdk v1.3.0
 	go.temporal.io/server v1.6.1
+	go.uber.org/zap v1.16.0
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
 	golang.org/x/tools v0.0.0-20210115202250-e0d201561e39
