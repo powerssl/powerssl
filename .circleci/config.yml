@@ -267,7 +267,7 @@ workflows:
       - build_powerctl_image:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - build_powerctl
       - build_powerssl_agent:
@@ -275,7 +275,7 @@ workflows:
       - build_powerssl_agent_image:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - build_powerssl_agent
       - build_powerssl_apiserver:
@@ -283,7 +283,7 @@ workflows:
       - build_powerssl_apiserver_image:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - build_powerssl_apiserver
       - build_powerssl_auth:
@@ -291,7 +291,7 @@ workflows:
       - build_powerssl_auth_image:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - build_powerssl_auth
       - build_powerssl_controller:
@@ -299,7 +299,7 @@ workflows:
       - build_powerssl_controller_image:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - build_powerssl_controller
       - build_powerssl_grpcgateway:
@@ -307,7 +307,7 @@ workflows:
       - build_powerssl_grpcgateway_image:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - build_powerssl_grpcgateway
       - build_powerssl_integration_acme:
@@ -315,7 +315,7 @@ workflows:
       - build_powerssl_integration_acme_image:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - build_powerssl_integration_acme
       - build_powerssl_integration_cloudflare:
@@ -323,7 +323,7 @@ workflows:
       - build_powerssl_integration_cloudflare_image:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - build_powerssl_integration_cloudflare
       - build_powerssl_signer:
@@ -331,7 +331,7 @@ workflows:
       - build_powerssl_signer_image:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - build_powerssl_signer
       - build_powerssl_temporalserver:
@@ -339,7 +339,7 @@ workflows:
       - build_powerssl_temporalserver_image:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - build_powerssl_temporalserver
       - build_powerssl_webapp:
@@ -347,7 +347,7 @@ workflows:
       - build_powerssl_webapp_image:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - build_powerssl_webapp
       - build_powerssl_worker:
@@ -355,7 +355,7 @@ workflows:
       - build_powerssl_worker_image:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - build_powerssl_worker
       - build_powerutil:
@@ -363,6 +363,6 @@ workflows:
       - build_powerutil_image:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - build_powerutil
