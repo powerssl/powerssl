@@ -12,13 +12,11 @@ import (
 	"powerssl.dev/powerssl/internal/pkg/transport"
 	"powerssl.dev/powerssl/pkg/controller/acme"
 	"powerssl.dev/powerssl/pkg/controller/integration"
-	"powerssl.dev/powerssl/pkg/controller/workflow"
 )
 
 type GRPCClient struct {
 	ACME        acme.Service
 	Integration integration.Service
-	Workflow    workflow.Service
 }
 
 func NewGRPCClient(ctx context.Context, cfg *transport.ClientConfig, authToken string, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
