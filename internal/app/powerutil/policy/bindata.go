@@ -3,6 +3,7 @@
 // ../../../../configs/vault/policies/powerssl-apiserver.hcl
 // ../../../../configs/vault/policies/powerssl-controller.hcl
 // ../../../../configs/vault/policies/powerssl-signer.hcl
+// ../../../../configs/vault/policies/powerssl-worker.hcl
 package policy
 
 import (
@@ -79,7 +80,7 @@ func (fi bindataFileInfo) Sys() interface{} {
 	return nil
 }
 
-var _powersslApiserverHcl = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x84\xcc\xc1\x09\xc2\x50\x0c\x00\xd0\x7b\xa6\x08\x39\x0a\x92\x09\x9c\x44\x3c\x44\x0d\x1a\xfe\xe7\x1b\x92\xd8\x52\x4a\x77\xef\xa1\x03\x74\x80\xf7\x5c\xea\x8b\xe4\xcd\x38\xed\x33\xd8\x7f\xb3\x46\x66\xbf\x8a\x5b\x6a\x4c\x1a\x84\x2b\x20\xbe\xc4\xe5\x69\xdd\xca\x34\xf1\x86\x77\xfa\xfb\x5b\x4a\xe9\x01\x1b\xc0\x71\x54\xc8\x48\x2b\x6e\xba\x24\x5f\xce\xd9\x1e\x00\x00\xff\xff\x63\x24\xdc\xa5\x7a\x00\x00\x00")
+var _powersslApiserverHcl = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x04\xc0\x41\x0e\x40\x30\x10\x05\xd0\x7d\x4f\x31\x99\xbd\xf4\x04\x4e\x22\x16\x83\x09\x3f\x1a\x7e\x3a\xc5\x42\xdc\xdd\xa3\xb5\x4d\x94\x3b\x72\x60\x3d\x32\xcf\xc7\x6b\x44\xe9\x8c\x08\xaf\xb7\x57\x95\x37\x89\xcc\x46\x9b\x50\xd0\xe0\x21\xbd\x0c\x7a\x71\xb1\xe6\x3a\xa6\x2f\xfd\x01\x00\x00\xff\xff\xb7\xe0\x38\xa8\x43\x00\x00\x00")
 
 func powersslApiserverHclBytes() ([]byte, error) {
 	return bindataRead(
@@ -139,6 +140,26 @@ func powersslSignerHcl() (*asset, error) {
 	return a, nil
 }
 
+var _powersslWorkerHcl = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x2a\x48\x2c\xc9\x50\x50\x2a\x29\x4a\xcc\x2b\xce\x2c\xd1\xcf\x4e\xad\x2c\xd6\xd7\x52\x52\xa8\xe6\x52\x50\x48\x4e\x2c\x48\x4c\xca\xcc\xc9\x2c\xc9\x4c\x2d\x56\xb0\x55\x88\x56\x2a\x2d\x48\x49\x2c\x49\x55\x8a\xe5\xaa\xe5\x02\x04\x00\x00\xff\xff\x4e\x74\x54\x86\x36\x00\x00\x00")
+
+func powersslWorkerHclBytes() ([]byte, error) {
+	return bindataRead(
+		_powersslWorkerHcl,
+		"powerssl-worker.hcl",
+	)
+}
+
+func powersslWorkerHcl() (*asset, error) {
+	bytes, err := powersslWorkerHclBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "powerssl-worker.hcl", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -194,6 +215,7 @@ var _bindata = map[string]func() (*asset, error){
 	"powerssl-apiserver.hcl":  powersslApiserverHcl,
 	"powerssl-controller.hcl": powersslControllerHcl,
 	"powerssl-signer.hcl":     powersslSignerHcl,
+	"powerssl-worker.hcl":     powersslWorkerHcl,
 }
 
 // AssetDir returns the file names below a certain
@@ -240,6 +262,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"powerssl-apiserver.hcl":  &bintree{powersslApiserverHcl, map[string]*bintree{}},
 	"powerssl-controller.hcl": &bintree{powersslControllerHcl, map[string]*bintree{}},
 	"powerssl-signer.hcl":     &bintree{powersslSignerHcl, map[string]*bintree{}},
+	"powerssl-worker.hcl":     &bintree{powersslWorkerHcl, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory
