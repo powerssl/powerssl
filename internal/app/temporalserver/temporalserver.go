@@ -1,17 +1,16 @@
 package temporalserver
 
 import (
-	"log"
 	"fmt"
 
-	"go.temporal.io/server/common/service/config"
+	temporalconfig "go.temporal.io/server/common/service/config"
 	"go.temporal.io/server/temporal"
 )
 
-func Run(cfg *Config) {
-	config, err := config.LoadConfig(cfg.Env, cfg.ConfigDir, cfg.Zone)
+func Run(cfg *Config) error {
+	config, err := temporalconfig.LoadConfig(cfg.Env, cfg.ConfigDir, cfg.Zone)
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Unable to load configuration: %v.\n", err))
+		return fmt.Errorf("unable to load configuration: %v", err)
 	}
 
 	s := temporal.NewServer(
@@ -22,8 +21,8 @@ func Run(cfg *Config) {
 		temporal.WithConfig(config),
 	)
 
-	if err := s.Start(); err != nil {
-		log.Fatal(fmt.Sprintf("Unable to start server: %v.", err))
+	if err = s.Start(); err != nil {
+		return fmt.Errorf("unable to start server: %v", err)
 	}
-	log.Print("All services are stopped.")
+	return nil
 }

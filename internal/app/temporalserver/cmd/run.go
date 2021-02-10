@@ -8,45 +8,44 @@ import (
 	"go.temporal.io/server/temporal"
 
 	"powerssl.dev/powerssl/internal/app/temporalserver"
+	cmdutil "powerssl.dev/powerssl/internal/pkg/cmd"
 )
 
 func newCmdRun() *cobra.Command {
-	var (
-		env       string
-		configDir string
-		services  []string
-		zone      string
-	)
+	var config temporalserver.Config
 
 	cmd := &cobra.Command{
 		Use:   "run",
 		Short: "Run the Temporal Server",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			env = viper.GetString("env")
-			configDir = viper.GetString("config-dir")
+		Args:  cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := viper.Unmarshal(&config); err != nil {
+				return err
+			}
 			// NOTE: viper.GetStringSlice doesn't do the trick
-			services = strings.Split(viper.GetString("service")[1:len(viper.GetString("service"))-1], ",")
-			zone = viper.GetString("zone")
+			services := strings.Split(viper.GetString("services")[1:len(viper.GetString("services"))-1], ",")
+			config.Services = []string{}
+			for _, service := range services {
+				if service != "" {
+					config.Services = append(config.Services, service)
+				}
+			}
+			return config.Validate()
 		},
-		Run: func(cmd *cobra.Command, args []string) {
-			temporalserver.Run(&temporalserver.Config{
-				Env:       env,
-				ConfigDir: configDir,
-				Services:  services,
-				Zone:      zone,
-			})
-		},
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
+			return temporalserver.Run(&config)
+		}),
 	}
 
-	cmd.Flags().StringP("env", "", "development", "Environment is one of the input params ex-development")
-	cmd.Flags().StringP("config-dir", "", "config", "Config directory to load a set of yaml config files from")
-	cmd.Flags().StringArrayP("service", "", temporal.Services, "Service(s) to start")
-	cmd.Flags().StringP("zone", "", "", "Zone is another input param")
+	cmd.Flags().String("env", "development", "Environment is one of the input params ex-development")
+	cmd.Flags().String("config-dir", "config", "Config directory to load a set of yaml config files from")
+	cmd.Flags().StringArray("service", temporal.Services, "Service(s) to start")
+	cmd.Flags().String("zone", "", "Zone is another input param")
 
-	viper.BindPFlag("env", cmd.Flags().Lookup("env"))
-	viper.BindPFlag("config-dir", cmd.Flags().Lookup("config-dir"))
-	viper.BindPFlag("service", cmd.Flags().Lookup("service"))
-	viper.BindPFlag("zone", cmd.Flags().Lookup("zone"))
+	cmdutil.Must(viper.BindPFlag("env", cmd.Flags().Lookup("env")))
+	cmdutil.Must(viper.BindPFlag("config-dir", cmd.Flags().Lookup("config-dir")))
+	cmdutil.Must(viper.BindPFlag("services", cmd.Flags().Lookup("service")))
+	cmdutil.Must(viper.BindPFlag("zone", cmd.Flags().Lookup("zone")))
 
 	return cmd
 }
