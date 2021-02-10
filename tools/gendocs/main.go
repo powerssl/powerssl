@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
+	"log"
 	"path"
 	"path/filepath"
 	"strings"
@@ -55,8 +55,8 @@ func main() {
 		fail(err)
 	}
 	for _, file := range files {
-		input, err := ioutil.ReadFile(file)
-		if err != nil {
+		var input []byte
+		if input, err = ioutil.ReadFile(file); err != nil {
 			fail(err)
 		}
 		lines := strings.Split(string(input), "\n")
@@ -66,15 +66,14 @@ func main() {
 			}
 		}
 		output := strings.Join(lines[0:len(lines)-2], "\n")
-		if err := ioutil.WriteFile(file, []byte(output), 0644); err != nil {
+		if err = ioutil.WriteFile(file, []byte(output), 0644); err != nil {
 			fail(err)
 		}
 	}
 }
 
 func fail(err error) {
-	fmt.Fprintf(os.Stderr, "error: %v\n", err)
-	os.Exit(1)
+	log.Fatalf("error: %v\n", err)
 }
 
 func filePrepender(filename string) string {
@@ -92,14 +91,19 @@ func filePrepender(filename string) string {
 		meta["has_children"] = true
 	case 2:
 		meta["parent"] = s[len(s)-2]
-		if s[1] == "create" || s[1] == "ca" {
+		switch s[1] {
+		case "create", "ca", "migrate", "temporal":
 			meta["has_children"] = true
 		}
 	case 3:
 		meta["parent"] = s[len(s)-2]
 		meta["grand_parent"] = s[len(s)-3]
 	}
-	byt, _ := yaml.Marshal(meta)
+	var byt []byte
+	var err error
+	if byt, err = yaml.Marshal(meta); err != nil {
+		fail(err)
+	}
 	return fmt.Sprintf("---\n%s---\n", string(byt))
 }
 
