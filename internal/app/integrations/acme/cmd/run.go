@@ -5,75 +5,58 @@ import (
 	"github.com/spf13/viper"
 
 	"powerssl.dev/powerssl/internal/app/integrations/acme"
+	cmdutil "powerssl.dev/powerssl/internal/pkg/cmd"
 	"powerssl.dev/powerssl/pkg/integration"
 )
 
 func newCmdRun() *cobra.Command {
-	var (
-		addr                  string
-		authToken             string
-		caFile                string
-		insecure              bool
-		insecureSkipTLSVerify bool
-		metricsAddr           string
-		serverNameOverride    string
-		tracer                string
-	)
+	var config integration.Config
+	var noMetrics, noTracing bool
 
 	cmd := &cobra.Command{
 		Use:   "run",
 		Short: "Run ACME integration",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			addr = viper.GetString("addr")
-			authToken = viper.GetString("auth-token")
-			caFile = viper.GetString("ca-file")
-			insecure = viper.GetBool("insecure")
-			insecureSkipTLSVerify = viper.GetBool("insecure-skip-tls-verify")
-			if !viper.GetBool("no-metrics") {
-				metricsAddr = viper.GetString("metrics-addr")
+		Args:  cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := viper.Unmarshal(&config); err != nil {
+				return err
 			}
-			serverNameOverride = viper.GetString("server-name-override")
-			if !viper.GetBool("no-tracing") {
-				tracer = viper.GetString("tracer")
+			if noMetrics {
+				config.Metrics.Addr = ""
 			}
+			if noTracing {
+				config.Tracer = ""
+			}
+			if !viper.IsSet("controller.ca-file") {
+				config.ControllerClientConfig.CAFile = viper.GetString("ca-file")
+			}
+			return config.Validate()
 		},
-		Run: func(cmd *cobra.Command, args []string) {
-			integration.Run(&integration.Config{
-				AuthToken: authToken,
-				ControllerClientConfig: &integration.ControllerClientConfig{
-					Addr:                  addr,
-					CAFile:                caFile,
-					Insecure:              insecure,
-					InsecureSkipTLSVerify: insecureSkipTLSVerify,
-					ServerNameOverride:    serverNameOverride,
-				},
-				MetricsAddr: metricsAddr,
-				Tracer:      tracer,
-			}, integration.KindACME, "acme", acme.New())
-		},
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
+			return integration.Run(&config, integration.KindACME, "acme", acme.New())
+		}),
 	}
 
-	cmd.Flags().BoolP("insecure", "", false, "Use insecure communication")
-	cmd.Flags().BoolP("insecure-skip-tls-verify", "", false, "Accepts any certificate presented by the server and any host name in that certificate")
-	cmd.Flags().BoolP("no-metrics", "", false, "Do not serve metrics")
-	cmd.Flags().BoolP("no-tracing", "", false, "Do not trace")
-	cmd.Flags().StringP("addr", "", "", "GRPC address of Controller")
-	cmd.Flags().StringP("auth-token", "", "", "Authentication token")
-	cmd.Flags().StringP("ca-file", "", "", "Certificate authority file")
-	cmd.Flags().StringP("metrics-addr", "", ":9090", "HTTP Addr")
-	cmd.Flags().StringP("server-name-override", "", "", "It will override the virtual host name of authority")
-	cmd.Flags().StringP("tracer", "", "jaeger", "Tracing implementation")
+	cmd.Flags().BoolVar(&noMetrics, "no-metrics", false, "Do not serve metrics")
+	cmd.Flags().BoolVar(&noTracing, "no-tracing", false, "Do not trace")
+	cmd.Flags().Bool("controller-insecure", false, "Use insecure communication")
+	cmd.Flags().Bool("controller-insecure-skip-tls-verify", false, "Accepts any certificate presented by the server and any host name in that certificate")
+	cmd.Flags().String("auth-token", "", "Authentication token")
+	cmd.Flags().String("ca-file", "", "Certificate authority file")
+	cmd.Flags().String("controller-addr", "", "GRPC address of Controller")
+	cmd.Flags().String("controller-server-name-override", "", "It will override the virtual host name of authority")
+	cmd.Flags().String("metrics-addr", ":9090", "HTTP Addr")
+	cmd.Flags().String("tracer", "jaeger", "Tracing implementation")
 
-	viper.BindPFlag("addr", cmd.Flags().Lookup("addr"))
-	viper.BindPFlag("auth-token", cmd.Flags().Lookup("auth-token"))
-	viper.BindPFlag("ca-file", cmd.Flags().Lookup("ca-file"))
-	viper.BindPFlag("insecure", cmd.Flags().Lookup("insecure"))
-	viper.BindPFlag("insecure-skip-tls-verify", cmd.Flags().Lookup("insecure-skip-tls-verify"))
-	viper.BindPFlag("metrics-addr", cmd.Flags().Lookup("metrics-addr"))
-	viper.BindPFlag("no-metrics", cmd.Flags().Lookup("no-metrics"))
-	viper.BindPFlag("no-tracing", cmd.Flags().Lookup("no-tracing"))
-	viper.BindPFlag("server-name-override", cmd.Flags().Lookup("server-name-override"))
-	viper.BindPFlag("tracer", cmd.Flags().Lookup("tracer"))
+	cmdutil.Must(viper.BindPFlag("auth-token", cmd.Flags().Lookup("auth-token")))
+	cmdutil.Must(viper.BindPFlag("ca-file", cmd.Flags().Lookup("ca-file")))
+	cmdutil.Must(viper.BindPFlag("controller.addr", cmd.Flags().Lookup("controller-addr")))
+	cmdutil.Must(viper.BindPFlag("controller.ca-file", cmd.Flags().Lookup("ca-file")))
+	cmdutil.Must(viper.BindPFlag("controller.insecure", cmd.Flags().Lookup("controller-insecure")))
+	cmdutil.Must(viper.BindPFlag("controller.insecure-skip-tls-verify", cmd.Flags().Lookup("controller-insecure-skip-tls-verify")))
+	cmdutil.Must(viper.BindPFlag("controller.server-name-override", cmd.Flags().Lookup("controller-server-name-override")))
+	cmdutil.Must(viper.BindPFlag("metrics.addr", cmd.Flags().Lookup("metrics-addr")))
+	cmdutil.Must(viper.BindPFlag("tracer", cmd.Flags().Lookup("tracer")))
 
 	return cmd
 }
