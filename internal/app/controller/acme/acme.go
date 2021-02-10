@@ -3,11 +3,12 @@ package acme
 import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
+	temporalclient "go.temporal.io/sdk/client"
 	"google.golang.org/grpc"
 
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"powerssl.dev/powerssl/internal/app/controller/acme/endpoint"
-	service "powerssl.dev/powerssl/internal/app/controller/acme/service"
+	"powerssl.dev/powerssl/internal/app/controller/acme/service"
 	"powerssl.dev/powerssl/internal/app/controller/acme/transport"
 	apiv1 "powerssl.dev/powerssl/internal/pkg/controller/api/v1"
 )
@@ -18,8 +19,8 @@ type ACME struct {
 	tracer    stdopentracing.Tracer
 }
 
-func New(logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram) *ACME {
-	svc := service.New(logger)
+func New(logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, temporalClient temporalclient.Client) *ACME {
+	svc := service.New(logger, temporalClient)
 	endpoints := endpoint.NewEndpoints(svc, logger, tracer, duration)
 
 	return &ACME{

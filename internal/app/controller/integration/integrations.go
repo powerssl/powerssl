@@ -12,6 +12,30 @@ var ErrNotFound = errors.New("integration not found")
 
 var Integrations integrations
 
+func Delete(uuid uuid.UUID) error {
+	return Integrations.Delete(uuid)
+}
+
+func Get(uuid uuid.UUID) (*Integration, error) {
+	return Integrations.Get(uuid)
+}
+
+func GetByKind(kind Kind) (*Integration, error) {
+	return Integrations.GetByKind(kind)
+}
+
+func Init() {
+	Integrations.Init()
+}
+
+func Put(integration *Integration) {
+	Integrations.Put(integration)
+}
+
+func WaitByKind(ctx context.Context, kind Kind) (*Integration, error) {
+	return Integrations.WaitByKind(ctx, kind)
+}
+
 type integrations struct {
 	m         map[uuid.UUID]*Integration
 	c         chan struct{}
@@ -23,10 +47,6 @@ type integrations struct {
 
 	sync.Once
 	sync.RWMutex
-}
-
-func (i *integrations) notify() {
-	i.c <- struct{}{}
 }
 
 func (i *integrations) Delete(uuid uuid.UUID) error {
@@ -53,7 +73,7 @@ func (i *integrations) Get(uuid uuid.UUID) (*Integration, error) {
 	return integration, nil
 }
 
-func (i *integrations) GetByKind(kind IntegrationKind) (*Integration, error) {
+func (i *integrations) GetByKind(kind Kind) (*Integration, error) {
 	i.RLock()
 	defer i.RUnlock()
 	for _, integration := range i.m {
@@ -91,15 +111,7 @@ func (i *integrations) Put(integration *Integration) {
 	i.notify()
 }
 
-func (i *integrations) Wait() chan struct{} {
-	c := make(chan struct{})
-	i.listeners.Lock()
-	i.listeners.s = append(i.listeners.s, c)
-	i.listeners.Unlock()
-	return c
-}
-
-func (i *integrations) WaitByKind(ctx context.Context, kind IntegrationKind) (*Integration, error) {
+func (i *integrations) WaitByKind(ctx context.Context, kind Kind) (*Integration, error) {
 	for {
 		integration, err := i.GetByKind(kind)
 		if err != nil && err != ErrNotFound {
@@ -109,7 +121,7 @@ func (i *integrations) WaitByKind(ctx context.Context, kind IntegrationKind) (*I
 			select {
 			case <-ctx.Done():
 				return nil, ctx.Err()
-			case <-i.Wait():
+			case <-i.wait():
 				continue
 			}
 		}
@@ -117,6 +129,18 @@ func (i *integrations) WaitByKind(ctx context.Context, kind IntegrationKind) (*I
 	}
 }
 
+func (i *integrations) notify() {
+	i.c <- struct{}{}
+}
+
+func (i *integrations) wait() chan struct{} {
+	c := make(chan struct{})
+	i.listeners.Lock()
+	i.listeners.s = append(i.listeners.s, c)
+	i.listeners.Unlock()
+	return c
+}
+
 func init() {
-	Integrations.Init()
+	Init()
 }

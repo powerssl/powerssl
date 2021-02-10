@@ -13,15 +13,15 @@ import (
 
 var errUnknown = errors.New("unknown error")
 
-type IntegrationKind string
+type Kind string
 
 const (
-	IntegrationKindACME IntegrationKind = "acme"
-	IntegrationKindDNS  IntegrationKind = "dns"
+	KindACME Kind = "acme"
+	KindDNS  Kind = "dns"
 )
 
 type Integration struct {
-	Kind IntegrationKind
+	Kind Kind
 	Name string
 	UUID uuid.UUID
 
@@ -57,12 +57,12 @@ func (*integrationServiceServer) ServiceName() string {
 }
 
 func (s *integrationServiceServer) Register(request *apiv1.RegisterIntegrationRequest, stream apiv1.IntegrationService_RegisterServer) error {
-	var kind IntegrationKind
+	var kind Kind
 	switch request.GetKind() {
 	case apiv1.IntegrationKind_ACME:
-		kind = IntegrationKindACME
+		kind = KindACME
 	case apiv1.IntegrationKind_DNS:
-		kind = IntegrationKindDNS
+		kind = KindDNS
 	default:
 		return errors.New("integration kind not found")
 	}
@@ -97,11 +97,11 @@ func (s *integrationServiceServer) Register(request *apiv1.RegisterIntegrationRe
 func (s *integrationServiceServer) register(integration *Integration) {
 	s.logger.Log("interation", integration.UUID, "action", "connect", "name", integration.Name, "kind", integration.Kind)
 
-	Integrations.Put(integration)
+	Put(integration)
 }
 
 func (s *integrationServiceServer) unregister(integration *Integration) {
 	s.logger.Log("integration", integration.UUID, "action", "disconnect")
 
-	Integrations.Delete(integration.UUID)
+	Delete(integration.UUID)
 }

@@ -1,0 +1,86 @@
+package activity
+
+import (
+	"context"
+	"encoding/base64"
+	"fmt"
+	"reflect"
+
+	temporalactivity "go.temporal.io/sdk/activity"
+	temporalclient "go.temporal.io/sdk/client"
+
+	"powerssl.dev/powerssl/internal/app/controller/integration"
+	apiv1 "powerssl.dev/powerssl/internal/pkg/controller/api/v1"
+	"powerssl.dev/powerssl/pkg/controller/api"
+)
+
+type Activity struct {
+	activityName api.ActivityName
+	input        interface{}
+	token        string
+}
+
+func New(ctx context.Context, activityName api.ActivityName, input interface{}) *Activity {
+	activityInfo := temporalactivity.GetInfo(ctx)
+	taskToken := activityInfo.TaskToken
+	token := base64.RawStdEncoding.EncodeToString(taskToken)
+
+	a := &Activity{
+		activityName: activityName,
+		input:        input,
+		token:        token,
+	}
+
+	Put(a)
+
+	return a
+}
+
+func (a *Activity) Execute(ctx context.Context) error {
+	activityIntegration, err := a.integration(ctx)
+	if err != nil {
+		return err
+	}
+	activityIntegration.Send(&apiv1.Activity{
+		Name:  apiv1.Activity_Name(a.activityName),
+		Token: a.Token(),
+		Workflow: &apiv1.Activity_Workflow{
+			Activities: []string{},
+		},
+	})
+	return nil
+}
+
+func (a *Activity) Token() string {
+	return a.token
+}
+
+func (a *Activity) GetInput(_ context.Context, v interface{}) error {
+	if reflect.TypeOf(v).Kind() != reflect.Ptr {
+		return fmt.Errorf("kind of type %s needs to be Ptr", reflect.TypeOf(v))
+	}
+	if !reflect.TypeOf(a.input).AssignableTo(reflect.TypeOf(v)) {
+		return fmt.Errorf("value of type %s is not assignable to type %s", reflect.TypeOf(a.input), reflect.TypeOf(v))
+	}
+	reflect.ValueOf(v).Elem().Set(reflect.ValueOf(a.input))
+	return nil
+}
+
+func (a *Activity) SetResult(ctx context.Context, temporal temporalclient.Client, result interface{}, activityError error) (err error) {
+	var taskToken []byte
+	if taskToken, err = base64.RawStdEncoding.DecodeString(a.Token()); err != nil {
+		return err
+	}
+	if err = temporal.CompleteActivity(ctx, taskToken, result, activityError); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *Activity) integrationKind() integration.Kind {
+	return integration.Kind(a.activityName.IntegrationKind())
+}
+
+func (a *Activity) integration(ctx context.Context) (*integration.Integration, error) {
+	return integration.WaitByKind(ctx, a.integrationKind())
+}
