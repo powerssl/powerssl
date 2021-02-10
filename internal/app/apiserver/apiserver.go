@@ -2,9 +2,6 @@ package apiserver
 
 import (
 	"context"
-	"io"
-	"os"
-
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/prometheus"
@@ -12,8 +9,8 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
-	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
+	"io"
 
 	"powerssl.dev/powerssl/internal/app/apiserver/acmeaccount"
 	"powerssl.dev/powerssl/internal/app/apiserver/acmeserver"
@@ -30,11 +27,12 @@ import (
 
 const component = "powerssl-apiserver"
 
-func Run(cfg *Config) {
-	logger := util.NewLogger(os.Stdout)
+func Run(cfg *Config) (err error) {
+	zapLogger, logger := util.NewZapAndKitLogger()
 
+	cfg.ServerConfig.VaultToken = cfg.VaultClientConfig.Token
+	cfg.ServerConfig.VaultURL = cfg.VaultClientConfig.URL
 	cfg.ServerConfig.VaultRole = component
-	util.ValidateConfig(cfg, logger)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
@@ -43,54 +41,46 @@ func Run(cfg *Config) {
 
 	var tracer opentracing.Tracer
 	{
-		var err error
 		var closer io.Closer
 		if tracer, closer, err = tracing.Init(component, cfg.Tracer, log.With(logger, "component", "tracing")); err != nil {
-			_ = logger.Log("component", "tracing", "err", err)
-			os.Exit(1)
+			return err
 		}
 		defer func() {
-			_ = closer.Close()
+			err = closer.Close()
 		}()
 	}
 
 	var repositories *repository.Repositories
 	{
 		var db *sqlx.DB
-		var err error
-		if db, err = sqlx.Connect(cfg.DBDialect, cfg.DBConnection); err != nil {
-			_ = logger.Log("database", cfg.DBDialect, "err", err)
-			os.Exit(1)
+		if db, err = sqlx.Connect(cfg.DB.Dialect, cfg.DB.Connection); err != nil {
+			return err
 		}
 		defer func() {
 			_ = db.Close()
 		}()
-		zapLogger, _ := zap.NewDevelopment() // TODO
 		repositories = repository.NewRepositories(db, zapLogger)
 	}
 
 	var temporalClient temporalclient.Client
 	{
-		var err error
-		if temporalClient, err = temporalclient.NewClient(temporalclient.Config{
-			CAFile:    cfg.VaultClientConfig.CAFile, // TODO Wrong cfg path
-			HostPort:  cfg.TemporalClientConfig.HostPort,
-			Namespace: cfg.TemporalClientConfig.Namespace,
-		}, nil, tracer); err != nil {
-			_ = logger.Log("err", err)
-			os.Exit(1)
+		var closer io.Closer
+		if temporalClient, closer, err = temporalclient.NewClient(cfg.TemporalClientConfig, zapLogger, tracer, component); err != nil {
+			return err
 		}
-		defer temporalClient.Close()
+		defer func() {
+			temporalClient.Close()
+			err = closer.Close()
+		}()
 	}
 
 	var vaultClient *vault.Client
 	{
-		var err error
-		if vaultClient, err = vault.New(cfg.VaultClientConfig.URL, cfg.VaultClientConfig.Token, cfg.VaultClientConfig.CAFile); err != nil {
-			_ = logger.Log("err", err)
-			os.Exit(1)
+		if vaultClient, err = vault.New(cfg.VaultClientConfig); err != nil {
+			return err
 		}
 	}
+	var _ = vaultClient // TODO: Needed here?
 
 	duration := prometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
 		Namespace: "powerssl_io",
@@ -101,33 +91,32 @@ func Run(cfg *Config) {
 
 	var authMiddleware kitendpoint.Middleware
 	{
-		var err error
-		if authMiddleware, err = auth.NewParser(cfg.JWKSURL); err != nil {
-			_ = logger.Log("err", err)
-			os.Exit(1)
+		if authMiddleware, err = auth.NewParser(cfg.JWKS.URL); err != nil {
+			return err
 		}
 	}
 
-	if cfg.MetricsAddr != "" {
+	if cfg.Metrics.Addr != "" {
 		g.Go(func() error {
-			return transport.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, log.With(logger, "component", "metrics"))
 		})
 	}
 
 	g.Go(func() error {
-		return transport.ServeGRPC(ctx, cfg.ServerConfig, log.With(logger, "transport", "gRPC"), []transport.Service{
-			acmeaccount.New(repositories, logger, tracer, duration, temporalClient, vaultClient, authMiddleware),
+		return transport.ServeGRPC(ctx, &cfg.ServerConfig, log.With(logger, "transport", "gRPC"), []transport.Service{
+			acmeaccount.New(repositories, logger, tracer, duration, temporalClient, authMiddleware),
 			acmeserver.New(repositories, logger, tracer, duration, authMiddleware),
 			certificate.New(repositories, logger, tracer, duration, authMiddleware),
 			user.New(repositories, logger, tracer, duration, authMiddleware),
 		})
 	})
 
-	if err := g.Wait(); err != nil {
+	if err = g.Wait(); err != nil {
 		switch err.(type) {
 		case util.InterruptError:
 		default:
-			_ = logger.Log("err", err)
+			return err
 		}
 	}
+	return nil
 }
