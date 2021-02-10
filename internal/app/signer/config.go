@@ -1,7 +1,7 @@
 package signer
 
 import (
-	"gopkg.in/go-playground/validator.v9"
+	"github.com/go-playground/validator/v10"
 
 	"powerssl.dev/powerssl/internal/pkg/transport"
 )
@@ -9,8 +9,10 @@ import (
 type ServerConfig = transport.ServerConfig
 
 type Config struct {
-	MetricsAddr  string
-	ServerConfig *ServerConfig
+	Metrics struct {
+		Addr string
+	}
+	ServerConfig ServerConfig `mapstructure:",squash"`
 	Tracer       string
 }
 

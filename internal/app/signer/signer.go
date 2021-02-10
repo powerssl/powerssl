@@ -2,10 +2,11 @@ package signer
 
 import (
 	"context"
-	"os"
+	"io"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/prometheus"
+	"github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 
@@ -16,24 +17,26 @@ import (
 
 const component = "powerssl-signer"
 
-func Run(cfg *Config) {
-	logger := util.NewLogger(os.Stdout)
+func Run(cfg *Config) (err error) {
+	_, logger := util.NewZapAndKitLogger()
 
 	cfg.ServerConfig.VaultRole = component
-	util.ValidateConfig(cfg, logger)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
 		return util.InterruptHandler(ctx, logger)
 	})
 
-	tracer, closer, err := tracing.Init(component, cfg.Tracer, log.With(logger, "component", "tracing"))
-	if err != nil {
-		logger.Log("component", "tracing", "err", err)
-		os.Exit(1)
+	var tracer opentracing.Tracer
+	{
+		var closer io.Closer
+		if tracer, closer, err = tracing.Init(component, cfg.Tracer, log.With(logger, "component", "tracing")); err != nil {
+			return err
+		}
+		defer func() {
+			err = closer.Close()
+		}()
 	}
-	defer closer.Close()
-
 	var _ = tracer // TODO
 
 	duration := prometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
@@ -42,26 +45,24 @@ func Run(cfg *Config) {
 		Name:      "request_duration_seconds",
 		Help:      "Request duration in seconds.",
 	}, []string{"method", "success"})
-
 	var _ = duration // TODO
 
-	var services []transport.Service
-
-	if cfg.MetricsAddr != "" {
+	if cfg.Metrics.Addr != "" {
 		g.Go(func() error {
-			return transport.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, log.With(logger, "component", "metrics"))
 		})
 	}
 
 	g.Go(func() error {
-		return transport.ServeGRPC(ctx, cfg.ServerConfig, log.With(logger, "transport", "gRPC"), services)
+		return transport.ServeGRPC(ctx, &cfg.ServerConfig, log.With(logger, "transport", "gRPC"), []transport.Service{})
 	})
 
-	if err := g.Wait(); err != nil {
+	if err = g.Wait(); err != nil {
 		switch err.(type) {
 		case util.InterruptError:
 		default:
-			logger.Log("err", err)
+			return err
 		}
 	}
+	return nil
 }
