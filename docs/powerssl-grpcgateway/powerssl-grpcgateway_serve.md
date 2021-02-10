@@ -16,9 +16,8 @@ powerssl-grpcgateway serve [flags]
 ### Options
 
 ```
-      --addr string                             Addr (default ":8080")
-      --apiserver-addr string                   GRPC address of APIServer
-      --apiserver-auth-token string             APIServer authentication token
+      --addr string                             GRPC Addr (default ":8080")
+      --apiserver-addr string                   GRPC address of API server
       --apiserver-insecure                      Use insecure communication
       --apiserver-insecure-skip-tls-verify      Accepts any certificate presented by the server and any host name in that certificate
       --apiserver-server-name-override string   It will override the virtual host name of authority

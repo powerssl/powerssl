@@ -26,7 +26,6 @@ powerssl-controller serve [flags]
       --common-name string                      API Server common name
   -h, --help                                    help for serve
       --insecure                                Do not use TLS for the server
-      --jwks-url string                         JWKS URL
       --metrics-addr string                     HTTP Addr (default ":9090")
       --no-metrics                              Do not serve metrics
       --no-tracing                              Do not trace

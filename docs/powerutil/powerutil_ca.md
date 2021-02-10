@@ -16,6 +16,12 @@ CA
   -h, --help   help for ca
 ```
 
+### Options inherited from parent commands
+
+```
+  -v, --verbose   Verbose output
+```
+
 ### SEE ALSO
 
 * [powerutil](/powerutil)	 - powerutil provides PowerSSL utilities

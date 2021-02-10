@@ -23,4 +23,4 @@ powerssl-webapp provides PowerSSL WebApp.
 
 ### SEE ALSO
 
-* [powerssl-webapp serve](/powerssl-webapp/serve)	 - Serve the API
+* [powerssl-webapp serve](/powerssl-webapp/serve)	 - Serve the WebApp

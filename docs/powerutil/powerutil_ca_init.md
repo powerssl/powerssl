@@ -22,6 +22,12 @@ powerutil ca init [flags]
       --key-size int      Key size (default 4096)
 ```
 
+### Options inherited from parent commands
+
+```
+  -v, --verbose   Verbose output
+```
+
 ### SEE ALSO
 
 * [powerutil ca](/powerutil/ca)	 - CA

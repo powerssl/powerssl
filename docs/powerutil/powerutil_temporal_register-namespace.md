@@ -28,6 +28,12 @@ powerutil temporal register-namespace [flags]
       --tls-server-name string         override for target server name
 ```
 
+### Options inherited from parent commands
+
+```
+  -v, --verbose   Verbose output
+```
+
 ### SEE ALSO
 
 * [powerutil temporal](/powerutil/temporal)	 - Temporal

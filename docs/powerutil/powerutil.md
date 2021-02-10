@@ -16,11 +16,13 @@ powerutil provides PowerSSL utilities.
 ### Options
 
 ```
-  -h, --help   help for powerutil
+  -h, --help      help for powerutil
+  -v, --verbose   Verbose output
 ```
 
 ### SEE ALSO
 
 * [powerutil ca](/powerutil/ca)	 - CA
+* [powerutil migrate](/powerutil/migrate)	 - Migrate
 * [powerutil temporal](/powerutil/temporal)	 - Temporal
 * [powerutil vault](/powerutil/vault)	 - Vault migrations

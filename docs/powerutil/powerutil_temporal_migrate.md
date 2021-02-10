@@ -28,6 +28,12 @@ powerutil temporal migrate [flags]
       --visibility-database string   Visibility DB (default "temporal_visibility")
 ```
 
+### Options inherited from parent commands
+
+```
+  -v, --verbose   Verbose output
+```
+
 ### SEE ALSO
 
 * [powerutil temporal](/powerutil/temporal)	 - Temporal

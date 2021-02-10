@@ -16,17 +16,17 @@ powerssl-integration-cloudflare run [flags]
 ### Options
 
 ```
-      --addr string                   GRPC address of Controller
-      --auth-token string             Authentication token
-      --ca-file string                Certificate authority file
-  -h, --help                          help for run
-      --insecure                      Use insecure communication
-      --insecure-skip-tls-verify      Accepts any certificate presented by the server and any host name in that certificate
-      --metrics-addr string           HTTP Addr (default ":9090")
-      --no-metrics                    Do not serve metrics
-      --no-tracing                    Do not trace
-      --server-name-override string   It will override the virtual host name of authority
-      --tracer string                 Tracing implementation (default "jaeger")
+      --auth-token string                        Authentication token
+      --ca-file string                           Certificate authority file
+      --controller-addr string                   GRPC address of Controller
+      --controller-insecure                      Use insecure communication
+      --controller-insecure-skip-tls-verify      Accepts any certificate presented by the server and any host name in that certificate
+      --controller-server-name-override string   It will override the virtual host name of authority
+  -h, --help                                     help for run
+      --metrics-addr string                      HTTP Addr (default ":9090")
+      --no-metrics                               Do not serve metrics
+      --no-tracing                               Do not trace
+      --tracer string                            Tracing implementation (default "jaeger")
 ```
 
 ### Options inherited from parent commands

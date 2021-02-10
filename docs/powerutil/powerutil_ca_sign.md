@@ -23,6 +23,12 @@ powerutil ca sign [flags]
   -h, --help            help for sign
 ```
 
+### Options inherited from parent commands
+
+```
+  -v, --verbose   Verbose output
+```
+
 ### SEE ALSO
 
 * [powerutil ca](/powerutil/ca)	 - CA

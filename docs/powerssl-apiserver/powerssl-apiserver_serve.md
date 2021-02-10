@@ -19,8 +19,8 @@ powerssl-apiserver serve [flags]
       --addr string                   GRPC Addr (default ":8080")
       --ca-file string                Certificate authority file
       --common-name string            API Server common name
-      --db-connection string          DB connection (default "/tmp/powerssl.sqlie3")
-      --db-dialect string             DB Dialect (default "sqlite3")
+      --db-connection string          DB connection
+      --db-dialect string             DB Dialect
   -h, --help                          help for serve
       --insecure                      Do not use TLS for the server
       --jwks-url string               JWKS URL

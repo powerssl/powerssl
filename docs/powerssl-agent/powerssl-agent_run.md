@@ -16,13 +16,13 @@ powerssl-agent run [flags]
 ### Options
 
 ```
-      --addr string                   GRPC address of API
-      --auth-token string             Auth token
-      --ca-file string                Certificate authority file
-  -h, --help                          help for run
-      --insecure                      Use insecure communication
-      --insecure-skip-tls-verify      Accepts any certificate presented by the server and any host name in that certificate
-      --server-name-override string   It will override the virtual host name of authority
+      --apiserver-addr string                   GRPC address of API server
+      --apiserver-insecure                      Use insecure communication
+      --apiserver-insecure-skip-tls-verify      Accepts any certificate presented by the server and any host name in that certificate
+      --apiserver-server-name-override string   It will override the virtual host name of authority
+      --auth-token string                       Auth token
+      --ca-file string                          Certificate authority file
+  -h, --help                                    help for run
 ```
 
 ### Options inherited from parent commands

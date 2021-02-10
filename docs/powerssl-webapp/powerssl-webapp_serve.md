@@ -7,7 +7,7 @@ title: serve
 ---
 ## powerssl-webapp serve
 
-Serve the API
+Serve the WebApp
 
 ```
 powerssl-webapp serve [flags]
@@ -16,13 +16,13 @@ powerssl-webapp serve [flags]
 ### Options
 
 ```
-      --addr string           Addr (default ":8080")
-      --api-addr string       API Addr
-      --auth-uri string       Auth URI
-      --grpc-web-uri string   gRPC-Web URI
-  -h, --help                  help for serve
-      --metrics-addr string   HTTP Addr (default ":9090")
-      --no-metrics            Do not serve metrics
+      --addr string             Addr (default ":8080")
+      --apiserver-addr string   GRPC address of API server
+      --auth-uri string         Auth URI
+      --grpcweb-uri string      gRPC-Web URI
+  -h, --help                    help for serve
+      --metrics-addr string     HTTP Addr (default ":9090")
+      --no-metrics              Do not serve metrics
 ```
 
 ### Options inherited from parent commands
