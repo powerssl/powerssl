@@ -7,13 +7,17 @@ case "$COMPONENT" in
 		BUILD_ARG="COMPONENT=$COMPONENT"
 		DIR=grpc-server
 		;;
-	powerssl-auth|powerssl-grpcgateway|powerssl-webapp)
+	powerssl-auth|powerssl-grpcgateway|powerssl-temporalserver|powerssl-webapp)
 		BUILD_ARG="COMPONENT=$COMPONENT"
 		DIR=web-server
 		;;
 	powerssl-integration-*)
 		BUILD_ARG="INTEGRATION=${COMPONENT/powerssl-integration-}"
 		DIR=integration
+		;;
+  powerssl-worker)
+    BUILD_ARG="COMPONENT=$COMPONENT"
+		DIR=worker
 		;;
 	*)
 		DIR=cli
