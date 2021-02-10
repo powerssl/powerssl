@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/go-kit/kit/log"
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	temporalclient "go.temporal.io/sdk/client"
 
@@ -15,15 +14,14 @@ import (
 	"powerssl.dev/powerssl/internal/app/apiserver/unitofwork"
 	"powerssl.dev/powerssl/internal/pkg/temporal"
 	"powerssl.dev/powerssl/internal/pkg/temporal/workflow"
-	"powerssl.dev/powerssl/internal/pkg/vault"
 	"powerssl.dev/powerssl/pkg/apiserver/acmeaccount"
 	"powerssl.dev/powerssl/pkg/apiserver/api"
 )
 
-func New(repositories *repository.Repositories, logger log.Logger, temporalClient temporalclient.Client, vaultClient *vault.Client) acmeaccount.Service {
+func New(repositories *repository.Repositories, logger log.Logger, temporalClient temporalclient.Client) acmeaccount.Service {
 	var svc acmeaccount.Service
 	{
-		svc = NewBasicService(repositories, logger, temporalClient, vaultClient)
+		svc = NewBasicService(repositories, logger, temporalClient)
 		svc = UnitOfWorkMiddleware(repositories, logger)(svc)
 		svc = LoggingMiddleware(logger)(svc)
 	}
@@ -34,21 +32,19 @@ type basicService struct {
 	*repository.Repositories
 	logger   log.Logger
 	temporal temporalclient.Client
-	vault    *vault.Client
 }
 
-func NewBasicService(repositories *repository.Repositories, logger log.Logger, temporalClient temporalclient.Client, vaultClient *vault.Client) acmeaccount.Service {
+func NewBasicService(repositories *repository.Repositories, logger log.Logger, temporalClient temporalclient.Client) acmeaccount.Service {
 	return basicService{
 		Repositories: repositories,
 		logger:       logger,
 		temporal:     temporalClient,
-		vault:        vaultClient,
 	}
 }
 
 func (s basicService) Create(ctx context.Context, parent string, apiACMEAccount *api.ACMEAccount) (_ *api.ACMEAccount, err error) {
 	var acmeAccount *model.ACMEAccount
-	if acmeAccount, err = model.NewACMEAccountFromAPI(parent, apiACMEAccount, uuid.New().String()); err != nil {
+	if acmeAccount, err = model.NewACMEAccountFromAPI(parent, apiACMEAccount, ""); err != nil {
 		return nil, err
 	}
 	if acmeAccount.ACMEServer, err = s.ACMEServers.FindByName(ctx, parent); err != nil {
@@ -57,12 +53,9 @@ func (s basicService) Create(ctx context.Context, parent string, apiACMEAccount 
 	if err = s.ACMEAccounts.Add(ctx, acmeAccount); err != nil {
 		return nil, err
 	}
-	if err := s.vault.CreateTransitKey(ctx, acmeAccount.ID); err != nil {
-		return nil, err
-	}
 	_, err = s.temporal.ExecuteWorkflow(ctx, temporalclient.StartWorkflowOptions{
 		ID:        fmt.Sprintf("%s/create-account", acmeAccount.Name()),
-		TaskQueue: temporal.TaskQueue,
+		TaskQueue: temporal.WorkerTaskQueue,
 	}, workflow.CreateAccount, workflow.CreateAccountParams{
 		Account:              acmeAccount.Name(),
 		DirectoryURL:         acmeAccount.ACMEServer.DirectoryURL,

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/go-kit/kit/log"
-	"github.com/google/uuid"
 
 	"powerssl.dev/powerssl/internal/app/apiserver/model"
 	"powerssl.dev/powerssl/internal/app/apiserver/repository"
@@ -36,7 +35,7 @@ func NewBasicService(repositories *repository.Repositories, logger log.Logger) a
 }
 
 func (s basicService) Create(ctx context.Context, apiACMEServer *api.ACMEServer) (_ *api.ACMEServer, err error) {
-	acmeServer := model.NewACMEServerFromAPI(apiACMEServer, uuid.New().String())
+	acmeServer := model.NewACMEServerFromAPI(apiACMEServer, "")
 	if err = s.ACMEServers.Add(ctx, acmeServer); err != nil {
 		return nil, err
 	}
@@ -76,8 +75,10 @@ func (s basicService) Update(ctx context.Context, name string, apiACMEServer *ap
 	if acmeServer, err = s.ACMEServers.FindByName(ctx, name); err != nil {
 		return nil, err
 	}
-	updatedACMEServer := model.NewACMEServerFromAPI(apiACMEServer, acmeServer.ID)
-	if err = unitofwork.GetUnit(ctx).Alter(updatedACMEServer); err != nil {
+	if err = acmeServer.Update([]string{}, model.NewACMEServerFromAPI(apiACMEServer, acmeServer.ID)); err != nil {
+		return nil, err
+	}
+	if err = unitofwork.GetUnit(ctx).Alter(acmeServer); err != nil {
 		return nil, err
 	}
 	return acmeServer.ToAPI(), nil

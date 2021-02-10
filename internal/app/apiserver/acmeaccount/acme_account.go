@@ -13,7 +13,6 @@ import (
 	"powerssl.dev/powerssl/internal/app/apiserver/acmeaccount/transport"
 	"powerssl.dev/powerssl/internal/app/apiserver/repository"
 	apiv1 "powerssl.dev/powerssl/internal/pkg/apiserver/api/v1"
-	"powerssl.dev/powerssl/internal/pkg/vault"
 )
 
 type ACMEAccount struct {
@@ -22,8 +21,8 @@ type ACMEAccount struct {
 	tracer    stdopentracing.Tracer
 }
 
-func New(repositories *repository.Repositories, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, temporalClient temporalclient.Client, vaultClient *vault.Client, auth kitendpoint.Middleware) *ACMEAccount {
-	svc := service.New(repositories, logger, temporalClient, vaultClient)
+func New(repositories *repository.Repositories, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, temporalClient temporalclient.Client, auth kitendpoint.Middleware) *ACMEAccount {
+	svc := service.New(repositories, logger, temporalClient)
 	endpoints := endpoint.NewEndpoints(svc, logger, tracer, duration, auth)
 
 	return &ACMEAccount{

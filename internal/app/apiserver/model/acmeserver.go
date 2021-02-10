@@ -2,7 +2,11 @@ package model
 
 import (
 	"fmt"
+	"strings"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/mennanov/fieldmask-utils"
 
 	"powerssl.dev/powerssl/pkg/apiserver/api"
 )
@@ -24,6 +28,10 @@ type ACMEServer struct {
 }
 
 func NewACMEServerFromAPI(apiACMEServer *api.ACMEServer, id string) *ACMEServer {
+	if id == "" {
+		id = uuid.New().String()
+	}
+
 	return &ACMEServer{
 		ID:              id,
 		DisplayName:     apiACMEServer.DisplayName,
@@ -45,6 +53,11 @@ func (a *ACMEServer) ToAPI() *api.ACMEServer {
 		DirectoryURL:    a.DirectoryURL,
 		IntegrationName: a.IntegrationName,
 	}
+}
+
+func (a *ACMEServer) Update(updateMask []string, acmeServer *ACMEServer) error {
+	mask := fieldmask_utils.MaskFromString(strings.Join(updateMask, ","))
+	return fieldmask_utils.StructToStruct(mask, acmeServer, a)
 }
 
 type ACMEServers []*ACMEServer

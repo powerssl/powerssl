@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gogo/status"
+	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 
 	"powerssl.dev/powerssl/pkg/apiserver/api"
@@ -50,6 +51,10 @@ func NewACMEAccountFromAPI(parent string, acmeAccount *api.ACMEAccount, id strin
 	s := strings.Split(parent, "/")
 	if len(s) != 2 || s[0] != "acmeServers" {
 		return nil, status.Error(codes.InvalidArgument, "malformed parent")
+	}
+
+	if id == "" {
+		id = uuid.New().String()
 	}
 
 	return &ACMEAccount{
