@@ -1,20 +1,21 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-	"strings"
-
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
+	cmdutil "powerssl.dev/powerssl/internal/pkg/cmd"
 	"powerssl.dev/powerssl/internal/pkg/version"
 )
+
+const component = "agent"
 
 var (
 	cfgFile string
 	verbose bool
 )
+
+func Execute() {
+	cmdutil.ExecuteWithConfig(NewCmdRoot(), component, cfgFile, verbose)
+}
 
 func NewCmdRoot() *cobra.Command {
 	cmd := &cobra.Command{
@@ -32,30 +33,4 @@ Find more information at: https://docs.powerssl.io/powerssl-agent`,
 	cmd.AddCommand(newCmdRun())
 
 	return cmd
-}
-
-func Execute() {
-	cobra.OnInitialize(initConfig)
-
-	if err := NewCmdRoot().Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-}
-
-func initConfig() {
-	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
-	} else {
-		viper.AddConfigPath("/etc/powerssl/agent")
-		viper.SetConfigName("config")
-	}
-
-	viper.AutomaticEnv()
-	viper.SetEnvPrefix("powerssl")
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
-
-	if err := viper.ReadInConfig(); err == nil && verbose {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
 }

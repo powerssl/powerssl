@@ -2,8 +2,10 @@ package agent
 
 import (
 	"context"
-	"os"
+	"io"
 
+	"github.com/go-kit/kit/log"
+	"github.com/opentracing/opentracing-go"
 	"golang.org/x/sync/errgroup"
 
 	"powerssl.dev/powerssl/internal/pkg/tracing"
@@ -11,32 +13,45 @@ import (
 	apiserverclient "powerssl.dev/powerssl/pkg/apiserver/client"
 )
 
-func Run(cfg *Config) {
-	logger := util.NewLogger(os.Stdout)
+const component = "powerssl-agent"
 
-	util.ValidateConfig(cfg, logger)
+func Run(cfg *Config) (err error) {
+	_, logger := util.NewZapAndKitLogger()
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
 		return util.InterruptHandler(ctx, logger)
 	})
 
-	g.Go(func() error {
-		tracer, _, _ := tracing.NewNoopTracer("powerssl-agent", logger)
-		client, err := apiserverclient.NewGRPCClient(ctx, cfg.APIServerClientConfig, cfg.AuthToken, logger, tracer)
-		if err != nil {
-			logger.Log("transport", "gRPC", "err", err)
-			os.Exit(1)
+	var tracer opentracing.Tracer
+	{
+		var closer io.Closer
+		if tracer, closer, err = tracing.Init(component, "", log.With(logger, "component", "tracing")); err != nil {
+			return err
 		}
-		var _ = client
+		defer func() {
+			err = closer.Close()
+		}()
+	}
+
+	var apiserverClient *apiserverclient.GRPCClient
+	{
+		if apiserverClient, err = apiserverclient.NewGRPCClient(ctx, &cfg.APIServerClientConfig, cfg.AuthToken, logger, tracer); err != nil {
+			return err
+		}
+	}
+	var _ = apiserverClient
+
+	g.Go(func() error {
 		return nil
 	})
 
-	if err := g.Wait(); err != nil {
+	if err = g.Wait(); err != nil {
 		switch err.(type) {
 		case util.InterruptError:
 		default:
-			logger.Log("err", err)
+			return err
 		}
 	}
+	return nil
 }
