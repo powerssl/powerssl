@@ -45,33 +45,33 @@ func New(client acme.Service, handler Integration) *integration {
 func (i *integration) HandleActivity(ctx context.Context, activity *api.Activity) error {
 	var err error
 	switch activity.Name {
-	case api.Activity_ACME_CREATE_ACCOUNT:
+	case api.ActivityACMECreateAccount:
 		err = i.createAccount(ctx, activity)
-	case api.Activity_ACME_CREATE_AUTHORIZATION:
+	case api.ActivityACMECreateAuthorization:
 		err = i.createAuthorization(ctx, activity)
-	case api.Activity_ACME_CREATE_ORDER:
+	case api.ActivityACMECreateOrder:
 		err = i.createOrder(ctx, activity)
-	case api.Activity_ACME_DEACTIVATE_ACCOUNT:
+	case api.ActivityACMEDeactivateAccount:
 		err = i.deactivateAccount(ctx, activity)
-	case api.Activity_ACME_DEACTIVATE_AUTHORIZATION:
+	case api.ActivityACMEDeactivateAuthorization:
 		err = i.deactivateAuthorization(ctx, activity)
-	case api.Activity_ACME_FINALIZE_ORDER:
+	case api.ActivityACMEFinalizeOrder:
 		err = i.finalizeOrder(ctx, activity)
-	case api.Activity_ACME_GET_AUTHORIZATION:
+	case api.ActivityACMEGetAuthorization:
 		err = i.getAuthorization(ctx, activity)
-	case api.Activity_ACME_GET_CERTIFICATE:
+	case api.ActivityACMEGetCertificate:
 		err = i.getCertificate(ctx, activity)
-	case api.Activity_ACME_GET_CHALLENGE:
+	case api.ActivityACMEGetChallenge:
 		err = i.getChallenge(ctx, activity)
-	case api.Activity_ACME_GET_ORDER:
+	case api.ActivityACMEGetOrder:
 		err = i.getOrder(ctx, activity)
-	case api.Activity_ACME_REKEY_ACCOUNT:
+	case api.ActivityACMERekeyAccount:
 		err = i.rekeyAccount(ctx, activity)
-	case api.Activity_ACME_REVOKE_CERTIFICATE:
+	case api.ActivityACMERevokeCertificate:
 		err = i.revokeCertificate(ctx, activity)
-	case api.Activity_ACME_UPDATE_ACCOUNT:
+	case api.ActivityACMEUpdateAccount:
 		err = i.updateAccount(ctx, activity)
-	case api.Activity_ACME_VALIDATE_CHALLENGE:
+	case api.ActivityACMEValidateChallenge:
 		err = i.validateChallenge(ctx, activity)
 	default:
 		err = fmt.Errorf("activity %s not implemented", activity.Name)

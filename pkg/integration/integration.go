@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"time"
 
@@ -43,50 +42,49 @@ type integration struct {
 	handler Integration
 }
 
-func Run(cfg *Config, kind kind, name string, handler interface{}) {
-	logger := util.NewLogger(os.Stdout)
-
-	util.ValidateConfig(cfg, logger)
+func Run(cfg *Config, kind kind, name string, handler interface{}) (err error) {
+	_, logger := util.NewZapAndKitLogger()
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
 		return util.InterruptHandler(ctx, logger)
 	})
 
-	tracer, closer, err := tracing.Init(fmt.Sprintf("powerssl-integration-%s", kind), cfg.Tracer, log.With(logger, "component", "tracing"))
-	if err != nil {
-		logger.Log("component", "tracing", "err", err)
-		os.Exit(1)
-	}
-	defer closer.Close()
-
-	var client *controllerclient.GRPCClient
+	var tracer opentracing.Tracer
 	{
-		var err error
-		if client, err = controllerclient.NewGRPCClient(ctx, cfg.ControllerClientConfig, cfg.AuthToken, logger, tracer); err != nil {
-			logger.Log("transport", "gRPC", "during", "Connect", "err", err)
-			os.Exit(1)
+		var closer io.Closer
+		if tracer, closer, err = tracing.Init(fmt.Sprintf("powerssl-integration-%s", kind), cfg.Tracer, log.With(logger, "component", "tracing")); err != nil {
+			return err
+		}
+		defer func() {
+			err = closer.Close()
+		}()
+	}
+
+	var controllerClient *controllerclient.GRPCClient
+	{
+		if controllerClient, err = controllerclient.NewGRPCClient(ctx, &cfg.ControllerClientConfig, cfg.AuthToken, logger, tracer); err != nil {
+			return err
 		}
 	}
 
 	var integrationhandler Integration
 	switch kind {
 	case KindACME:
-		integrationhandler = integrationacme.New(client.ACME, handler.(integrationacme.Integration))
+		integrationhandler = integrationacme.New(controllerClient.ACME, handler.(integrationacme.Integration))
 	case KindDNS:
-		logger.Log("kind", "DNS", "err", "Not yet supported")
-		os.Exit(1)
+		return fmt.Errorf("not yet supported")
 		// integrationhandler = integrationdns.New(client.DNS, handler.(integrationdns.Integration))
 	}
 
-	if cfg.MetricsAddr != "" {
+	if cfg.Metrics.Addr != "" {
 		g.Go(func() error {
-			return transport.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, log.With(logger, "component", "metrics"))
 		})
 	}
 
 	i := &integration{
-		client:  client,
+		client:  controllerClient,
 		logger:  logger,
 		kind:    kind,
 		name:    name,
@@ -99,19 +97,20 @@ func Run(cfg *Config, kind kind, name string, handler interface{}) {
 			case <-ctx.Done():
 				return ctx.Err()
 			default:
-				logger.Log("err", i.run(ctx))
+				_ = logger.Log("err", i.run(ctx))
 				time.Sleep(time.Second)
 			}
 		}
 	})
 
-	if err := g.Wait(); err != nil {
+	if err = g.Wait(); err != nil {
 		switch err.(type) {
 		case util.InterruptError:
 		default:
-			logger.Log("err", err)
+			return err
 		}
 	}
+	return nil
 }
 
 func (i *integration) run(ctx context.Context) error {
@@ -130,12 +129,12 @@ func (i *integration) run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	i.logger.Log("connected", true)
+	_ = i.logger.Log("connected", true)
 	for {
 		activity, err := stream.Recv()
 		if err != nil {
 			if err == io.EOF {
-				i.logger.Log("err", "EOF")
+				_ = i.logger.Log("err", "EOF")
 				break
 			}
 			return err
@@ -144,14 +143,16 @@ func (i *integration) run(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		go i.handleActivity(ctx, apiActivity)
+		go func() {
+			_ = i.handleActivity(ctx, apiActivity)
+		}()
 	}
 	return nil
 }
 
 func (i *integration) loggingMiddleware(ctx context.Context, activity *api.Activity) (err error) {
 	defer func() {
-		i.logger.Log("activity", activity.Token, "name", activity.Name, "err", err)
+		_ = i.logger.Log("activity", activity.Token, "name", activity.Name, "err", err)
 	}()
 
 	return i.tracingMiddleware(ctx, activity)
@@ -160,7 +161,7 @@ func (i *integration) loggingMiddleware(ctx context.Context, activity *api.Activ
 func (i *integration) tracingMiddleware(ctx context.Context, activity *api.Activity) error {
 	wireContext, err := tracing.WireContextFromJSON(activity.Signature) // TODO: Do not use Signature for Span
 	if err != nil && !strings.Contains(err.Error(), "not found") {
-		i.logger.Log("activity", activity.Token, "err", err)
+		_ = i.logger.Log("activity", activity.Token, "err", err)
 	}
 	activitySpan := opentracing.StartSpan(activity.Name.String(), ext.RPCServerOption(wireContext))
 	defer activitySpan.Finish()

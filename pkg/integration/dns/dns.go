@@ -28,11 +28,11 @@ func New(client interface{}, handler Integration) *integration {
 func (i *integration) HandleActivity(ctx context.Context, activity *api.Activity) error {
 	var err error
 	switch activity.Name {
-	case api.Activity_DNS_CREATE_RECORD:
+	case api.ActivityDNSCreateRecord:
 		err = i.createRecord(ctx, activity)
-	case api.Activity_DNS_DELETE_RECORD:
+	case api.ActivityDNSDeleteRecord:
 		err = i.deleteRecord(ctx, activity)
-	case api.Activity_DNS_VERIFY_DOMAIN:
+	case api.ActivityDNSVerifyDomain:
 		err = i.verifyDomain(ctx, activity)
 	default:
 		err = fmt.Errorf("activity %s not implemented", activity.Name)

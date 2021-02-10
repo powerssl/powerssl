@@ -1,22 +1,25 @@
 package integration // import "powerssl.dev/powerssl/pkg/integration"
 
 import (
-	"gopkg.in/go-playground/validator.v9"
+	"github.com/go-playground/validator/v10"
 
 	"powerssl.dev/powerssl/internal/pkg/transport"
+	"powerssl.dev/powerssl/internal/pkg/util"
 )
 
 type ControllerClientConfig = transport.ClientConfig
 
 type Config struct {
-	AuthToken              string `validate:"required"`
-	ControllerClientConfig *ControllerClientConfig
-	MetricsAddr            string
-	Tracer                 string
+	AuthToken              string                 `validate:"required"`
+	ControllerClientConfig ControllerClientConfig `mapstructure:",squash"`
+	Metrics                struct {
+		Addr string
+	}
+	Tracer string
 }
 
 func (cfg *Config) Validate() error {
 	validate := validator.New()
 	validate.RegisterStructValidation(transport.ClientConfigValidator, transport.ClientConfig{})
-	return validate.Struct(cfg)
+	return util.ValidateConfig(validate, cfg)
 }
