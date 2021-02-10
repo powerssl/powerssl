@@ -17,6 +17,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
+	"github.com/go-playground/validator/v10"
 	middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/johanbrandhorst/certify"
@@ -25,16 +26,15 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 type ServerConfig struct {
 	Addr       string
-	CAFile     string
-	CertFile   string
-	CommonName string
+	CAFile     string `mapstructure:"ca-file"`
+	CertFile   string `mapstructure:"cert-file"`
+	CommonName string `mapstructure:"common-name"`
 	Insecure   bool
-	KeyFile    string
+	KeyFile    string `mapstructure:"key-file"`
 	VaultRole  string
 	VaultToken string
 	VaultURL   string

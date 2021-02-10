@@ -5,17 +5,17 @@ import (
 	"crypto/tls"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 type ClientConfig struct {
-	Addr                  string `validate:"required"`
-	CAFile                string
+	Addr                  string `validate:"required,hostname_port"`
+	CAFile                string `mapstructure:"ca-file"`
 	Insecure              bool
-	InsecureSkipTLSVerify bool
-	ServerNameOverride    string
+	InsecureSkipTLSVerify bool   `mapstructure:"insecure-skip-tls-verify"`
+	ServerNameOverride    string `mapstructure:"server-name-override"`
 }
 
 func ClientConfigValidator(sl validator.StructLevel) {
