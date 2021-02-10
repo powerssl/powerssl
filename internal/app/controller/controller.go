@@ -2,42 +2,52 @@ package controller
 
 import (
 	"context"
-	"os"
+	"io"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/prometheus"
+	"github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
-	temporalworker "go.temporal.io/sdk/worker"
+	"go.temporal.io/sdk/worker"
 	"golang.org/x/sync/errgroup"
 
-	"powerssl.dev/powerssl/internal/pkg/auth"
+	"powerssl.dev/powerssl/internal/app/controller/acme"
+	"powerssl.dev/powerssl/internal/app/controller/integration"
+	"powerssl.dev/powerssl/internal/pkg/apiserver"
 	"powerssl.dev/powerssl/internal/pkg/temporal"
+	"powerssl.dev/powerssl/internal/pkg/temporal/activity"
 	temporalclient "powerssl.dev/powerssl/internal/pkg/temporal/client"
 	"powerssl.dev/powerssl/internal/pkg/tracing"
 	"powerssl.dev/powerssl/internal/pkg/transport"
 	"powerssl.dev/powerssl/internal/pkg/util"
+	"powerssl.dev/powerssl/internal/pkg/vault"
 	apiserverclient "powerssl.dev/powerssl/pkg/apiserver/client"
 )
 
 const component = "powerssl-controller"
 
-func Run(cfg *Config) {
-	logger := util.NewLogger(os.Stdout)
+func Run(cfg *Config) (err error) {
+	zapLogger, logger := util.NewZapAndKitLogger()
 
+	cfg.ServerConfig.VaultToken = cfg.VaultClientConfig.Token
+	cfg.ServerConfig.VaultURL = cfg.VaultClientConfig.URL
 	cfg.ServerConfig.VaultRole = component
-	util.ValidateConfig(cfg, logger)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
 		return util.InterruptHandler(ctx, logger)
 	})
 
-	tracer, closer, err := tracing.Init(component, cfg.Tracer, log.With(logger, "component", "tracing"))
-	if err != nil {
-		logger.Log("component", "tracing", "err", err)
-		os.Exit(1)
+	var tracer opentracing.Tracer
+	{
+		var closer io.Closer
+		if tracer, closer, err = tracing.Init(component, cfg.Tracer, log.With(logger, "component", "tracing")); err != nil {
+			return err
+		}
+		defer func() {
+			err = closer.Close()
+		}()
 	}
-	defer closer.Close()
 
 	duration := prometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
 		Namespace: "powerssl_io",
@@ -46,65 +56,70 @@ func Run(cfg *Config) {
 		Help:      "Request duration in seconds.",
 	}, []string{"method", "success"})
 
-	var client *apiserverclient.GRPCClient
+	var apiserverClient *apiserverclient.GRPCClient
 	{
-		token, err := auth.NewServiceToken(cfg.AuthToken)
-		if err != nil {
-			logger.Log("err", err)
-			os.Exit(1)
-		}
-		if client, err = apiserverclient.NewGRPCClient(ctx, cfg.APIServerClientConfig, token, logger, tracer); err != nil {
-			logger.Log("transport", "gRPC", "during", "Connect", "err", err)
-			os.Exit(1)
+		if apiserverClient, err = apiserverclient.NewGRPCClient(ctx, &cfg.APIServerClientConfig, cfg.AuthToken, logger, tracer); err != nil {
+			return err
 		}
 	}
 
 	var temporalClient temporalclient.Client
 	{
-		var err error
-		if temporalClient, err = temporalclient.NewClient(temporalclient.Config{
-			CAFile:    cfg.VaultClientConfig.CAFile, // TODO Wrong cfg path
-			HostPort:  cfg.TemporalClientConfig.HostPort,
-			Namespace: cfg.TemporalClientConfig.Namespace,
-		}, nil, tracer); err != nil {
-			logger.Log("err", err)
-			os.Exit(1)
+		var closer io.Closer
+		if temporalClient, closer, err = temporalclient.NewClient(cfg.TemporalClientConfig, zapLogger, tracer, component); err != nil {
+			return err
 		}
-		defer temporalClient.Close()
+		defer func() {
+			temporalClient.Close()
+			err = closer.Close()
+		}()
 	}
 
-	services, err := makeServices(logger, tracer, duration, client, cfg.JWKSURL)
-	if err != nil {
-		logger.Log("err", err)
-		os.Exit(1)
+	var vaultClient *vault.Client
+	{
+		if vaultClient, err = vault.New(cfg.VaultClientConfig); err != nil {
+			return err
+		}
 	}
 
-	if cfg.MetricsAddr != "" {
+	if cfg.Metrics.Addr != "" {
 		g.Go(func() error {
-			return transport.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, log.With(logger, "component", "metrics"))
 		})
 	}
 
 	g.Go(func() error {
-		return transport.ServeGRPC(ctx, cfg.ServerConfig, log.With(logger, "transport", "gRPC"), services)
+		return transport.ServeGRPC(ctx, &cfg.ServerConfig, log.With(logger, "transport", "gRPC"), []transport.Service{
+			acme.New(logger, tracer, duration, temporalClient),
+			integration.New(logger, duration), // TODO: tracing
+		})
 	})
 
 	g.Go(func() error {
-		worker := temporalworker.New(temporalClient, temporal.TaskQueue, temporalworker.Options{})
-		interruptCh := make(chan interface{}, 1)
-		go func() {
-			s := <-ctx.Done()
-			interruptCh <- s
-			close(interruptCh)
-		}()
-		return worker.Run(interruptCh)
+		worker.EnableVerboseLogging(true)
+		backgroundActivityContext := context.Background()
+		backgroundActivityContext = apiserver.SetClient(backgroundActivityContext, apiserverClient)
+		backgroundActivityContext = vault.SetClient(backgroundActivityContext, vaultClient)
+		w := worker.New(temporalClient, temporal.ControllerTaskQueue, worker.Options{
+			BackgroundActivityContext: backgroundActivityContext,
+		})
+		w.RegisterActivity(activity.CreateACMEAccount)
+		if err = w.Start(); err != nil {
+			return err
+		}
+		select {
+		case <-ctx.Done():
+			w.Stop()
+			return ctx.Err()
+		}
 	})
 
-	if err := g.Wait(); err != nil {
+	if err = g.Wait(); err != nil {
 		switch err.(type) {
 		case util.InterruptError:
 		default:
-			logger.Log("err", err)
+			return err
 		}
 	}
+	return nil
 }
