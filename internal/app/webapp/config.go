@@ -1,18 +1,28 @@
 package webapp
 
 import (
-	"gopkg.in/go-playground/validator.v9"
+	"github.com/go-playground/validator/v10"
+
+	"powerssl.dev/powerssl/internal/pkg/util"
 )
 
 type Config struct {
-	APIAddr     string `validate:"required"`
-	Addr        string `validate:"required"`
-	AuthURI     string `validate:"required"`
-	GRPCWebURI  string `validate:"required"`
-	MetricsAddr string
+	APIServer struct {
+		Addr string `validate:"required,hostname_port"`
+	}
+	Addr string `validate:"required,hostname_port"`
+	Auth struct {
+		URI string `validate:"required,uri"`
+	}
+	GRPCWeb struct {
+		URI string `validate:"required,uri"`
+	}
+	Metrics struct {
+		Addr string
+	}
 }
 
 func (cfg *Config) Validate() error {
 	validate := validator.New()
-	return validate.Struct(cfg)
+	return util.ValidateConfig(validate, cfg)
 }

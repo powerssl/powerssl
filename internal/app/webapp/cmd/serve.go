@@ -5,53 +5,43 @@ import (
 	"github.com/spf13/viper"
 
 	"powerssl.dev/powerssl/internal/app/webapp"
+	cmdutil "powerssl.dev/powerssl/internal/pkg/cmd"
 )
 
 func newCmdServe() *cobra.Command {
-	var (
-		addr        string
-		apiAddr     string
-		authURI     string
-		grpcWebURI  string
-		metricsAddr string
-	)
+	var config webapp.Config
+	var noMetrics bool
 
 	cmd := &cobra.Command{
 		Use:   "serve",
-		Short: "Serve the API",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			addr = viper.GetString("addr")
-			apiAddr = viper.GetString("api-addr")
-			authURI = viper.GetString("auth-uri")
-			grpcWebURI = viper.GetString("grpc-web-uri")
-			if !viper.GetBool("no-metrics") {
-				metricsAddr = viper.GetString("metrics-addr")
+		Short: "Serve the WebApp",
+		Args:  cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := viper.Unmarshal(&config); err != nil {
+				return err
 			}
+			if noMetrics {
+				config.Metrics.Addr = ""
+			}
+			return config.Validate()
 		},
-		Run: func(cmd *cobra.Command, args []string) {
-			webapp.Run(&webapp.Config{
-				Addr:        addr,
-				APIAddr:     apiAddr,
-				AuthURI:     authURI,
-				GRPCWebURI:  grpcWebURI,
-				MetricsAddr: metricsAddr,
-			})
-		},
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
+			return webapp.Run(&config)
+		}),
 	}
 
-	cmd.Flags().BoolP("no-metrics", "", false, "Do not serve metrics")
+	cmd.Flags().BoolVar(&noMetrics, "no-metrics", false, "Do not serve metrics")
 	cmd.Flags().StringP("addr", "", ":8080", "Addr")
-	cmd.Flags().StringP("api-addr", "", "", "API Addr")
+	cmd.Flags().String("apiserver-addr", "", "GRPC address of API server")
 	cmd.Flags().StringP("auth-uri", "", "", "Auth URI")
-	cmd.Flags().StringP("grpc-web-uri", "", "", "gRPC-Web URI")
+	cmd.Flags().StringP("grpcweb-uri", "", "", "gRPC-Web URI")
 	cmd.Flags().StringP("metrics-addr", "", ":9090", "HTTP Addr")
 
-	viper.BindPFlag("addr", cmd.Flags().Lookup("addr"))
-	viper.BindPFlag("api-addr", cmd.Flags().Lookup("api-addr"))
-	viper.BindPFlag("auth-uri", cmd.Flags().Lookup("auth-uri"))
-	viper.BindPFlag("grpc-web-uri", cmd.Flags().Lookup("grpc-web-uri"))
-	viper.BindPFlag("metrics-addr", cmd.Flags().Lookup("metrics-addr"))
-	viper.BindPFlag("no-metrics", cmd.Flags().Lookup("no-metrics"))
+	cmdutil.Must(viper.BindPFlag("addr", cmd.Flags().Lookup("addr")))
+	cmdutil.Must(viper.BindPFlag("apiserver.addr", cmd.Flags().Lookup("apiserver-addr")))
+	cmdutil.Must(viper.BindPFlag("auth.uri", cmd.Flags().Lookup("auth-uri")))
+	cmdutil.Must(viper.BindPFlag("grpcweb.uri", cmd.Flags().Lookup("grpcweb-uri")))
+	cmdutil.Must(viper.BindPFlag("metrics.addr", cmd.Flags().Lookup("metrics-addr")))
 
 	return cmd
 }
