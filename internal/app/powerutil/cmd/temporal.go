@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"powerssl.dev/powerssl/internal/app/powerutil"
+	cmdutil "powerssl.dev/powerssl/internal/pkg/cmd"
 )
 
 func newCmdTemporal() *cobra.Command {
@@ -25,9 +26,10 @@ func newCmdTemporalMigrate() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "migrate",
 		Short: "Run temporal migrations",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Args:  cobra.NoArgs,
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
 			return powerutil.RunTemporalMigrate(docker, host, password, plugin, port, temporalDatabase, user, visibilityDatabase)
-		},
+		}),
 	}
 
 	cmd.Flags().BoolVar(&docker, "docker", false, "Execute with docker")
@@ -49,9 +51,10 @@ func newCmdTemporalRegisterNamespace() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "register-namespace",
 		Short: "Run temporal register namespace",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Args:  cobra.NoArgs,
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
 			return powerutil.RunTemporalRegisterNamespace(docker, tlsEnableHostVerification, address, namespace, tlsCertPath, tlsKeyPath, tlsCAPath, tlsServerName)
-		},
+		}),
 	}
 
 	cmd.Flags().BoolVar(&docker, "docker", false, "execute with docker")

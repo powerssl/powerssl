@@ -15,39 +15,45 @@ import (
 )
 
 const (
-	PKI_PATH     = "pki"
-	TRANSIT_PATH = "transit"
+	PkiPath     = "pki"
+	TransitPath = "transit"
 )
 
 var mounts = map[string]*api.MountInput{
-	PKI_PATH: {
+	PkiPath: {
 		Type:        "pki",
 		Description: "PowerSSL PKI",
 		Config: api.MountConfigInput{
 			MaxLeaseTTL: "8760h",
 		},
 	},
-	TRANSIT_PATH: {
+	TransitPath: {
 		Type:        "transit",
 		Description: "PowerSSL Transit",
 	},
 }
 
 var roles = map[string]map[string]interface{}{
-	fmt.Sprintf("%s/roles/powerssl-apiserver", PKI_PATH): map[string]interface{}{
+	fmt.Sprintf("%s/roles/powerssl-apiserver", PkiPath): {
 		"allowed_domains":    "apiserver",
 		"allow_localhost":    true, // TODO: Disable in production
 		"allow_bare_domains": true,
 		"max_ttl":            "24h",
 	},
-	fmt.Sprintf("%s/roles/powerssl-controller", PKI_PATH): map[string]interface{}{
+	fmt.Sprintf("%s/roles/powerssl-controller", PkiPath): {
 		"allowed_domains":    "controller",
 		"allow_localhost":    true, // TODO: Disable in production
 		"allow_bare_domains": true,
 		"max_ttl":            "24h",
 	},
-	fmt.Sprintf("%s/roles/powerssl-signer", PKI_PATH): map[string]interface{}{
+	fmt.Sprintf("%s/roles/powerssl-signer", PkiPath): {
 		"allowed_domains":    "signer",
+		"allow_localhost":    true, // TODO: Disable in production
+		"allow_bare_domains": true,
+		"max_ttl":            "24h",
+	},
+	fmt.Sprintf("%s/roles/powerssl-worker", PkiPath): {
+		"allowed_domains":    "worker",
 		"allow_localhost":    true, // TODO: Disable in production
 		"allow_bare_domains": true,
 		"max_ttl":            "24h",
@@ -55,16 +61,20 @@ var roles = map[string]map[string]interface{}{
 }
 
 var tokens = map[string][]string{
-	"powerssl-apiserver":  []string{"powerssl-apiserver"},
-	"powerssl-controller": []string{"powerssl-controller"},
-	"powerssl-signer":     []string{"powerssl-signer"},
+	"powerssl-apiserver":  {"powerssl-apiserver"},
+	"powerssl-controller": {"powerssl-controller"},
+	"powerssl-signer":     {"powerssl-signer"},
+	"powerssl-worker":     {"powerssl-worker"},
 }
 
 func RunVault(addr, ca, caKey string) error {
 	var keys []string
 	var rootToken string
 	{
-		c, err := vault.New(addr, "", ca)
+		c, err := vault.New(vault.ClientConfig{
+			CAFile: ca,
+			URL:    addr,
+		})
 		if err != nil {
 			return err
 		}
@@ -91,7 +101,11 @@ func RunVault(addr, ca, caKey string) error {
 		}
 	}
 
-	c, err := vault.New(addr, rootToken, ca)
+	c, err := vault.New(vault.ClientConfig{
+		CAFile: ca,
+		Token:  rootToken,
+		URL:    addr,
+	})
 	if err != nil {
 		return err
 	}
@@ -124,8 +138,8 @@ func RunVault(addr, ca, caKey string) error {
 }
 
 func vaultInit(c *vault.Client) ([]string, []string, string, error) {
-	var SecretShares int = 1
-	var SecretThreshold int = 1
+	var SecretShares = 1
+	var SecretThreshold = 1
 	var StoredShares int
 	var PGPKeys []string
 	var RecoveryShares int
@@ -231,7 +245,7 @@ func vaultInitPKI(c *vault.Client, addr, ca, caKey string) error {
 	var cert, csr string
 
 	{
-		path := fmt.Sprintf("%s/intermediate/generate/internal", PKI_PATH)
+		path := fmt.Sprintf("%s/intermediate/generate/internal", PkiPath)
 		data := map[string]interface{}{
 			"common_name": "PowerSSL Intermediate Authority",
 			"ttl":         "8760h",
@@ -255,7 +269,7 @@ func vaultInitPKI(c *vault.Client, addr, ca, caKey string) error {
 	}
 
 	{
-		path := fmt.Sprintf("%s/intermediate/set-signed", PKI_PATH)
+		path := fmt.Sprintf("%s/intermediate/set-signed", PkiPath)
 		data := map[string]interface{}{
 			"certificate": cert,
 		}
@@ -266,7 +280,7 @@ func vaultInitPKI(c *vault.Client, addr, ca, caKey string) error {
 	}
 
 	{
-		path := fmt.Sprintf("%s/config/urls", PKI_PATH)
+		path := fmt.Sprintf("%s/config/urls", PkiPath)
 		data := map[string]interface{}{
 			"crl_distribution_points": fmt.Sprintf("%s/v1/pki/crl", addr),
 			"issuing_certificates":    fmt.Sprintf("%s/v1/pki/ca", addr),

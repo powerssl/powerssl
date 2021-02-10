@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"powerssl.dev/powerssl/internal/app/powerutil/asset"
+	cmdutil "powerssl.dev/powerssl/internal/pkg/cmd"
 )
 
 func newCmdMigrate() *cobra.Command {
@@ -48,21 +49,22 @@ func newCmdMigrateDown(databaseURL *string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "down [--all | -a | N]",
 		Short: "Apply all or N down migrations",
+		Args:  cobra.MaximumNArgs(1),
 		PreRunE: migratePreRunE(databaseURL, &m, func(cmd *cobra.Command, args []string) error {
 			if all && len(args) > 0 {
 				return errors.New("--all cannot be used with other arguments")
 			}
 			if !all && len(args) == 0 {
-				fmt.Println("Are you sure you want to apply all down migrations? [y/N]")
+				cmd.Println("Are you sure you want to apply all down migrations? [y/N]")
 				var response string
 				if _, err := fmt.Scanln(&response); err != nil {
 					return err
 				}
 				response = strings.ToLower(strings.TrimSpace(response))
 				if response == "y" {
-					fmt.Println("Applying all down migrations")
+					cmd.Println("Applying all down migrations")
 				} else {
-					fmt.Println("Not applying all down migrations")
+					cmd.Println("Not applying all down migrations")
 				}
 				return nil
 			}
@@ -76,7 +78,7 @@ func newCmdMigrateDown(databaseURL *string) *cobra.Command {
 			}
 			return nil
 		}),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
 			if limit >= 0 {
 				if err := m.Steps(-limit); err != nil {
 					if err != migrate.ErrNoChange {
@@ -91,7 +93,7 @@ func newCmdMigrateDown(databaseURL *string) *cobra.Command {
 				}
 			}
 			return nil
-		},
+		}),
 		PostRunE: migratePostRunE(m),
 	}
 
@@ -107,26 +109,27 @@ func newCmdMigrateDrop(databaseURL *string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "drop [--force | -f]",
 		Short: "Drop everything inside database",
+		Args:  cobra.NoArgs,
 		PreRunE: migratePreRunE(databaseURL, &m, func(cmd *cobra.Command, args []string) error {
 			if !force {
-				fmt.Println("Are you sure you want to drop the entire database schema? [y/N]")
+				cmd.Println("Are you sure you want to drop the entire database schema? [y/N]")
 				var response string
 				if _, err := fmt.Scanln(&response); err != nil {
 					return err
 				}
 				response = strings.ToLower(strings.TrimSpace(response))
 				if response == "y" {
-					fmt.Println("Dropping the entire database schema")
+					cmd.Println("Dropping the entire database schema")
 				} else {
-					fmt.Println("Aborted dropping the entire database schema")
+					cmd.Println("Aborted dropping the entire database schema")
 					return errors.New("aborted")
 				}
 			}
 			return nil
 		}),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
 			return m.Drop()
-		},
+		}),
 		PostRunE: migratePostRunE(m),
 	}
 
@@ -142,6 +145,7 @@ func newCmdMigrateForce(databaseURL *string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "force V",
 		Short: "Set version V but don't run migration (ignores dirty state)",
+		Args:  cobra.ExactArgs(1),
 		PreRunE: migratePreRunE(databaseURL, &m, func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				return errors.New("please specify version argument V")
@@ -156,9 +160,9 @@ func newCmdMigrateForce(databaseURL *string) *cobra.Command {
 			v = int(v64)
 			return nil
 		}),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
 			return m.Force(v)
-		},
+		}),
 		PostRunE: migratePostRunE(m),
 	}
 
@@ -172,6 +176,7 @@ func newCmdMigrateGoto(databaseURL *string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "goto V",
 		Short: "Migrate to version V",
+		Args:  cobra.ExactArgs(1),
 		PreRunE: migratePreRunE(databaseURL, &m, func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				return errors.New("please specify version argument V")
@@ -183,14 +188,14 @@ func newCmdMigrateGoto(databaseURL *string) *cobra.Command {
 			v = uint(v64)
 			return nil
 		}),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
 			if err := m.Migrate(v); err != nil {
 				if err != migrate.ErrNoChange {
 					return err
 				}
 			}
 			return nil
-		},
+		}),
 		PostRunE: migratePostRunE(m),
 	}
 
@@ -204,6 +209,7 @@ func newCmdMigrateUp(databaseURL *string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "up [N]",
 		Short: "Apply all or N up migrations",
+		Args:  cobra.MaximumNArgs(1),
 		PreRunE: migratePreRunE(databaseURL, &m, func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				var n uint64
@@ -215,7 +221,7 @@ func newCmdMigrateUp(databaseURL *string) *cobra.Command {
 			}
 			return nil
 		}),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
 			if limit >= 0 {
 				if err := m.Steps(limit); err != nil {
 					if err != migrate.ErrNoChange {
@@ -230,7 +236,7 @@ func newCmdMigrateUp(databaseURL *string) *cobra.Command {
 				}
 			}
 			return nil
-		},
+		}),
 		PostRunE: migratePostRunE(m),
 	}
 

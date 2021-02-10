@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"powerssl.dev/powerssl/internal/app/powerutil"
+	cmdutil "powerssl.dev/powerssl/internal/pkg/cmd"
 )
 
 func newCmdVault() *cobra.Command {
@@ -12,9 +13,10 @@ func newCmdVault() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "vault",
 		Short: "Vault migrations",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Args:  cobra.NoArgs,
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
 			return powerutil.RunVault(addr, ca, caKey)
-		},
+		}),
 	}
 
 	cmd.Flags().StringVar(&addr, "addr", "https://localhost:8200", "Vault address")
