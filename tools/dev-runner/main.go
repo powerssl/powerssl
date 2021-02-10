@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -85,8 +86,16 @@ func main() {
 		addComponent = func(comp component.Component) {
 			i := idx
 			interrupts[comp.Command] = make(chan struct{})
+			localComp := comp
 			g.Go(func() error {
-				return observeComponent(ctx, of, comp, i, interrupts[comp.Command])
+				if val, ok := localComp.Env["POWERSSL_AUTH_TOKEN"]; ok && val == "{{GENERATE}}" {
+					var err error
+					if localComp.Env["POWERSSL_AUTH_TOKEN"], err = serviceToken(); err != nil {
+						of.SystemOutput(err.Error())
+						cancel()
+					}
+				}
+				return observeComponent(ctx, of, localComp, i, interrupts[comp.Command])
 			})
 			idx++
 		}
@@ -164,7 +173,7 @@ func main() {
 			"--allowed_origins http://localhost:8080",
 			"--backend_addr localhost:8082",
 			"--backend_tls",
-			"--backend_tls_ca_files local/certs/ca.pem",
+			"--backend_tls_ca_files local/certs/ca.pem,local/certs/intermediate.pem",
 			"--server_bind_address localhost",
 			"--server_http_debug_port 8087",
 			"--server_http_tls_port 8086",
@@ -331,4 +340,24 @@ func handleVault(of *internal.Outlet) error {
 		return fmt.Errorf("failed to wait %s: %s", comp.Command, err)
 	}
 	return nil
+}
+
+func serviceToken() (_ string, err error) {
+	if err = internal.WaitForService("localhost:8081", time.Minute); err != nil {
+		return "", err
+	}
+	var resp *http.Response
+	resp, err = http.Get("http://localhost:8081/service")
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+	var byt []byte
+	byt, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	return string(byt), nil
 }
