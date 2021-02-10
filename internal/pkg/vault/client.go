@@ -2,19 +2,34 @@ package vault
 
 import (
 	"context"
-
 	"github.com/hashicorp/vault/api"
 	"github.com/opentracing/opentracing-go"
 )
+
+var clientValue = struct{}{}
+
+func GetClient(ctx context.Context) *Client {
+	return ctx.Value(clientValue).(*Client)
+}
+
+func SetClient(ctx context.Context, client *Client) context.Context {
+	return context.WithValue(ctx, clientValue, client)
+}
+
+type ClientConfig struct {
+	CAFile string `mapstructure:"ca-file"`
+	Token  string `validate:"required"`
+	URL    string `validate:"required,url"`
+}
 
 type Client struct {
 	c *api.Client
 }
 
-func New(address, token, caFile string) (*Client, error) {
+func New(cfg ClientConfig) (*Client, error) {
 	conf := api.DefaultConfig()
-	if caFile != "" {
-		conf.ConfigureTLS(&api.TLSConfig{CAPath: caFile})
+	if cfg.CAFile != "" {
+		conf.ConfigureTLS(&api.TLSConfig{CAPath: cfg.CAFile})
 	}
 	// conf.ConfigureTLS(&api.TLSConfig{TLSServerName: "vault"})
 
@@ -23,11 +38,11 @@ func New(address, token, caFile string) (*Client, error) {
 		return nil, err
 	}
 
-	if address != "" {
-		c.SetAddress(address)
+	if cfg.URL != "" {
+		c.SetAddress(cfg.URL)
 	}
-	if token != "" {
-		c.SetToken(token)
+	if cfg.Token != "" {
+		c.SetToken(cfg.Token)
 	}
 
 	return &Client{c: c}, nil
