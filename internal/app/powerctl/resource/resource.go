@@ -23,7 +23,7 @@ import (
 	apiserverclient "powerssl.dev/powerssl/pkg/apiserver/client"
 )
 
-type ResourceHandler interface {
+type Handler interface {
 	Create(client *apiserverclient.GRPCClient, resource *Resource) (*Resource, error)
 	Delete(client *apiserverclient.GRPCClient, name string) error
 	Get(client *apiserverclient.GRPCClient, name string) (*Resource, error)
@@ -34,11 +34,11 @@ type ResourceHandler interface {
 }
 
 type resourcesStruct struct {
-	m map[string]ResourceHandler
+	m map[string]Handler
 	s []string
 }
 
-func (r *resourcesStruct) Add(resourceHandler ResourceHandler, aliases ...string) {
+func (r *resourcesStruct) Add(resourceHandler Handler, aliases ...string) {
 	var kind string
 	if t := reflect.TypeOf(resourceHandler); t.Kind() == reflect.Ptr {
 		kind = t.Elem().Name()
@@ -59,7 +59,7 @@ func (r *resourcesStruct) Kinds() []string {
 	return r.s
 }
 
-func (r *resourcesStruct) Get(kind string) (ResourceHandler, error) {
+func (r *resourcesStruct) Get(kind string) (Handler, error) {
 	resourceHandler, ok := r.m[kind]
 	if !ok {
 		return nil, errors.New("unknown resource kind")
@@ -67,7 +67,7 @@ func (r *resourcesStruct) Get(kind string) (ResourceHandler, error) {
 	return resourceHandler, nil
 }
 
-var resources = resourcesStruct{m: make(map[string]ResourceHandler)}
+var resources = resourcesStruct{m: make(map[string]Handler)}
 
 type Resource struct {
 	Kind string        `json:"kind,omitempty" yaml:"kind,omitempty"`
@@ -111,8 +111,6 @@ func ResourcesFromFile(filename string) ([]*Resource, error) {
 			return nil, err
 		}
 
-		fmt.Println("XXXXXXXXXXXXXXXXXXXX")
-
 		dec := goyaml.NewDecoder(strings.NewReader(string(in)))
 		for {
 			var value interface{}
@@ -122,10 +120,7 @@ func ResourcesFromFile(filename string) ([]*Resource, error) {
 					break
 				}
 			}
-			fmt.Printf("%#v\n", value)
 		}
-
-		fmt.Println("XXXXXXXXXXXXXXXXXXXX")
 
 		switch filepath.Ext(filename) {
 		case ".json":
@@ -215,8 +210,7 @@ func (r *Resource) Describe(client *apiserverclient.GRPCClient, output io.Writer
 	if err != nil {
 		return err
 	}
-	resourceHandler.Describe(client, r, output)
-	return nil
+	return resourceHandler.Describe(client, r, output)
 }
 
 type resourceLoader struct {
@@ -284,7 +278,7 @@ func ResourcesFromArgs(args []string) (resources []*Resource, err error) {
 	return resources, nil
 }
 
-func ResourceHandlerByKind(kind string) (ResourceHandler, error) {
+func ResourceHandlerByKind(kind string) (Handler, error) {
 	return resources.Get(kind)
 }
 
@@ -364,6 +358,6 @@ func FormatResource(res interface{}, w io.Writer) (err error) {
 			return err
 		}
 	}
-	fmt.Fprintln(w, string(out))
+	_, _ = fmt.Fprintln(w, string(out))
 	return nil
 }

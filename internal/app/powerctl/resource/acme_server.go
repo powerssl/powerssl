@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"powerssl.dev/powerssl/internal/app/powerctl"
+	cmdutil "powerssl.dev/powerssl/internal/pkg/cmd"
 	"powerssl.dev/powerssl/pkg/apiserver/api"
 	apiserverclient "powerssl.dev/powerssl/pkg/apiserver/client"
 )
@@ -91,17 +92,16 @@ func (r acmeServer) Columns(resource *Resource) ([]string, []string) {
 		}
 }
 
-func (r acmeServer) Describe(client *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
+func (r acmeServer) Describe(_ *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
 	spec := resource.Spec.(*acmeServerSpec)
 	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
-	fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
-	fmt.Fprintln(w, fmt.Sprintf("Create Time:\t%s", resource.Meta.CreateTime))
-	fmt.Fprintln(w, fmt.Sprintf("Update Time:\t%s", resource.Meta.UpdateTime))
-	fmt.Fprintln(w, fmt.Sprintf("Display Name:\t%s", spec.DisplayName))
-	fmt.Fprintln(w, fmt.Sprintf("Directory URL:\t%s", spec.DirectoryURL))
-	fmt.Fprintln(w, fmt.Sprintf("Integration Name:\t%s", spec.IntegrationName))
-	w.Flush()
-	return nil
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Create Time:\t%s", resource.Meta.CreateTime))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Update Time:\t%s", resource.Meta.UpdateTime))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Display Name:\t%s", spec.DisplayName))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Directory URL:\t%s", spec.DirectoryURL))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Integration Name:\t%s", spec.IntegrationName))
+	return w.Flush()
 }
 
 type acmeServerSpec struct {
@@ -129,7 +129,7 @@ func NewCmdCreateACMEServer() *cobra.Command {
 			client, err = powerctl.NewGRPCClient()
 			return err
 		},
-		RunE: func(cmd *cobra.Command, args []string) (err error) {
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) (err error) {
 			var apiACMEServer *api.ACMEServer
 			if letsEncrypt {
 				apiACMEServer = &api.ACMEServer{
@@ -154,14 +154,14 @@ func NewCmdCreateACMEServer() *cobra.Command {
 				return err
 			}
 			return FormatResource(acmeServer{}.Encode(apiACMEServer), os.Stdout)
-		},
+		}),
 	}
 
-	cmd.Flags().BoolVarP(&letsEncrypt, "letsencrypt", "", false, "Let's Encrypt defaults")
-	cmd.Flags().BoolVarP(&letsEncryptStaging, "letsencrypt-staging", "", false, "Let's Encrypt staging defaults")
-	cmd.Flags().StringVarP(&directoryURL, "directory-url", "", "", "Directory URL")
-	cmd.Flags().StringVarP(&displayName, "display-name", "", "", "Display name")
-	cmd.Flags().StringVarP(&integrationName, "integration-name", "", "", "Integration name")
+	cmd.Flags().BoolVar(&letsEncrypt, "letsencrypt", false, "Let's Encrypt defaults")
+	cmd.Flags().BoolVar(&letsEncryptStaging, "letsencrypt-staging", false, "Let's Encrypt staging defaults")
+	cmd.Flags().StringVar(&directoryURL, "directory-url", "", "Directory URL")
+	cmd.Flags().StringVar(&displayName, "display-name", "", "Display name")
+	cmd.Flags().StringVar(&integrationName, "integration-name", "", "Integration name")
 
 	return cmd
 }

@@ -1,13 +1,13 @@
 package cmd
 
 import (
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
 
 	"powerssl.dev/powerssl/internal/app/powerctl"
 	"powerssl.dev/powerssl/internal/app/powerctl/resource"
+	cmdutil "powerssl.dev/powerssl/internal/pkg/cmd"
 	apiserverclient "powerssl.dev/powerssl/pkg/apiserver/client"
 )
 
@@ -22,7 +22,7 @@ func newCmdGet() *cobra.Command {
 			client, err = powerctl.NewGRPCClient()
 			return err
 		},
-		RunE: func(cmd *cobra.Command, args []string) (err error) {
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) (err error) {
 			var resources []*resource.Resource
 			if len(args) == 1 && !strings.Contains(args[0], "/") {
 				kinds := strings.Split(args[0], ",")
@@ -30,19 +30,18 @@ func newCmdGet() *cobra.Command {
 					kinds = resource.Kinds()
 				}
 				for _, kind := range kinds {
-					resourceHandler, err := resource.ResourceHandlerByKind(kind)
-					if err != nil {
+					var resourceHandler resource.Handler
+					if resourceHandler, err = resource.ResourceHandlerByKind(kind); err != nil {
 						return err
 					}
-					res, err := resourceHandler.List(client)
-					if err != nil {
+					var res []*resource.Resource
+					if res, err = resourceHandler.List(client); err != nil {
 						return err
 					}
 					resources = append(resources, res...)
 				}
 			} else {
-				resources, err = resource.ResourcesFromArgs(args)
-				if err != nil {
+				if resources, err = resource.ResourcesFromArgs(args); err != nil {
 					return err
 				}
 				for i, res := range resources {
@@ -52,12 +51,12 @@ func newCmdGet() *cobra.Command {
 				}
 			}
 			if len(resources) > 1 {
-				return resource.FormatResource(resources, os.Stdout)
+				return resource.FormatResource(resources, cmd.OutOrStdout())
 			} else if len(resources) == 1 {
-				return resource.FormatResource(resources[0], os.Stdout)
+				return resource.FormatResource(resources[0], cmd.OutOrStdout())
 			}
 			return nil
-		},
+		}),
 	}
 
 	return cmd

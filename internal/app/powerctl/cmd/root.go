@@ -2,15 +2,16 @@ package cmd
 
 import (
 	"fmt"
-	"os"
+	"log"
 	"path/filepath"
 	"strings"
 
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"powerssl.dev/powerssl/internal/app/powerctl/resource"
+	cmdutil "powerssl.dev/powerssl/internal/pkg/cmd"
 	"powerssl.dev/powerssl/internal/pkg/version"
 )
 
@@ -40,21 +41,21 @@ Find more information at: https://docs.powerssl.io/powerctl`,
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output")
 	cmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.powerctl/config.yaml)")
 
-	cmd.PersistentFlags().BoolP("insecure", "", false, "Use insecure communication")
-	cmd.PersistentFlags().BoolP("insecure-skip-tls-verify", "", false, "Accepts any certificate presented by the server and any host name in that certificate")
-	cmd.PersistentFlags().StringP("addr", "", "", "GRPC address of API server")
-	cmd.PersistentFlags().StringP("auth-token", "", "", "Authentication token")
-	cmd.PersistentFlags().StringP("ca-file", "", "", "Certificate authority file")
+	cmd.PersistentFlags().Bool("insecure", false, "Use insecure communication")
+	cmd.PersistentFlags().Bool("insecure-skip-tls-verify", false, "Accepts any certificate presented by the server and any host name in that certificate")
+	cmd.PersistentFlags().String("addr", "", "GRPC address of API server")
+	cmd.PersistentFlags().String("auth-token", "", "Authentication token")
+	cmd.PersistentFlags().String("ca-file", "", "Certificate authority file")
+	cmd.PersistentFlags().String("server-name-override", "", "It will override the virtual host name of authority")
 	cmd.PersistentFlags().StringP("output", "o", "table", "Output format")
-	cmd.PersistentFlags().StringP("server-name-override", "", "", "It will override the virtual host name of authority")
 
-	viper.BindPFlag("addr", cmd.PersistentFlags().Lookup("addr"))
-	viper.BindPFlag("auth-token", cmd.PersistentFlags().Lookup("auth-token"))
-	viper.BindPFlag("ca-file", cmd.PersistentFlags().Lookup("ca-file"))
-	viper.BindPFlag("insecure", cmd.PersistentFlags().Lookup("insecure"))
-	viper.BindPFlag("insecure-skip-tls-verify", cmd.PersistentFlags().Lookup("insecure-skip-tls-verify"))
-	viper.BindPFlag("output", cmd.PersistentFlags().Lookup("output"))
-	viper.BindPFlag("server-name-override", cmd.PersistentFlags().Lookup("server-name-override"))
+	cmdutil.Must(viper.BindPFlag("addr", cmd.PersistentFlags().Lookup("addr")))
+	cmdutil.Must(viper.BindPFlag("auth-token", cmd.PersistentFlags().Lookup("auth-token")))
+	cmdutil.Must(viper.BindPFlag("ca-file", cmd.PersistentFlags().Lookup("ca-file")))
+	cmdutil.Must(viper.BindPFlag("insecure", cmd.PersistentFlags().Lookup("insecure")))
+	cmdutil.Must(viper.BindPFlag("insecure-skip-tls-verify", cmd.PersistentFlags().Lookup("insecure-skip-tls-verify")))
+	cmdutil.Must(viper.BindPFlag("output", cmd.PersistentFlags().Lookup("output")))
+	cmdutil.Must(viper.BindPFlag("server-name-override", cmd.PersistentFlags().Lookup("server-name-override")))
 
 	cmd.AddCommand(newCmdCompletion())
 	cmdCreate := newCmdCreate()
@@ -75,10 +76,7 @@ Find more information at: https://docs.powerssl.io/powerctl`,
 func Execute() {
 	cobra.OnInitialize(initConfig)
 
-	if err := NewCmdRoot().Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	cmdutil.Execute(NewCmdRoot())
 }
 
 func initConfig() {
@@ -87,8 +85,7 @@ func initConfig() {
 	} else {
 		home, err := homedir.Dir()
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			log.Fatal(err)
 		}
 
 		viper.AddConfigPath(filepath.Join(home, ".powerctl"))
@@ -100,8 +97,7 @@ func initConfig() {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 
 	if err := viper.ReadInConfig(); err != nil && strings.Contains("Not Found", err.Error()) {
-		fmt.Println("Can't read config:", err)
-		os.Exit(1)
+		log.Fatal("Can't read config:", err)
 	} else if err == nil && verbose {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}

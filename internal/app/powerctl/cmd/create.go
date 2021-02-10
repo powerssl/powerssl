@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"os"
+	cmdutil "powerssl.dev/powerssl/internal/pkg/cmd"
 
 	"github.com/spf13/cobra"
 
@@ -26,11 +26,10 @@ func newCmdCreate() *cobra.Command {
 		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
 			client, err = powerctl.NewGRPCClient()
 			return err
-
 		},
-		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			resources, err := resource.ResourcesFromFile(filename)
-			if err != nil {
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) (err error) {
+			var resources []*resource.Resource
+			if resources, err = resource.ResourcesFromFile(filename); err != nil {
 				return err
 			}
 			for i, res := range resources {
@@ -39,12 +38,12 @@ func newCmdCreate() *cobra.Command {
 				}
 			}
 			if len(resources) > 1 {
-				return resource.FormatResource(resources, os.Stdout)
+				return resource.FormatResource(resources, cmd.OutOrStdout())
 			} else if len(resources) == 1 {
-				return resource.FormatResource(resources[0], os.Stdout)
+				return resource.FormatResource(resources[0], cmd.OutOrStdout())
 			}
 			return nil
-		},
+		}),
 	}
 
 	cmd.Flags().StringVarP(&filename, "filename", "f", "", "Filename to file to use to create the resources")

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	cmdutil "powerssl.dev/powerssl/internal/pkg/cmd"
 	"strings"
 	"text/tabwriter"
 
@@ -87,16 +88,15 @@ func (r user) Columns(resource *Resource) ([]string, []string) {
 		}
 }
 
-func (r user) Describe(client *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
+func (r user) Describe(_ *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
 	spec := resource.Spec.(*userSpec)
 	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
-	fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
-	fmt.Fprintln(w, fmt.Sprintf("Create Time:\t%s", resource.Meta.CreateTime))
-	fmt.Fprintln(w, fmt.Sprintf("Update Time:\t%s", resource.Meta.UpdateTime))
-	fmt.Fprintln(w, fmt.Sprintf("Display Name:\t%s", spec.DisplayName))
-	fmt.Fprintln(w, fmt.Sprintf("User Name:\t%s", spec.UserName))
-	w.Flush()
-	return nil
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Create Time:\t%s", resource.Meta.CreateTime))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Update Time:\t%s", resource.Meta.UpdateTime))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Display Name:\t%s", spec.DisplayName))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("User Name:\t%s", spec.UserName))
+	return w.Flush()
 }
 
 type userSpec struct {
@@ -120,7 +120,7 @@ func NewCmdCreateUser() *cobra.Command {
 			client, err = powerctl.NewGRPCClient()
 			return err
 		},
-		RunE: func(cmd *cobra.Command, args []string) (err error) {
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) (err error) {
 			apiUser := &api.User{
 				DisplayName: displayName,
 				UserName:    userName,
@@ -129,11 +129,11 @@ func NewCmdCreateUser() *cobra.Command {
 				return err
 			}
 			return FormatResource(user{}.Encode(apiUser), os.Stdout)
-		},
+		}),
 	}
 
-	cmd.Flags().StringVarP(&displayName, "display-name", "", "", "Display name")
-	cmd.Flags().StringVarP(&userName, "user-name", "", "", "User name")
+	cmd.Flags().StringVar(&displayName, "display-name", "", "Display name")
+	cmd.Flags().StringVar(&userName, "user-name", "", "User name")
 
 	return cmd
 }

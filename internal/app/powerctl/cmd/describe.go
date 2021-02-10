@@ -1,12 +1,11 @@
 package cmd
 
 import (
-	"os"
-
 	"github.com/spf13/cobra"
 
 	"powerssl.dev/powerssl/internal/app/powerctl"
 	"powerssl.dev/powerssl/internal/app/powerctl/resource"
+	cmdutil "powerssl.dev/powerssl/internal/pkg/cmd"
 	apiserverclient "powerssl.dev/powerssl/pkg/apiserver/client"
 )
 
@@ -20,18 +19,17 @@ func newCmdDescribe() *cobra.Command {
 		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
 			client, err = powerctl.NewGRPCClient()
 			return err
-
 		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			res, err := resource.ResourceFromArgs(args)
-			if err != nil {
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) (err error) {
+			var res *resource.Resource
+			if res, err = resource.ResourceFromArgs(args); err != nil {
 				return err
 			}
 			if res, err = res.Get(client); err != nil {
 				return err
 			}
-			return res.Describe(client, os.Stdout)
-		},
+			return res.Describe(client, cmd.OutOrStdout())
+		}),
 	}
 
 	return cmd

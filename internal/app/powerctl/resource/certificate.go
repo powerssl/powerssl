@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"powerssl.dev/powerssl/internal/app/powerctl"
+	cmdutil "powerssl.dev/powerssl/internal/pkg/cmd"
 	"powerssl.dev/powerssl/pkg/apiserver/api"
 	apiserverclient "powerssl.dev/powerssl/pkg/apiserver/client"
 )
@@ -99,19 +100,18 @@ func (r certificate) Columns(resource *Resource) ([]string, []string) {
 		}
 }
 
-func (r certificate) Describe(client *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
+func (r certificate) Describe(_ *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
 	spec := resource.Spec.(*certificateSpec)
 	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
-	fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
-	fmt.Fprintln(w, fmt.Sprintf("Create Time:\t%s", resource.Meta.CreateTime))
-	fmt.Fprintln(w, fmt.Sprintf("Update Time:\t%s", resource.Meta.UpdateTime))
-	fmt.Fprintln(w, fmt.Sprintf("DNS Names:\t%s", strings.Join(spec.Dnsnames, ",")))
-	fmt.Fprintln(w, fmt.Sprintf("Key Algorithm:\t%s", fmt.Sprint(spec.KeyAlgorithm)))
-	fmt.Fprintln(w, fmt.Sprintf("Key Size:\t%s", fmt.Sprint(spec.KeySize)))
-	fmt.Fprintln(w, fmt.Sprintf("Digest Algorithm:\t%s", fmt.Sprint(spec.DigestAlgorithm)))
-	fmt.Fprintln(w, fmt.Sprintf("Auto Renew:\t%v", spec.AutoRenew))
-	w.Flush()
-	return nil
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Create Time:\t%s", resource.Meta.CreateTime))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Update Time:\t%s", resource.Meta.UpdateTime))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("DNS Names:\t%s", strings.Join(spec.Dnsnames, ",")))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Key Algorithm:\t%s", fmt.Sprint(spec.KeyAlgorithm)))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Key Size:\t%s", fmt.Sprint(spec.KeySize)))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Digest Algorithm:\t%s", fmt.Sprint(spec.DigestAlgorithm)))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Auto Renew:\t%v", spec.AutoRenew))
+	return w.Flush()
 }
 
 type certificateSpec struct {
@@ -140,7 +140,7 @@ func NewCmdCreateCertificate() *cobra.Command {
 			client, err = powerctl.NewGRPCClient()
 			return err
 		},
-		RunE: func(cmd *cobra.Command, args []string) (err error) {
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) (err error) {
 			apiCertificate := &api.Certificate{
 				Dnsnames:        strings.Split(dnsNames, ","),
 				KeyAlgorithm:    keyAlgorithm,
@@ -152,14 +152,14 @@ func NewCmdCreateCertificate() *cobra.Command {
 				return err
 			}
 			return FormatResource(certificate{}.Encode(apiCertificate), os.Stdout)
-		},
+		}),
 	}
 
-	cmd.Flags().BoolVarP(&autoRenew, "auto-renew", "", false, "Auto renew ...")
-	cmd.Flags().IntVarP(&keySize, "key-size", "", 0, "Key size ...")
-	cmd.Flags().StringVarP(&digestAlgorithm, "digest-algorithm", "", "", "Digest algorithm ...")
-	cmd.Flags().StringVarP(&dnsNames, "dns-names", "", "", "DNS name for the certificate (seperated by \",\")")
-	cmd.Flags().StringVarP(&keyAlgorithm, "key-algorithm", "", "", "Key algorithm ...")
+	cmd.Flags().BoolVar(&autoRenew, "auto-renew", false, "Auto renew ...")
+	cmd.Flags().IntVar(&keySize, "key-size", 0, "Key size ...")
+	cmd.Flags().StringVar(&digestAlgorithm, "digest-algorithm", "", "Digest algorithm ...")
+	cmd.Flags().StringVar(&dnsNames, "dns-names", "", "DNS name for the certificate (seperated by \",\")")
+	cmd.Flags().StringVar(&keyAlgorithm, "key-algorithm", "", "Key algorithm ...")
 
 	return cmd
 }

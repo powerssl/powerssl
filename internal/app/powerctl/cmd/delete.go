@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	cmdutil "powerssl.dev/powerssl/internal/pkg/cmd"
 
 	"powerssl.dev/powerssl/internal/app/powerctl"
 	"powerssl.dev/powerssl/internal/app/powerctl/resource"
@@ -20,18 +21,18 @@ func newCmdDelete() *cobra.Command {
 			return err
 
 		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			resources, err := resource.ResourcesFromArgs(args)
-			if err != nil {
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) (err error) {
+			var resources []*resource.Resource
+			if resources, err = resource.ResourcesFromArgs(args); err != nil {
 				return err
 			}
-			for _, resource := range resources {
-				if err := resource.Delete(client); err != nil {
+			for _, res := range resources {
+				if err = res.Delete(client); err != nil {
 					return err
 				}
 			}
 			return nil
-		},
+		}),
 	}
 
 	return cmd

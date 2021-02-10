@@ -6,13 +6,13 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 
 	"powerssl.dev/powerssl/internal/app/powerctl"
+	cmdutil "powerssl.dev/powerssl/internal/pkg/cmd"
 	"powerssl.dev/powerssl/pkg/apiserver/api"
 	apiserverclient "powerssl.dev/powerssl/pkg/apiserver/client"
 )
@@ -104,16 +104,16 @@ func (r acmeAccount) Columns(resource *Resource) ([]string, []string) {
 func (r acmeAccount) Describe(client *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
 	spec := resource.Spec.(*acmeAccountSpec)
 	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
-	fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
-	fmt.Fprintln(w, fmt.Sprintf("Create Time:\t%s", resource.Meta.CreateTime))
-	fmt.Fprintln(w, fmt.Sprintf("Update Time:\t%s", resource.Meta.UpdateTime))
-	fmt.Fprintln(w, fmt.Sprintf("Display Name:\t%s", spec.DisplayName))
-	fmt.Fprintln(w, fmt.Sprintf("Title:\t%s", spec.Title))
-	fmt.Fprintln(w, fmt.Sprintf("Description:\t%s", spec.Description))
-	fmt.Fprintln(w, fmt.Sprintf("TOS Agreed:\t%v", spec.TermsOfServiceAgreed))
-	fmt.Fprintln(w, fmt.Sprintf("Contacts:\t%s", strings.Join(spec.Contacts, ",")))
-	fmt.Fprintln(w, fmt.Sprintf("Account URL:\t%s", spec.AccountURL))
-	fmt.Fprintln(w, "ACME Server:")
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Create Time:\t%s", resource.Meta.CreateTime))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Update Time:\t%s", resource.Meta.UpdateTime))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Display Name:\t%s", spec.DisplayName))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Title:\t%s", spec.Title))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Description:\t%s", spec.Description))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("TOS Agreed:\t%v", spec.TermsOfServiceAgreed))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Contacts:\t%s", strings.Join(spec.Contacts, ",")))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Account URL:\t%s", spec.AccountURL))
+	_, _ = fmt.Fprintln(w, "ACME Server:")
 	acmeServer := &Resource{
 		Kind: "acmeserver",
 		Meta: &resourceMeta{
@@ -124,13 +124,14 @@ func (r acmeAccount) Describe(client *apiserverclient.GRPCClient, resource *Reso
 		return err
 	}
 	acmeServerDescription := new(bytes.Buffer)
-	acmeServer.Describe(client, acmeServerDescription)
+	if err = acmeServer.Describe(client, acmeServerDescription); err != nil {
+		return err
+	}
 	scanner := bufio.NewScanner(acmeServerDescription)
 	for scanner.Scan() {
-		fmt.Fprintln(w, "", "", scanner.Text())
+		_, _ = fmt.Fprintln(w, "", "", scanner.Text())
 	}
-	w.Flush()
-	return nil
+	return w.Flush()
 }
 
 type acmeAccountSpec struct {
@@ -160,7 +161,7 @@ func NewCmdCreateACMEAccount() *cobra.Command {
 			client, err = powerctl.NewGRPCClient()
 			return err
 		},
-		RunE: func(cmd *cobra.Command, args []string) (err error) {
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) (err error) {
 			apiACMEAccount := &api.ACMEAccount{
 				Contacts:             strings.Split(contacts, ","),
 				TermsOfServiceAgreed: termsOfServiceAgreed,
@@ -168,15 +169,15 @@ func NewCmdCreateACMEAccount() *cobra.Command {
 			if apiACMEAccount, err = client.ACMEAccount.Create(context.Background(), fmt.Sprintf("acmeServers/%s", acmeServerID), apiACMEAccount); err != nil {
 				return err
 			}
-			return FormatResource(acmeAccount{}.Encode(apiACMEAccount), os.Stdout)
-		},
+			return FormatResource(acmeAccount{}.Encode(apiACMEAccount), cmd.OutOrStdout())
+		}),
 	}
 
-	cmd.Flags().BoolVarP(&termsOfServiceAgreed, "agree-terms-of-service", "", false, "Terms of Service agreed")
-	cmd.Flags().StringVarP(&contacts, "contacts", "", "", "Contact URLs (e.g. mailto:contact@example.com) (seperated by \",\")")
-	cmd.Flags().StringVarP(&acmeServerID, "acmeserver", "", "", "ACME Server")
+	cmd.Flags().BoolVar(&termsOfServiceAgreed, "agree-terms-of-service", false, "Terms of Service agreed")
+	cmd.Flags().StringVar(&contacts, "contacts", "", "Contact URLs (e.g. mailto:contact@example.com) (seperated by \",\")")
+	cmd.Flags().StringVar(&acmeServerID, "acmeserver", "", "ACME Server")
 
-	cmd.MarkFlagRequired("acmeserver")
+	cmdutil.Must(cmd.MarkFlagRequired("acmeserver"))
 
 	return cmd
 }
