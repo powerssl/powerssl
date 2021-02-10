@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"time"
 
 	bindatahtmltemplate "github.com/arschles/go-bindata-html-template"
@@ -28,33 +27,32 @@ import (
 	utilhttp "powerssl.dev/powerssl/internal/pkg/util/http"
 )
 
-func Run(cfg *Config) {
-	logger := util.NewLogger(os.Stdout)
-
-	util.ValidateConfig(cfg, logger)
+func Run(cfg *Config) (err error) {
+	_, logger := util.NewZapAndKitLogger()
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
 		return util.InterruptHandler(ctx, logger)
 	})
 
-	if cfg.MetricsAddr != "" {
+	if cfg.Metrics.Addr != "" {
 		g.Go(func() error {
-			return transport.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, log.With(logger, "component", "metrics"))
 		})
 	}
 
 	g.Go(func() error {
-		return ServeHTTP(ctx, cfg.Addr, log.With(logger, "component", "http"), cfg.JWTPrivateKeyFile, cfg.WebAppURI)
+		return ServeHTTP(ctx, cfg.Addr, log.With(logger, "component", "http"), cfg.JWT.PrivateKeyFile, cfg.WebApp.URI)
 	})
 
-	if err := g.Wait(); err != nil {
+	if err = g.Wait(); err != nil {
 		switch err.(type) {
 		case util.InterruptError:
 		default:
-			logger.Log("err", err)
+			return err
 		}
 	}
+	return nil
 }
 
 func jwksEndpoint(signKeys ...*rsa.PrivateKey) (func(w http.ResponseWriter, req *http.Request), error) {
@@ -79,7 +77,7 @@ func jwksEndpoint(signKeys ...*rsa.PrivateKey) (func(w http.ResponseWriter, req 
 	}
 	return func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Add("Content-Type", "application/jwk+json")
-		fmt.Fprintln(w, string(jwks))
+		_, _ = fmt.Fprintln(w, string(jwks))
 	}, nil
 }
 
@@ -109,12 +107,12 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		if req.URL.Path == "/" {
-			w.Write(buffer)
+			_, _ = w.Write(buffer)
 			return
 		}
 		if req.URL.Path == "/favicon.ico" {
 			w.Header().Add("content-type", "image/x-icon")
-			w.Write(asset.MustAsset("favicon.ico"))
+			_, _ = w.Write(asset.MustAsset("favicon.ico"))
 			return
 		}
 		http.NotFound(w, req)
@@ -133,7 +131,7 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 			return
 		}
 		w.Header().Add("Content-Type", "application/jwt")
-		fmt.Fprint(w, tokenString)
+		_, _ = fmt.Fprint(w, tokenString)
 	})
 	mux.HandleFunc("/service", func(w http.ResponseWriter, req *http.Request) {
 		key := jose.JSONWebKey{Key: signKey}
@@ -151,7 +149,7 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 			return
 		}
 		w.Header().Add("Content-Type", "application/jwt")
-		fmt.Fprint(w, tokenString)
+		_, _ = fmt.Fprint(w, tokenString)
 	})
 	mux.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(utilhttp.NewFileSystem(asset.AssetFile()))))
 	srv := http.Server{
@@ -164,16 +162,16 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 		c <- srv.ListenAndServe()
 		close(c)
 	}()
-	logger.Log("listening", addr)
+	_ = logger.Log("listening", addr)
 	select {
 	case err := <-c:
-		logger.Log("err", err)
+		_ = logger.Log("err", err)
 		if err != http.ErrServerClosed {
 			return err
 		}
 		return nil
 	case <-ctx.Done():
-		logger.Log("err", ctx.Err())
+		_ = logger.Log("err", ctx.Err())
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 		if err := srv.Shutdown(shutdownCtx); err != nil {
