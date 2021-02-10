@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -23,10 +22,8 @@ import (
 	utilhttp "powerssl.dev/powerssl/internal/pkg/util/http"
 )
 
-func Run(cfg *Config) {
-	logger := util.NewLogger(os.Stdout)
-
-	util.ValidateConfig(cfg, logger)
+func Run(cfg *Config) (err error) {
+	_, logger := util.NewZapAndKitLogger()
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
@@ -35,17 +32,14 @@ func Run(cfg *Config) {
 
 	var conn *grpc.ClientConn
 	{
-		var err error
-		conn, err = transport.NewClientConn(ctx, cfg.APIServerClientConfig)
-		if err != nil {
-			logger.Log("transport", "gRPC", "during", "Connect", "err", err)
-			os.Exit(1)
+		if conn, err = transport.NewClientConn(ctx, &cfg.APIServerClientConfig); err != nil {
+			return err
 		}
 	}
 
-	if cfg.MetricsAddr != "" {
+	if cfg.Metrics.Addr != "" {
 		g.Go(func() error {
-			return transport.ServeMetrics(ctx, cfg.MetricsAddr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, log.With(logger, "component", "metrics"))
 		})
 	}
 
@@ -53,13 +47,14 @@ func Run(cfg *Config) {
 		return ServeHTTP(ctx, cfg.Addr, log.With(logger, "component", "http"), conn)
 	})
 
-	if err := g.Wait(); err != nil {
+	if err = g.Wait(); err != nil {
 		switch err.(type) {
 		case util.InterruptError:
 		default:
-			logger.Log("err", err)
+			return err
 		}
 	}
+	return nil
 }
 
 func ServeHTTP(ctx context.Context, addr string, logger log.Logger, conn *grpc.ClientConn) error {
@@ -90,16 +85,16 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, conn *grpc.C
 		c <- srv.ListenAndServe()
 		close(c)
 	}()
-	logger.Log("listening", addr)
+	_ = logger.Log("listening", addr)
 	select {
 	case err := <-c:
-		logger.Log("err", err)
+		_ = logger.Log("err", err)
 		if err != http.ErrServerClosed {
 			return err
 		}
 		return nil
 	case <-ctx.Done():
-		logger.Log("err", ctx.Err())
+		_ = logger.Log("err", ctx.Err())
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 		if err := srv.Shutdown(shutdownCtx); err != nil {
@@ -132,7 +127,7 @@ func healthzServer(conn *grpc.ClientConn) http.HandlerFunc {
 			http.Error(w, fmt.Sprintf("grpc server is %s", s), http.StatusBadGateway)
 			return
 		}
-		fmt.Fprintln(w, "ok")
+		_, _ = fmt.Fprintln(w, "ok")
 	}
 }
 
@@ -158,7 +153,7 @@ func newGateway(ctx context.Context, conn *grpc.ClientConn) (http.Handler, error
 // preflightHandler adds the necessary headers in order to serve
 // CORS from any origin using the methods "GET", "HEAD", "POST", "PUT", "DELETE"
 // TODO: Don't do this without consideration in production systems.
-func preflightHandler(w http.ResponseWriter, r *http.Request) {
+func preflightHandler(w http.ResponseWriter, _ *http.Request) {
 	headers := []string{"Content-Type", "Accept", "Authorization"}
 	w.Header().Set("Access-Control-Allow-Headers", strings.Join(headers, ","))
 	methods := []string{"GET", "HEAD", "POST", "PUT", "DELETE"}
@@ -182,6 +177,6 @@ func swaggerUIConfigEndpoint() (func(w http.ResponseWriter, req *http.Request), 
 	}
 	return func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
-		fmt.Fprintln(w, string(res))
+		_, _ = fmt.Fprintln(w, string(res))
 	}, nil
 }
