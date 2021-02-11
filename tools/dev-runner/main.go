@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -48,9 +49,7 @@ func main() {
 		if watcher, err = fsnotify.NewWatcher(); err != nil {
 			of.ErrorOutput(fmt.Sprintf("watcher error: %s", err))
 		}
-		defer func() {
-			_ = watcher.Close()
-		}()
+		defer errWrapCloser(watcher, &err)
 	}
 
 	interrupts := make(map[string]chan struct{}, len(component.Components)+1)
@@ -67,7 +66,8 @@ func main() {
 				// if event.Op&fsnotify.Write != fsnotify.Write {
 				// 	break
 				// }
-				c, ok := interrupts[event.Name]
+				var c chan struct{}
+				c, ok = interrupts[event.Name]
 				if ok {
 					c <- struct{}{}
 				}
@@ -101,19 +101,23 @@ func main() {
 		}
 	}
 
-	wd, _ := os.Getwd()
+	wd, err := os.Getwd()
+	if err != nil {
+		cancel()
+		of.ErrorOutput(err.Error())
+	}
 	addComponent(component.Component{
 		Name:    "postgres",
 		Command: "docker",
 		Args:    fmt.Sprintf("run --rm -e POSTGRES_PASSWORD=powerssl -e POSTGRES_DB=powerssl -e POSTGRES_USER=powerssl -e PGDATA=/var/lib/postgresql/data/pgdata -p 5432:5432 -v %s/local/postgresql/data:/var/lib/postgresql/data postgres:13.1", wd),
 	})
 
-	if err := internal.WaitForService("localhost:5432", time.Minute); err != nil {
+	if err = internal.WaitForService("localhost:5432", time.Minute); err != nil {
 		of.SystemOutput(err.Error())
 		cancel()
 	}
 
-	if err := handlePostgres(of); err != nil {
+	if err = handlePostgres(of); err != nil {
 		cancel()
 		of.ErrorOutput(err.Error())
 	}
@@ -123,12 +127,12 @@ func main() {
 		Args:    "server -config configs/vault/config.hcl",
 	})
 
-	if err := internal.WaitForService("localhost:8200", time.Minute); err != nil {
+	if err = internal.WaitForService("localhost:8200", time.Minute); err != nil {
 		cancel()
 		of.ErrorOutput(err.Error())
 	}
 
-	if err := handleVault(of); err != nil {
+	if err = handleVault(of); err != nil {
 		cancel()
 		of.ErrorOutput(err.Error())
 	}
@@ -137,18 +141,18 @@ func main() {
 		if comp.Command != "bin/powerssl-temporalserver" {
 			continue
 		}
-		if err := watcher.Add(comp.Command); err != nil {
+		if err = watcher.Add(comp.Command); err != nil {
 			of.ErrorOutput(fmt.Sprintf("watcher error: %s", err))
 		}
 		addComponent(comp)
 	}
 
-	if err := internal.WaitForService("localhost:7233", time.Minute); err != nil {
+	if err = internal.WaitForService("localhost:7233", time.Minute); err != nil {
 		cancel()
 		of.ErrorOutput(err.Error())
 	}
 
-	if err := handleTemporal(of); err != nil {
+	if err = handleTemporal(of); err != nil {
 		cancel()
 		of.ErrorOutput(err.Error())
 	}
@@ -157,7 +161,7 @@ func main() {
 		if comp.Command == "bin/powerssl-temporalserver" {
 			continue
 		}
-		if err := watcher.Add(comp.Command); err != nil {
+		if err = watcher.Add(comp.Command); err != nil {
 			of.ErrorOutput(fmt.Sprintf("watcher error: %s", err))
 		}
 		addComponent(comp)
@@ -182,7 +186,23 @@ func main() {
 		}, " "),
 	})
 
-	if err := g.Wait(); err != nil {
+	addComponent(component.Component{
+		Name:    "temporalweb",
+		Command: "docker",
+		Args: strings.Join([]string{
+			"run", "--rm", "--init",
+			"-e", "TEMPORAL_GRPC_ENDPOINT=host.docker.internal:7233",
+			"-e", "TEMPORAL_TLS_CERT_PATH=/certs/localhost.pem",
+			"-e", "TEMPORAL_TLS_KEY_PATH=/certs/localhost-key.pem",
+			"-e", "TEMPORAL_TLS_CA_PATH=/certs/ca.pem",
+			"-e", "TEMPORAL_TLS_SERVER_NAME=localhost",
+			"-p", "8088:8088",
+			"-v", fmt.Sprintf("%s/local/certs:/certs", wd),
+			"temporalio/web:latest",
+		}, " "),
+	})
+
+	if err = g.Wait(); err != nil {
 		switch err.(type) {
 		case util.InterruptError:
 		default:
@@ -199,10 +219,10 @@ func handlePostgres(of *internal.Outlet) error {
 			return errors.Wrap(err, "connecting default database")
 		}
 		defer func() {
-			_ = db.Close()
+			errWrapCloser(db, &err)
 		}()
 		for {
-			if err := db.Ping(); err == nil {
+			if err = db.Ping(); err == nil {
 				break
 			}
 			time.Sleep(time.Second)
@@ -225,7 +245,7 @@ func handlePostgres(of *internal.Outlet) error {
 				return errors.Wrap(err, "creating database vault")
 			}
 		}
-		_ = db.Close()
+		errWrapCloser(db, &err)
 	}
 	{
 		var err error
@@ -233,11 +253,9 @@ func handlePostgres(of *internal.Outlet) error {
 		if db, err = sql.Open("postgres", "postgresql://powerssl:powerssl@localhost:5432/vault?sslmode=disable"); err != nil {
 			return errors.Wrap(err, "connecting vault database")
 		}
-		defer func() {
-			_ = db.Close()
-		}()
+		defer errWrapCloser(db, &err)
 		for {
-			if err := db.Ping(); err == nil {
+			if err = db.Ping(); err == nil {
 				break
 			}
 			time.Sleep(time.Second)
@@ -249,7 +267,7 @@ func handlePostgres(of *internal.Outlet) error {
 				return errors.Wrap(err, "creating vault table and index")
 			}
 		}
-		_ = db.Close()
+		errWrapCloser(db, &err)
 	}
 	{
 		comp := component.Component{
@@ -261,10 +279,10 @@ func handlePostgres(of *internal.Outlet) error {
 		if err != nil {
 			return err
 		}
-		if err := cmd.Start(); err != nil {
+		if err = cmd.Start(); err != nil {
 			return fmt.Errorf("failed to start %s: %s", comp.Command, err)
 		}
-		if err := cmd.Wait(); err != nil {
+		if err = cmd.Wait(); err != nil {
 			return fmt.Errorf("failed to wait %s: %s", comp.Command, err)
 		}
 	}
@@ -278,10 +296,10 @@ func handlePostgres(of *internal.Outlet) error {
 		if err != nil {
 			return err
 		}
-		if err := cmd.Start(); err != nil {
+		if err = cmd.Start(); err != nil {
 			return fmt.Errorf("failed to start %s: %s", comp.Command, err)
 		}
-		if err := cmd.Wait(); err != nil {
+		if err = cmd.Wait(); err != nil {
 			return fmt.Errorf("failed to wait %s: %s", comp.Command, err)
 		}
 	}
@@ -298,7 +316,7 @@ func handleTemporal(of *internal.Outlet) error {
 	if err != nil {
 		return err
 	}
-	if err := cmd.Start(); err != nil {
+	if err = cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start %s: %s", comp.Command, err)
 	}
 	_ = cmd.Wait()
@@ -311,12 +329,12 @@ func handleVault(of *internal.Outlet) error {
 		command = "bin/powerutil"
 		args = "vault --ca local/certs/ca.pem --ca-key local/certs/ca-key.pem"
 	} else {
-		d, err := ioutil.ReadFile("local/vault/secret.yaml")
-		if err != nil {
+		var byt []byte
+		if byt, err = ioutil.ReadFile("local/vault/secret.yaml"); err != nil {
 			return fmt.Errorf("config error: %s", err)
 		}
 		var config map[string]interface{}
-		if err := yaml.Unmarshal(d, &config); err != nil {
+		if err = yaml.Unmarshal(byt, &config); err != nil {
 			return fmt.Errorf("config error: %s", err)
 		}
 
@@ -333,10 +351,10 @@ func handleVault(of *internal.Outlet) error {
 	if err != nil {
 		return err
 	}
-	if err := cmd.Start(); err != nil {
+	if err = cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start %s: %s", comp.Command, err)
 	}
-	if err := cmd.Wait(); err != nil {
+	if err = cmd.Wait(); err != nil {
 		return fmt.Errorf("failed to wait %s: %s", comp.Command, err)
 	}
 	return nil
@@ -347,17 +365,21 @@ func serviceToken() (_ string, err error) {
 		return "", err
 	}
 	var resp *http.Response
-	resp, err = http.Get("http://localhost:8081/service")
-	if err != nil {
-		return "", err
+	if resp, err = http.Get("http://localhost:8081/service"); err != nil {
+		return
 	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
+	defer errWrapCloser(resp.Body, &err)
 	var byt []byte
-	byt, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
+	if byt, err = ioutil.ReadAll(resp.Body); err != nil {
+		return
 	}
 	return string(byt), nil
+}
+
+func errWrapCloser(closer io.Closer, wErr *error) {
+	if err := closer.Close(); err != nil && *wErr != nil {
+		*wErr = fmt.Errorf("%s: %w", err, *wErr)
+	} else if err != nil {
+		*wErr = err
+	}
 }
