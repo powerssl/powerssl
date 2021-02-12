@@ -12,7 +12,6 @@ require (
 	github.com/daviddengcn/go-colortext v1.0.0
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/eggsampler/acme/v2 v2.0.1
 	github.com/freerware/work/v4 v4.0.0-beta
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/ghodss/yaml v1.0.0

@@ -40,6 +40,11 @@ check-scripts:
 .PHONY: clean
 clean: clean-dev-runner clean-powerctl clean-powerssl-agent clean-powerssl-apiserver clean-powerssl-auth clean-powerssl-controller clean-powerssl-grpcgateway clean-powerssl-integration-acme clean-powerssl-integration-cloudflare clean-powerssl-signer clean-powerssl-temporalserver clean-powerssl-webapp clean-powerssl-worker clean-powerutil
 
+.PHONY: clean-powerssl-integration-%
+clean-powerssl-integration-%:
+	cd integration/${*} && go clean powerssl.dev/integration/${*}/cmd/powerssl-integration-${*}
+	rm -f bin/powerssl-integration-${*}
+
 .PHONY: clean-%
 clean-%:
 	go clean powerssl.dev/powerssl/cmd/${*}

@@ -17,8 +17,6 @@ import (
 	auth "powerssl.dev/powerssl/internal/app/auth/cmd"
 	controller "powerssl.dev/powerssl/internal/app/controller/cmd"
 	grpcgateway "powerssl.dev/powerssl/internal/app/grpcgateway/cmd"
-	acmeintegration "powerssl.dev/powerssl/internal/app/integrations/acme/cmd"
-	cloudflareintegration "powerssl.dev/powerssl/internal/app/integrations/cloudflare/cmd"
 	powerctl "powerssl.dev/powerssl/internal/app/powerctl/cmd"
 	powerutil "powerssl.dev/powerssl/internal/app/powerutil/cmd"
 	signer "powerssl.dev/powerssl/internal/app/signer/cmd"
@@ -29,11 +27,9 @@ import (
 
 func main() {
 	for _, f := range []func() *cobra.Command{
-		acmeintegration.NewCmdRoot,
 		agent.NewCmdRoot,
 		apiserver.NewCmdRoot,
 		auth.NewCmdRoot,
-		cloudflareintegration.NewCmdRoot,
 		controller.NewCmdRoot,
 		grpcgateway.NewCmdRoot,
 		powerctl.NewCmdRoot,
