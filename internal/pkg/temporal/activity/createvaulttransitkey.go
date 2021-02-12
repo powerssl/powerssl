@@ -19,7 +19,7 @@ func (p *CreateVaultTransitKeyParams) ToKeyVals() []interface{} {
 	}
 }
 
-func CreateVaultTransitKey(ctx context.Context, params CreateVaultTransitKeyParams) (err error) {
+func CreateVaultTransitKey(ctx context.Context, params *CreateVaultTransitKeyParams) (err error) {
 	logger := temporalactivity.GetLogger(ctx)
 	logger.Info("CreateVaultTransitKey", params.ToKeyVals()...)
 

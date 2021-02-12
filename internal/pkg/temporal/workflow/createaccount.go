@@ -44,7 +44,7 @@ func CreateAccount(ctx temporalworkflow.Context, params CreateAccountParams) err
 	controllerCtx := temporalworkflow.WithTaskQueue(ctx, temporalutil.ControllerTaskQueue)
 	workerCtx := temporalworkflow.WithTaskQueue(ctx, temporalutil.WorkerTaskQueue)
 
-	if err := temporalworkflow.ExecuteActivity(workerCtx, activity.CreateVaultTransitKey, activity.CreateVaultTransitKeyParams{
+	if err := temporalworkflow.ExecuteActivity(workerCtx, activity.CreateVaultTransitKey, &activity.CreateVaultTransitKeyParams{
 		Name: params.Account,
 	}).Get(ctx, nil); err != nil {
 		return err
@@ -59,7 +59,7 @@ func CreateAccount(ctx temporalworkflow.Context, params CreateAccountParams) err
 		return err
 	}
 
-	if err := temporalworkflow.ExecuteActivity(workerCtx, activity.UpdateAccount, activity.UpdateAccountParams{
+	if err := temporalworkflow.ExecuteActivity(workerCtx, activity.UpdateAccount, &activity.UpdateAccountParams{
 		Name:       params.Account,
 		UpdateMask: []string{"account_url"},
 		ACMEAccount: &api.ACMEAccount{

@@ -27,7 +27,7 @@ type UpdateAccountResults struct {
 	ACMEAccount *api.ACMEAccount
 }
 
-func UpdateAccount(ctx context.Context, params UpdateAccountParams) (_ *UpdateAccountResults, err error) {
+func UpdateAccount(ctx context.Context, params *UpdateAccountParams) (_ *UpdateAccountResults, err error) {
 	logger := temporalactivity.GetLogger(ctx)
 	logger.Info("UpdateAccount", params.ToKeyVals()...)
 

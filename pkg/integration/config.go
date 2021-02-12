@@ -10,8 +10,8 @@ import (
 type ControllerClientConfig = transport.ClientConfig
 
 type Config struct {
-	AuthToken              string                 `validate:"required"`
-	ControllerClientConfig ControllerClientConfig `mapstructure:",squash"`
+	AuthToken              string                 `mapstructure:"auth-token" validate:"required"`
+	ControllerClientConfig ControllerClientConfig `mapstructure:"controller"`
 	Metrics                struct {
 		Addr string
 	}

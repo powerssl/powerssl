@@ -6,6 +6,8 @@ import (
 	"github.com/go-kit/kit/log"
 	temporalclient "go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/temporal"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	integrationactivity "powerssl.dev/powerssl/internal/app/controller/integration/activity"
 	"powerssl.dev/powerssl/internal/app/controller/integration/activity/acme"
@@ -43,22 +45,30 @@ func appErr(err *api.Error) error {
 	return activityError
 }
 
-func (bs basicService) GetCreateAccountRequest(ctx context.Context, apiActivity *api.Activity) (*api.Activity, string, bool, []string, error) {
-	var input activity.CreateACMEAccountParams
+func (s basicService) integrationErr(err error) error {
+	s.logger.Log("err", err)
+	return status.Error(codes.Internal, "")
+}
+
+func (s basicService) GetCreateAccountRequest(ctx context.Context, apiActivity *api.Activity) (*api.Activity, string, bool, []string, error) {
+	var input *activity.CreateACMEAccountParams
 	if err := integrationactivity.GetInput(ctx, apiActivity, &input); err != nil {
-		return nil, "", false, nil, err
+		return nil, "", false, nil, s.integrationErr(err)
 	}
 	return apiActivity, input.DirectoryURL, input.TermsOfServiceAgreed, input.Contacts, nil
 }
 
-func (bs basicService) SetCreateAccountResponse(ctx context.Context, apiActivity *api.Activity, account *api.Account, err *api.Error) error {
+func (s basicService) SetCreateAccountResponse(ctx context.Context, apiActivity *api.Activity, account *api.Account, apiErr *api.Error) error {
 	result := &activity.CreateACMEAccountResults{
 		Account: account,
 	}
-	return integrationactivity.SetResult(ctx, apiActivity, bs.temporal, result, appErr(err))
+	if err := integrationactivity.SetResult(ctx, apiActivity, s.temporal, result, appErr(apiErr)); err != nil {
+		return s.integrationErr(err)
+	}
+	return nil
 }
 
-func (bs basicService) GetDeactivateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, error) {
+func (s basicService) GetDeactivateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, error) {
 	f, err := integrationactivity.GetRequestDeprecated(activity)
 	if err != nil {
 		return nil, "", err
@@ -66,7 +76,7 @@ func (bs basicService) GetDeactivateAccountRequest(ctx context.Context, activity
 	return f.(func(*api.Activity) (*api.Activity, string, error))(activity)
 }
 
-func (bs basicService) SetDeactivateAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error {
+func (s basicService) SetDeactivateAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error {
 	f, err := integrationactivity.SetResponseDeprecated(activity)
 	if err != nil {
 		return err
@@ -74,7 +84,7 @@ func (bs basicService) SetDeactivateAccountResponse(ctx context.Context, activit
 	return f.(func(*api.Account, *api.Error) error)(account, erro)
 }
 
-func (bs basicService) GetRekeyAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
+func (s basicService) GetRekeyAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
 	f, err := integrationactivity.GetRequestDeprecated(activity)
 	if err != nil {
 		return nil, "", "", err
@@ -82,7 +92,7 @@ func (bs basicService) GetRekeyAccountRequest(ctx context.Context, activity *api
 	return f.(func(*api.Activity) (*api.Activity, string, string, error))(activity)
 }
 
-func (bs basicService) SetRekeyAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error {
+func (s basicService) SetRekeyAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error {
 	f, err := integrationactivity.SetResponseDeprecated(activity)
 	if err != nil {
 		return err
@@ -90,7 +100,7 @@ func (bs basicService) SetRekeyAccountResponse(ctx context.Context, activity *ap
 	return f.(func(*api.Account, *api.Error) error)(account, erro)
 }
 
-func (bs basicService) GetUpdateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, []string, error) {
+func (s basicService) GetUpdateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, []string, error) {
 	f, err := integrationactivity.GetRequestDeprecated(activity)
 	if err != nil {
 		return nil, "", nil, err
@@ -98,7 +108,7 @@ func (bs basicService) GetUpdateAccountRequest(ctx context.Context, activity *ap
 	return f.(func(*api.Activity) (*api.Activity, string, []string, error))(activity)
 }
 
-func (bs basicService) SetUpdateAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error {
+func (s basicService) SetUpdateAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error {
 	f, err := integrationactivity.SetResponseDeprecated(activity)
 	if err != nil {
 		return err
@@ -106,7 +116,7 @@ func (bs basicService) SetUpdateAccountResponse(ctx context.Context, activity *a
 	return f.(func(*api.Account, *api.Error) error)(account, erro)
 }
 
-func (bs basicService) GetCreateOrderRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, []*api.Identifier, string, string, error) {
+func (s basicService) GetCreateOrderRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, []*api.Identifier, string, string, error) {
 	var input acme.CreateOrderInput
 	if err := integrationactivity.GetInput(ctx, activity, &input); err != nil {
 		return nil, "", "", nil, "", "", err
@@ -114,14 +124,14 @@ func (bs basicService) GetCreateOrderRequest(ctx context.Context, activity *api.
 	return activity, input.DirectoryURL, input.AccountURL, input.Identifiers, input.NotBefore, input.NotAfter, nil
 }
 
-func (bs basicService) SetCreateOrderResponse(ctx context.Context, activity *api.Activity, order *api.Order, err *api.Error) error {
+func (s basicService) SetCreateOrderResponse(ctx context.Context, activity *api.Activity, order *api.Order, err *api.Error) error {
 	result := &acme.CreateOrderResult{
 		Order: order,
 	}
-	return integrationactivity.SetResult(ctx, activity, bs.temporal, result, appErr(err))
+	return integrationactivity.SetResult(ctx, activity, s.temporal, result, appErr(err))
 }
 
-func (bs basicService) GetFinalizeOrderRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, *x509.CertificateRequest, error) {
+func (s basicService) GetFinalizeOrderRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, *x509.CertificateRequest, error) {
 	f, err := integrationactivity.GetRequestDeprecated(activity)
 	if err != nil {
 		return nil, "", "", nil, err
@@ -129,7 +139,7 @@ func (bs basicService) GetFinalizeOrderRequest(ctx context.Context, activity *ap
 	return f.(func(*api.Activity) (*api.Activity, string, string, *x509.CertificateRequest, error))(activity)
 }
 
-func (bs basicService) SetFinalizeOrderResponse(ctx context.Context, activity *api.Activity, order *api.Order, erro *api.Error) error {
+func (s basicService) SetFinalizeOrderResponse(ctx context.Context, activity *api.Activity, order *api.Order, erro *api.Error) error {
 	f, err := integrationactivity.SetResponseDeprecated(activity)
 	if err != nil {
 		return err
@@ -137,7 +147,7 @@ func (bs basicService) SetFinalizeOrderResponse(ctx context.Context, activity *a
 	return f.(func(*api.Order, *api.Error) error)(order, erro)
 }
 
-func (bs basicService) GetGetOrderRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
+func (s basicService) GetGetOrderRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
 	f, err := integrationactivity.GetRequestDeprecated(activity)
 	if err != nil {
 		return nil, "", "", err
@@ -145,7 +155,7 @@ func (bs basicService) GetGetOrderRequest(ctx context.Context, activity *api.Act
 	return f.(func(*api.Activity) (*api.Activity, string, string, error))(activity)
 }
 
-func (bs basicService) SetGetOrderResponse(ctx context.Context, activity *api.Activity, order *api.Order, erro *api.Error) error {
+func (s basicService) SetGetOrderResponse(ctx context.Context, activity *api.Activity, order *api.Order, erro *api.Error) error {
 	f, err := integrationactivity.SetResponseDeprecated(activity)
 	if err != nil {
 		return err
@@ -153,7 +163,7 @@ func (bs basicService) SetGetOrderResponse(ctx context.Context, activity *api.Ac
 	return f.(func(*api.Order, *api.Error) error)(order, erro)
 }
 
-func (bs basicService) GetCreateAuthorizationRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, *api.Identifier, error) {
+func (s basicService) GetCreateAuthorizationRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, *api.Identifier, error) {
 	f, err := integrationactivity.GetRequestDeprecated(activity)
 	if err != nil {
 		return nil, "", "", nil, err
@@ -161,7 +171,7 @@ func (bs basicService) GetCreateAuthorizationRequest(ctx context.Context, activi
 	return f.(func(*api.Activity) (*api.Activity, string, string, *api.Identifier, error))(activity)
 }
 
-func (bs basicService) SetCreateAuthorizationResponse(ctx context.Context, activity *api.Activity, authorization *api.Authorization, erro *api.Error) error {
+func (s basicService) SetCreateAuthorizationResponse(ctx context.Context, activity *api.Activity, authorization *api.Authorization, erro *api.Error) error {
 	f, err := integrationactivity.SetResponseDeprecated(activity)
 	if err != nil {
 		return err
@@ -169,7 +179,7 @@ func (bs basicService) SetCreateAuthorizationResponse(ctx context.Context, activ
 	return f.(func(*api.Authorization, *api.Error) error)(authorization, erro)
 }
 
-func (bs basicService) GetDeactivateAuthorizationRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
+func (s basicService) GetDeactivateAuthorizationRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
 	f, err := integrationactivity.GetRequestDeprecated(activity)
 	if err != nil {
 		return nil, "", "", err
@@ -177,7 +187,7 @@ func (bs basicService) GetDeactivateAuthorizationRequest(ctx context.Context, ac
 	return f.(func(*api.Activity) (*api.Activity, string, string, error))(activity)
 }
 
-func (bs basicService) SetDeactivateAuthorizationResponse(ctx context.Context, activity *api.Activity, authorization *api.Authorization, erro *api.Error) error {
+func (s basicService) SetDeactivateAuthorizationResponse(ctx context.Context, activity *api.Activity, authorization *api.Authorization, erro *api.Error) error {
 	f, err := integrationactivity.SetResponseDeprecated(activity)
 	if err != nil {
 		return err
@@ -185,7 +195,7 @@ func (bs basicService) SetDeactivateAuthorizationResponse(ctx context.Context, a
 	return f.(func(*api.Authorization, *api.Error) error)(authorization, erro)
 }
 
-func (bs basicService) GetGetAuthorizationRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
+func (s basicService) GetGetAuthorizationRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
 	f, err := integrationactivity.GetRequestDeprecated(activity)
 	if err != nil {
 		return nil, "", "", err
@@ -193,7 +203,7 @@ func (bs basicService) GetGetAuthorizationRequest(ctx context.Context, activity 
 	return f.(func(*api.Activity) (*api.Activity, string, string, error))(activity)
 }
 
-func (bs basicService) SetGetAuthorizationResponse(ctx context.Context, activity *api.Activity, authorization *api.Authorization, erro *api.Error) error {
+func (s basicService) SetGetAuthorizationResponse(ctx context.Context, activity *api.Activity, authorization *api.Authorization, erro *api.Error) error {
 	f, err := integrationactivity.SetResponseDeprecated(activity)
 	if err != nil {
 		return err
@@ -201,7 +211,7 @@ func (bs basicService) SetGetAuthorizationResponse(ctx context.Context, activity
 	return f.(func(*api.Authorization, *api.Error) error)(authorization, erro)
 }
 
-func (bs basicService) GetGetChallengeRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
+func (s basicService) GetGetChallengeRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
 	f, err := integrationactivity.GetRequestDeprecated(activity)
 	if err != nil {
 		return nil, "", "", err
@@ -209,7 +219,7 @@ func (bs basicService) GetGetChallengeRequest(ctx context.Context, activity *api
 	return f.(func(*api.Activity) (*api.Activity, string, string, error))(activity)
 }
 
-func (bs basicService) SetGetChallengeResponse(ctx context.Context, activity *api.Activity, challenge *api.Challenge, erro *api.Error) error {
+func (s basicService) SetGetChallengeResponse(ctx context.Context, activity *api.Activity, challenge *api.Challenge, erro *api.Error) error {
 	f, err := integrationactivity.SetResponseDeprecated(activity)
 	if err != nil {
 		return err
@@ -217,7 +227,7 @@ func (bs basicService) SetGetChallengeResponse(ctx context.Context, activity *ap
 	return f.(func(*api.Challenge, *api.Error) error)(challenge, erro)
 }
 
-func (bs basicService) GetValidateChallengeRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
+func (s basicService) GetValidateChallengeRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
 	f, err := integrationactivity.GetRequestDeprecated(activity)
 	if err != nil {
 		return nil, "", "", err
@@ -225,7 +235,7 @@ func (bs basicService) GetValidateChallengeRequest(ctx context.Context, activity
 	return f.(func(*api.Activity) (*api.Activity, string, string, error))(activity)
 }
 
-func (bs basicService) SetValidateChallengeResponse(ctx context.Context, activity *api.Activity, challenge *api.Challenge, erro *api.Error) error {
+func (s basicService) SetValidateChallengeResponse(ctx context.Context, activity *api.Activity, challenge *api.Challenge, erro *api.Error) error {
 	f, err := integrationactivity.SetResponseDeprecated(activity)
 	if err != nil {
 		return err
@@ -233,7 +243,7 @@ func (bs basicService) SetValidateChallengeResponse(ctx context.Context, activit
 	return f.(func(*api.Challenge, *api.Error) error)(challenge, erro)
 }
 
-func (bs basicService) GetGetCertificateRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
+func (s basicService) GetGetCertificateRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, error) {
 	f, err := integrationactivity.GetRequestDeprecated(activity)
 	if err != nil {
 		return nil, "", "", err
@@ -241,7 +251,7 @@ func (bs basicService) GetGetCertificateRequest(ctx context.Context, activity *a
 	return f.(func(*api.Activity) (*api.Activity, string, string, error))(activity)
 }
 
-func (bs basicService) SetGetCertificateResponse(ctx context.Context, activity *api.Activity, certificates []*x509.Certificate, erro *api.Error) error {
+func (s basicService) SetGetCertificateResponse(ctx context.Context, activity *api.Activity, certificates []*x509.Certificate, erro *api.Error) error {
 	f, err := integrationactivity.SetResponseDeprecated(activity)
 	if err != nil {
 		return err
@@ -249,7 +259,7 @@ func (bs basicService) SetGetCertificateResponse(ctx context.Context, activity *
 	return f.(func([]*x509.Certificate, *api.Error) error)(certificates, erro)
 }
 
-func (bs basicService) GetRevokeCertificateRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, *x509.Certificate, *api.RevocationReason, error) {
+func (s basicService) GetRevokeCertificateRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, *x509.Certificate, *api.RevocationReason, error) {
 	f, err := integrationactivity.GetRequestDeprecated(activity)
 	if err != nil {
 		return nil, "", "", nil, nil, err
@@ -257,7 +267,7 @@ func (bs basicService) GetRevokeCertificateRequest(ctx context.Context, activity
 	return f.(func(*api.Activity) (*api.Activity, string, string, *x509.Certificate, *api.RevocationReason, error))(activity)
 }
 
-func (bs basicService) SetRevokeCertificateResponse(ctx context.Context, activity *api.Activity, erro *api.Error) error {
+func (s basicService) SetRevokeCertificateResponse(ctx context.Context, activity *api.Activity, erro *api.Error) error {
 	f, err := integrationactivity.SetResponseDeprecated(activity)
 	if err != nil {
 		return err

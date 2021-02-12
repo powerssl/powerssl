@@ -4,12 +4,10 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"strings"
 	"time"
 
 	"github.com/go-kit/kit/log"
 	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/ext"
 	"golang.org/x/sync/errgroup"
 
 	acmetransport "powerssl.dev/powerssl/internal/app/controller/acme/transport" // TODO: Wrong package
@@ -159,14 +157,14 @@ func (i *integration) loggingMiddleware(ctx context.Context, activity *api.Activ
 }
 
 func (i *integration) tracingMiddleware(ctx context.Context, activity *api.Activity) error {
-	wireContext, err := tracing.WireContextFromJSON(activity.Signature) // TODO: Do not use Signature for Span
-	if err != nil && !strings.Contains(err.Error(), "not found") {
-		_ = i.logger.Log("activity", activity.Token, "err", err)
-	}
-	activitySpan := opentracing.StartSpan(activity.Name.String(), ext.RPCServerOption(wireContext))
-	defer activitySpan.Finish()
-	activitySpan.SetTag("token", activity.Token)
-	ctx = opentracing.ContextWithSpan(ctx, activitySpan)
+	//wireContext, err := tracing.WireContextFromJSON(activity.Signature) // TODO: Do not use Signature for Span
+	//if err != nil && !strings.Contains(err.Error(), "not found") {
+	//	_ = i.logger.Log("activity", activity.Token, "err", err)
+	//}
+	//activitySpan := opentracing.StartSpan(activity.Name.String(), ext.RPCServerOption(wireContext))
+	//defer activitySpan.Finish()
+	//activitySpan.SetTag("token", activity.Token)
+	//ctx = opentracing.ContextWithSpan(ctx, activitySpan)
 
 	return i.handler.HandleActivity(ctx, activity)
 }

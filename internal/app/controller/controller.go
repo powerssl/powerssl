@@ -91,7 +91,7 @@ func Run(cfg *Config) (err error) {
 	g.Go(func() error {
 		return transport.ServeGRPC(ctx, &cfg.ServerConfig, log.With(logger, "transport", "gRPC"), []transport.Service{
 			acme.New(logger, tracer, duration, temporalClient),
-			integration.New(logger, duration), // TODO: tracing
+			integration.New(ctx, logger, duration), // TODO: tracing
 		})
 	})
 

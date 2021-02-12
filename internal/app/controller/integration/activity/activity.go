@@ -55,13 +55,12 @@ func (a *Activity) Token() string {
 	return a.token
 }
 
-func (a *Activity) GetInput(_ context.Context, v interface{}) error {
-	if reflect.TypeOf(v).Kind() != reflect.Ptr {
-		return fmt.Errorf("kind of type %s needs to be Ptr", reflect.TypeOf(v))
-	}
-	if !reflect.TypeOf(a.input).AssignableTo(reflect.TypeOf(v)) {
-		return fmt.Errorf("value of type %s is not assignable to type %s", reflect.TypeOf(a.input), reflect.TypeOf(v))
-	}
+func (a *Activity) GetInput(_ context.Context, v interface{}) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("%s", r)
+		}
+	}()
 	reflect.ValueOf(v).Elem().Set(reflect.ValueOf(a.input))
 	return nil
 }

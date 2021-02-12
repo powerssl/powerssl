@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"context"
 	"errors"
 
 	"github.com/go-kit/kit/log"
@@ -38,11 +39,13 @@ func (i *Integration) Send(activity *apiv1.Activity) {
 }
 
 type integrationServiceServer struct {
+	ctx    context.Context
 	logger log.Logger
 }
 
-func New(logger log.Logger, duration metrics.Histogram) *integrationServiceServer {
+func New(ctx context.Context, logger log.Logger, duration metrics.Histogram) *integrationServiceServer {
 	return &integrationServiceServer{
+		ctx:    ctx,
 		logger: logger,
 	}
 
@@ -78,6 +81,9 @@ func (s *integrationServiceServer) Register(request *apiv1.RegisterIntegrationRe
 
 	for {
 		select {
+		case <-s.ctx.Done():
+			s.unregister(integration)
+			return s.ctx.Err()
 		case <-stream.Context().Done():
 			s.unregister(integration)
 			return stream.Context().Err()

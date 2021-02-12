@@ -27,7 +27,7 @@ type CreateACMEAccountResults struct {
 	Account *api.Account
 }
 
-func CreateACMEAccount(ctx context.Context, params CreateACMEAccountParams) (*CreateACMEAccountResults, error) {
+func CreateACMEAccount(ctx context.Context, params *CreateACMEAccountParams) (*CreateACMEAccountResults, error) {
 	logger := temporalactivity.GetLogger(ctx)
 	logger.Info("CreateACMEAccount", params.ToKeyVals()...)
 
