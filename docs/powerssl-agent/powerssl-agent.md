@@ -12,7 +12,6 @@ powerssl-agent provides PowerSSL Agent
 ### Synopsis
 
 powerssl-agent provides PowerSSL Agent.
-
 ### Options
 
 ```

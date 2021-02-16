@@ -18,9 +18,9 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 
-	"powerssl.dev/powerssl/internal/pkg/component"
-	"powerssl.dev/powerssl/internal/pkg/util"
-	"powerssl.dev/powerssl/tools/dev-runner/internal"
+	"powerssl.dev/common/util"
+	"powerssl.dev/tools/dev-runner/internal"
+	"powerssl.dev/tools/dev-runner/internal/component"
 )
 
 func main() {

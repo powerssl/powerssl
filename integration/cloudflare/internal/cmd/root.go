@@ -1,13 +1,10 @@
 package cmd
 
 import (
-	"os"
-	"strings"
-
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
-	"powerssl.dev/integration/cloudflare/internal/version"
+	cmdutil "powerssl.dev/common/cmd"
+	"powerssl.dev/common/version"
 )
 
 const component = "integration-cloudflare"
@@ -18,13 +15,7 @@ var (
 )
 
 func Execute() {
-	cmd := newCmdRoot()
-
-	cobra.OnInitialize(initConfig(cmd, component, cfgFile, verbose))
-
-	if err := cmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+	cmdutil.ExecuteWithConfig(newCmdRoot(), component, cfgFile, verbose)
 }
 
 func newCmdRoot() *cobra.Command {
@@ -43,38 +34,4 @@ Find more information at: https://docs.powerssl.io/powerssl-integration-cloudfla
 	cmd.AddCommand(newCmdRun())
 
 	return cmd
-}
-
-func initConfig(cmd *cobra.Command, component, cfgFile string, verbose bool) func() {
-	return func() {
-		if cfgFile != "" {
-			viper.SetConfigFile(cfgFile)
-		} else {
-			viper.AddConfigPath("/etc/powerssl/%s" + component)
-			viper.SetConfigName("config")
-		}
-
-		viper.AutomaticEnv()
-		viper.SetEnvPrefix("powerssl")
-		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
-
-		if err := viper.ReadInConfig(); err == nil && verbose {
-			cmd.Println("Using config file:", viper.ConfigFileUsed())
-		}
-	}
-}
-
-func handleError(f func(cmd *cobra.Command, args []string) error) func(cmd *cobra.Command, args []string) {
-	return func(cmd *cobra.Command, args []string) {
-		if err := f(cmd, args); err != nil {
-			cmd.PrintErrln(err)
-			os.Exit(1)
-		}
-	}
-}
-
-func must(err error) {
-	if err != nil {
-		panic(err)
-	}
 }

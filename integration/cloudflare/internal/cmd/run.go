@@ -4,9 +4,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"powerssl.dev/powerssl/pkg/integration"
-
+	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/integration/cloudflare/internal"
+	"powerssl.dev/sdk/integration"
 )
 
 func newCmdRun() *cobra.Command {
@@ -32,7 +32,7 @@ func newCmdRun() *cobra.Command {
 			}
 			return config.Validate()
 		},
-		Run: handleError(func(cmd *cobra.Command, args []string) error {
+		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
 			return integration.Run(&config, integration.KindDNS, "cloudflare", cloudflare.New())
 		}),
 	}
@@ -48,15 +48,15 @@ func newCmdRun() *cobra.Command {
 	cmd.Flags().String("metrics-addr", ":9090", "HTTP Addr")
 	cmd.Flags().String("tracer", "jaeger", "Tracing implementation")
 
-	must(viper.BindPFlag("auth-token", cmd.Flags().Lookup("auth-token")))
-	must(viper.BindPFlag("ca-file", cmd.Flags().Lookup("ca-file")))
-	must(viper.BindPFlag("controller.addr", cmd.Flags().Lookup("controller-addr")))
-	must(viper.BindPFlag("controller.ca-file", cmd.Flags().Lookup("ca-file")))
-	must(viper.BindPFlag("controller.insecure", cmd.Flags().Lookup("controller-insecure")))
-	must(viper.BindPFlag("controller.insecure-skip-tls-verify", cmd.Flags().Lookup("controller-insecure-skip-tls-verify")))
-	must(viper.BindPFlag("controller.server-name-override", cmd.Flags().Lookup("controller-server-name-override")))
-	must(viper.BindPFlag("metrics.addr", cmd.Flags().Lookup("metrics-addr")))
-	must(viper.BindPFlag("tracer", cmd.Flags().Lookup("tracer")))
+	cmdutil.Must(viper.BindPFlag("auth-token", cmd.Flags().Lookup("auth-token")))
+	cmdutil.Must(viper.BindPFlag("ca-file", cmd.Flags().Lookup("ca-file")))
+	cmdutil.Must(viper.BindPFlag("controller.addr", cmd.Flags().Lookup("controller-addr")))
+	cmdutil.Must(viper.BindPFlag("controller.ca-file", cmd.Flags().Lookup("ca-file")))
+	cmdutil.Must(viper.BindPFlag("controller.insecure", cmd.Flags().Lookup("controller-insecure")))
+	cmdutil.Must(viper.BindPFlag("controller.insecure-skip-tls-verify", cmd.Flags().Lookup("controller-insecure-skip-tls-verify")))
+	cmdutil.Must(viper.BindPFlag("controller.server-name-override", cmd.Flags().Lookup("controller-server-name-override")))
+	cmdutil.Must(viper.BindPFlag("metrics.addr", cmd.Flags().Lookup("metrics-addr")))
+	cmdutil.Must(viper.BindPFlag("tracer", cmd.Flags().Lookup("tracer")))
 
 	return cmd
 }
