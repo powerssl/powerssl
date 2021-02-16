@@ -4,7 +4,7 @@ package powerssl.controller.v1;
 
 import "powerssl/controller/v1/integration.proto";
 
-option go_package = "powerssl.dev/powerssl/internal/pkg/controller/api/v1;api";
+option go_package = "powerssl.dev/sdk/controller/api/v1;api";
 
 service WorkflowService {
   rpc Create(CreateWorkflowRequest) returns (Workflow) {};

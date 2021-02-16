@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"time"
 
-	"powerssl.dev/powerssl/pkg/controller/api"
+	"powerssl.dev/sdk/controller/api"
 )
 
 func (acme *ACME) GetCertificate(_ context.Context, accountURL string, certificateURL string) ([]*x509.Certificate, error) {

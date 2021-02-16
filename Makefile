@@ -31,7 +31,7 @@ build-%:
 
 .PHONY: build-dev-runner
 build-dev-runner:
-	go build -o bin/dev-runner powerssl.dev/powerssl/tools/dev-runner
+	cd tools/dev-runner && go build -o ../../bin/dev-runner powerssl.dev/tools/dev-runner
 
 .PHONY: check-scripts
 check-scripts:
@@ -50,11 +50,6 @@ clean-%:
 	go clean powerssl.dev/powerssl/cmd/${*}
 	rm -f bin/${*}
 
-.PHONY: clean-dev-runner
-clean-dev-runner:
-	go clean powerssl.dev/powerssl/tools/dev-runner
-	rm -f bin/dev-runner
-
 .PHONY: clear
 clear:
 	rm -rf local
@@ -69,7 +64,17 @@ generate: generate-protobuf generate-go generate-docs
 
 .PHONY: generate-docs
 generate-docs:
-	go run powerssl.dev/powerssl/tools/gendocs
+	cd powerctl && go run powerssl.dev/powerctl/tools/gendocs ../docs
+	cd powerssl-agent && go run powerssl.dev/agent/tools/gendocs ../docs
+	cd powerssl-apiserver && go run powerssl.dev/apiserver/tools/gendocs ../docs
+	cd powerssl-auth && go run powerssl.dev/auth/tools/gendocs ../docs
+	cd powerssl-controller && go run powerssl.dev/controller/tools/gendocs ../docs
+	cd powerssl-grpcgateway && go run powerssl.dev/grpcgateway/tools/gendocs ../docs
+	cd powerssl-signer && go run powerssl.dev/signer/tools/gendocs ../docs
+	cd powerssl-temporalserver && go run powerssl.dev/temporalserver/tools/gendocs ../docs
+	cd powerssl-webapp && go run powerssl.dev/webapp/tools/gendocs ../docs
+	cd powerssl-worker && go run powerssl.dev/worker/tools/gendocs ../docs
+	cd powerutil && go run powerssl.dev/powerutil/tools/gendocs ../docs
 
 .PHONY: generate-go
 generate-go:
