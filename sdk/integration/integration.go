@@ -10,9 +10,9 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"golang.org/x/sync/errgroup"
 
+	"powerssl.dev/common"
 	"powerssl.dev/common/tracing"
 	"powerssl.dev/common/transport"
-	"powerssl.dev/common/util"
 	"powerssl.dev/sdk/controller/api"
 	apiv1 "powerssl.dev/sdk/controller/api/v1"
 	controllerclient "powerssl.dev/sdk/controller/client"
@@ -40,11 +40,11 @@ type integration struct {
 }
 
 func Run(cfg *Config, kind kind, name string, handler interface{}) (err error) {
-	_, logger := util.NewZapAndKitLogger()
+	_, logger := common.NewZapAndKitLogger()
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
-		return util.InterruptHandler(ctx, logger)
+		return common.InterruptHandler(ctx, logger)
 	})
 
 	var tracer opentracing.Tracer
@@ -53,9 +53,7 @@ func Run(cfg *Config, kind kind, name string, handler interface{}) (err error) {
 		if tracer, closer, err = tracing.Init(fmt.Sprintf("powerssl-integration-%s", kind), cfg.Tracer, log.With(logger, "component", "tracing")); err != nil {
 			return err
 		}
-		defer func() {
-			err = closer.Close()
-		}()
+		defer common.ErrWrapCloser(closer, &err)
 	}
 
 	var controllerClient *controllerclient.GRPCClient
@@ -102,7 +100,7 @@ func Run(cfg *Config, kind kind, name string, handler interface{}) (err error) {
 
 	if err = g.Wait(); err != nil {
 		switch err.(type) {
-		case util.InterruptError:
+		case common.InterruptError:
 		default:
 			return err
 		}

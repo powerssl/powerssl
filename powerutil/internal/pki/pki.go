@@ -1,9 +1,9 @@
 package pki
 
 import (
-	"github.com/cloudflare/cfssl/log"
+	cfssllog "github.com/cloudflare/cfssl/log"
 )
 
 func init() {
-	log.Level = log.LevelError
+	cfssllog.Level = cfssllog.LevelError
 }

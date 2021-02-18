@@ -1,17 +1,17 @@
 package pki
 
 import (
-	"github.com/cloudflare/cfssl/config"
-	"github.com/cloudflare/cfssl/helpers"
-	"github.com/cloudflare/cfssl/signer"
-	"github.com/cloudflare/cfssl/signer/local"
+	cfsslconfig "github.com/cloudflare/cfssl/config"
+	cfsslhelpers "github.com/cloudflare/cfssl/helpers"
+	cfsslsigner "github.com/cloudflare/cfssl/signer"
+	cfsslsignerlocal "github.com/cloudflare/cfssl/signer/local"
 )
 
 func Sign(ca, caKey, csr string) ([]byte, error) {
-	policy := &config.Signing{
-		Default: &config.SigningProfile{
-			Expiry: helpers.OneYear,
-			CAConstraint: config.CAConstraint{
+	policy := &cfsslconfig.Signing{
+		Default: &cfsslconfig.SigningProfile{
+			Expiry: cfsslhelpers.OneYear,
+			CAConstraint: cfsslconfig.CAConstraint{
 				IsCA:       true,
 				MaxPathLen: 1,
 			},
@@ -25,12 +25,12 @@ func Sign(ca, caKey, csr string) ([]byte, error) {
 		},
 	}
 
-	s, err := local.NewSignerFromFile(ca, caKey, policy)
+	s, err := cfsslsignerlocal.NewSignerFromFile(ca, caKey, policy)
 	if err != nil {
 		return nil, err
 	}
 
-	req := signer.SignRequest{Request: csr}
+	req := cfsslsigner.SignRequest{Request: csr}
 	cert, err := s.Sign(req)
 	if err != nil {
 		return nil, err

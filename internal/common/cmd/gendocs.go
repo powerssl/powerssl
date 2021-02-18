@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -14,41 +14,60 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func GenDocs(cmd *cobra.Command) {
-	if len(os.Args) < 2 {
-		fail(fmt.Errorf("docs directory has to be provided"))
-	}
-	dir := os.Args[1]
+func GenDocs(newCmdRoot *cobra.Command) {
+	var dir string
 
-	if err := doc.GenMarkdownTreeCustom(cmd, dir+"/"+cmd.Use, filePrepender, linkHandler); err != nil {
-		fail(err)
-	}
-
-	// NOTE: Strip timestamp from all generated docs.
-	files, err := filepath.Glob(dir + "/" + cmd.Use + "/*.md")
-	if err != nil {
-		fail(err)
-	}
-	for _, file := range files {
-		var input []byte
-		if input, err = ioutil.ReadFile(file); err != nil {
-			fail(err)
-		}
-		lines := strings.Split(string(input), "\n")
-		for i, line := range lines {
-			if strings.Contains(line, "Find more information at:") {
-				lines = append(lines[:i], lines[i+2:]...)
+	cmd := &cobra.Command{
+		Use:   "gendocs DIR",
+		Short: "gendocs generates documentation for this component",
+		Args:  cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if dir == "" {
+				return errors.New("directory needs to be set")
 			}
-		}
-		output := strings.Join(lines[0:len(lines)-2], "\n")
-		if err = ioutil.WriteFile(file, []byte(output), 0644); err != nil {
-			fail(err)
-		}
-	}
-}
+			if _, err := os.Stat(dir); err != nil {
+				if !os.IsNotExist(err) {
+					return err
+				}
+				return errors.New("directory does not exist")
+			}
+			return nil
+		},
+		Run: HandleError(func(cmd *cobra.Command, args []string) (err error) {
+			if err = doc.GenMarkdownTreeCustom(newCmdRoot, dir+"/"+newCmdRoot.Use, filePrepender, linkHandler); err != nil {
+				return err
+			}
 
-func fail(err error) {
-	log.Fatalf("error: %v\n", err)
+			// NOTE: Strip timestamp from all generated docs.
+			var files []string
+			if files, err = filepath.Glob(dir + "/" + newCmdRoot.Use + "/*.md"); err != nil {
+				return err
+			}
+			for _, file := range files {
+				var input []byte
+				if input, err = ioutil.ReadFile(file); err != nil {
+					return err
+				}
+				lines := strings.Split(string(input), "\n")
+				for i, line := range lines {
+					if strings.Contains(line, "Find more information at:") {
+						lines = append(lines[:i], lines[i+2:]...)
+					}
+				}
+				output := strings.Join(lines[0:len(lines)-2], "\n")
+				if err = ioutil.WriteFile(file, []byte(output), 0644); err != nil {
+					return err
+				}
+			}
+			return nil
+		}),
+	}
+
+	cmd.Flags().StringVarP(&dir, "dir", "d", "", "output directory")
+
+	if err := cmd.Execute(); err != nil {
+		os.Exit(1)
+	}
 }
 
 func filePrepender(filename string) string {
@@ -77,7 +96,7 @@ func filePrepender(filename string) string {
 	var byt []byte
 	var err error
 	if byt, err = yaml.Marshal(meta); err != nil {
-		fail(err)
+		panic(err)
 	}
 	return fmt.Sprintf("---\n%s---\n", string(byt))
 }

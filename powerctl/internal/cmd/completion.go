@@ -45,7 +45,7 @@ func newCmdZSHCompletion() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "zsh",
 		Short: "Generates zsh completion scripts",
-		Args: cobra.NoArgs,
+		Args:  cobra.NoArgs,
 		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
 			return NewCmdRoot().GenZshCompletion(cmd.OutOrStdout())
 		}),

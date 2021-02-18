@@ -12,8 +12,8 @@ import (
 	"github.com/golang-migrate/migrate/v4/source/go_bindata"
 	"github.com/spf13/cobra"
 
-	"powerssl.dev/powerutil/internal/asset"
 	cmdutil "powerssl.dev/common/cmd"
+	"powerssl.dev/powerutil/internal/asset"
 )
 
 func newCmdMigrate() *cobra.Command {
