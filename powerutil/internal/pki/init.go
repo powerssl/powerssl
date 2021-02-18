@@ -1,24 +1,24 @@
 package pki
 
 import (
-	"github.com/cloudflare/cfssl/csr"
-	"github.com/cloudflare/cfssl/initca"
+	cfsslcsr "github.com/cloudflare/cfssl/csr"
+	cfsslinitca "github.com/cloudflare/cfssl/initca"
 )
 
 func Init(keyAlgo string, keySize int) ([]byte, []byte, []byte, error) {
-	req := csr.CertificateRequest{
-		KeyRequest: &csr.KeyRequest{
+	req := cfsslcsr.CertificateRequest{
+		KeyRequest: &cfsslcsr.KeyRequest{
 			A: keyAlgo,
 			S: keySize,
 		},
-		Names: []csr.Name{
+		Names: []cfsslcsr.Name{
 			{
 				O: "PowerSSL Root Authority",
 			},
 		},
 	}
 
-	cert, csr, key, err := initca.New(&req)
+	cert, csr, key, err := cfsslinitca.New(&req)
 	if err != nil {
 		return nil, nil, nil, err
 	}

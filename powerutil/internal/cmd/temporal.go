@@ -3,8 +3,8 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"powerssl.dev/powerutil/internal"
 	cmdutil "powerssl.dev/common/cmd"
+	"powerssl.dev/powerutil/internal"
 )
 
 func newCmdTemporal() *cobra.Command {

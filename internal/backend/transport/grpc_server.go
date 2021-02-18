@@ -26,6 +26,8 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+
+	"powerssl.dev/common"
 )
 
 type ServerConfig struct {
@@ -56,17 +58,19 @@ func (kgf keyGeneratorFunc) Generate() (crypto.PrivateKey, error) {
 	return kgf()
 }
 
-type Service interface {
-	RegisterGRPCServer(baseServer *grpc.Server)
-	ServiceName() string
+type Service struct {
+	ServiceName        string
+	RegisterGRPCServer func(baseServer *grpc.Server)
 }
 
-func ServeGRPC(ctx context.Context, cfg *ServerConfig, logger log.Logger, services []Service) error {
-	listener, err := net.Listen("tcp", cfg.Addr)
-	if err != nil {
+type Services []Service
+
+func ServeGRPC(ctx context.Context, cfg ServerConfig, logger log.Logger, services Services) (err error) {
+	var listener net.Listener
+	if listener, err = net.Listen("tcp", cfg.Addr); err != nil {
 		return err
 	}
-	defer listener.Close()
+	defer common.ErrWrapCloser(listener, &err)
 
 	recoveryOptions := []recovery.Option{
 		recovery.WithRecoveryHandler(recoveryHandler(logger)),
@@ -89,13 +93,13 @@ func ServeGRPC(ctx context.Context, cfg *ServerConfig, logger log.Logger, servic
 			}
 		} else {
 			certPool := x509.NewCertPool()
-			caData, err := ioutil.ReadFile(cfg.CAFile)
-			if err != nil {
+			var caData []byte
+			if caData, err = ioutil.ReadFile(cfg.CAFile); err != nil {
 				return err
 			}
 			certPool.AppendCertsFromPEM(caData)
-			url, err := url.Parse(cfg.VaultURL)
-			if err != nil {
+			var vaultURL *url.URL
+			if vaultURL, err = url.Parse(cfg.VaultURL); err != nil {
 				return err
 			}
 			c := &certify.Certify{
@@ -104,7 +108,7 @@ func ServeGRPC(ctx context.Context, cfg *ServerConfig, logger log.Logger, servic
 				Issuer: &vault.Issuer{
 					Role:  cfg.VaultRole,
 					Token: cfg.VaultToken,
-					URL:   url,
+					URL:   vaultURL,
 					TLSConfig: &tls.Config{
 						RootCAs: certPool,
 					},
@@ -124,7 +128,7 @@ func ServeGRPC(ctx context.Context, cfg *ServerConfig, logger log.Logger, servic
 				}
 				return cert, err
 			}
-			// TODO: This was priming the server before the first reqeust. Certify is now failing with this.
+			// TODO: This was priming the server before the first request. Certify is now failing with this.
 			// if _, err := getCertificate(&tls.ClientHelloInfo{ServerName: cfg.CommonName}); err != nil {
 			// 	return err
 			// }
@@ -138,7 +142,7 @@ func ServeGRPC(ctx context.Context, cfg *ServerConfig, logger log.Logger, servic
 	healthpb.RegisterHealthServer(srv, healthSrv)
 	for _, service := range services {
 		service.RegisterGRPCServer(srv)
-		healthSrv.SetServingStatus(service.ServiceName(), healthpb.HealthCheckResponse_SERVING)
+		healthSrv.SetServingStatus(service.ServiceName, healthpb.HealthCheckResponse_SERVING)
 	}
 
 	c := make(chan error)
@@ -148,7 +152,7 @@ func ServeGRPC(ctx context.Context, cfg *ServerConfig, logger log.Logger, servic
 	}()
 	logger.Log("listening", cfg.Addr, "secure", !cfg.Insecure)
 	select {
-	case err := <-c:
+	case err = <-c:
 		logger.Log("err", err)
 		return err
 	case <-ctx.Done():

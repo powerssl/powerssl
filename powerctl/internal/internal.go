@@ -7,9 +7,9 @@ import (
 
 	"github.com/spf13/viper"
 
+	"powerssl.dev/common"
 	"powerssl.dev/common/tracing"
 	"powerssl.dev/common/transport"
-	"powerssl.dev/common/util"
 	apiserverclient "powerssl.dev/sdk/apiserver/client"
 )
 
@@ -26,7 +26,7 @@ func NewGRPCClient() (*apiserverclient.GRPCClient, error) {
 	if !insecure && !insecureSkipTLSVerify && caFle == "" {
 		return nil, errors.New("provide ca-file")
 	}
-	logger := util.NewLogger(os.Stdout)
+	logger := common.NewLogger(os.Stdout)
 	tracer, _, _ := tracing.NewNoopTracer("powerctl", logger)
 	cfg := &transport.ClientConfig{
 		Addr:                  addr,

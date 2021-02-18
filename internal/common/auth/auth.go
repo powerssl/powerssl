@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"powerssl.dev/common"
 
 	stdjwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-kit/kit/auth/jwt"
@@ -30,7 +31,7 @@ func NewParser(jwksURL string) (endpoint.Middleware, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer common.ErrWrapCloser(resp.Body, &err)
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
