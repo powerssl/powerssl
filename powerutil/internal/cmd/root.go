@@ -26,7 +26,6 @@ Find more information at: https://docs.powerssl.io/powerutil`,
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output")
 
 	cmd.AddCommand(newCmdCA())
-	cmd.AddCommand(newCmdMigrate())
 	cmd.AddCommand(newCmdTemporal())
 	cmd.AddCommand(newCmdVault())
 

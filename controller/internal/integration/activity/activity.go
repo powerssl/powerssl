@@ -11,7 +11,7 @@ import (
 
 	"powerssl.dev/controller/internal/integration"
 	"powerssl.dev/sdk/controller/api"
-	apiv1 "powerssl.dev/sdk/controller/api/v1"
+	apiv1 "powerssl.dev/api/controller/v1"
 )
 
 type Activity struct {

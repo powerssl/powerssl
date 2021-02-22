@@ -7,11 +7,11 @@ import (
 	"time"
 )
 
-func WaitForService(service string, timeout time.Duration) error {
-	return WaitForServices([]string{service}, timeout)
+func waitForService(service string, timeout time.Duration) error {
+	return waitForServices([]string{service}, timeout)
 }
 
-func WaitForServices(services []string, timeout time.Duration) error {
+func waitForServices(services []string, timeout time.Duration) error {
 	var depChan = make(chan struct{})
 	var wg sync.WaitGroup
 	wg.Add(len(services))

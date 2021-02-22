@@ -1,3 +1,3 @@
-component_bin := "powerssl-worker"
+component_bin := powerssl-worker
 
-include ../makefiles/main.mk
+include ../makefiles/component.mk

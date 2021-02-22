@@ -1,3 +1,3 @@
-component_bin := "powerssl-signer"
+component_bin := powerssl-signer
 
-include ../makefiles/main.mk
+include ../makefiles/component.mk

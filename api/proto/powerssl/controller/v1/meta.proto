@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package powerssl.controller.v1;
+
+option go_package = "powerssl.dev/api/controller/v1;api";
+
+message Activity {
+  enum Name {
+    NAME_UNSPECIFIED = 0;
+
+    ACME_CREATE_ACCOUNT = 101;
+    ACME_CREATE_AUTHORIZATION = 102;
+    ACME_CREATE_ORDER = 103;
+    ACME_DEACTIVATE_ACCOUNT = 104;
+    ACME_DEACTIVATE_AUTHORIZATION = 105;
+    ACME_FINALIZE_ORDER = 106;
+    ACME_GET_AUTHORIZATION = 107;
+    ACME_GET_CERTIFICATE = 108;
+    ACME_GET_CHALLENGE = 109;
+    ACME_GET_ORDER = 110;
+    ACME_REKEY_ACCOUNT = 111;
+    ACME_REVOKE_CERTIFICATE = 112;
+    ACME_UPDATE_ACCOUNT = 113;
+    ACME_VALIDATE_CHALLENGE = 114;
+
+    DNS_CREATE_RECORD = 201;
+    DNS_DELETE_RECORD = 202;
+    DNS_VERIFY_DOMAIN = 203;
+  }
+
+  message Workflow {
+    repeated string activities = 1;
+  }
+
+  string token = 1;
+  Name name = 2;
+  Workflow workflow = 3;
+  string signature = 4;
+}
+
+message Error {
+  string message = 1;
+}

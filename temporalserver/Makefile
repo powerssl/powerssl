@@ -1,3 +1,3 @@
-component_bin := "powerssl-temporalserver"
+component_bin := powerssl-temporalserver
 
-include ../makefiles/main.mk
+include ../makefiles/component.mk

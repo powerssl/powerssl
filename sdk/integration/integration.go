@@ -14,7 +14,7 @@ import (
 	"powerssl.dev/common/tracing"
 	"powerssl.dev/common/transport"
 	"powerssl.dev/sdk/controller/api"
-	apiv1 "powerssl.dev/sdk/controller/api/v1"
+	apiv1 "powerssl.dev/api/controller/v1"
 	controllerclient "powerssl.dev/sdk/controller/client"
 	integrationacme "powerssl.dev/sdk/integration/acme"
 	// integrationdns "powerssl.dev/sdk/integration/dns"

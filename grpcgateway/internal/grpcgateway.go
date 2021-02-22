@@ -8,18 +8,18 @@ import (
 	"time"
 
 	"github.com/go-kit/kit/log"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"golang.org/x/net/context"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 
+	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/backend/httpfs"
 	"powerssl.dev/common"
 	"powerssl.dev/common/transport"
 	"powerssl.dev/grpcgateway/internal/openapi"
 	"powerssl.dev/grpcgateway/internal/swaggerui"
-	apiv1 "powerssl.dev/sdk/apiserver/api/v1"
 )
 
 func Run(cfg *Config) (err error) {
@@ -137,7 +137,7 @@ func newGateway(ctx context.Context, conn *grpc.ClientConn) (http.Handler, error
 
 	for _, f := range []func(context.Context, *runtime.ServeMux, *grpc.ClientConn) error{
 		apiv1.RegisterACMEAccountServiceHandler,
-		apiv1.RegisterACMEServerServiceHandler,
+		apiv1.RegisterACMEServerServiceHandler,	
 		apiv1.RegisterCertificateIssueServiceHandler,
 		apiv1.RegisterCertificateServiceHandler,
 		apiv1.RegisterUserServiceHandler,

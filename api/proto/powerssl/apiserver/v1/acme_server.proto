@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package powerssl.apiserver.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "powerssl.dev/api/apiserver/v1;api";
+
+service ACMEServerService {
+  rpc Create(CreateACMEServerRequest) returns (ACMEServer) {
+    option (google.api.http) = {
+      post: "/v1/acmeServers"
+      body: "*"
+    };
+  }
+  rpc Delete(DeleteACMEServerRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/{name=acmeServers/*}"
+    };
+  }
+  rpc Get(GetACMEServerRequest) returns (ACMEServer) {
+    option (google.api.http) = {
+      get: "/v1/{name=acmeServers/*}"
+    };
+  }
+  rpc List(ListACMEServersRequest) returns (ListACMEServersResponse) {
+    option (google.api.http) = {
+      get: "/v1/acmeServers"
+    };
+  }
+  rpc Update(UpdateACMEServerRequest) returns (ACMEServer) {
+    option (google.api.http) = {
+      put: "/v1/{name=acmeServers/*}"
+      body: "*"
+    };
+  }
+}
+
+message ACMEServer {
+  string name = 1;
+
+  google.protobuf.Timestamp create_time = 2;
+  google.protobuf.Timestamp update_time = 3;
+  string display_name = 4;
+
+  string directory_url = 8;
+  string integration_name = 9;
+}
+
+message CreateACMEServerRequest {
+  ACMEServer acme_server = 1;
+}
+
+message DeleteACMEServerRequest {
+  string name = 1;
+}
+
+message GetACMEServerRequest {
+  string name = 1;
+}
+
+message ListACMEServersRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message ListACMEServersResponse {
+  repeated ACMEServer acme_servers = 1;
+  string next_page_token = 2;
+}
+
+message UpdateACMEServerRequest {
+  string name = 1;
+  google.protobuf.FieldMask update_mask = 2;
+  ACMEServer acme_server = 3;
+}

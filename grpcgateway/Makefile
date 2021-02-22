@@ -1,3 +1,3 @@
-component_bin := "powerssl-grpcgateway"
+component_bin := powerssl-grpcgateway
 
-include ../makefiles/main.mk
+include ../makefiles/component.mk

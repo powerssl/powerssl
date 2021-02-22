@@ -3,7 +3,7 @@ package integration
 import (
 	"github.com/google/uuid"
 
-	apiv1 "powerssl.dev/sdk/controller/api/v1"
+	apiv1 "powerssl.dev/api/controller/v1"
 )
 
 type Kind string

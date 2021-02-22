@@ -1,3 +1,3 @@
-component_bin := "powerssl-auth"
+component_bin := powerssl-auth
 
-include ../makefiles/main.mk
+include ../makefiles/component.mk

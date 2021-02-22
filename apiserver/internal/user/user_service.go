@@ -11,9 +11,9 @@ import (
 	backendtransport "powerssl.dev/backend/transport"
 	"powerssl.dev/sdk/apiserver/user"
 
+	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/apiserver/internal/repository"
 	"powerssl.dev/apiserver/internal/user/service"
-	apiv1 "powerssl.dev/sdk/apiserver/api/v1"
 	"powerssl.dev/sdk/apiserver/user/endpoint"
 	"powerssl.dev/sdk/apiserver/user/transport"
 )

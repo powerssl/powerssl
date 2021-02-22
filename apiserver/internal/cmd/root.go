@@ -31,6 +31,7 @@ Find more information at: https://docs.powerssl.io/powerssl-apiserver`,
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output")
 	cmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is /etc/powerssl/api/config.yaml)")
 
+	cmd.AddCommand(newCmdMigrate())
 	cmd.AddCommand(newCmdServe())
 
 	return cmd

@@ -1,3 +1,3 @@
-component_bin := "powerssl-agent"
+component_bin := powerssl-agent
 
-include ../makefiles/main.mk
+include ../makefiles/component.mk

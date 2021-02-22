@@ -2,6 +2,8 @@ module powerssl.dev/backend
 
 go 1.15
 
+replace powerssl.dev/api => ../../api
+
 replace powerssl.dev/common => ../common
 
 replace powerssl.dev/backend => ../backend
@@ -21,5 +23,6 @@ require (
 	go.temporal.io/sdk v1.4.1
 	go.uber.org/zap v1.16.0
 	google.golang.org/grpc v1.35.0
+	powerssl.dev/common v0.0.0-00010101000000-000000000000
 	powerssl.dev/sdk v0.0.0-00010101000000-000000000000
 )

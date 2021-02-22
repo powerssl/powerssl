@@ -3,26 +3,19 @@ package transport // import "powerssl.dev/sdk/apiserver/acmeserver/transport"
 import (
 	"context"
 
-	"github.com/gogo/protobuf/types"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
+	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/sdk/apiserver/acmeserver/endpoint"
 	"powerssl.dev/sdk/apiserver/api"
-	apiv1 "powerssl.dev/sdk/apiserver/api/v1"
 )
 
 func decodeGRPCACMEServer(acmeServer *apiv1.ACMEServer) (*api.ACMEServer, error) {
-	createTime, err := types.TimestampFromProto(acmeServer.GetCreateTime())
-	if err != nil {
-		return nil, err
-	}
-	updateTime, err := types.TimestampFromProto(acmeServer.GetUpdateTime())
-	if err != nil {
-		return nil, err
-	}
 	return &api.ACMEServer{
 		Name:            acmeServer.GetName(),
-		CreateTime:      createTime,
-		UpdateTime:      updateTime,
+		CreateTime:      acmeServer.GetCreateTime().AsTime(),
+		UpdateTime:      acmeServer.GetUpdateTime().AsTime(),
 		DisplayName:     acmeServer.GetDisplayName(),
 		DirectoryURL:    acmeServer.GetDirectoryUrl(),
 		IntegrationName: acmeServer.GetIntegrationName(),
@@ -30,18 +23,10 @@ func decodeGRPCACMEServer(acmeServer *apiv1.ACMEServer) (*api.ACMEServer, error)
 }
 
 func encodeGRPCACMEServer(acmeServer *api.ACMEServer) (*apiv1.ACMEServer, error) {
-	createTime, err := types.TimestampProto(acmeServer.CreateTime)
-	if err != nil {
-		return nil, err
-	}
-	updateTime, err := types.TimestampProto(acmeServer.UpdateTime)
-	if err != nil {
-		return nil, err
-	}
 	return &apiv1.ACMEServer{
 		Name:            acmeServer.Name,
-		CreateTime:      createTime,
-		UpdateTime:      updateTime,
+		CreateTime:      timestamppb.New(acmeServer.CreateTime),
+		UpdateTime:      timestamppb.New(acmeServer.UpdateTime),
 		DisplayName:     acmeServer.DisplayName,
 		DirectoryUrl:    acmeServer.DirectoryURL,
 		IntegrationName: acmeServer.IntegrationName,
@@ -117,12 +102,12 @@ func decodeGRPCDeleteRequest(_ context.Context, grpcReq interface{}) (interface{
 	}, nil
 }
 
-func decodeGRPCDeleteResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
+func decodeGRPCDeleteResponse(_ context.Context, _ interface{}) (interface{}, error) {
 	return endpoint.DeleteResponse{}, nil
 }
 
-func encodeGRPCDeleteResponse(_ context.Context, response interface{}) (interface{}, error) {
-	return &types.Empty{}, nil
+func encodeGRPCDeleteResponse(_ context.Context, _ interface{}) (interface{}, error) {
+	return &emptypb.Empty{}, nil
 }
 
 func encodeGRPCDeleteRequest(_ context.Context, request interface{}) (interface{}, error) {

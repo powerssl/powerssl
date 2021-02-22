@@ -1,3 +1,3 @@
-component_bin := "powerssl-controller"
+component_bin := powerssl-controller
 
-include ../makefiles/main.mk
+include ../makefiles/component.mk

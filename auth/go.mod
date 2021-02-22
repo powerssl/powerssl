@@ -2,6 +2,8 @@ module powerssl.dev/auth
 
 go 1.15
 
+replace powerssl.dev/api => ../api
+
 replace powerssl.dev/common => ../internal/common
 
 replace powerssl.dev/backend => ../internal/backend
@@ -9,10 +11,11 @@ replace powerssl.dev/backend => ../internal/backend
 replace powerssl.dev/sdk => ../sdk
 
 require (
-	github.com/ahmetb/govvv v0.3.0 // indirect
+	github.com/ahmetb/govvv v0.3.0
 	github.com/arschles/assert v2.0.0+incompatible // indirect
 	github.com/arschles/go-bindata-html-template v0.0.0-20170123182818-839a6918b9ff
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/go-kit/kit v0.10.0
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/pborman/uuid v1.2.1

@@ -7,7 +7,7 @@ import (
 
 	"powerssl.dev/sdk/controller/acme/endpoint"
 	"powerssl.dev/sdk/controller/api"
-	apiv1 "powerssl.dev/sdk/controller/api/v1"
+	apiv1 "powerssl.dev/api/controller/v1"
 )
 
 func DecodeGRPCActivity(activity *apiv1.Activity) (*api.Activity, error) {
