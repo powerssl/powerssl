@@ -1,3 +1,3 @@
-component_bin := "powerssl-webapp"
+component_bin := powerssl-webapp
 
-include ../makefiles/main.mk
+include ../makefiles/component.mk

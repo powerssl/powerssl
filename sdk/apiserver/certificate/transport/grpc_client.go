@@ -12,7 +12,7 @@ import (
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 
-	apiv1 "powerssl.dev/sdk/apiserver/api/v1"
+	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/sdk/apiserver/certificate"
 	"powerssl.dev/sdk/apiserver/certificate/endpoint"
 )

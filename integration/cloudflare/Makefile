@@ -1,4 +1,4 @@
 component     := integration/cloudflare
 component_bin := powerssl-integration-cloudflare
 
-include ../../makefiles/main.mk
+include ../../makefiles/component.mk

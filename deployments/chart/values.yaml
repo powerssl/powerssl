@@ -1,4 +1,0 @@
-postgresql:
-  postgresqlDatabase: powerssl
-  postgresqlPassword: powerssl
-  postgresqlUsername: powerssl

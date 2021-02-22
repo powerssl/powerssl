@@ -3,44 +3,29 @@ package transport // import "powerssl.dev/sdk/apiserver/user/transport"
 import (
 	"context"
 
-	"github.com/gogo/protobuf/types"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
+	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/sdk/apiserver/api"
-	apiv1 "powerssl.dev/sdk/apiserver/api/v1"
 	"powerssl.dev/sdk/apiserver/user/endpoint"
 )
 
 func decodeGRPCUser(user *apiv1.User) (*api.User, error) {
-	createTime, err := types.TimestampFromProto(user.GetCreateTime())
-	if err != nil {
-		return nil, err
-	}
-	updateTime, err := types.TimestampFromProto(user.GetUpdateTime())
-	if err != nil {
-		return nil, err
-	}
 	return &api.User{
 		Name:        user.GetName(),
-		CreateTime:  createTime,
-		UpdateTime:  updateTime,
+		CreateTime:  user.GetCreateTime().AsTime(),
+		UpdateTime:  user.GetUpdateTime().AsTime(),
 		DisplayName: user.GetDisplayName(),
 		UserName:    user.GetUserName(),
 	}, nil
 }
 
 func encodeGRPCUser(user *api.User) (*apiv1.User, error) {
-	createTime, err := types.TimestampProto(user.CreateTime)
-	if err != nil {
-		return nil, err
-	}
-	updateTime, err := types.TimestampProto(user.UpdateTime)
-	if err != nil {
-		return nil, err
-	}
 	return &apiv1.User{
 		Name:        user.Name,
-		CreateTime:  createTime,
-		UpdateTime:  updateTime,
+		CreateTime:  timestamppb.New(user.CreateTime),
+		UpdateTime:  timestamppb.New(user.UpdateTime),
 		DisplayName: user.DisplayName,
 		UserName:    user.UserName,
 	}, nil
@@ -115,12 +100,12 @@ func decodeGRPCDeleteRequest(_ context.Context, grpcReq interface{}) (interface{
 	}, nil
 }
 
-func decodeGRPCDeleteResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
+func decodeGRPCDeleteResponse(_ context.Context, _ interface{}) (interface{}, error) {
 	return endpoint.DeleteResponse{}, nil
 }
 
-func encodeGRPCDeleteResponse(_ context.Context, response interface{}) (interface{}, error) {
-	return &types.Empty{}, nil
+func encodeGRPCDeleteResponse(_ context.Context, _ interface{}) (interface{}, error) {
+	return &emptypb.Empty{}, nil
 }
 
 func encodeGRPCDeleteRequest(_ context.Context, request interface{}) (interface{}, error) {

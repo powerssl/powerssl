@@ -1,1 +1,1 @@
-include ../makefiles/main.mk
+include ../makefiles/component.mk

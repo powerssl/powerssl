@@ -3,15 +3,15 @@ package transport // import "powerssl.dev/sdk/controller/acme/transport"
 import (
 	"context"
 	"fmt"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/tracing/opentracing"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
-	"github.com/gogo/protobuf/types"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
+	apiv1 "powerssl.dev/api/controller/v1"
 	"powerssl.dev/sdk/controller/acme/endpoint"
-	apiv1 "powerssl.dev/sdk/controller/api/v1"
 )
 
 type grpcServer struct {
@@ -56,6 +56,8 @@ type grpcServer struct {
 
 	getRevokeCertificateRequest  grpctransport.Handler
 	setRevokeCertificateResponse grpctransport.Handler
+
+	apiv1.UnimplementedACMEServiceServer
 }
 
 func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger, tracer stdopentracing.Tracer) apiv1.ACMEServiceServer {
@@ -256,12 +258,12 @@ func (s *grpcServer) GetCreateAccountRequest(ctx context.Context, req *apiv1.Act
 	return rep.(*apiv1.GetCreateAccountRequestResponse), nil
 }
 
-func (s *grpcServer) SetCreateAccountResponse(ctx context.Context, req *apiv1.SetCreateAccountResponseRequest) (*types.Empty, error) {
+func (s *grpcServer) SetCreateAccountResponse(ctx context.Context, req *apiv1.SetCreateAccountResponseRequest) (*emptypb.Empty, error) {
 	_, rep, err := s.setCreateAccountResponse.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*types.Empty), nil
+	return rep.(*emptypb.Empty), nil
 }
 
 func (s *grpcServer) GetDeactivateAccountRequest(ctx context.Context, req *apiv1.Activity) (*apiv1.GetDeactivateAccountRequestResponse, error) {
@@ -272,12 +274,12 @@ func (s *grpcServer) GetDeactivateAccountRequest(ctx context.Context, req *apiv1
 	return rep.(*apiv1.GetDeactivateAccountRequestResponse), nil
 }
 
-func (s *grpcServer) SetDeactivateAccountResponse(ctx context.Context, req *apiv1.SetDeactivateAccountResponseRequest) (*types.Empty, error) {
+func (s *grpcServer) SetDeactivateAccountResponse(ctx context.Context, req *apiv1.SetDeactivateAccountResponseRequest) (*emptypb.Empty, error) {
 	_, rep, err := s.setDeactivateAccountResponse.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*types.Empty), nil
+	return rep.(*emptypb.Empty), nil
 }
 
 func (s *grpcServer) GetRekeyAccountRequest(ctx context.Context, req *apiv1.Activity) (*apiv1.GetRekeyAccountRequestResponse, error) {
@@ -288,12 +290,12 @@ func (s *grpcServer) GetRekeyAccountRequest(ctx context.Context, req *apiv1.Acti
 	return rep.(*apiv1.GetRekeyAccountRequestResponse), nil
 }
 
-func (s *grpcServer) SetRekeyAccountResponse(ctx context.Context, req *apiv1.SetRekeyAccountResponseRequest) (*types.Empty, error) {
+func (s *grpcServer) SetRekeyAccountResponse(ctx context.Context, req *apiv1.SetRekeyAccountResponseRequest) (*emptypb.Empty, error) {
 	_, rep, err := s.setRekeyAccountResponse.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*types.Empty), nil
+	return rep.(*emptypb.Empty), nil
 }
 
 func (s *grpcServer) GetUpdateAccountRequest(ctx context.Context, req *apiv1.Activity) (*apiv1.GetUpdateAccountRequestResponse, error) {
@@ -304,12 +306,12 @@ func (s *grpcServer) GetUpdateAccountRequest(ctx context.Context, req *apiv1.Act
 	return rep.(*apiv1.GetUpdateAccountRequestResponse), nil
 }
 
-func (s *grpcServer) SetUpdateAccountResponse(ctx context.Context, req *apiv1.SetUpdateAccountResponseRequest) (*types.Empty, error) {
+func (s *grpcServer) SetUpdateAccountResponse(ctx context.Context, req *apiv1.SetUpdateAccountResponseRequest) (*emptypb.Empty, error) {
 	_, rep, err := s.setUpdateAccountResponse.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*types.Empty), nil
+	return rep.(*emptypb.Empty), nil
 }
 
 func (s *grpcServer) GetCreateOrderRequest(ctx context.Context, req *apiv1.Activity) (*apiv1.GetCreateOrderRequestResponse, error) {
@@ -320,12 +322,12 @@ func (s *grpcServer) GetCreateOrderRequest(ctx context.Context, req *apiv1.Activ
 	return rep.(*apiv1.GetCreateOrderRequestResponse), nil
 }
 
-func (s *grpcServer) SetCreateOrderResponse(ctx context.Context, req *apiv1.SetCreateOrderResponseRequest) (*types.Empty, error) {
+func (s *grpcServer) SetCreateOrderResponse(ctx context.Context, req *apiv1.SetCreateOrderResponseRequest) (*emptypb.Empty, error) {
 	_, rep, err := s.setCreateOrderResponse.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*types.Empty), nil
+	return rep.(*emptypb.Empty), nil
 }
 
 func (s *grpcServer) GetFinalizeOrderRequest(ctx context.Context, req *apiv1.Activity) (*apiv1.GetFinalizeOrderRequestResponse, error) {
@@ -336,12 +338,12 @@ func (s *grpcServer) GetFinalizeOrderRequest(ctx context.Context, req *apiv1.Act
 	return rep.(*apiv1.GetFinalizeOrderRequestResponse), nil
 }
 
-func (s *grpcServer) SetFinalizeOrderResponse(ctx context.Context, req *apiv1.SetFinalizeOrderResponseRequest) (*types.Empty, error) {
+func (s *grpcServer) SetFinalizeOrderResponse(ctx context.Context, req *apiv1.SetFinalizeOrderResponseRequest) (*emptypb.Empty, error) {
 	_, rep, err := s.setFinalizeOrderResponse.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*types.Empty), nil
+	return rep.(*emptypb.Empty), nil
 }
 
 func (s *grpcServer) GetGetOrderRequest(ctx context.Context, req *apiv1.Activity) (*apiv1.GetGetOrderRequestResponse, error) {
@@ -352,12 +354,12 @@ func (s *grpcServer) GetGetOrderRequest(ctx context.Context, req *apiv1.Activity
 	return rep.(*apiv1.GetGetOrderRequestResponse), nil
 }
 
-func (s *grpcServer) SetGetOrderResponse(ctx context.Context, req *apiv1.SetGetOrderResponseRequest) (*types.Empty, error) {
+func (s *grpcServer) SetGetOrderResponse(ctx context.Context, req *apiv1.SetGetOrderResponseRequest) (*emptypb.Empty, error) {
 	_, rep, err := s.setGetOrderResponse.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*types.Empty), nil
+	return rep.(*emptypb.Empty), nil
 }
 
 func (s *grpcServer) GetCreateAuthorizationRequest(ctx context.Context, req *apiv1.Activity) (*apiv1.GetCreateAuthorizationRequestResponse, error) {
@@ -368,12 +370,12 @@ func (s *grpcServer) GetCreateAuthorizationRequest(ctx context.Context, req *api
 	return rep.(*apiv1.GetCreateAuthorizationRequestResponse), nil
 }
 
-func (s *grpcServer) SetCreateAuthorizationResponse(ctx context.Context, req *apiv1.SetCreateAuthorizationResponseRequest) (*types.Empty, error) {
+func (s *grpcServer) SetCreateAuthorizationResponse(ctx context.Context, req *apiv1.SetCreateAuthorizationResponseRequest) (*emptypb.Empty, error) {
 	_, rep, err := s.setCreateAuthorizationResponse.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*types.Empty), nil
+	return rep.(*emptypb.Empty), nil
 }
 
 func (s *grpcServer) GetDeactivateAuthorizationRequest(ctx context.Context, req *apiv1.Activity) (*apiv1.GetDeactivateAuthorizationRequestResponse, error) {
@@ -384,12 +386,12 @@ func (s *grpcServer) GetDeactivateAuthorizationRequest(ctx context.Context, req 
 	return rep.(*apiv1.GetDeactivateAuthorizationRequestResponse), nil
 }
 
-func (s *grpcServer) SetDeactivateAuthorizationResponse(ctx context.Context, req *apiv1.SetDeactivateAuthorizationResponseRequest) (*types.Empty, error) {
+func (s *grpcServer) SetDeactivateAuthorizationResponse(ctx context.Context, req *apiv1.SetDeactivateAuthorizationResponseRequest) (*emptypb.Empty, error) {
 	_, rep, err := s.setDeactivateAuthorizationResponse.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*types.Empty), nil
+	return rep.(*emptypb.Empty), nil
 }
 
 func (s *grpcServer) GetGetAuthorizationRequest(ctx context.Context, req *apiv1.Activity) (*apiv1.GetGetAuthorizationRequestResponse, error) {
@@ -400,12 +402,12 @@ func (s *grpcServer) GetGetAuthorizationRequest(ctx context.Context, req *apiv1.
 	return rep.(*apiv1.GetGetAuthorizationRequestResponse), nil
 }
 
-func (s *grpcServer) SetGetAuthorizationResponse(ctx context.Context, req *apiv1.SetGetAuthorizationResponseRequest) (*types.Empty, error) {
+func (s *grpcServer) SetGetAuthorizationResponse(ctx context.Context, req *apiv1.SetGetAuthorizationResponseRequest) (*emptypb.Empty, error) {
 	_, rep, err := s.setGetAuthorizationResponse.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*types.Empty), nil
+	return rep.(*emptypb.Empty), nil
 }
 
 func (s *grpcServer) GetGetChallengeRequest(ctx context.Context, req *apiv1.Activity) (*apiv1.GetGetChallengeRequestResponse, error) {
@@ -416,12 +418,12 @@ func (s *grpcServer) GetGetChallengeRequest(ctx context.Context, req *apiv1.Acti
 	return rep.(*apiv1.GetGetChallengeRequestResponse), nil
 }
 
-func (s *grpcServer) SetGetChallengeResponse(ctx context.Context, req *apiv1.SetGetChallengeResponseRequest) (*types.Empty, error) {
+func (s *grpcServer) SetGetChallengeResponse(ctx context.Context, req *apiv1.SetGetChallengeResponseRequest) (*emptypb.Empty, error) {
 	_, rep, err := s.setGetChallengeResponse.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*types.Empty), nil
+	return rep.(*emptypb.Empty), nil
 }
 
 func (s *grpcServer) GetValidateChallengeRequest(ctx context.Context, req *apiv1.Activity) (*apiv1.GetValidateChallengeRequestResponse, error) {
@@ -432,12 +434,12 @@ func (s *grpcServer) GetValidateChallengeRequest(ctx context.Context, req *apiv1
 	return rep.(*apiv1.GetValidateChallengeRequestResponse), nil
 }
 
-func (s *grpcServer) SetValidateChallengeResponse(ctx context.Context, req *apiv1.SetValidateChallengeResponseRequest) (*types.Empty, error) {
+func (s *grpcServer) SetValidateChallengeResponse(ctx context.Context, req *apiv1.SetValidateChallengeResponseRequest) (*emptypb.Empty, error) {
 	_, rep, err := s.setValidateChallengeResponse.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*types.Empty), nil
+	return rep.(*emptypb.Empty), nil
 }
 
 func (s *grpcServer) GetGetCertificateRequest(ctx context.Context, req *apiv1.Activity) (*apiv1.GetGetCertificateRequestResponse, error) {
@@ -448,12 +450,12 @@ func (s *grpcServer) GetGetCertificateRequest(ctx context.Context, req *apiv1.Ac
 	return rep.(*apiv1.GetGetCertificateRequestResponse), nil
 }
 
-func (s *grpcServer) SetGetCertificateResponse(ctx context.Context, req *apiv1.SetGetCertificateResponseRequest) (*types.Empty, error) {
+func (s *grpcServer) SetGetCertificateResponse(ctx context.Context, req *apiv1.SetGetCertificateResponseRequest) (*emptypb.Empty, error) {
 	_, rep, err := s.setGetCertificateResponse.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*types.Empty), nil
+	return rep.(*emptypb.Empty), nil
 }
 
 func (s *grpcServer) GetRevokeCertificateRequest(ctx context.Context, req *apiv1.Activity) (*apiv1.GetRevokeCertificateRequestResponse, error) {
@@ -464,10 +466,10 @@ func (s *grpcServer) GetRevokeCertificateRequest(ctx context.Context, req *apiv1
 	return rep.(*apiv1.GetRevokeCertificateRequestResponse), nil
 }
 
-func (s *grpcServer) SetRevokeCertificateResponse(ctx context.Context, req *apiv1.SetRevokeCertificateResponseRequest) (*types.Empty, error) {
+func (s *grpcServer) SetRevokeCertificateResponse(ctx context.Context, req *apiv1.SetRevokeCertificateResponseRequest) (*emptypb.Empty, error) {
 	_, rep, err := s.setRevokeCertificateResponse.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*types.Empty), nil
+	return rep.(*emptypb.Empty), nil
 }

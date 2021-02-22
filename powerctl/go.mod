@@ -2,12 +2,14 @@ module powerssl.dev/powerctl
 
 go 1.15
 
+replace powerssl.dev/api => ../api
+
 replace powerssl.dev/common => ../internal/common
 
 replace powerssl.dev/sdk => ../sdk
 
 require (
-	github.com/ahmetb/govvv v0.3.0 // indirect
+	github.com/ahmetb/govvv v0.3.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/jinzhu/inflection v1.0.0
 	github.com/mitchellh/go-homedir v1.1.0

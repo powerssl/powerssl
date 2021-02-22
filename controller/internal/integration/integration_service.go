@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
+	apiv1 "powerssl.dev/api/controller/v1"
 	backendtransport "powerssl.dev/backend/transport"
-	apiv1 "powerssl.dev/sdk/controller/api/v1"
 )
 
 var errUnknown = errors.New("unknown error")
@@ -31,6 +31,7 @@ func NewService(ctx context.Context, logger log.Logger) backendtransport.Service
 type integrationServiceServer struct {
 	ctx    context.Context
 	logger log.Logger
+	apiv1.UnimplementedIntegrationServiceServer
 }
 
 func (s *integrationServiceServer) Register(request *apiv1.RegisterIntegrationRequest, stream apiv1.IntegrationService_RegisterServer) error {

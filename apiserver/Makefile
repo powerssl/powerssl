@@ -1,3 +1,3 @@
-component_bin := "powerssl-apiserver"
+component_bin := powerssl-apiserver
 
-include ../makefiles/main.mk
+include ../makefiles/component.mk

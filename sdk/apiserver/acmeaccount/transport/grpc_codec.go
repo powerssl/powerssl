@@ -3,26 +3,21 @@ package transport // import "powerssl.dev/sdk/apiserver/acmeaccount/transport"
 import (
 	"context"
 
-	"github.com/gogo/protobuf/types"
+	"google.golang.org/protobuf/types/descriptorpb"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
+	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/sdk/apiserver/acmeaccount/endpoint"
-	apiv1 "powerssl.dev/sdk/apiserver/api/v1"
 	"powerssl.dev/sdk/apiserver/api"
 )
 
 func decodeGRPCACMEAccount(acmeAccount *apiv1.ACMEAccount) (*api.ACMEAccount, error) {
-	createTime, err := types.TimestampFromProto(acmeAccount.GetCreateTime())
-	if err != nil {
-		return nil, err
-	}
-	updateTime, err := types.TimestampFromProto(acmeAccount.GetUpdateTime())
-	if err != nil {
-		return nil, err
-	}
 	return &api.ACMEAccount{
 		Name:                 acmeAccount.GetName(),
-		CreateTime:           createTime,
-		UpdateTime:           updateTime,
+		CreateTime:           acmeAccount.GetCreateTime().AsTime(),
+		UpdateTime:           acmeAccount.GetUpdateTime().AsTime(),
 		DisplayName:          acmeAccount.GetDisplayName(),
 		Title:                acmeAccount.GetTitle(),
 		Description:          acmeAccount.GetDescription(),
@@ -34,18 +29,10 @@ func decodeGRPCACMEAccount(acmeAccount *apiv1.ACMEAccount) (*api.ACMEAccount, er
 }
 
 func encodeGRPCACMEAccount(acmeAccount *api.ACMEAccount) (*apiv1.ACMEAccount, error) {
-	createTime, err := types.TimestampProto(acmeAccount.CreateTime)
-	if err != nil {
-		return nil, err
-	}
-	updateTime, err := types.TimestampProto(acmeAccount.UpdateTime)
-	if err != nil {
-		return nil, err
-	}
 	return &apiv1.ACMEAccount{
 		Name:                 acmeAccount.Name,
-		CreateTime:           createTime,
-		UpdateTime:           updateTime,
+		CreateTime:           timestamppb.New(acmeAccount.CreateTime),
+		UpdateTime:           timestamppb.New(acmeAccount.UpdateTime),
 		DisplayName:          acmeAccount.DisplayName,
 		Title:                acmeAccount.Title,
 		Description:          acmeAccount.Description,
@@ -127,12 +114,12 @@ func decodeGRPCDeleteRequest(_ context.Context, grpcReq interface{}) (interface{
 	}, nil
 }
 
-func decodeGRPCDeleteResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
+func decodeGRPCDeleteResponse(_ context.Context, _ interface{}) (interface{}, error) {
 	return endpoint.DeleteResponse{}, nil
 }
 
-func encodeGRPCDeleteResponse(_ context.Context, response interface{}) (interface{}, error) {
-	return &types.Empty{}, nil
+func encodeGRPCDeleteResponse(_ context.Context, _ interface{}) (interface{}, error) {
+	return &emptypb.Empty{}, nil
 }
 
 func encodeGRPCDeleteRequest(_ context.Context, request interface{}) (interface{}, error) {
@@ -249,9 +236,14 @@ func encodeGRPCUpdateRequest(_ context.Context, request interface{}) (interface{
 	if err != nil {
 		return nil, err
 	}
+	var messageType *descriptorpb.DescriptorProto
+	updateMask, err := fieldmaskpb.New(messageType, req.UpdateMask...)
+	if err != nil {
+		return nil, err
+	}
 	return &apiv1.UpdateACMEAccountRequest{
 		Name:        req.Name,
-		UpdateMask:  &types.FieldMask{Paths: req.UpdateMask},
+		UpdateMask:  updateMask,
 		AcmeAccount: acmeAccount,
 	}, nil
 }

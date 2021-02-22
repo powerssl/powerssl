@@ -2,6 +2,8 @@ module powerssl.dev/signer
 
 go 1.15
 
+replace powerssl.dev/api => ../api
+
 replace powerssl.dev/common => ../internal/common
 
 replace powerssl.dev/backend => ../internal/backend
@@ -9,7 +11,7 @@ replace powerssl.dev/backend => ../internal/backend
 replace powerssl.dev/sdk => ../sdk
 
 require (
-	github.com/ahmetb/govvv v0.3.0 // indirect
+	github.com/ahmetb/govvv v0.3.0
 	github.com/go-kit/kit v0.10.0
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/opentracing/opentracing-go v1.2.0

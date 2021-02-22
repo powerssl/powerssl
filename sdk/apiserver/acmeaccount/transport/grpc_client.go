@@ -14,7 +14,7 @@ import (
 
 	"powerssl.dev/sdk/apiserver/acmeaccount"
 	"powerssl.dev/sdk/apiserver/acmeaccount/endpoint"
-	apiv1 "powerssl.dev/sdk/apiserver/api/v1"
+	apiv1 "powerssl.dev/api/apiserver/v1"
 )
 
 const serviceName = "powerssl.apiserver.v1.ACMEAccountService"

@@ -8,11 +8,11 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/tracing/opentracing"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
-	"github.com/gogo/protobuf/types"
 	stdopentracing "github.com/opentracing/opentracing-go"
+	"google.golang.org/protobuf/types/known/emptypb"
 
+	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/sdk/apiserver/acmeaccount/endpoint"
-	apiv1 "powerssl.dev/sdk/apiserver/api/v1"
 )
 
 type grpcServer struct {
@@ -21,6 +21,7 @@ type grpcServer struct {
 	get    grpctransport.Handler
 	list   grpctransport.Handler
 	update grpctransport.Handler
+	apiv1.UnimplementedACMEAccountServiceServer
 }
 
 func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger, tracer stdopentracing.Tracer) apiv1.ACMEAccountServiceServer {
@@ -71,12 +72,12 @@ func (s *grpcServer) Create(ctx context.Context, req *apiv1.CreateACMEAccountReq
 	return rep.(*apiv1.ACMEAccount), nil
 }
 
-func (s *grpcServer) Delete(ctx context.Context, req *apiv1.DeleteACMEAccountRequest) (*types.Empty, error) {
+func (s *grpcServer) Delete(ctx context.Context, req *apiv1.DeleteACMEAccountRequest) (*emptypb.Empty, error) {
 	_, rep, err := s.delete.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*types.Empty), nil
+	return rep.(*emptypb.Empty), nil
 }
 
 func (s *grpcServer) Get(ctx context.Context, req *apiv1.GetACMEAccountRequest) (*apiv1.ACMEAccount, error) {

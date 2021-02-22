@@ -11,12 +11,12 @@ import (
 	"powerssl.dev/backend/middleware"
 	"powerssl.dev/sdk/apiserver/acmeaccount"
 
+	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/apiserver/internal/acmeaccount/service"
 	"powerssl.dev/apiserver/internal/repository"
 	backendtransport "powerssl.dev/backend/transport"
 	"powerssl.dev/sdk/apiserver/acmeaccount/endpoint"
 	"powerssl.dev/sdk/apiserver/acmeaccount/transport"
-	apiv1 "powerssl.dev/sdk/apiserver/api/v1"
 )
 
 func NewService(repositories *repository.Repositories, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, temporalClient temporalclient.Client, auth kitendpoint.Middleware) backendtransport.Service {
