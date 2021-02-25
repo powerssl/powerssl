@@ -137,7 +137,7 @@ func newGateway(ctx context.Context, conn *grpc.ClientConn) (http.Handler, error
 
 	for _, f := range []func(context.Context, *runtime.ServeMux, *grpc.ClientConn) error{
 		apiv1.RegisterACMEAccountServiceHandler,
-		apiv1.RegisterACMEServerServiceHandler,	
+		apiv1.RegisterACMEServerServiceHandler,
 		apiv1.RegisterCertificateIssueServiceHandler,
 		apiv1.RegisterCertificateServiceHandler,
 		apiv1.RegisterUserServiceHandler,

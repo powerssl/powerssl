@@ -30,4 +30,3 @@ test:
 # Run go vet
 vet:
 	@$(SCRIPTS_PATH)/vet-go.sh
-

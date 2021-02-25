@@ -15,7 +15,6 @@ require (
 	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/go-kit/kit v0.10.0
 	github.com/go-playground/validator/v10 v10.4.1
-	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.2.0
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.7.1
