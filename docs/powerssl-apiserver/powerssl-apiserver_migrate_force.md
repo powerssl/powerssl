@@ -1,17 +1,17 @@
 ---
-grand_parent: powerutil
+grand_parent: powerssl-apiserver
 has_toc: false
 layout: default
 parent: migrate
-permalink: /powerutil/migrate/force
+permalink: /powerssl-apiserver/migrate/force
 title: force
 ---
-## powerutil migrate force
+## powerssl-apiserver migrate force
 
 Set version V but don't run migration (ignores dirty state)
 
 ```
-powerutil migrate force V [flags]
+powerssl-apiserver migrate force V [flags]
 ```
 
 ### Options
@@ -23,8 +23,11 @@ powerutil migrate force V [flags]
 ### Options inherited from parent commands
 
 ```
+      --config string         config file (default is /etc/powerssl/api/config.yaml)
       --database-url string   Database URL
   -v, --verbose               Verbose output
 ```
 
 ### SEE ALSO
+
+* [powerssl-apiserver migrate](/powerssl-apiserver/migrate)	 - Migrate

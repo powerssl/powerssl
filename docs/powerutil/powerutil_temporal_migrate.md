@@ -35,5 +35,3 @@ powerutil temporal migrate [flags]
 ```
 
 ### SEE ALSO
-
-* [powerutil temporal](/powerutil/temporal)	 - Temporal

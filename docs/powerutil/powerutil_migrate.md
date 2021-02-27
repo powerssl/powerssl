@@ -30,4 +30,3 @@ Migrate
 * [powerutil migrate drop](/powerutil/migrate/drop)	 - Drop everything inside database
 * [powerutil migrate force](/powerutil/migrate/force)	 - Set version V but don't run migration (ignores dirty state)
 * [powerutil migrate goto](/powerutil/migrate/goto)	 - Migrate to version V
-* [powerutil migrate up](/powerutil/migrate/up)	 - Apply all or N up migrations

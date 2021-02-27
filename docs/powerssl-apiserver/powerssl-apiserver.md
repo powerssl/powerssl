@@ -23,4 +23,5 @@ powerssl-apiserver provides PowerSSL API.
 
 ### SEE ALSO
 
+* [powerssl-apiserver migrate](/powerssl-apiserver/migrate)	 - Migrate
 * [powerssl-apiserver serve](/powerssl-apiserver/serve)	 - Serve the API
