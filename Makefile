@@ -20,7 +20,7 @@ bootstrap:
 
 .PHONY: build
 # Build all targets
-build: build-agent build-apiserver build-auth build-controller build-grpcgateway build-powerctl build-powerutil build-signer build-temporalserver build-tool-dev-runner build-webapp build-worker
+build: build-agent build-apiserver build-auth build-controller build-grpcgateway build-powerctl build-powerutil build-signer build-temporal build-tool-dev-runner build-webapp build-worker
 
 .PHONY: build-tool-%
 # Build single tool target
@@ -39,7 +39,7 @@ check-scripts:
 
 .PHONY: clean
 # Clean all targets
-clean: clean-agent clean-apiserver clean-auth clean-controller clean-grpcgateway clean-powerctl clean-powerutil clean-signer clean-temporalserver clean-tool-dev-runner clean-webapp clean-worker
+clean: clean-agent clean-apiserver clean-auth clean-controller clean-grpcgateway clean-powerctl clean-powerutil clean-signer clean-temporal clean-tool-dev-runner clean-webapp clean-worker
 
 .PHONY: clean-tool-%
 # Clean single tool target
@@ -63,7 +63,7 @@ docs-%:
 
 .PHONY: docs
 # Document all targets
-generate-docs: docs-agent docs-apiserver docs-auth docs-controller docs-grpcgateway docs-powerctl docs-powerutil docs-signer docs-temporalserver docs-webapp docs-worker
+docs: docs-agent docs-apiserver docs-auth docs-controller docs-grpcgateway docs-powerctl docs-powerutil docs-signer docs-temporal docs-webapp docs-worker
 
 .PHONY: image-%
 # Build image for single target
@@ -72,7 +72,7 @@ image-%:
 
 .PHONY: images
 # Build image for all targets
-images: image-agent image-apiserver image-auth image-controller image-envoy image-powerctl image-powerutil image-grpcgateway image-signer image-temporalserver image-webapp image-worker
+images: image-agent image-apiserver image-auth image-controller image-envoy image-powerctl image-powerutil image-grpcgateway image-signer image-temporal image-webapp image-worker
 
 .PHONY: install
 # Install all CLI tools
@@ -85,7 +85,7 @@ install-%:
 
 .PHONY: release-images
 # Release image for all targets
-images: release-image-agent release-image-apiserver release-image-auth release-image-controller release-image-envoy release-image-powerctl release-image-powerutil release-image-grpcgateway release-image-signer release-image-temporalserver release-image-webapp release-image-worker
+images: release-image-agent release-image-apiserver release-image-auth release-image-controller release-image-envoy release-image-powerctl release-image-powerutil release-image-grpcgateway release-image-signer release-image-temporal release-image-webapp release-image-worker
 
 .PHONY: release-image-%
 # Release single target image
@@ -94,5 +94,5 @@ release-image-%:
 
 .PHONY: run
 # Run development environment
-run: bin/powerssl-dev-runner bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-grpcgateway bin/powerssl-signer bin/powerssl-temporalserver bin/powerssl-webapp bin/powerssl-worker local/certs/ca-key.pem local/certs/ca.pem local/certs/localhost-key.pem local/certs/localhost.pem local/certs/vault-key.pem local/certs/vault.pem
+run: bin/powerssl-dev-runner bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-grpcgateway bin/powerssl-signer bin/powerssl-temporal bin/powerssl-webapp bin/powerssl-worker local/certs/ca-key.pem local/certs/ca.pem local/certs/localhost-key.pem local/certs/localhost.pem local/certs/vault-key.pem local/certs/vault.pem
 	@bin/powerssl-dev-runner

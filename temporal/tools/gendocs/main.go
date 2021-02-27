@@ -2,7 +2,7 @@ package main
 
 import (
 	cmdutil "powerssl.dev/common/cmd"
-	"powerssl.dev/temporalserver/internal/cmd"
+	"powerssl.dev/temporal/internal/cmd"
 )
 
 func main() {

@@ -135,7 +135,7 @@ func Run() error {
 	}
 
 	for _, comp := range component.Components {
-		if comp.Command != "bin/powerssl-temporalserver" {
+		if comp.Command != "bin/powerssl-temporal" {
 			continue
 		}
 		if err = watcher.Add(comp.Command); err != nil {
@@ -155,7 +155,7 @@ func Run() error {
 	}
 
 	for _, comp := range component.Components {
-		if comp.Command == "bin/powerssl-temporalserver" {
+		if comp.Command == "bin/powerssl-temporal" {
 			continue
 		}
 		if err = watcher.Add(comp.Command); err != nil {
@@ -285,8 +285,8 @@ func handlePostgres(of *Outlet) error {
 	}
 	{
 		comp := component.Component{
-			Name:    "powerssl-temporalserver",
-			Command: "bin/powerssl-temporalserver",
+			Name:    "powerssl-temporal",
+			Command: "bin/powerssl-temporal",
 			Args:    "migrate --host localhost --password powerssl --plugin postgres --port 5432 --user powerssl",
 		}
 		cmd, _, err := makeCmd(comp, 0, of)
@@ -305,8 +305,8 @@ func handlePostgres(of *Outlet) error {
 
 func handleTemporal(of *Outlet) error {
 	comp := component.Component{
-		Name:    "powerssl-temporalserver",
-		Command: "bin/powerssl-temporalserver",
+		Name:    "powerssl-temporal",
+		Command: "bin/powerssl-temporal",
 		Args:    "register-namespace --address localhost:7233 --namespace powerssl --tls-cert-path local/certs/localhost.pem --tls-key-path local/certs/localhost-key.pem --tls-ca-path local/certs/ca.pem --tls-enable-host-verification --tls-server-name localhost",
 	}
 	cmd, _, err := makeCmd(comp, 0, of)

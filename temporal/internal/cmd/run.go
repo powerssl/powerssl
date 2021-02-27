@@ -8,7 +8,7 @@ import (
 	"go.temporal.io/server/temporal"
 
 	cmdutil "powerssl.dev/common/cmd"
-	"powerssl.dev/temporalserver/internal"
+	"powerssl.dev/temporal/internal"
 )
 
 func newCmdRun() *cobra.Command {

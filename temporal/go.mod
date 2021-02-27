@@ -1,4 +1,4 @@
-module powerssl.dev/temporalserver
+module powerssl.dev/temporal
 
 go 1.15
 

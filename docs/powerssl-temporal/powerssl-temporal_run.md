@@ -1,16 +1,16 @@
 ---
 has_toc: false
 layout: default
-parent: powerssl-temporalserver
-permalink: /powerssl-temporalserver/run
+parent: powerssl-temporal
+permalink: /powerssl-temporal/run
 title: run
 ---
-## powerssl-temporalserver run
+## powerssl-temporal run
 
 Run the Temporal Server
 
 ```
-powerssl-temporalserver run [flags]
+powerssl-temporal run [flags]
 ```
 
 ### Options
@@ -26,10 +26,10 @@ powerssl-temporalserver run [flags]
 ### Options inherited from parent commands
 
 ```
-      --config string   config file (default is /etc/powerssl/temporalserver/config.yaml)
+      --config string   config file (default is /etc/powerssl/temporal/config.yaml)
   -v, --verbose         Verbose output
 ```
 
 ### SEE ALSO
 
-* [powerssl-temporalserver](/powerssl-temporalserver)	 - powerssl-temporalserver provides PowerSSL Temporal Server
+* [powerssl-temporal](/powerssl-temporal)	 - powerssl-temporal provides PowerSSL Temporal Server
