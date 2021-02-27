@@ -2,4 +2,4 @@
 
 set -euxo pipefail
 
-go fmt "$(go list "$PACKAGE/...")"
+go fmt "$PACKAGE/..."

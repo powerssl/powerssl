@@ -2,4 +2,4 @@
 
 set -euxo pipefail
 
-go test "$(go list "$PACKAGE/...")"
+go test "$PACKAGE/..."
