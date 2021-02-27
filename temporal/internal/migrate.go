@@ -11,7 +11,7 @@ import (
 	"go.temporal.io/server/tools/sql"
 
 	"powerssl.dev/common"
-	"powerssl.dev/temporalserver/internal/migration"
+	"powerssl.dev/temporal/internal/migration"
 )
 
 const schemaVersion = "v96"

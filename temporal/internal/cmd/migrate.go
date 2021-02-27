@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	cmdutil "powerssl.dev/common/cmd"
-	"powerssl.dev/temporalserver/internal"
+	"powerssl.dev/temporal/internal"
 )
 
 func newCmdMigrate() *cobra.Command {
