@@ -168,7 +168,6 @@ func Run() error {
 		Name:    "grpcwebproxy",
 		Command: "gobin",
 		Args: strings.Join([]string{
-			"-m",
 			"-run",
 			"github.com/improbable-eng/grpc-web/go/grpcwebproxy",
 			"--allowed_origins http://localhost:8080",
@@ -270,7 +269,7 @@ func handlePostgres(of *Outlet) error {
 	{
 		comp := component.Component{
 			Name:    "powerssl-apiserver",
-			Command: "bin/powerutil",
+			Command: "bin/powerssl-apiserver",
 			Args:    "migrate --database-url postgres://powerssl:powerssl@localhost:5432/powerssl?sslmode=disable up",
 		}
 		cmd, _, err := makeCmd(comp, 0, of)
@@ -287,8 +286,8 @@ func handlePostgres(of *Outlet) error {
 	{
 		comp := component.Component{
 			Name:    "powerssl-temporalserver",
-			Command: "bin/powerutil",
-			Args:    "temporal migrate --host localhost --password powerssl --plugin postgres --port 5432 --user powerssl --docker",
+			Command: "bin/powerssl-temporalserver",
+			Args:    "migrate --host localhost --password powerssl --plugin postgres --port 5432 --user powerssl",
 		}
 		cmd, _, err := makeCmd(comp, 0, of)
 		if err != nil {
@@ -307,8 +306,8 @@ func handlePostgres(of *Outlet) error {
 func handleTemporal(of *Outlet) error {
 	comp := component.Component{
 		Name:    "powerssl-temporalserver",
-		Command: "bin/powerutil",
-		Args:    "temporal register-namespace --address localhost:7233 --namespace powerssl --tls-cert-path local/certs/localhost.pem --tls-key-path local/certs/localhost-key.pem --tls-ca-path local/certs/ca.pem --tls-enable-host-verification --tls-server-name localhost",
+		Command: "bin/powerssl-temporalserver",
+		Args:    "register-namespace --address localhost:7233 --namespace powerssl --tls-cert-path local/certs/localhost.pem --tls-key-path local/certs/localhost-key.pem --tls-ca-path local/certs/ca.pem --tls-enable-host-verification --tls-server-name localhost",
 	}
 	cmd, _, err := makeCmd(comp, 0, of)
 	if err != nil {

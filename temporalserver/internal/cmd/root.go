@@ -31,6 +31,8 @@ Find more information at: https://docs.powerssl.io/powerssl-temporalserver`,
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output")
 	cmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is /etc/powerssl/temporalserver/config.yaml)")
 
+	cmd.AddCommand(newCmdMigrate())
+	cmd.AddCommand(newCmdRegisterNamespace())
 	cmd.AddCommand(newCmdRun())
 
 	return cmd
