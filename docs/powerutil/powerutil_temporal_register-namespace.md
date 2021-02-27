@@ -35,5 +35,3 @@ powerutil temporal register-namespace [flags]
 ```
 
 ### SEE ALSO
-
-* [powerutil temporal](/powerutil/temporal)	 - Temporal

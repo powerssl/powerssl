@@ -26,4 +26,3 @@ Temporal
 
 * [powerutil](/powerutil)	 - powerutil provides PowerSSL utilities
 * [powerutil temporal migrate](/powerutil/temporal/migrate)	 - Run temporal migrations
-* [powerutil temporal register-namespace](/powerutil/temporal/register-namespace)	 - Run temporal register namespace

@@ -28,5 +28,3 @@ powerutil migrate goto V [flags]
 ```
 
 ### SEE ALSO
-
-* [powerutil migrate](/powerutil/migrate)	 - Migrate

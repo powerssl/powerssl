@@ -1,17 +1,17 @@
 ---
-grand_parent: powerutil
+grand_parent: powerssl-apiserver
 has_toc: false
 layout: default
 parent: migrate
-permalink: /powerutil/migrate/up
+permalink: /powerssl-apiserver/migrate/up
 title: up
 ---
-## powerutil migrate up
+## powerssl-apiserver migrate up
 
 Apply all or N up migrations
 
 ```
-powerutil migrate up [N] [flags]
+powerssl-apiserver migrate up [N] [flags]
 ```
 
 ### Options
@@ -23,8 +23,11 @@ powerutil migrate up [N] [flags]
 ### Options inherited from parent commands
 
 ```
+      --config string         config file (default is /etc/powerssl/api/config.yaml)
       --database-url string   Database URL
   -v, --verbose               Verbose output
 ```
 
 ### SEE ALSO
+
+* [powerssl-apiserver migrate](/powerssl-apiserver/migrate)	 - Migrate

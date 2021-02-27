@@ -1,17 +1,17 @@
 ---
-grand_parent: powerutil
+grand_parent: powerssl-apiserver
 has_toc: false
 layout: default
 parent: migrate
-permalink: /powerutil/migrate/drop
+permalink: /powerssl-apiserver/migrate/drop
 title: drop
 ---
-## powerutil migrate drop
+## powerssl-apiserver migrate drop
 
 Drop everything inside database
 
 ```
-powerutil migrate drop [--force | -f] [flags]
+powerssl-apiserver migrate drop [--force | -f] [flags]
 ```
 
 ### Options
@@ -24,8 +24,11 @@ powerutil migrate drop [--force | -f] [flags]
 ### Options inherited from parent commands
 
 ```
+      --config string         config file (default is /etc/powerssl/api/config.yaml)
       --database-url string   Database URL
   -v, --verbose               Verbose output
 ```
 
 ### SEE ALSO
+
+* [powerssl-apiserver migrate](/powerssl-apiserver/migrate)	 - Migrate
