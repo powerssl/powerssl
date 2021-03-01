@@ -1,6 +1,6 @@
 module powerssl.dev/sdk
 
-go 1.15
+go 1.16
 
 replace powerssl.dev/api => ../api
 
@@ -13,6 +13,7 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
 	google.golang.org/grpc v1.35.0
+	google.golang.org/protobuf v1.25.0
 	powerssl.dev/api v0.0.0-00010101000000-000000000000
 	powerssl.dev/common v0.0.0-00010101000000-000000000000
 )

@@ -1,6 +1,6 @@
 module powerssl.dev/agent
 
-go 1.15
+go 1.16
 
 replace powerssl.dev/api => ../api
 

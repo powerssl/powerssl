@@ -1,6 +1,6 @@
 module powerssl.dev/integration/cloudflare
 
-go 1.15
+go 1.16
 
 replace powerssl.dev/api => ../../api
 

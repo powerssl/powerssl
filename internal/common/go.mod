@@ -1,6 +1,6 @@
 module powerssl.dev/common
 
-go 1.15
+go 1.16
 
 require (
 	github.com/HdrHistogram/hdrhistogram-go v1.0.1 // indirect
@@ -23,7 +23,6 @@ require (
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/uber/jaeger-client-go v2.25.0+incompatible
 	github.com/uber/jaeger-lib v2.4.0+incompatible
-	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
@@ -34,7 +33,6 @@ require (
 	golang.org/x/tools v0.0.0-20200605181038-cef9fc3bc8f0 // indirect
 	google.golang.org/genproto v0.0.0-20210212180131-e7f2df4ecc2d // indirect
 	google.golang.org/grpc v1.35.0
-	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1
 	gopkg.in/yaml.v3 v3.0.0-20210106172901-c476de37821d

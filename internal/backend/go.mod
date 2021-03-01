@@ -1,6 +1,6 @@
 module powerssl.dev/backend
 
-go 1.15
+go 1.16
 
 replace powerssl.dev/api => ../../api
 
@@ -16,7 +16,6 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.2
 	github.com/hashicorp/vault/api v1.0.5-0.20200117231345-460d63e36490
 	github.com/johanbrandhorst/certify v1.8.1
-	github.com/lib/pq v1.3.0 // indirect
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pborman/uuid v1.2.1
 	github.com/uber-go/tally v3.3.17+incompatible

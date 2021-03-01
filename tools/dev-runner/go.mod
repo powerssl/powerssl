@@ -1,6 +1,6 @@
 module powerssl.dev/tools/dev-runner
 
-go 1.15
+go 1.16
 
 replace powerssl.dev/common => ../../internal/common
 

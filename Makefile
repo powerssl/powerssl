@@ -16,7 +16,7 @@ local/certs/ca-key.pem local/certs/ca.csr local/certs/ca.pem: bin/powerutil
 .PHONY: bootstrap
 # Bootstrap development environment
 bootstrap:
-	@GO111MODULE=off go get -u github.com/myitcv/gobin
+	@go install github.com/myitcv/gobin@latest
 
 .PHONY: build
 # Build all targets
