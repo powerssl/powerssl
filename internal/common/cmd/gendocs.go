@@ -14,7 +14,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func GenDocs(newCmdRoot *cobra.Command) {
+func GenDocs(newCmdRoot *cobra.Command, hasChildren ...string) {
 	var dir string
 
 	cmd := &cobra.Command{
@@ -34,13 +34,21 @@ func GenDocs(newCmdRoot *cobra.Command) {
 			return nil
 		},
 		Run: HandleError(func(cmd *cobra.Command, args []string) (err error) {
-			if err = doc.GenMarkdownTreeCustom(newCmdRoot, dir+"/"+newCmdRoot.Use, filePrepender, linkHandler); err != nil {
+			dir += "/" + newCmdRoot.Use
+			if err = os.RemoveAll(dir); err != nil {
+				return err
+			}
+			if err = os.MkdirAll(dir, 0755); err != nil {
+				return err
+			}
+
+			if err = doc.GenMarkdownTreeCustom(newCmdRoot, dir, filePrepender(hasChildren), linkHandler); err != nil {
 				return err
 			}
 
 			// NOTE: Strip timestamp from all generated docs.
 			var files []string
-			if files, err = filepath.Glob(dir + "/" + newCmdRoot.Use + "/*.md"); err != nil {
+			if files, err = filepath.Glob(dir + "/*.md"); err != nil {
 				return err
 			}
 			for _, file := range files {
@@ -70,35 +78,45 @@ func GenDocs(newCmdRoot *cobra.Command) {
 	}
 }
 
-func filePrepender(filename string) string {
-	name := filepath.Base(filename)
-	base := strings.TrimSuffix(name, path.Ext(name))
-	s := strings.Split(base, "_")
-
-	meta := make(map[string]interface{})
-	meta["has_toc"] = false
-	meta["permalink"] = fmt.Sprintf("/%s", strings.Join(s, "/"))
-	meta["layout"] = "default"
-	meta["title"] = s[len(s)-1]
-	switch len(s) {
-	case 1:
-		meta["has_children"] = true
-	case 2:
-		meta["parent"] = s[len(s)-2]
-		switch s[1] {
-		case "create", "ca", "migrate", "temporal":
-			meta["has_children"] = true
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
 		}
-	case 3:
-		meta["parent"] = s[len(s)-2]
-		meta["grand_parent"] = s[len(s)-3]
 	}
-	var byt []byte
-	var err error
-	if byt, err = yaml.Marshal(meta); err != nil {
-		panic(err)
+	return false
+}
+
+func filePrepender(hasChildren []string) func(filename string) string {
+	return func(filename string) string {
+		name := filepath.Base(filename)
+		base := strings.TrimSuffix(name, path.Ext(name))
+		s := strings.Split(base, "_")
+
+		meta := make(map[string]interface{})
+		meta["has_toc"] = false
+		meta["permalink"] = fmt.Sprintf("/%s", strings.Join(s, "/"))
+		meta["layout"] = "default"
+		meta["title"] = s[len(s)-1]
+		switch len(s) {
+		case 1:
+			meta["has_children"] = true
+		case 2:
+			meta["parent"] = s[len(s)-2]
+			if contains(hasChildren, s[1]) {
+				meta["has_children"] = true
+			}
+		case 3:
+			meta["parent"] = s[len(s)-2]
+			meta["grand_parent"] = s[len(s)-3]
+		}
+		var byt []byte
+		var err error
+		if byt, err = yaml.Marshal(meta); err != nil {
+			panic(err)
+		}
+		return fmt.Sprintf("---\n%s---\n", string(byt))
 	}
-	return fmt.Sprintf("---\n%s---\n", string(byt))
 }
 
 func linkHandler(name string) string {

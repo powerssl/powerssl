@@ -6,5 +6,5 @@ import (
 )
 
 func main() {
-	cmdutil.GenDocs(cmd.NewCmdRoot())
+	cmdutil.GenDocs(cmd.NewCmdRoot(), "ca")
 }

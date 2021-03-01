@@ -1,5 +1,4 @@
 ---
-has_children: true
 has_toc: false
 layout: default
 parent: powerssl-temporal
