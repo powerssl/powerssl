@@ -2,7 +2,14 @@ package version
 
 import "fmt"
 
-var BuildDate, GitBranch, GitCommit, GitState, GitSummary, Version string
+var (
+	BuildDate  string
+	GitBranch  string
+	GitCommit  string
+	GitState   string
+	GitSummary string
+	Version    string
+)
 
 func String() string {
 	if GitState == "clean" {
