@@ -197,13 +197,21 @@ func vaultUnseal(c *vault.Client, keys []string) error {
 }
 
 func vaultPutPolicies(c *vault.Client) error {
-	for _, assetFile := range policy.AssetNames() {
-		byt, err := policy.Asset(assetFile)
-		if err != nil {
+	dirEntries, err := policy.ReadDir(".")
+	if err != nil {
+		return err
+	}
+	for _, dirEntry := range dirEntries {
+		if dirEntry.IsDir() {
+			continue
+		}
+		name := dirEntry.Name()
+		var byt []byte
+		if byt, err = policy.ReadFile(name); err != nil {
 			return err
 		}
-		name := assetFile[0 : len(assetFile)-len(filepath.Ext(assetFile))]
-		if err := c.Sys().PutPolicy(name, string(byt)); err != nil {
+		policyName := name[0 : len(name)-len(filepath.Ext(name))]
+		if err = c.Sys().PutPolicy(policyName, string(byt)); err != nil {
 			return err
 		}
 	}
