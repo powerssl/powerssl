@@ -198,7 +198,24 @@ jobs:
     steps:
       - checkout
       - *restore_go_modules
-      - run: go mod download
+      - run: cd agent && go mod download
+      - run: cd api && go mod download
+      - run: cd apiserver && go mod download
+      - run: cd auth && go mod download
+      - run: cd controller && go mod download
+      - run: cd grpcgateway && go mod download
+      - run: cd integration/acme && go mod download
+      - run: cd integration/cloudflare && go mod download
+      - run: cd internal/backend && go mod download
+      - run: cd internal/common && go mod download
+      - run: cd internal/workflow && go mod download
+      - run: cd powerctl && go mod download
+      - run: cd powerutil && go mod download
+      - run: cd sdk && go mod download
+      - run: cd temporal && go mod download
+      - run: cd tools/dev-runner && go mod download
+      - run: cd webapp && go mod download
+      - run: cd worker && go mod download
       - *save_go_modules
   verify_generated:
     executor: golang-node-executor
