@@ -1,11 +1,11 @@
 // Code generated for package asset by go-bindata DO NOT EDIT. (@generated)
 // sources:
-// ../../../web/auth/assets/app.js
-// ../../../web/auth/assets/bootstrap.min.css
-// ../../../web/auth/assets/bootstrap.min.js
-// ../../../web/auth/assets/favicon.ico
-// ../../../web/auth/assets/jquery-3.3.1.min.js
-// ../../../web/auth/assets/popper.min.js
+// ../../web/assets/app.js
+// ../../web/assets/bootstrap.min.css
+// ../../web/assets/bootstrap.min.js
+// ../../web/assets/favicon.ico
+// ../../web/assets/jquery-3.3.1.min.js
+// ../../web/assets/popper.min.js
 package asset
 
 import (

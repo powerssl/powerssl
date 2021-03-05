@@ -1,4 +1,4 @@
-// Code generated for package asset by go-bindata DO NOT EDIT. (@generated)
+// Code generated for package migration by go-bindata DO NOT EDIT. (@generated)
 // sources:
 // ../../db/migrations/20210130204142_create_acme_servers_table.down.sql
 // ../../db/migrations/20210130204142_create_acme_servers_table.up.sql

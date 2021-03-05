@@ -8,6 +8,7 @@ replace github.com/apache/thrift => github.com/apache/thrift v0.0.0-201612212036
 
 require (
 	github.com/ahmetb/govvv v0.3.0
+	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.7.1

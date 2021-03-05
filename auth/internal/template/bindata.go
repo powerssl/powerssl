@@ -1,6 +1,6 @@
 // Code generated for package template by go-bindata DO NOT EDIT. (@generated)
 // sources:
-// ../../../web/auth/index.html
+// ../../web/index.html
 package template
 
 import (

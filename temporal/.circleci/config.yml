@@ -1,0 +1,67 @@
+version: 2.1
+jobs:
+  build_temporal:
+    executor: golang-executor
+    steps:
+      - build:
+          component: temporal
+  check_scripts_temporal:
+    executor: golang-executor
+    steps:
+      - check_scripts:
+          component: temporal
+  download_dependencies_temporal:
+    executor: golang-executor
+    steps:
+      - download_dependencies:
+          component: temporal
+  image_temporal:
+    machine: true
+    steps:
+      - image:
+          component: temporal
+  test_temporal:
+    executor: golang-executor
+    steps:
+      - test:
+          component: temporal
+  verify_generated_temporal:
+    executor: golang-executor
+    steps:
+      - verify_generated:
+          component: temporal
+  vet_temporal:
+    executor: golang-executor
+    steps:
+      - vet:
+          component: temporal
+workflows:
+  build:
+    jobs:
+      - check_scripts_temporal:
+          requires:
+            - check_scripts
+      - download_dependencies_temporal:
+          requires:
+            - check_scripts
+      - verify_generated_temporal:
+          requires:
+            - download_dependencies_temporal
+      - test_temporal:
+          requires:
+            - download_dependencies_temporal
+      - vet_temporal:
+          requires:
+            - download_dependencies_temporal
+      - build_temporal:
+          requires:
+            - check_scripts_temporal
+            - test_temporal
+            - verify_generated_temporal
+            - vet_temporal
+      - image_temporal:
+          filters:
+            branches:
+              only: main
+          requires:
+            - build_temporal

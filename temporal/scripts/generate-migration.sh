@@ -11,5 +11,11 @@ do
 done
 
 base=$(go mod download -json go.temporal.io/server | jq -r '.Dir')
+basedir=$(basename "$(dirname "$base")")
+basename="$basedir/$(basename "$base")"
 
-gobin -m -run github.com/go-bindata/go-bindata/go-bindata -ignore '\.go$' -fs -modtime 726710400 -pkg migration -prefix "$base" "$base/schema/postgresql/..."
+trap 'rm -rf "$basedir"' EXIT
+mkdir "$basedir"
+ln -s "$base" "$basename"
+
+gobin -m -run github.com/go-bindata/go-bindata/go-bindata -ignore '\.go$' -fs -modtime 726710400 -pkg migration -prefix "$basename" "$basename/schema/postgresql/..."

@@ -1,0 +1,67 @@
+version: 2.1
+jobs:
+  build_auth:
+    executor: golang-executor
+    steps:
+      - build:
+          component: auth
+  check_scripts_auth:
+    executor: golang-executor
+    steps:
+      - check_scripts:
+          component: auth
+  download_dependencies_auth:
+    executor: golang-executor
+    steps:
+      - download_dependencies:
+          component: auth
+  image_auth:
+    machine: true
+    steps:
+      - image:
+          component: auth
+  test_auth:
+    executor: golang-executor
+    steps:
+      - test:
+          component: auth
+  verify_generated_auth:
+    executor: golang-executor
+    steps:
+      - verify_generated:
+          component: auth
+  vet_auth:
+    executor: golang-executor
+    steps:
+      - vet:
+          component: auth
+workflows:
+  build:
+    jobs:
+      - check_scripts_auth:
+          requires:
+            - check_scripts
+      - download_dependencies_auth:
+          requires:
+            - check_scripts
+      - verify_generated_auth:
+          requires:
+            - download_dependencies_auth
+      - test_auth:
+          requires:
+            - download_dependencies_auth
+      - vet_auth:
+          requires:
+            - download_dependencies_auth
+      - build_auth:
+          requires:
+            - check_scripts_auth
+            - test_auth
+            - verify_generated_auth
+            - vet_auth
+      - image_auth:
+          filters:
+            branches:
+              only: main
+          requires:
+            - build_auth

@@ -1,0 +1,67 @@
+version: 2.1
+jobs:
+  build_apiserver:
+    executor: golang-executor
+    steps:
+      - build:
+          component: apiserver
+  check_scripts_apiserver:
+    executor: golang-executor
+    steps:
+      - check_scripts:
+          component: apiserver
+  download_dependencies_apiserver:
+    executor: golang-executor
+    steps:
+      - download_dependencies:
+          component: apiserver
+  image_apiserver:
+    machine: true
+    steps:
+      - image:
+          component: apiserver
+  test_apiserver:
+    executor: golang-executor
+    steps:
+      - test:
+          component: apiserver
+  verify_generated_apiserver:
+    executor: golang-executor
+    steps:
+      - verify_generated:
+          component: apiserver
+  vet_apiserver:
+    executor: golang-executor
+    steps:
+      - vet:
+          component: apiserver
+workflows:
+  build:
+    jobs:
+      - check_scripts_apiserver:
+          requires:
+            - check_scripts
+      - download_dependencies_apiserver:
+          requires:
+            - check_scripts
+      - verify_generated_apiserver:
+          requires:
+            - download_dependencies_apiserver
+      - test_apiserver:
+          requires:
+            - download_dependencies_apiserver
+      - vet_apiserver:
+          requires:
+            - download_dependencies_apiserver
+      - build_apiserver:
+          requires:
+            - check_scripts_apiserver
+            - test_apiserver
+            - verify_generated_apiserver
+            - vet_apiserver
+      - image_apiserver:
+          filters:
+            branches:
+              only: main
+          requires:
+            - build_apiserver

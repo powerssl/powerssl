@@ -1,5 +1,6 @@
 root_path := $(abspath .)
 include makefiles/common.mk
+include makefiles/go_bootstrap.mk
 
 bin/powerssl-dev-runner:
 	@$(MAKE) build-tool-dev-runner
@@ -12,11 +13,6 @@ local/certs/%-key.pem local/certs/%.csr local/certs/%.pem: bin/powerutil local/c
 
 local/certs/ca-key.pem local/certs/ca.csr local/certs/ca.pem: bin/powerutil
 	@mkdir -p local/certs && cd local/certs && $(BIN_PATH)/powerutil ca init
-
-.PHONY: bootstrap
-# Bootstrap development environment
-bootstrap:
-	@go install github.com/myitcv/gobin@latest
 
 .PHONY: build
 # Build all targets
@@ -65,6 +61,11 @@ docs-%:
 # Document all targets
 docs: docs-agent docs-apiserver docs-auth docs-controller docs-grpcgateway docs-powerctl docs-powerutil docs-temporal docs-webapp docs-worker
 
+.PHONY: generate-circleci-config
+# Generate CircleCI config
+generate-circleci-config:
+	@scripts/generate-circleci-config.sh
+
 .PHONY: image-%
 # Build image for single target
 image-%:
@@ -96,3 +97,8 @@ release-image-%:
 # Run development environment
 run: bin/powerssl-dev-runner bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-grpcgateway bin/powerssl-temporal bin/powerssl-webapp bin/powerssl-worker local/certs/ca-key.pem local/certs/ca.pem local/certs/localhost-key.pem local/certs/localhost.pem local/certs/vault-key.pem local/certs/vault.pem
 	@bin/powerssl-dev-runner
+
+.PHONY: tidy-go
+# Run go mod tidy in all places
+tidy-go:
+	@$(SCRIPTS_PATH)/tidy-go.sh
