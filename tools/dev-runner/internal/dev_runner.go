@@ -85,7 +85,7 @@ func Run() error {
 			interrupts[comp.Command] = make(chan struct{})
 			localComp := comp
 			g.Go(func() error {
-				if val, ok := localComp.Env["POWERSSL_AUTH_TOKEN"]; ok && val == "{{GENERATE}}" {
+				if val, ok := localComp.Env["POWERSSL_AUTH_TOKEN"]; ok && val == component.GenerateAuthToken {
 					var err error
 					if localComp.Env["POWERSSL_AUTH_TOKEN"], err = serviceToken(); err != nil {
 						of.SystemOutput(err.Error())
@@ -121,7 +121,7 @@ func Run() error {
 
 	addComponent(component.Component{
 		Command: "vault",
-		Args:    "server -config configs/vault/config.hcl",
+		Args:    "server -config tools/dev-runner/configs/vault.hcl",
 	})
 
 	if err = waitForService("localhost:8200", time.Minute); err != nil {
