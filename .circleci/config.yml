@@ -4,7 +4,7 @@ references:
     attach_workspace:
       at: .
   go_modules_cache_key: &go_modules_cache_key
-    go-mod-{{ .Environment.CACHE_VERSION }}-{{ checksum "go.sum" }}
+    go-mod-{{ .Environment.CACHE_VERSION }}-{{ checksum "agent/go.sum" }}-{{ checksum "api/go.sum" }}-{{ checksum "apiserver/go.sum" }}-{{ checksum "auth/go.sum" }}-{{ checksum "controller/go.sum" }}-{{ checksum "grpcgateway/go.sum" }}-{{ checksum "integration/acme/go.sum" }}-{{ checksum "integration/cloudflare/go.sum" }}-{{ checksum "internal/backend/go.sum" }}-{{ checksum "internal/common/go.sum" }}-{{ checksum "internal/workflow/go.sum" }}-{{ checksum "powerctl/go.sum" }}-{{ checksum "powerutil/go.sum" }}-{{ checksum "sdk/go.sum" }}-{{ checksum "temporal/go.sum" }}-{{ checksum "tools/dev-runner/go.sum" }}-{{ checksum "webapp/go.sum" }}-{{ checksum "worker/go.sum" }}
   restore_go_modules: &restore_go_modules
     restore_cache:
       key: *go_modules_cache_key
@@ -56,10 +56,10 @@ commands:
 executors:
   golang-executor:
     docker:
-      - image: circleci/golang:1.15
+      - image: circleci/golang:1.16
   golang-node-executor:
     docker:
-      - image: circleci/golang:1.15-node
+      - image: circleci/golang:1.16-node
 jobs:
   build_powerctl:
     executor: golang-executor
@@ -148,17 +148,6 @@ jobs:
     steps:
       - build_component:
           component: powerssl-integration-cloudflare
-          image: true
-  build_powerssl_signer:
-    executor: golang-executor
-    steps:
-      - build_component:
-          component: powerssl-signer
-  build_powerssl_signer_image:
-    machine: true
-    steps:
-      - build_component:
-          component: powerssl-signer
           image: true
   build_powerssl_temporalserver:
     executor: golang-executor
@@ -326,14 +315,6 @@ workflows:
               only: main
           requires:
             - build_powerssl_integration_cloudflare
-      - build_powerssl_signer:
-          requires: *test_stage
-      - build_powerssl_signer_image:
-          filters:
-            branches:
-              only: main
-          requires:
-            - build_powerssl_signer
       - build_powerssl_temporalserver:
           requires: *test_stage
       - build_powerssl_temporalserver_image:
