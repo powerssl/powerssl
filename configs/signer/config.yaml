@@ -1,7 +1,0 @@
-addr: localhost:8084
-metrics-addr: localhost:9094
-ca-file: local/certs/ca.pem
-common-name: localhost
-vault:
-  url: https://localhost:8200
-  token: powerssl-signer

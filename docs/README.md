@@ -10,5 +10,4 @@
 * [powerssl-grpcgateway](powerssl-grpcgateway/powerssl-grpcgateway.md)
 * [powerssl-integration-acme](powerssl-integration-acme/powerssl-integration-acme.md)
 * [powerssl-integration-cloudflare](powerssl-integration-cloudflare/powerssl-integration-cloudflare.md)
-* [powerssl-signer](powerssl-signer/powerssl-signer.md)
 * [powerssl-webapp](powerssl-webapp/powerssl-webapp.md)

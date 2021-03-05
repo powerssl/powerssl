@@ -46,12 +46,6 @@ var roles = map[string]map[string]interface{}{
 		"allow_bare_domains": true,
 		"max_ttl":            "24h",
 	},
-	fmt.Sprintf("%s/roles/powerssl-signer", PkiPath): {
-		"allowed_domains":    "signer",
-		"allow_localhost":    true, // TODO: Disable in production
-		"allow_bare_domains": true,
-		"max_ttl":            "24h",
-	},
 	fmt.Sprintf("%s/roles/powerssl-worker", PkiPath): {
 		"allowed_domains":    "worker",
 		"allow_localhost":    true, // TODO: Disable in production
@@ -63,7 +57,6 @@ var roles = map[string]map[string]interface{}{
 var tokens = map[string][]string{
 	"powerssl-apiserver":  {"powerssl-apiserver"},
 	"powerssl-controller": {"powerssl-controller"},
-	"powerssl-signer":     {"powerssl-signer"},
 	"powerssl-worker":     {"powerssl-worker"},
 }
 
