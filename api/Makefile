@@ -1,4 +1,5 @@
-include ../makefiles/help.mk
+root_path := $(abspath ..)
+include ../makefiles/library.mk
 
 .PHONY: fmt
 # Format code
@@ -9,3 +10,4 @@ fmt:
 # Generate proto stubs
 generate:
 	@scripts/generate-protobuf.sh
+	@$(SCRIPTS_PATH)/generate-go.sh

@@ -1,7 +1,7 @@
 // Code generated for package asset by go-bindata DO NOT EDIT. (@generated)
 // sources:
-// ../../../web/app/assets/bundle.js
-// ../../../web/app/assets/favicon.ico
+// ../../web/assets/bundle.js
+// ../../web/assets/favicon.ico
 package asset
 
 import (

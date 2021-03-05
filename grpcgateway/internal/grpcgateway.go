@@ -15,10 +15,10 @@ import (
 	"google.golang.org/grpc/connectivity"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
+	"powerssl.dev/api/openapi"
 	"powerssl.dev/backend/httpfs"
 	"powerssl.dev/common"
 	"powerssl.dev/common/transport"
-	"powerssl.dev/grpcgateway/internal/openapi"
 	"powerssl.dev/grpcgateway/internal/swaggerui"
 )
 

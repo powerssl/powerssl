@@ -1,0 +1,67 @@
+version: 2.1
+jobs:
+  build_agent:
+    executor: golang-executor
+    steps:
+      - build:
+          component: agent
+  check_scripts_agent:
+    executor: golang-executor
+    steps:
+      - check_scripts:
+          component: agent
+  download_dependencies_agent:
+    executor: golang-executor
+    steps:
+      - download_dependencies:
+          component: agent
+  image_agent:
+    machine: true
+    steps:
+      - image:
+          component: agent
+  test_agent:
+    executor: golang-executor
+    steps:
+      - test:
+          component: agent
+  verify_generated_agent:
+    executor: golang-executor
+    steps:
+      - verify_generated:
+          component: agent
+  vet_agent:
+    executor: golang-executor
+    steps:
+      - vet:
+          component: agent
+workflows:
+  build:
+    jobs:
+      - check_scripts_agent:
+          requires:
+            - check_scripts
+      - download_dependencies_agent:
+          requires:
+            - check_scripts
+      - verify_generated_agent:
+          requires:
+            - download_dependencies_agent
+      - test_agent:
+          requires:
+            - download_dependencies_agent
+      - vet_agent:
+          requires:
+            - download_dependencies_agent
+      - build_agent:
+          requires:
+            - check_scripts_agent
+            - test_agent
+            - verify_generated_agent
+            - vet_agent
+      - image_agent:
+          filters:
+            branches:
+              only: main
+          requires:
+            - build_agent

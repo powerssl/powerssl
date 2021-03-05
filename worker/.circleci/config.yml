@@ -1,0 +1,67 @@
+version: 2.1
+jobs:
+  build_worker:
+    executor: golang-executor
+    steps:
+      - build:
+          component: worker
+  check_scripts_worker:
+    executor: golang-executor
+    steps:
+      - check_scripts:
+          component: worker
+  download_dependencies_worker:
+    executor: golang-executor
+    steps:
+      - download_dependencies:
+          component: worker
+  image_worker:
+    machine: true
+    steps:
+      - image:
+          component: worker
+  test_worker:
+    executor: golang-executor
+    steps:
+      - test:
+          component: worker
+  verify_generated_worker:
+    executor: golang-executor
+    steps:
+      - verify_generated:
+          component: worker
+  vet_worker:
+    executor: golang-executor
+    steps:
+      - vet:
+          component: worker
+workflows:
+  build:
+    jobs:
+      - check_scripts_worker:
+          requires:
+            - check_scripts
+      - download_dependencies_worker:
+          requires:
+            - check_scripts
+      - verify_generated_worker:
+          requires:
+            - download_dependencies_worker
+      - test_worker:
+          requires:
+            - download_dependencies_worker
+      - vet_worker:
+          requires:
+            - download_dependencies_worker
+      - build_worker:
+          requires:
+            - check_scripts_worker
+            - test_worker
+            - verify_generated_worker
+            - vet_worker
+      - image_worker:
+          filters:
+            branches:
+              only: main
+          requires:
+            - build_worker

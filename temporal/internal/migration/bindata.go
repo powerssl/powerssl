@@ -1,21 +1,21 @@
 // Code generated for package migration by go-bindata DO NOT EDIT. (@generated)
 // sources:
-// ../../../../../../pkg/mod/go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/database.sql
-// ../../../../../../pkg/mod/go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/schema.sql
-// ../../../../../../pkg/mod/go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/versioned/v1.0/manifest.json
-// ../../../../../../pkg/mod/go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/versioned/v1.0/schema.sql
-// ../../../../../../pkg/mod/go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/versioned/v1.1/cluster_metadata.sql
-// ../../../../../../pkg/mod/go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/versioned/v1.1/manifest.json
-// ../../../../../../pkg/mod/go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/versioned/v1.2/manifest.json
-// ../../../../../../pkg/mod/go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/versioned/v1.2/queue.sql
-// ../../../../../../pkg/mod/go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/versioned/v1.3/manifest.json
-// ../../../../../../pkg/mod/go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/versioned/v1.3/visibility_tasks.sql
-// ../../../../../../pkg/mod/go.temporal.io/server@v1.6.4/schema/postgresql/v96/visibility/database.sql
-// ../../../../../../pkg/mod/go.temporal.io/server@v1.6.4/schema/postgresql/v96/visibility/schema.sql
-// ../../../../../../pkg/mod/go.temporal.io/server@v1.6.4/schema/postgresql/v96/visibility/versioned/v1.0/manifest.json
-// ../../../../../../pkg/mod/go.temporal.io/server@v1.6.4/schema/postgresql/v96/visibility/versioned/v1.0/schema.sql
-// ../../../../../../pkg/mod/go.temporal.io/server@v1.6.4/schema/postgresql/v96/visibility/versioned/v1.1/index.sql
-// ../../../../../../pkg/mod/go.temporal.io/server@v1.6.4/schema/postgresql/v96/visibility/versioned/v1.1/manifest.json
+// go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/database.sql
+// go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/schema.sql
+// go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/versioned/v1.0/manifest.json
+// go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/versioned/v1.0/schema.sql
+// go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/versioned/v1.1/cluster_metadata.sql
+// go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/versioned/v1.1/manifest.json
+// go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/versioned/v1.2/manifest.json
+// go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/versioned/v1.2/queue.sql
+// go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/versioned/v1.3/manifest.json
+// go.temporal.io/server@v1.6.4/schema/postgresql/v96/temporal/versioned/v1.3/visibility_tasks.sql
+// go.temporal.io/server@v1.6.4/schema/postgresql/v96/visibility/database.sql
+// go.temporal.io/server@v1.6.4/schema/postgresql/v96/visibility/schema.sql
+// go.temporal.io/server@v1.6.4/schema/postgresql/v96/visibility/versioned/v1.0/manifest.json
+// go.temporal.io/server@v1.6.4/schema/postgresql/v96/visibility/versioned/v1.0/schema.sql
+// go.temporal.io/server@v1.6.4/schema/postgresql/v96/visibility/versioned/v1.1/index.sql
+// go.temporal.io/server@v1.6.4/schema/postgresql/v96/visibility/versioned/v1.1/manifest.json
 package migration
 
 import (

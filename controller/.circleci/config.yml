@@ -1,0 +1,67 @@
+version: 2.1
+jobs:
+  build_controller:
+    executor: golang-executor
+    steps:
+      - build:
+          component: controller
+  check_scripts_controller:
+    executor: golang-executor
+    steps:
+      - check_scripts:
+          component: controller
+  download_dependencies_controller:
+    executor: golang-executor
+    steps:
+      - download_dependencies:
+          component: controller
+  image_controller:
+    machine: true
+    steps:
+      - image:
+          component: controller
+  test_controller:
+    executor: golang-executor
+    steps:
+      - test:
+          component: controller
+  verify_generated_controller:
+    executor: golang-executor
+    steps:
+      - verify_generated:
+          component: controller
+  vet_controller:
+    executor: golang-executor
+    steps:
+      - vet:
+          component: controller
+workflows:
+  build:
+    jobs:
+      - check_scripts_controller:
+          requires:
+            - check_scripts
+      - download_dependencies_controller:
+          requires:
+            - check_scripts
+      - verify_generated_controller:
+          requires:
+            - download_dependencies_controller
+      - test_controller:
+          requires:
+            - download_dependencies_controller
+      - vet_controller:
+          requires:
+            - download_dependencies_controller
+      - build_controller:
+          requires:
+            - check_scripts_controller
+            - test_controller
+            - verify_generated_controller
+            - vet_controller
+      - image_controller:
+          filters:
+            branches:
+              only: main
+          requires:
+            - build_controller

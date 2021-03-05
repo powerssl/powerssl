@@ -1,0 +1,143 @@
+version: 2.1
+commands:
+  build:
+    parameters:
+      component:
+        type: string
+    steps:
+      - checkout
+      - go_modules_cache_restore:
+          component: << parameters.component >>
+      - run:
+          command: make bootstrap build
+          working_directory: << parameters.component >>
+      - persist_to_workspace:
+          root: .
+          paths:
+            - bin
+      - store_artifacts:
+          destination: bin
+          path: bin
+  check_scripts:
+    parameters:
+      component:
+        type: string
+    steps:
+      - checkout
+      - run: sudo apt-get install -y shellcheck
+      - run:
+          command: make check-scripts
+          working_directory: << parameters.component >>
+  download_dependencies:
+    parameters:
+      component:
+        type: string
+    steps:
+      - checkout
+      - go_modules_cache_restore:
+          component: << parameters.component >>
+      - run:
+          command: go mod download
+          name: go mod download
+          working_directory: << parameters.component >>
+      - run: git checkout -- << parameters.component >>/go.sum
+      - go_modules_cache_save:
+          component: << parameters.component >>
+  go_modules_cache_restore:
+    parameters:
+      component:
+        type: string
+    steps:
+      - restore_cache:
+          keys:
+            - go-mod-{{ arch }}-{{ checksum "<< parameters.component >>/go.sum" }}
+  go_modules_cache_save:
+    parameters:
+      component:
+        type: string
+    steps:
+      - save_cache:
+          key: go-mod-{{ arch }}-{{ checksum "<< parameters.component >>/go.sum" }}
+          paths:
+            - /go/pkg/mod
+  image:
+    parameters:
+      component:
+        type: string
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          command: make image release-image
+          working_directory: << parameters.component >>
+  test:
+    parameters:
+      component:
+        type: string
+    steps:
+      - checkout
+      - go_modules_cache_restore:
+          component: <<parameters.component>>
+      - run:
+          command: make test
+          working_directory: << parameters.component >>
+  verify_generated:
+    parameters:
+      component:
+        type: string
+    steps:
+      - checkout
+      - go_modules_cache_restore:
+          component: << parameters.component >>
+      - run:
+          command: make bootstrap generate
+          working_directory: << parameters.component >>
+      - run: git diff --exit-code
+  vet:
+    parameters:
+      component:
+        type: string
+    steps:
+      - checkout
+      - go_modules_cache_restore:
+          component: << parameters.component >>
+      - run:
+          command: make vet
+          working_directory: << parameters.component >>
+executors:
+  golang-executor:
+    docker:
+      - image: circleci/golang:1.16
+  golang-node-executor:
+    docker:
+      - image: circleci/golang:1.16-node
+jobs:
+  check_scripts:
+    executor: golang-executor
+    steps:
+      - check_scripts:
+          component: .
+  test_circleci_config:
+    executor: golang-executor
+    steps:
+      - checkout
+      - run:
+          name: Install circleci-config-merge
+          command: |
+            sudo mkdir /tmp/circleci-config-merge
+            sudo wget -O /tmp/circleci-config-merge/circleci-config-merge.tar.gz https://github.com/suzuki-shunsuke/circleci-config-merge/releases/download/v1.0.0/circleci-config-merge_1.0.0_linux_amd64.tar.gz
+            sudo tar -zxvf /tmp/circleci-config-merge/circleci-config-merge.tar.gz -C /tmp/circleci-config-merge
+            sudo mv /tmp/circleci-config-merge/circleci-config-merge /usr/local/bin
+      - run: make generate-circleci-config
+      - run: git diff --exit-code
+orbs:
+  go: circleci/go@1.5.0
+workflows:
+  version: 2
+  build:
+    jobs:
+      - test_circleci_config
+      - check_scripts:
+          requires:
+            - test_circleci_config

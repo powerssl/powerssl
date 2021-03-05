@@ -1,0 +1,67 @@
+version: 2.1
+jobs:
+  build_grpcgateway:
+    executor: golang-executor
+    steps:
+      - build:
+          component: grpcgateway
+  check_scripts_grpcgateway:
+    executor: golang-executor
+    steps:
+      - check_scripts:
+          component: grpcgateway
+  download_dependencies_grpcgateway:
+    executor: golang-executor
+    steps:
+      - download_dependencies:
+          component: grpcgateway
+  image_grpcgateway:
+    machine: true
+    steps:
+      - image:
+          component: grpcgateway
+  test_grpcgateway:
+    executor: golang-executor
+    steps:
+      - test:
+          component: grpcgateway
+  verify_generated_grpcgateway:
+    executor: golang-executor
+    steps:
+      - verify_generated:
+          component: grpcgateway
+  vet_grpcgateway:
+    executor: golang-executor
+    steps:
+      - vet:
+          component: grpcgateway
+workflows:
+  build:
+    jobs:
+      - check_scripts_grpcgateway:
+          requires:
+            - check_scripts
+      - download_dependencies_grpcgateway:
+          requires:
+            - check_scripts
+      - verify_generated_grpcgateway:
+          requires:
+            - download_dependencies_grpcgateway
+      - test_grpcgateway:
+          requires:
+            - download_dependencies_grpcgateway
+      - vet_grpcgateway:
+          requires:
+            - download_dependencies_grpcgateway
+      - build_grpcgateway:
+          requires:
+            - check_scripts_grpcgateway
+            - test_grpcgateway
+            - verify_generated_grpcgateway
+            - vet_grpcgateway
+      - image_grpcgateway:
+          filters:
+            branches:
+              only: main
+          requires:
+            - build_grpcgateway

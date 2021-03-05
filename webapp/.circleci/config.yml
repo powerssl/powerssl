@@ -1,0 +1,67 @@
+version: 2.1
+jobs:
+  build_webapp:
+    executor: golang-executor
+    steps:
+      - build:
+          component: webapp
+  check_scripts_webapp:
+    executor: golang-executor
+    steps:
+      - check_scripts:
+          component: webapp
+  download_dependencies_webapp:
+    executor: golang-executor
+    steps:
+      - download_dependencies:
+          component: webapp
+  image_webapp:
+    machine: true
+    steps:
+      - image:
+          component: webapp
+  test_webapp:
+    executor: golang-executor
+    steps:
+      - test:
+          component: webapp
+  verify_generated_webapp:
+    executor: golang-executor
+    steps:
+      - verify_generated:
+          component: webapp
+  vet_webapp:
+    executor: golang-executor
+    steps:
+      - vet:
+          component: webapp
+workflows:
+  build:
+    jobs:
+      - check_scripts_webapp:
+          requires:
+            - check_scripts
+      - download_dependencies_webapp:
+          requires:
+            - check_scripts
+      - verify_generated_webapp:
+          requires:
+            - download_dependencies_webapp
+      - test_webapp:
+          requires:
+            - download_dependencies_webapp
+      - vet_webapp:
+          requires:
+            - download_dependencies_webapp
+      - build_webapp:
+          requires:
+            - check_scripts_webapp
+            - test_webapp
+            - verify_generated_webapp
+            - vet_webapp
+      - image_webapp:
+          filters:
+            branches:
+              only: main
+          requires:
+            - build_webapp
