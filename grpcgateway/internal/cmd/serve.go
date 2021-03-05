@@ -23,7 +23,7 @@ func newCmdServe() *cobra.Command {
 			if noMetrics {
 				config.Metrics.Addr = ""
 			}
-			if !viper.IsSet("apiserver.ca-file") {
+			if !viper.IsSet("apiserver.ca-file") || config.APIServerClientConfig.CAFile == "" {
 				config.APIServerClientConfig.CAFile = viper.GetString("ca-file")
 			}
 			return config.Validate()

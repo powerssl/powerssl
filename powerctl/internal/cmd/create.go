@@ -47,5 +47,10 @@ func newCmdCreate() *cobra.Command {
 
 	cmd.Flags().StringVarP(&filename, "filename", "f", "", "Filename to file to use to create the resources")
 
+	cmd.AddCommand(resource.NewCmdCreateACMEAccount())
+	cmd.AddCommand(resource.NewCmdCreateACMEServer())
+	cmd.AddCommand(resource.NewCmdCreateCertificate())
+	cmd.AddCommand(resource.NewCmdCreateUser())
+
 	return cmd
 }

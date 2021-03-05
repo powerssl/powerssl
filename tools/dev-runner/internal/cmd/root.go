@@ -14,11 +14,8 @@ func Execute() {
 
 func NewCmdRoot() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "powerssl-dev-runner",
-		Short: "powerssl-dev-runner spins up the local dev environment",
-		Long: `powerssl-dev-runner spins up the local dev environment.
-
-Find more information at: https://docs.powerssl.io/powerssl-dev-runner`,
+		Use:     "powerssl-dev-runner",
+		Short:   "powerssl-dev-runner spins up the local dev environment",
 		Version: version.String(),
 		Args:    cobra.NoArgs,
 		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {

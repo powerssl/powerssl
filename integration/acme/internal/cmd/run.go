@@ -27,7 +27,7 @@ func newCmdRun() *cobra.Command {
 			if noTracing {
 				config.Tracer = ""
 			}
-			if !viper.IsSet("controller.ca-file") {
+			if !viper.IsSet("controller.ca-file") || config.ControllerClientConfig.CAFile == "" {
 				config.ControllerClientConfig.CAFile = viper.GetString("ca-file")
 			}
 			return config.Validate()

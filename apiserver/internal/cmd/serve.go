@@ -26,10 +26,10 @@ func newCmdServe() *cobra.Command {
 			if noTracing {
 				config.Tracer = ""
 			}
-			if !viper.IsSet("temporal.ca-file") {
+			if !viper.IsSet("temporal.ca-file") || config.TemporalClientConfig.CAFile == "" {
 				config.TemporalClientConfig.CAFile = viper.GetString("ca-file")
 			}
-			if !viper.IsSet("vault.ca-file") {
+			if !viper.IsSet("vault.ca-file") || config.VaultClientConfig.CAFile == "" {
 				config.VaultClientConfig.CAFile = viper.GetString("ca-file")
 			}
 			return config.Validate()

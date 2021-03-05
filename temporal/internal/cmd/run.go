@@ -23,7 +23,7 @@ func newCmdRun() *cobra.Command {
 				return err
 			}
 			// NOTE: viper.GetStringSlice doesn't do the trick
-			services := strings.Split(viper.GetString("services")[1:len(viper.GetString("services"))-1], ",")
+			services := strings.Split(viper.GetString("services"), ",")
 			config.Services = []string{}
 			for _, service := range services {
 				if service != "" {

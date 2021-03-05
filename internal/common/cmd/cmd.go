@@ -14,7 +14,7 @@ func Execute(cmd *cobra.Command) {
 	}
 }
 
-func ExecuteWithConfig(cmd *cobra.Command, component, cfgFile string, verbose bool) {
+func ExecuteWithConfig(cmd *cobra.Command, component string, cfgFile *string, verbose *bool) {
 	cobra.OnInitialize(initConfig(cmd, component, cfgFile, verbose))
 
 	Execute(cmd)
@@ -29,12 +29,12 @@ func HandleError(f func(cmd *cobra.Command, args []string) error) func(cmd *cobr
 	}
 }
 
-func initConfig(cmd *cobra.Command, component, cfgFile string, verbose bool) func() {
+func initConfig(cmd *cobra.Command, component string, cfgFile *string, verbose *bool) func() {
 	return func() {
-		if cfgFile != "" {
-			viper.SetConfigFile(cfgFile)
+		if *cfgFile != "" {
+			viper.SetConfigFile(*cfgFile)
 		} else {
-			viper.AddConfigPath("/etc/powerssl/%s" + component)
+			viper.AddConfigPath("/etc/powerssl/" + component)
 			viper.SetConfigName("config")
 		}
 
@@ -42,7 +42,7 @@ func initConfig(cmd *cobra.Command, component, cfgFile string, verbose bool) fun
 		viper.SetEnvPrefix("powerssl")
 		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 
-		if err := viper.ReadInConfig(); err == nil && verbose {
+		if err := viper.ReadInConfig(); err == nil && *verbose {
 			cmd.Println("Using config file:", viper.ConfigFileUsed())
 		}
 	}

@@ -15,7 +15,7 @@ var (
 )
 
 func Execute() {
-	cmdutil.ExecuteWithConfig(NewCmdRoot(), component, cfgFile, verbose)
+	cmdutil.ExecuteWithConfig(NewCmdRoot(), component, &cfgFile, &verbose)
 }
 
 func NewCmdRoot() *cobra.Command {

@@ -12,7 +12,6 @@ import (
 
 	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/common/version"
-	"powerssl.dev/powerctl/internal/resource"
 )
 
 var (
@@ -58,12 +57,7 @@ Find more information at: https://docs.powerssl.io/powerctl`,
 	cmdutil.Must(viper.BindPFlag("server-name-override", cmd.PersistentFlags().Lookup("server-name-override")))
 
 	cmd.AddCommand(newCmdCompletion())
-	cmdCreate := newCmdCreate()
-	cmdCreate.AddCommand(resource.NewCmdCreateACMEAccount())
-	cmdCreate.AddCommand(resource.NewCmdCreateACMEServer())
-	cmdCreate.AddCommand(resource.NewCmdCreateCertificate())
-	cmdCreate.AddCommand(resource.NewCmdCreateUser())
-	cmd.AddCommand(cmdCreate)
+	cmd.AddCommand(newCmdCreate())
 	cmd.AddCommand(newCmdDelete())
 	cmd.AddCommand(newCmdDescribe())
 	cmd.AddCommand(newCmdGet())
