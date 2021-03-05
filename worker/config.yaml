@@ -1,0 +1,19 @@
+apiserver:
+  addr: localhost:8082
+  ca-file:
+  insecure: false
+  insecure-skip-tls-verify: false
+  server-name-override:
+auth-token:
+ca-file: local/certs/ca.pem
+metrics:
+  addr: localhost:9096
+temporal:
+  ca-file:
+  host-port: localhost:7233
+  namespace: powerssl
+tracer: jaeger
+vault:
+  ca-file:
+  token: powerssl-worker
+  url: https://localhost:8200

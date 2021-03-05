@@ -1,0 +1,23 @@
+addr: localhost:8082
+ca-file: local/certs/ca.pem
+common-name: localhost
+db:
+  connection: postgresql://powerssl:powerssl@localhost:5432/powerssl?sslmode=disable
+  dialect: postgres
+insecure: false
+jwks:
+  url: http://localhost:8081/.well-known/jwks.json
+metrics:
+  addr: localhost:9092
+temporal:
+  ca-file:
+  host-port: localhost:7233
+  namespace: powerssl
+tls:
+  cert-file:
+  private-key-file:
+tracer: jaeger
+vault:
+  ca-file:
+  token: powerssl-apiserver
+  url: https://localhost:8200

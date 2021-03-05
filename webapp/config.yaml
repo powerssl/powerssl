@@ -1,0 +1,9 @@
+addr: localhost:8080
+apiserver:
+  addr: localhost:8082
+auth:
+  uri: http://localhost:8081
+grpcweb:
+  uri: https://localhost:8086
+metrics:
+  addr: localhost:9090
