@@ -77,7 +77,7 @@ images: image-agent image-apiserver image-auth image-controller image-envoy imag
 
 .PHONY: install
 # Install all CLI tools
-install: install-powerctl install-powerssl-agent install-powerutil
+install: install-powerctl install-agent install-powerutil
 
 .PHONY: install-%
 # Install single CLI tool
