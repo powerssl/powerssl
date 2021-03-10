@@ -2,12 +2,11 @@
 
 set -euo pipefail
 
-if [ "${STATIC_ENABLED:=1}" == "0" ]; then
-	unset STATIC_ENABLED
-fi
+"$(dirname "$0")/build-go.sh"
 
-ldflags=$(gobin -m -run github.com/ahmetb/govvv build -flags -pkg powerssl.dev/common/version)
+GOPATH=${GOPATH:-$HOME/go}
+GOBIN=${GOBIN:-$GOPATH/bin}
 
 set -x
 
-env CGO_ENABLED="${CGO_ENABLED:-0}" go install ${FORCE_REBUILD:+-a} -tags netgo -ldflags "$ldflags${DEBUG_ENABLED:+ -w}${STATIC_ENABLED:+ -extldflags \"-static\"}" "$PACKAGE"
+cp -f "$OUTPUT" "$GOBIN"
