@@ -2,6 +2,8 @@ package internal
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"database/sql"
 	"fmt"
 	"io/ioutil"
@@ -28,6 +30,16 @@ func Run() error {
 		logger := common.NewLogger(ioutil.Discard)
 		return common.InterruptHandler(ctx, logger)
 	})
+
+	go func() {
+		_ = http.ListenAndServe("localhost:8080", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			target := "https://" + strings.ReplaceAll(req.Host, "8080", "8443") + req.URL.Path
+			if len(req.URL.RawQuery) > 0 {
+				target += "?" + req.URL.RawQuery
+			}
+			http.Redirect(w, req, target, http.StatusTemporaryRedirect)
+		}))
+	}()
 
 	of := NewOutlet()
 	{
@@ -56,22 +68,14 @@ func Run() error {
 			select {
 			case <-ctx.Done():
 				return nil
-			case event, ok := <-watcher.Events:
-				if !ok {
-					return nil
+			case event := <-watcher.Events:
+				if event.Op&fsnotify.Create != fsnotify.Create {
+					continue
 				}
-				// if event.Op&fsnotify.Write != fsnotify.Write {
-				// 	break
-				// }
-				var c chan struct{}
-				c, ok = interrupts[event.Name]
-				if ok {
+				if c, ok := interrupts[event.Name]; ok {
 					c <- struct{}{}
 				}
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					return nil
-				}
+			case err := <-watcher.Errors:
 				return err
 			}
 		}
@@ -170,13 +174,13 @@ func Run() error {
 		Args: strings.Join([]string{
 			"-run",
 			"github.com/improbable-eng/grpc-web/go/grpcwebproxy",
-			"--allowed_origins http://localhost:8080",
+			"--allowed_origins https://localhost:8443",
 			"--backend_addr localhost:8082",
 			"--backend_tls",
 			"--backend_tls_ca_files local/certs/ca.pem,local/certs/intermediate.pem",
 			"--server_bind_address localhost",
-			"--server_http_debug_port 8087",
-			"--server_http_tls_port 8086",
+			"--server_http_debug_port 8889",
+			"--server_http_tls_port 8883",
 			"--server_tls_cert_file local/certs/localhost.pem",
 			"--server_tls_key_file local/certs/localhost-key.pem",
 		}, " "),
@@ -358,11 +362,27 @@ func handleVault(of *Outlet) error {
 }
 
 func serviceToken() (_ string, err error) {
-	if err = waitForService("localhost:8081", time.Minute); err != nil {
+	if err = waitForService("localhost:8843", time.Minute); err != nil {
 		return "", err
 	}
+	rootCAs, _ := x509.SystemCertPool()
+	if rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
+	localCertFile := "local/certs/ca.pem" // TODO: make const
+	certs, err := ioutil.ReadFile(localCertFile)
+	if err != nil {
+		return "", fmt.Errorf("failed to append %q to RootCAs: %v", localCertFile, err)
+	}
+	rootCAs.AppendCertsFromPEM(certs)
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: false,
+		RootCAs:            rootCAs,
+	}
+	tr := &http.Transport{TLSClientConfig: tlsConfig}
+	httpClient := &http.Client{Transport: tr}
 	var resp *http.Response
-	if resp, err = http.Get("http://localhost:8081/service"); err != nil {
+	if resp, err = httpClient.Get("https://localhost:8843/service"); err != nil {
 		return
 	}
 	defer common.ErrWrapCloser(resp.Body, &err)
