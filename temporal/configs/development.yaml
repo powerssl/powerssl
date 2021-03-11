@@ -27,12 +27,6 @@ persistence:
         maxConnLifetime: "1h"
 
 global:
-#  authorization:
-#    jwtKeyProvider:
-#      keySourceURIs:
-#        - "http://localhost:8081/.well-known/jwks.json"
-#      refreshInterval: "1h"
-#    permissionsClaimName: "lol"
   membership:
     maxJoinDuration: 30s
   pprof:
