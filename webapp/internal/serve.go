@@ -14,7 +14,7 @@ import (
 	"powerssl.dev/webapp/internal/template"
 )
 
-func ServeHTTP(ctx context.Context, addr string, logger log.Logger, authURI, apiAddr, grpcWebURI string) error {
+func ServeHTTP(ctx context.Context, addr string, insecure bool, certFile, keyFile string, logger log.Logger, authURI, apiAddr, grpcWebURI string) error {
 	var buffer []byte
 	{
 		tmpl := bindatahtmltemplate.Must(bindatahtmltemplate.New("index", template.Asset).Parse("index.html"))
@@ -51,7 +51,11 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, authURI, api
 
 	c := make(chan error)
 	go func() {
-		c <- srv.ListenAndServe()
+		if insecure {
+			c <- srv.ListenAndServe()
+		} else {
+			c <- srv.ListenAndServeTLS(certFile, keyFile)
+		}
 		close(c)
 	}()
 	_ = logger.Log("listening", addr)

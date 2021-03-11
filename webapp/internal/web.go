@@ -25,7 +25,7 @@ func Run(cfg *Config) error {
 	}
 
 	g.Go(func() error {
-		return ServeHTTP(ctx, cfg.Addr, log.With(logger, "component", "http"), cfg.Auth.URI, cfg.APIServer.Addr, cfg.GRPCWeb.URI)
+		return ServeHTTP(ctx, cfg.Addr, cfg.Insecure, cfg.TLS.CertFile, cfg.TLS.PrivateKeyFile, log.With(logger, "component", "http"), cfg.Auth.URI, cfg.APIServer.Addr, cfg.GRPCWeb.URI)
 	})
 
 	if err := g.Wait(); err != nil {

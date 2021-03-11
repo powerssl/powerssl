@@ -1,9 +1,13 @@
-addr: localhost:8080
+addr: localhost:8443
 apiserver:
   addr: localhost:8082
 auth:
-  uri: http://localhost:8081
+  uri: https://localhost:8843
 grpcweb:
-  uri: https://localhost:8086
+  uri: https://localhost:8883
+insecure: false
 metrics:
   addr: localhost:9090
+tls:
+  cert-file: local/certs/localhost.pem
+  private-key-file: local/certs/localhost-key.pem

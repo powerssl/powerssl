@@ -17,8 +17,13 @@ type Config struct {
 	GRPCWeb struct {
 		URI string `validate:"required,uri"`
 	}
-	Metrics struct {
+	Insecure bool
+	Metrics  struct {
 		Addr string
+	}
+	TLS struct {
+		CertFile       string `mapstructure:"cert-file"`
+		PrivateKeyFile string `mapstructure:"private-key-file"`
 	}
 }
 

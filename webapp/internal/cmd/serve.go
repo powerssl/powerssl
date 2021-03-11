@@ -31,6 +31,7 @@ func newCmdServe() *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&noMetrics, "no-metrics", false, "Do not serve metrics")
+	cmd.Flags().Bool("insecure", false, "Do not use TLS for the server")
 	cmd.Flags().StringP("addr", "", ":8080", "Addr")
 	cmd.Flags().String("apiserver-addr", "", "GRPC address of API server")
 	cmd.Flags().StringP("auth-uri", "", "", "Auth URI")
@@ -42,6 +43,7 @@ func newCmdServe() *cobra.Command {
 	cmdutil.Must(viper.BindPFlag("auth.uri", cmd.Flags().Lookup("auth-uri")))
 	cmdutil.Must(viper.BindPFlag("grpcweb.uri", cmd.Flags().Lookup("grpcweb-uri")))
 	cmdutil.Must(viper.BindPFlag("metrics.addr", cmd.Flags().Lookup("metrics-addr")))
+	cmdutil.Must(viper.BindPFlag("insecure", cmd.Flags().Lookup("insecure")))
 
 	return cmd
 }
