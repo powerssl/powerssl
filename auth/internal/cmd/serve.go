@@ -31,6 +31,7 @@ func newCmdServe() *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&noMetrics, "no-metrics", false, "Do not serve metrics")
+	cmd.Flags().Bool("insecure", false, "Do not use TLS for the server")
 	cmd.Flags().String("addr", ":8080", "GRPC")
 	cmd.Flags().String("jwt-private-key-file", "", "JWT private key file")
 	cmd.Flags().String("metrics-addr", ":9090", "HTTP Addr")
@@ -39,6 +40,7 @@ func newCmdServe() *cobra.Command {
 	cmdutil.Must(viper.BindPFlag("addr", cmd.Flags().Lookup("addr")))
 	cmdutil.Must(viper.BindPFlag("jwt.private-key-file", cmd.Flags().Lookup("jwt-private-key-file")))
 	cmdutil.Must(viper.BindPFlag("metrics.addr", cmd.Flags().Lookup("metrics-addr")))
+	cmdutil.Must(viper.BindPFlag("insecure", cmd.Flags().Lookup("insecure")))
 	cmdutil.Must(viper.BindPFlag("webapp.uri", cmd.Flags().Lookup("webapp-uri")))
 
 	return cmd

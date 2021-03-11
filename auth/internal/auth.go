@@ -42,7 +42,7 @@ func Run(cfg *Config) (err error) {
 	}
 
 	g.Go(func() error {
-		return ServeHTTP(ctx, cfg.Addr, log.With(logger, "component", "http"), cfg.JWT.PrivateKeyFile, cfg.WebApp.URI)
+		return ServeHTTP(ctx, cfg.Addr, cfg.Insecure, cfg.TLS.CertFile, cfg.TLS.PrivateKeyFile, log.With(logger, "component", "http"), cfg.JWT.PrivateKeyFile, cfg.WebApp.URI)
 	})
 
 	if err = g.Wait(); err != nil {
@@ -81,7 +81,7 @@ func jwksEndpoint(signKeys ...*rsa.PrivateKey) (func(w http.ResponseWriter, req 
 	}, nil
 }
 
-func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKeyFile, webappURI string) error {
+func ServeHTTP(ctx context.Context, addr string, insecure bool, certFile, keyFile string, logger log.Logger, jwtPrivateKeyFile, webappURI string) error {
 	signBytes, err := ioutil.ReadFile(jwtPrivateKeyFile)
 	if err != nil {
 		return fmt.Errorf("failed to load signing key %v", err)
@@ -159,7 +159,11 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, jwtPrivateKe
 
 	c := make(chan error)
 	go func() {
-		c <- srv.ListenAndServe()
+		if insecure {
+			c <- srv.ListenAndServe()
+		} else {
+			c <- srv.ListenAndServeTLS(certFile, keyFile)
+		}
 		close(c)
 	}()
 	_ = logger.Log("listening", addr)

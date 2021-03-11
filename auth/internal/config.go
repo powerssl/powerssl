@@ -7,12 +7,17 @@ import (
 )
 
 type Config struct {
-	Addr string `validate:"required,hostname_port"`
-	JWT  struct {
+	Addr     string `validate:"required,hostname_port"`
+	Insecure bool
+	JWT      struct {
 		PrivateKeyFile string `mapstructure:"private-key-file" validate:"required"`
 	}
 	Metrics struct {
 		Addr string
+	}
+	TLS struct {
+		CertFile       string `mapstructure:"cert-file"`
+		PrivateKeyFile string `mapstructure:"private-key-file"`
 	}
 	WebApp struct {
 		URI string `mapstructure:"uri" validate:"required"`
