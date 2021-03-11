@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -26,8 +27,12 @@ func ClaimsFromContext(ctx context.Context) *stdjwt.StandardClaims {
 	return claims
 }
 
-func NewParser(jwksURL string) (endpoint.Middleware, error) {
-	resp, err := http.Get(jwksURL)
+func NewParser(jwksURL string, tlsConfig *tls.Config) (endpoint.Middleware, error) {
+	client := http.DefaultClient
+	if tlsConfig != nil {
+		client = &http.Client{Transport: &http.Transport{TLSClientConfig: tlsConfig}}
+	}
+	resp, err := client.Get(jwksURL)
 	if err != nil {
 		return nil, err
 	}

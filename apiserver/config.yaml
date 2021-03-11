@@ -6,7 +6,9 @@ db:
   dialect: postgres
 insecure: false
 jwks:
-  url: http://localhost:8081/.well-known/jwks.json
+  insecure-skip-tls-verify: false
+  server-name-override:
+  url: https://localhost:8843/.well-known/jwks.json
 metrics:
   addr: localhost:9092
 temporal:

@@ -14,12 +14,15 @@ type TemporalClientConfig = temporalclient.Config
 type VaultClientConfig = vault.ClientConfig
 
 type Config struct {
-	DB struct {
+	CAFile string `mapstructure:"ca-file"`
+	DB     struct {
 		Connection string `validate:"required"`
 		Dialect    string `validate:"required"`
 	}
 	JWKS struct {
-		URL string `validate:"required"`
+		InsecureSkipTLSVerify bool   `mapstructure:"insecure-skip-tls-verify"`
+		ServerNameOverride    string `mapstructure:"server-name-override"`
+		URL                   string `validate:"required"`
 	}
 	Metrics struct {
 		Addr string

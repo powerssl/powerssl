@@ -2,7 +2,11 @@ package internal
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"fmt"
 	"io"
+	"io/ioutil"
 
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
@@ -87,9 +91,27 @@ func Run(cfg *Config) (err error) {
 		Help:      "Request duration in seconds.",
 	}, []string{"method", "success"})
 
+	var rootCAs *x509.CertPool
+	{
+		if rootCAs, _ = x509.SystemCertPool(); rootCAs == nil {
+			rootCAs = x509.NewCertPool()
+		}
+		var byt []byte
+		if byt, err = ioutil.ReadFile(cfg.CAFile); err != nil {
+			return fmt.Errorf("failed to append %q to RootCAs: %v", cfg.CAFile, err)
+		}
+		if ok := rootCAs.AppendCertsFromPEM(byt); !ok {
+			_ = logger.Log("no certs appended, using system certs only")
+		}
+	}
+
 	var authMiddleware kitendpoint.Middleware
 	{
-		if authMiddleware, err = auth.NewParser(cfg.JWKS.URL); err != nil {
+		if authMiddleware, err = auth.NewParser(cfg.JWKS.URL, &tls.Config{
+			InsecureSkipVerify: cfg.JWKS.InsecureSkipTLSVerify,
+			RootCAs:            rootCAs,
+			ServerName:         cfg.JWKS.ServerNameOverride,
+		}); err != nil {
 			return err
 		}
 	}
