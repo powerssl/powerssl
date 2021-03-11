@@ -3,6 +3,7 @@ package transport
 import (
 	"context"
 	"net/http"
+	"net/http/pprof"
 	"time"
 
 	"github.com/go-kit/kit/log"
@@ -12,6 +13,11 @@ import (
 func ServeMetrics(ctx context.Context, addr string, logger log.Logger) error {
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.Handler())
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
+	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	srv := http.Server{
 		Addr:    addr,
 		Handler: mux,
@@ -22,16 +28,16 @@ func ServeMetrics(ctx context.Context, addr string, logger log.Logger) error {
 		c <- srv.ListenAndServe()
 		close(c)
 	}()
-	logger.Log("listening", addr)
+	_ = logger.Log("listening", addr)
 	select {
 	case err := <-c:
-		logger.Log("err", err)
+		_ = logger.Log("err", err)
 		if err != http.ErrServerClosed {
 			return err
 		}
 		return nil
 	case <-ctx.Done():
-		logger.Log("err", ctx.Err())
+		_ = logger.Log("err", ctx.Err())
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 		if err := srv.Shutdown(shutdownCtx); err != nil {
