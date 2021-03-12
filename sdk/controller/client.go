@@ -1,4 +1,4 @@
-package client // import "powerssl.dev/sdk/controller/client"
+package controller // import "powerssl.dev/sdk/controller"
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 	"powerssl.dev/common/auth"
 	"powerssl.dev/common/transport"
 	"powerssl.dev/sdk/controller/acme"
-	"powerssl.dev/sdk/controller/integration"
 	acmetransport "powerssl.dev/sdk/controller/acme/transport"
+	"powerssl.dev/sdk/controller/integration"
 	intregrationtransport "powerssl.dev/sdk/controller/integration/transport"
 )
 

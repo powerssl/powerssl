@@ -10,12 +10,12 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"golang.org/x/sync/errgroup"
 
+	apiv1 "powerssl.dev/api/controller/v1"
 	"powerssl.dev/common"
 	"powerssl.dev/common/tracing"
 	"powerssl.dev/common/transport"
+	"powerssl.dev/sdk/controller"
 	"powerssl.dev/sdk/controller/api"
-	apiv1 "powerssl.dev/api/controller/v1"
-	controllerclient "powerssl.dev/sdk/controller/client"
 	integrationacme "powerssl.dev/sdk/integration/acme"
 	// integrationdns "powerssl.dev/sdk/integration/dns"
 )
@@ -32,7 +32,7 @@ type Integration interface {
 }
 
 type integration struct {
-	client  *controllerclient.GRPCClient
+	client  *controller.GRPCClient
 	logger  log.Logger
 	kind    kind
 	name    string
@@ -56,9 +56,9 @@ func Run(cfg *Config, kind kind, name string, handler interface{}) (err error) {
 		defer common.ErrWrapCloser(closer, &err)
 	}
 
-	var controllerClient *controllerclient.GRPCClient
+	var controllerClient *controller.GRPCClient
 	{
-		if controllerClient, err = controllerclient.NewGRPCClient(ctx, &cfg.ControllerClientConfig, cfg.AuthToken, logger, tracer); err != nil {
+		if controllerClient, err = controller.NewGRPCClient(ctx, &cfg.ControllerClientConfig, cfg.AuthToken, logger, tracer); err != nil {
 			return err
 		}
 	}
