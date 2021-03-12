@@ -10,10 +10,10 @@ import (
 	"powerssl.dev/common"
 	"powerssl.dev/common/tracing"
 	"powerssl.dev/common/transport"
-	apiserverclient "powerssl.dev/sdk/apiserver/client"
+	"powerssl.dev/sdk/apiserver"
 )
 
-func NewGRPCClient() (*apiserverclient.GRPCClient, error) {
+func NewGRPCClient() (*apiserver.Client, error) {
 	addr := viper.GetString("addr")
 	authToken := viper.GetString("auth-token")
 	caFle := viper.GetString("ca-file")
@@ -35,5 +35,5 @@ func NewGRPCClient() (*apiserverclient.GRPCClient, error) {
 		InsecureSkipTLSVerify: insecureSkipTLSVerify,
 		ServerNameOverride:    serverNameOverride,
 	}
-	return apiserverclient.NewGRPCClient(context.TODO(), cfg, authToken, logger, tracer)
+	return apiserver.NewClient(context.TODO(), cfg, authToken, logger, tracer)
 }

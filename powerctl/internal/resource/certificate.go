@@ -12,13 +12,13 @@ import (
 
 	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/powerctl/internal"
+	"powerssl.dev/sdk/apiserver"
 	"powerssl.dev/sdk/apiserver/api"
-	apiserverclient "powerssl.dev/sdk/apiserver/client"
 )
 
 type certificate struct{}
 
-func (r certificate) Create(client *apiserverclient.GRPCClient, resource *Resource) (*Resource, error) {
+func (r certificate) Create(client *apiserver.Client, resource *Resource) (*Resource, error) {
 	spec := resource.Spec.(*certificateSpec)
 	certificate := &api.Certificate{
 		Dnsnames:        spec.Dnsnames,
@@ -34,7 +34,7 @@ func (r certificate) Create(client *apiserverclient.GRPCClient, resource *Resour
 	return r.Encode(certificate), nil
 }
 
-func (r certificate) Delete(client *apiserverclient.GRPCClient, name string) error {
+func (r certificate) Delete(client *apiserver.Client, name string) error {
 	return client.Certificate.Delete(context.Background(), fmt.Sprintf("certificates/%s", name))
 }
 
@@ -57,7 +57,7 @@ func (r certificate) Encode(certificate *api.Certificate) *Resource {
 	}
 }
 
-func (r certificate) Get(client *apiserverclient.GRPCClient, name string) (*Resource, error) {
+func (r certificate) Get(client *apiserver.Client, name string) (*Resource, error) {
 	certificate, err := client.Certificate.Get(context.Background(), fmt.Sprintf("certificates/%s", name))
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func (r certificate) Get(client *apiserverclient.GRPCClient, name string) (*Reso
 	return r.Encode(certificate), nil
 }
 
-func (r certificate) List(client *apiserverclient.GRPCClient) ([]*Resource, error) {
+func (r certificate) List(client *apiserver.Client) ([]*Resource, error) {
 	return listResource(func(pageToken string) ([]*Resource, string, error) {
 		certificates, nextPageToken, err := client.Certificate.List(context.Background(), 0, pageToken)
 		if err != nil {
@@ -100,7 +100,7 @@ func (r certificate) Columns(resource *Resource) ([]string, []string) {
 		}
 }
 
-func (r certificate) Describe(_ *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
+func (r certificate) Describe(_ *apiserver.Client, resource *Resource, output io.Writer) (err error) {
 	spec := resource.Spec.(*certificateSpec)
 	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
 	_, _ = fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
@@ -123,7 +123,7 @@ type certificateSpec struct {
 }
 
 func NewCmdCreateCertificate() *cobra.Command {
-	var client *apiserverclient.GRPCClient
+	var client *apiserver.Client
 	var (
 		autoRenew       bool
 		dnsNames        string

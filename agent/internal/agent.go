@@ -10,7 +10,7 @@ import (
 
 	"powerssl.dev/common"
 	"powerssl.dev/common/tracing"
-	apiserverclient "powerssl.dev/sdk/apiserver/client"
+	"powerssl.dev/sdk/apiserver"
 )
 
 const component = "powerssl-agent"
@@ -32,9 +32,9 @@ func Run(cfg *Config) (err error) {
 		defer common.ErrWrapCloser(closer, &err)
 	}
 
-	var apiserverClient *apiserverclient.GRPCClient
+	var apiserverClient *apiserver.Client
 	{
-		if apiserverClient, err = apiserverclient.NewGRPCClient(ctx, &cfg.APIServerClientConfig, cfg.AuthToken, logger, tracer); err != nil {
+		if apiserverClient, err = apiserver.NewClient(ctx, &cfg.APIServerClientConfig, cfg.AuthToken, logger, tracer); err != nil {
 			return err
 		}
 	}

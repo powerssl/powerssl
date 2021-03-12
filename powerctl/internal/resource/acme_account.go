@@ -13,13 +13,13 @@ import (
 
 	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/powerctl/internal"
+	"powerssl.dev/sdk/apiserver"
 	"powerssl.dev/sdk/apiserver/api"
-	apiserverclient "powerssl.dev/sdk/apiserver/client"
 )
 
 type acmeAccount struct{}
 
-func (r acmeAccount) Create(client *apiserverclient.GRPCClient, resource *Resource) (*Resource, error) {
+func (r acmeAccount) Create(client *apiserver.Client, resource *Resource) (*Resource, error) {
 	spec := resource.Spec.(*acmeAccountSpec)
 	acmeAccount := &api.ACMEAccount{
 		Contacts:             spec.Contacts,
@@ -32,7 +32,7 @@ func (r acmeAccount) Create(client *apiserverclient.GRPCClient, resource *Resour
 	return r.Encode(acmeAccount), nil
 }
 
-func (r acmeAccount) Delete(client *apiserverclient.GRPCClient, name string) error {
+func (r acmeAccount) Delete(client *apiserver.Client, name string) error {
 	return client.ACMEAccount.Delete(context.Background(), fmt.Sprintf("acmeServers/-/acmeAccounts/%s", name))
 }
 
@@ -58,7 +58,7 @@ func (r acmeAccount) Encode(acmeAccount *api.ACMEAccount) *Resource {
 	}
 }
 
-func (r acmeAccount) Get(client *apiserverclient.GRPCClient, name string) (*Resource, error) {
+func (r acmeAccount) Get(client *apiserver.Client, name string) (*Resource, error) {
 	acmeAccount, err := client.ACMEAccount.Get(context.Background(), fmt.Sprintf("acmeServers/-/acmeAccounts/%s", name))
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (r acmeAccount) Get(client *apiserverclient.GRPCClient, name string) (*Reso
 	return r.Encode(acmeAccount), nil
 }
 
-func (r acmeAccount) List(client *apiserverclient.GRPCClient) ([]*Resource, error) {
+func (r acmeAccount) List(client *apiserver.Client) ([]*Resource, error) {
 	return listResource(func(pageToken string) ([]*Resource, string, error) {
 		acmeAccounts, nextPageToken, err := client.ACMEAccount.List(context.Background(), "parent", 0, pageToken)
 		if err != nil {
@@ -101,7 +101,7 @@ func (r acmeAccount) Columns(resource *Resource) ([]string, []string) {
 		}
 }
 
-func (r acmeAccount) Describe(client *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
+func (r acmeAccount) Describe(client *apiserver.Client, resource *Resource, output io.Writer) (err error) {
 	spec := resource.Spec.(*acmeAccountSpec)
 	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
 	_, _ = fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
@@ -145,7 +145,7 @@ type acmeAccountSpec struct {
 }
 
 func NewCmdCreateACMEAccount() *cobra.Command {
-	var client *apiserverclient.GRPCClient
+	var client *apiserver.Client
 	var (
 		acmeServerID         string
 		contacts             string

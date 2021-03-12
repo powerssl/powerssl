@@ -12,13 +12,13 @@ import (
 
 	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/powerctl/internal"
+	"powerssl.dev/sdk/apiserver"
 	"powerssl.dev/sdk/apiserver/api"
-	apiserverclient "powerssl.dev/sdk/apiserver/client"
 )
 
 type user struct{}
 
-func (r user) Create(client *apiserverclient.GRPCClient, resource *Resource) (*Resource, error) {
+func (r user) Create(client *apiserver.Client, resource *Resource) (*Resource, error) {
 	spec := resource.Spec.(*userSpec)
 	user := &api.User{
 		DisplayName: spec.DisplayName,
@@ -31,7 +31,7 @@ func (r user) Create(client *apiserverclient.GRPCClient, resource *Resource) (*R
 	return r.Encode(user), nil
 }
 
-func (r user) Delete(client *apiserverclient.GRPCClient, name string) error {
+func (r user) Delete(client *apiserver.Client, name string) error {
 	return client.User.Delete(context.Background(), fmt.Sprintf("users/%s", name))
 }
 
@@ -51,7 +51,7 @@ func (r user) Encode(user *api.User) *Resource {
 	}
 }
 
-func (r user) Get(client *apiserverclient.GRPCClient, name string) (*Resource, error) {
+func (r user) Get(client *apiserver.Client, name string) (*Resource, error) {
 	user, err := client.User.Get(context.Background(), fmt.Sprintf("users/%s", name))
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func (r user) Get(client *apiserverclient.GRPCClient, name string) (*Resource, e
 	return r.Encode(user), nil
 }
 
-func (r user) List(client *apiserverclient.GRPCClient) ([]*Resource, error) {
+func (r user) List(client *apiserver.Client) ([]*Resource, error) {
 	return listResource(func(pageToken string) ([]*Resource, string, error) {
 		users, nextPageToken, err := client.User.List(context.Background(), 0, pageToken)
 		if err != nil {
@@ -88,7 +88,7 @@ func (r user) Columns(resource *Resource) ([]string, []string) {
 		}
 }
 
-func (r user) Describe(_ *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
+func (r user) Describe(_ *apiserver.Client, resource *Resource, output io.Writer) (err error) {
 	spec := resource.Spec.(*userSpec)
 	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
 	_, _ = fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
@@ -105,7 +105,7 @@ type userSpec struct {
 }
 
 func NewCmdCreateUser() *cobra.Command {
-	var client *apiserverclient.GRPCClient
+	var client *apiserver.Client
 	var (
 		displayName string
 		userName    string

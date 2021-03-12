@@ -12,13 +12,13 @@ import (
 
 	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/powerctl/internal"
+	"powerssl.dev/sdk/apiserver"
 	"powerssl.dev/sdk/apiserver/api"
-	apiserverclient "powerssl.dev/sdk/apiserver/client"
 )
 
 type acmeServer struct{}
 
-func (r acmeServer) Create(client *apiserverclient.GRPCClient, resource *Resource) (*Resource, error) {
+func (r acmeServer) Create(client *apiserver.Client, resource *Resource) (*Resource, error) {
 	spec := resource.Spec.(*acmeServerSpec)
 	acmeServer := &api.ACMEServer{
 		DirectoryURL:    spec.DirectoryURL,
@@ -32,7 +32,7 @@ func (r acmeServer) Create(client *apiserverclient.GRPCClient, resource *Resourc
 	return r.Encode(acmeServer), nil
 }
 
-func (r acmeServer) Delete(client *apiserverclient.GRPCClient, name string) error {
+func (r acmeServer) Delete(client *apiserver.Client, name string) error {
 	return client.ACMEServer.Delete(context.Background(), fmt.Sprintf("acmeServers/%s", name))
 }
 
@@ -53,7 +53,7 @@ func (r acmeServer) Encode(acmeServer *api.ACMEServer) *Resource {
 	}
 }
 
-func (r acmeServer) Get(client *apiserverclient.GRPCClient, name string) (*Resource, error) {
+func (r acmeServer) Get(client *apiserver.Client, name string) (*Resource, error) {
 	acmeServer, err := client.ACMEServer.Get(context.Background(), fmt.Sprintf("acmeServers/%s", name))
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func (r acmeServer) Get(client *apiserverclient.GRPCClient, name string) (*Resou
 	return r.Encode(acmeServer), nil
 }
 
-func (r acmeServer) List(client *apiserverclient.GRPCClient) ([]*Resource, error) {
+func (r acmeServer) List(client *apiserver.Client) ([]*Resource, error) {
 	return listResource(func(pageToken string) ([]*Resource, string, error) {
 		acmeServers, nextPageToken, err := client.ACMEServer.List(context.Background(), 0, pageToken)
 		if err != nil {
@@ -92,7 +92,7 @@ func (r acmeServer) Columns(resource *Resource) ([]string, []string) {
 		}
 }
 
-func (r acmeServer) Describe(_ *apiserverclient.GRPCClient, resource *Resource, output io.Writer) (err error) {
+func (r acmeServer) Describe(_ *apiserver.Client, resource *Resource, output io.Writer) (err error) {
 	spec := resource.Spec.(*acmeServerSpec)
 	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
 	_, _ = fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
@@ -111,7 +111,7 @@ type acmeServerSpec struct {
 }
 
 func NewCmdCreateACMEServer() *cobra.Command {
-	var client *apiserverclient.GRPCClient
+	var client *apiserver.Client
 	var (
 		directoryURL       string
 		displayName        string

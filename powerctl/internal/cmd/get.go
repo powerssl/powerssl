@@ -8,11 +8,11 @@ import (
 	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/powerctl/internal"
 	"powerssl.dev/powerctl/internal/resource"
-	apiserverclient "powerssl.dev/sdk/apiserver/client"
+	"powerssl.dev/sdk/apiserver"
 )
 
 func newCmdGet() *cobra.Command {
-	var client *apiserverclient.GRPCClient
+	var client *apiserver.Client
 
 	cmd := &cobra.Command{
 		Use:   "get",

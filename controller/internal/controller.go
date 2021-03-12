@@ -12,7 +12,7 @@ import (
 	"go.temporal.io/sdk/worker"
 	"golang.org/x/sync/errgroup"
 
-	"powerssl.dev/backend/apiserver"
+	backendapiserver "powerssl.dev/backend/apiserver"
 	"powerssl.dev/backend/temporal"
 	temporalclient "powerssl.dev/backend/temporal/client"
 	backendtransport "powerssl.dev/backend/transport"
@@ -23,7 +23,7 @@ import (
 	"powerssl.dev/controller/internal/acme"
 	"powerssl.dev/controller/internal/activity"
 	"powerssl.dev/controller/internal/integration"
-	apiserverclient "powerssl.dev/sdk/apiserver/client"
+	"powerssl.dev/sdk/apiserver"
 	sharedactivity "powerssl.dev/workflow/activity"
 )
 
@@ -57,9 +57,9 @@ func Run(cfg *Config) (err error) {
 		Help:      "Request duration in seconds.",
 	}, []string{"method", "success"})
 
-	var apiserverClient *apiserverclient.GRPCClient
+	var apiserverClient *apiserver.Client
 	{
-		if apiserverClient, err = apiserverclient.NewGRPCClient(ctx, &cfg.APIServerClientConfig, cfg.AuthToken, logger, tracer); err != nil {
+		if apiserverClient, err = apiserver.NewClient(ctx, &cfg.APIServerClientConfig, cfg.AuthToken, logger, tracer); err != nil {
 			return err
 		}
 	}
@@ -99,7 +99,7 @@ func Run(cfg *Config) (err error) {
 	g.Go(func() error {
 		worker.EnableVerboseLogging(true)
 		backgroundActivityContext := context.Background()
-		backgroundActivityContext = apiserver.SetClient(backgroundActivityContext, apiserverClient)
+		backgroundActivityContext = backendapiserver.SetClient(backgroundActivityContext, apiserverClient)
 		backgroundActivityContext = vault.SetClient(backgroundActivityContext, vaultClient)
 		w := worker.New(temporalClient, temporal.ControllerTaskQueue, worker.Options{
 			BackgroundActivityContext: backgroundActivityContext,

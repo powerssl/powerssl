@@ -20,17 +20,17 @@ import (
 	"github.com/spf13/viper"
 	goyaml "gopkg.in/yaml.v2"
 
-	apiserverclient "powerssl.dev/sdk/apiserver/client"
+	"powerssl.dev/sdk/apiserver"
 )
 
 type Handler interface {
-	Create(client *apiserverclient.GRPCClient, resource *Resource) (*Resource, error)
-	Delete(client *apiserverclient.GRPCClient, name string) error
-	Get(client *apiserverclient.GRPCClient, name string) (*Resource, error)
-	List(client *apiserverclient.GRPCClient) ([]*Resource, error)
+	Create(client *apiserver.Client, resource *Resource) (*Resource, error)
+	Delete(client *apiserver.Client, name string) error
+	Get(client *apiserver.Client, name string) (*Resource, error)
+	List(client *apiserver.Client) ([]*Resource, error)
 	Spec() interface{}
 	Columns(resource *Resource) ([]string, []string)
-	Describe(client *apiserverclient.GRPCClient, resource *Resource, output io.Writer) error
+	Describe(client *apiserver.Client, resource *Resource, output io.Writer) error
 }
 
 type resourcesStruct struct {
@@ -166,7 +166,7 @@ func ResourcesFromFile(filename string) ([]*Resource, error) {
 	return out, nil
 }
 
-func (r *Resource) Create(client *apiserverclient.GRPCClient) (*Resource, error) {
+func (r *Resource) Create(client *apiserver.Client) (*Resource, error) {
 	resourceHandler, err := resources.Get(r.Kind)
 	if err != nil {
 		return nil, err
@@ -174,7 +174,7 @@ func (r *Resource) Create(client *apiserverclient.GRPCClient) (*Resource, error)
 	return resourceHandler.Create(client, r)
 }
 
-func (r *Resource) Delete(client *apiserverclient.GRPCClient) error {
+func (r *Resource) Delete(client *apiserver.Client) error {
 	resourceHandler, err := resources.Get(r.Kind)
 	if err != nil {
 		return err
@@ -182,7 +182,7 @@ func (r *Resource) Delete(client *apiserverclient.GRPCClient) error {
 	return resourceHandler.Delete(client, r.Meta.UID)
 }
 
-func (r *Resource) Get(client *apiserverclient.GRPCClient) (*Resource, error) {
+func (r *Resource) Get(client *apiserver.Client) (*Resource, error) {
 	resourceHandler, err := resources.Get(r.Kind)
 	if err != nil {
 		return nil, err
@@ -205,7 +205,7 @@ func (r *Resource) ToTable() ([]string, []string, error) {
 	return header, columns, nil
 }
 
-func (r *Resource) Describe(client *apiserverclient.GRPCClient, output io.Writer) error {
+func (r *Resource) Describe(client *apiserver.Client, output io.Writer) error {
 	resourceHandler, err := resources.Get(r.Kind)
 	if err != nil {
 		return err

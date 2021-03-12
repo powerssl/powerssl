@@ -1,4 +1,4 @@
-package client // import "powerssl.dev/sdk/apiserver/client"
+package apiserver // import "powerssl.dev/sdk/apiserver"
 
 import (
 	"context"
@@ -18,20 +18,20 @@ import (
 	usertransport "powerssl.dev/sdk/apiserver/user/transport"
 )
 
-type GRPCClient struct {
+type Client struct {
 	ACMEAccount acmeaccount.Service
 	ACMEServer  acmeserver.Service
 	Certificate certificate.Service
 	User        user.Service
 }
 
-func NewGRPCClient(ctx context.Context, cfg *transport.ClientConfig, authToken string, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
+func NewClient(ctx context.Context, cfg *transport.ClientConfig, authToken string, logger log.Logger, tracer stdopentracing.Tracer) (*Client, error) {
 	conn, err := transport.NewClientConn(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 	authSigner := auth.NewSigner(authToken)
-	return &GRPCClient{
+	return &Client{
 		ACMEAccount: acmeaccounttransport.NewGRPCClient(conn, logger, tracer, authSigner),
 		ACMEServer:  acmeservertransport.NewGRPCClient(conn, logger, tracer, authSigner),
 		Certificate: certificatetransport.NewGRPCClient(conn, logger, tracer, authSigner),
