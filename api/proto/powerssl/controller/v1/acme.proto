@@ -78,9 +78,10 @@ service ACMEService {
 
 message GetCreateAccountRequestResponse {
   Activity activity = 1;
-  string directory_url = 2;
-  bool terms_of_service_agreed = 3;
-  repeated string contacts = 4;
+  string key_token = 2;
+  string directory_url = 3;
+  bool terms_of_service_agreed = 4;
+  repeated string contacts = 5;
 }
 
 message SetCreateAccountResponseRequest {

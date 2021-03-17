@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"crypto/x509"
+
 	"github.com/go-kit/kit/log"
 	temporalclient "go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/temporal"
@@ -50,12 +51,12 @@ func (s basicService) integrationErr(err error) error {
 	return status.Error(codes.Internal, "")
 }
 
-func (s basicService) GetCreateAccountRequest(ctx context.Context, apiActivity *api.Activity) (*api.Activity, string, bool, []string, error) {
-	var input *activity.CreateACMEAccountParams
+func (s basicService) GetCreateAccountRequest(ctx context.Context, apiActivity *api.Activity) (*api.Activity, string, string, bool, []string, error) {
+	var input *CreateACMEAccountParams
 	if err := integrationactivity.GetInput(ctx, apiActivity, &input); err != nil {
-		return nil, "", false, nil, s.integrationErr(err)
+		return nil, "", "", false, nil, s.integrationErr(err)
 	}
-	return apiActivity, input.DirectoryURL, input.TermsOfServiceAgreed, input.Contacts, nil
+	return apiActivity, input.KeyToken, input.DirectoryURL, input.TermsOfServiceAgreed, input.Contacts, nil
 }
 
 func (s basicService) SetCreateAccountResponse(ctx context.Context, apiActivity *api.Activity, account *api.Account, apiErr *api.Error) error {

@@ -23,7 +23,7 @@ type loggingMiddleware struct {
 	next   acme.Service
 }
 
-func (mw loggingMiddleware) GetCreateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, bool, []string, error) {
+func (mw loggingMiddleware) GetCreateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, bool, []string, error) {
 	defer func() {
 		mw.logger.Log("method", "GetCreateAccountRequest", "activity", activity)
 	}()

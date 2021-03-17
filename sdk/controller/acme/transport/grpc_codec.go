@@ -2,12 +2,13 @@ package transport // import "powerssl.dev/sdk/controller/acme/transport"
 
 import (
 	"context"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/gogo/protobuf/types"
 
+	apiv1 "powerssl.dev/api/controller/v1"
 	"powerssl.dev/sdk/controller/acme/endpoint"
 	"powerssl.dev/sdk/controller/api"
-	apiv1 "powerssl.dev/api/controller/v1"
 )
 
 func DecodeGRPCActivity(activity *apiv1.Activity) (*api.Activity, error) {
@@ -128,9 +129,10 @@ func decodeGRPCGetCreateAccountRequestResponse(_ context.Context, grpcReply inte
 	}
 	return endpoint.GetCreateAccountRequestResponse{
 		Activity:             activity,
-		DirectoryURL:         reply.GetDirectoryUrl(),
-		TermsOfServiceAgreed: reply.GetTermsOfServiceAgreed(),
 		Contacts:             reply.GetContacts(),
+		DirectoryURL:         reply.GetDirectoryUrl(),
+		KeyToken:             reply.GetKeyToken(),
+		TermsOfServiceAgreed: reply.GetTermsOfServiceAgreed(),
 	}, nil
 }
 
@@ -142,9 +144,10 @@ func encodeGRPCGetCreateAccountRequestResponse(_ context.Context, response inter
 	}
 	return &apiv1.GetCreateAccountRequestResponse{
 		Activity:             activity,
-		DirectoryUrl:         resp.DirectoryURL,
-		TermsOfServiceAgreed: resp.TermsOfServiceAgreed,
 		Contacts:             resp.Contacts,
+		DirectoryUrl:         resp.DirectoryURL,
+		KeyToken:             resp.KeyToken,
+		TermsOfServiceAgreed: resp.TermsOfServiceAgreed,
 	}, nil
 }
 
@@ -183,7 +186,7 @@ func decodeGRPCSetCreateAccountResponseResponse(_ context.Context, grpcReply int
 }
 
 func encodeGRPCSetCreateAccountResponseResponse(_ context.Context, response interface{}) (interface{}, error) {
-	return &types.Empty{}, nil
+	return &emptypb.Empty{}, nil
 }
 
 func encodeGRPCSetCreateAccountResponseRequest(_ context.Context, request interface{}) (interface{}, error) {

@@ -8,7 +8,7 @@ import (
 )
 
 type Service interface {
-	GetCreateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, bool, []string, error)
+	GetCreateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, bool, []string, error)
 	SetCreateAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error
 
 	GetDeactivateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, error)

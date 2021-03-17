@@ -54,15 +54,15 @@ type Endpoints struct {
 	SetRevokeCertificateResponseEndpoint endpoint.Endpoint
 }
 
-func (e Endpoints) GetCreateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, bool, []string, error) {
+func (e Endpoints) GetCreateAccountRequest(ctx context.Context, activity *api.Activity) (*api.Activity, string, string, bool, []string, error) {
 	resp, err := e.GetCreateAccountRequestEndpoint(ctx, GetCreateAccountRequestRequest{
 		Activity: activity,
 	})
 	if err != nil {
-		return nil, "", false, nil, err
+		return nil, "", "", false, nil, err
 	}
 	response := resp.(GetCreateAccountRequestResponse)
-	return response.Activity, response.DirectoryURL, response.TermsOfServiceAgreed, response.Contacts, nil
+	return response.Activity, response.KeyToken, response.DirectoryURL, response.TermsOfServiceAgreed, response.Contacts, nil
 }
 
 type GetCreateAccountRequestRequest struct {
@@ -72,8 +72,9 @@ type GetCreateAccountRequestRequest struct {
 type GetCreateAccountRequestResponse struct {
 	Activity             *api.Activity
 	DirectoryURL         string
-	TermsOfServiceAgreed bool
 	Contacts             []string
+	KeyToken             string
+	TermsOfServiceAgreed bool
 }
 
 func (e Endpoints) SetCreateAccountResponse(ctx context.Context, activity *api.Activity, account *api.Account, erro *api.Error) error {
@@ -594,15 +595,16 @@ type SetRevokeCertificateResponseResponse struct{}
 func MakeGetCreateAccountRequestEndpoint(s acme.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetCreateAccountRequestRequest)
-		activity, directoryURL, termsOfServiceAgreed, contacts, err := s.GetCreateAccountRequest(ctx, req.Activity)
+		activity, keyToken, directoryURL, termsOfServiceAgreed, contacts, err := s.GetCreateAccountRequest(ctx, req.Activity)
 		if err != nil {
 			return nil, err
 		}
 		return GetCreateAccountRequestResponse{
 			Activity:             activity,
 			DirectoryURL:         directoryURL,
-			TermsOfServiceAgreed: termsOfServiceAgreed,
 			Contacts:             contacts,
+			KeyToken:             keyToken,
+			TermsOfServiceAgreed: termsOfServiceAgreed,
 		}, nil
 	}
 }

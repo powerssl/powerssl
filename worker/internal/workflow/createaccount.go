@@ -37,9 +37,10 @@ func CreateAccount(ctx temporalworkflow.Context, params workflow.CreateAccountPa
 
 	var createACMEAccountResult activity.CreateACMEAccountResults
 	if err := temporalworkflow.ExecuteActivity(controllerCtx, activity.CreateACMEAccount, &activity.CreateACMEAccountParams{
-		DirectoryURL:         params.DirectoryURL,
-		TermsOfServiceAgreed: params.TermsOfServiceAgreed,
 		Contacts:             params.Contacts,
+		DirectoryURL:         params.DirectoryURL,
+		KeyName:              params.Account,
+		TermsOfServiceAgreed: params.TermsOfServiceAgreed,
 	}).Get(ctx, &createACMEAccountResult); err != nil {
 		return err
 	}

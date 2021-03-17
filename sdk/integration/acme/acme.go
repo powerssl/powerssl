@@ -10,7 +10,7 @@ import (
 )
 
 type Integration interface {
-	CreateAccount(ctx context.Context, directoryURL string, termsOfServiceAgreed bool, contacts []string) (*api.Account, error)
+	CreateAccount(ctx context.Context, keyToken, directoryURL string, termsOfServiceAgreed bool, contacts []string) (*api.Account, error)
 	DeactivateAccount(ctx context.Context, accountURL string) (*api.Account, error)
 	RekeyAccount(ctx context.Context, accountURL, directoryURL string) (*api.Account, error)
 	UpdateAccount(ctx context.Context, accountURL string, contacts []string) (*api.Account, error)
@@ -80,11 +80,11 @@ func (i *integration) HandleActivity(ctx context.Context, activity *api.Activity
 }
 
 func (i *integration) createAccount(ctx context.Context, activity *api.Activity) error {
-	activity, directoryURL, termsOfServiceAgreed, contacts, err := i.client.GetCreateAccountRequest(ctx, activity)
+	activity, keyToken, directoryURL, termsOfServiceAgreed, contacts, err := i.client.GetCreateAccountRequest(ctx, activity)
 	if err != nil {
 		return err
 	}
-	account, err := i.handler.CreateAccount(ctx, directoryURL, termsOfServiceAgreed, contacts)
+	account, err := i.handler.CreateAccount(ctx, keyToken, directoryURL, termsOfServiceAgreed, contacts)
 	var erro *api.Error
 	if err != nil {
 		erro = &api.Error{Message: err.Error()}
