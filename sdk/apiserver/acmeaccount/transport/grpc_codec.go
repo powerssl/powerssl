@@ -3,7 +3,6 @@ package transport // import "powerssl.dev/sdk/apiserver/acmeaccount/transport"
 import (
 	"context"
 
-	"google.golang.org/protobuf/types/descriptorpb"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -236,7 +235,7 @@ func encodeGRPCUpdateRequest(_ context.Context, request interface{}) (interface{
 	if err != nil {
 		return nil, err
 	}
-	var messageType *descriptorpb.DescriptorProto
+	var messageType *apiv1.ACMEAccount
 	updateMask, err := fieldmaskpb.New(messageType, req.UpdateMask...)
 	if err != nil {
 		return nil, err
