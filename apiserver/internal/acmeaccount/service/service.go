@@ -11,7 +11,6 @@ import (
 
 	"powerssl.dev/apiserver/internal/model"
 	"powerssl.dev/apiserver/internal/repository"
-	"powerssl.dev/apiserver/internal/unitofwork"
 	"powerssl.dev/backend/temporal"
 	"powerssl.dev/sdk/apiserver/acmeaccount"
 	"powerssl.dev/sdk/apiserver/api"
@@ -108,10 +107,10 @@ func (s basicService) Update(ctx context.Context, name string, updateMask []stri
 	//		// TODO: error
 	//	}
 	//}
-	var updatedACMEAccount *model.ACMEAccount
-	updatedACMEAccount, err = model.NewACMEAccountFromAPI(acmeAccount.ACMEServer.Name(), apiACMEAccount, acmeAccount.ID)
-	if err = unitofwork.GetUnit(ctx).Alter(updatedACMEAccount); err != nil {
-		return nil, err
-	}
+	//var updatedACMEAccount *model.ACMEAccount
+	//updatedACMEAccount, err = model.NewACMEAccountFromAPI(acmeAccount.ACMEServer.Name(), apiACMEAccount, acmeAccount.ID)
+	//if err = unitofwork.GetUnit(ctx).Alter(updatedACMEAccount); err != nil {
+	//	return nil, err
+	//}
 	return acmeAccount.ToAPI(), nil
 }
