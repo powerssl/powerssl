@@ -2,25 +2,22 @@ package acme
 
 import (
 	"context"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
 	"fmt"
 	"time"
 
 	"powerssl.dev/sdk/controller/api"
 )
 
-func (acme *ACME) CreateAccount(ctx context.Context, directoryURL string, termsOfServiceAgreed bool, contacts []string) (*api.Account, error) {
-	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	if err != nil {
-		return nil, fmt.Errorf("error creating private key: %v", err)
-	}
+func (acme *ACME) CreateAccount(ctx context.Context, keyToken, directoryURL string, termsOfServiceAgreed bool, contacts []string) (*api.Account, error) {
 	client, err := NewClient(ctx, directoryURL)
 	if err != nil {
 		return nil, err
 	}
-	account, err := client.NewAccount(privKey, false, termsOfServiceAgreed, contacts...)
+	signer, err := acme.vault.SignerFromKeyToken(keyToken)
+	if err != nil {
+		return nil, err
+	}
+	account, err := client.NewAccount(signer, false, termsOfServiceAgreed, contacts...)
 	if err != nil {
 		return nil, fmt.Errorf("error creating new account: %v", err)
 	}

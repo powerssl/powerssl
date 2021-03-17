@@ -7,6 +7,7 @@ import (
 	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/integration/acme/internal"
 	"powerssl.dev/sdk/integration"
+	"powerssl.dev/sdk/integration/vault"
 )
 
 func newCmdRun() *cobra.Command {
@@ -33,7 +34,14 @@ func newCmdRun() *cobra.Command {
 			return config.Validate()
 		},
 		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
-			return integration.Run(&config, integration.KindACME, "acme", acme.New())
+			handler, err := acme.New(vault.Config{
+				Address: "https://localhost:8200",
+				CAFile:  config.ControllerClientConfig.CAFile, // TODO: Wrong config
+			})
+			if err != nil {
+				return err
+			}
+			return integration.Run(&config, integration.KindACME, "acme", handler)
 		}),
 	}
 

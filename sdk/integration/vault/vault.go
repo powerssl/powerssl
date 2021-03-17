@@ -10,11 +10,28 @@ import (
 	"github.com/kenshaw/pemutil"
 )
 
-func PrivateKeyFromKeyToken(keyToken string) (_ crypto.PrivateKey, err error) {
+type Config struct {
+	Address       string
+	CAFile        string
+	ClientCert    string
+	ClientKey     string
+	Insecure      bool
+	TLSServerName string
+}
+
+type Client struct {
+	c *api.Client
+}
+
+func NewClient(cfg Config) (_ *Client, err error) {
 	conf := api.DefaultConfig()
-	conf.Address = "https://localhost:8200"
-	if err := conf.ConfigureTLS(&api.TLSConfig{
-		CAPath: "/Users/dspangenberg/src/powerssl.io/powerssl/local/certs/ca.pem",
+	conf.Address = cfg.Address
+	if err = conf.ConfigureTLS(&api.TLSConfig{
+		CACert:        cfg.CAFile,
+		ClientCert:    cfg.ClientCert,
+		ClientKey:     cfg.ClientKey,
+		Insecure:      cfg.Insecure,
+		TLSServerName: cfg.TLSServerName,
 	}); err != nil {
 		return nil, err
 	}
@@ -22,6 +39,16 @@ func PrivateKeyFromKeyToken(keyToken string) (_ crypto.PrivateKey, err error) {
 	if c, err = api.NewClient(conf); err != nil {
 		return nil, err
 	}
+	return &Client{
+		c: c,
+	}, nil
+}
+
+func (c *Client) Logical() *api.Logical {
+	return c.c.Logical()
+}
+
+func (c *Client) PrivateKeyFromKeyToken(keyToken string) (_ crypto.PrivateKey, err error) {
 	var secret *api.Secret
 	if secret, err = c.Logical().Unwrap(keyToken); err != nil {
 		return nil, err
@@ -61,9 +88,9 @@ func PrivateKeyFromKeyToken(keyToken string) (_ crypto.PrivateKey, err error) {
 	return privateKey, nil
 }
 
-func SignerFromKeyToken(keyToken string) (_ crypto.Signer, err error) {
+func (c *Client) SignerFromKeyToken(keyToken string) (_ crypto.Signer, err error) {
 	var privateKey crypto.PrivateKey
-	if privateKey, err = PrivateKeyFromKeyToken(keyToken); err != nil {
+	if privateKey, err = c.PrivateKeyFromKeyToken(keyToken); err != nil {
 		return nil, err
 	}
 	var signer crypto.Signer
