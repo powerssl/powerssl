@@ -18,6 +18,7 @@ powerssl-auth serve [flags]
 ```
       --addr string                   GRPC (default ":8080")
   -h, --help                          help for serve
+      --insecure                      Do not use TLS for the server
       --jwt-private-key-file string   JWT private key file
       --metrics-addr string           HTTP Addr (default ":9090")
       --no-metrics                    Do not serve metrics

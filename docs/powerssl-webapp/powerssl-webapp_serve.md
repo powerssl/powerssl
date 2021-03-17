@@ -21,6 +21,7 @@ powerssl-webapp serve [flags]
       --auth-uri string         Auth URI
       --grpcweb-uri string      gRPC-Web URI
   -h, --help                    help for serve
+      --insecure                Do not use TLS for the server
       --metrics-addr string     HTTP Addr (default ":9090")
       --no-metrics              Do not serve metrics
 ```
