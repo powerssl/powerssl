@@ -2,11 +2,13 @@ package vault
 
 import (
 	"context"
+
 	"github.com/hashicorp/vault/api"
 	"github.com/opentracing/opentracing-go"
+	"powerssl.dev/backend/ctxkey"
 )
 
-var clientValue = struct{}{}
+var clientValue = ctxkey.New("dev.powerssl.backend.vault")
 
 func GetClient(ctx context.Context) *Client {
 	return ctx.Value(clientValue).(*Client)
