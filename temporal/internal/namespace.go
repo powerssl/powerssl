@@ -5,12 +5,13 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"io/ioutil"
+	"time"
 
 	"go.temporal.io/api/workflowservice/v1"
 	temporalclient "go.temporal.io/sdk/client"
 )
 
-func RunRegisterNamespace(address, namespace, tlsCertPath, tlsKeyPath, tlsCAPath, tlsServerName string, tlsEnableHostVerification bool) (err error) {
+func RunRegisterNamespace(address, namespace, description, ownerEmail string, workflowExecutionRetentionPeriod *time.Duration, tlsCertPath, tlsKeyPath, tlsCAPath, tlsServerName string, tlsEnableHostVerification bool) (err error) {
 	var tlsConnectionOptions tls.Config
 
 	if tlsCertPath != "" && tlsKeyPath != "" {
@@ -49,5 +50,8 @@ func RunRegisterNamespace(address, namespace, tlsCertPath, tlsKeyPath, tlsCAPath
 
 	return namespaceClient.Register(context.Background(), &workflowservice.RegisterNamespaceRequest{
 		Namespace: namespace,
+		Description: description,
+		OwnerEmail: ownerEmail,
+		WorkflowExecutionRetentionPeriod: workflowExecutionRetentionPeriod,
 	})
 }
