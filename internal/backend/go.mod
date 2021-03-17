@@ -14,7 +14,7 @@ require (
 	github.com/go-kit/kit v0.10.0
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.2
-	github.com/hashicorp/vault/api v1.0.5-0.20200117231345-460d63e36490
+	github.com/hashicorp/vault/api v1.0.5-0.20210316211753-9e6de0762492
 	github.com/johanbrandhorst/certify v1.8.1
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pborman/uuid v1.2.1
