@@ -7,16 +7,18 @@ import (
 const CreateACMEAccount = "CreateACMEAccount"
 
 type CreateACMEAccountParams struct {
-	DirectoryURL         string
-	TermsOfServiceAgreed bool
 	Contacts             []string
+	DirectoryURL         string
+	KeyName              string
+	TermsOfServiceAgreed bool
 }
 
 func (p *CreateACMEAccountParams) ToKeyVals() []interface{} {
 	return []interface{}{
-		"DirectoryURL", p.DirectoryURL,
-		"TermsOfServiceAgreed", p.TermsOfServiceAgreed,
 		"Contacts", p.Contacts,
+		"DirectoryURL", p.DirectoryURL,
+		"KeyName", p.KeyName,
+		"TermsOfServiceAgreed", p.TermsOfServiceAgreed,
 	}
 }
 

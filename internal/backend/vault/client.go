@@ -25,33 +25,50 @@ type ClientConfig struct {
 }
 
 type Client struct {
-	c *api.Client
+	c   *api.Client
+	cfg ClientConfig
 }
 
 func New(cfg ClientConfig) (*Client, error) {
 	conf := api.DefaultConfig()
 	if cfg.CAFile != "" {
-		conf.ConfigureTLS(&api.TLSConfig{CAPath: cfg.CAFile})
+		if err := conf.ConfigureTLS(&api.TLSConfig{
+			CAPath: cfg.CAFile,
+		}); err != nil {
+			return nil, err
+		}
 	}
-	// conf.ConfigureTLS(&api.TLSConfig{TLSServerName: "vault"})
+	if cfg.URL != "" {
+		conf.Address = cfg.URL
+	}
 
 	c, err := api.NewClient(conf)
 	if err != nil {
 		return nil, err
 	}
-
-	if cfg.URL != "" {
-		c.SetAddress(cfg.URL)
-	}
 	if cfg.Token != "" {
 		c.SetToken(cfg.Token)
 	}
 
-	return &Client{c: c}, nil
+	return &Client{
+		c:   c,
+		cfg: cfg,
+	}, nil
 }
 
 func (c *Client) Auth() *api.Auth {
 	return c.c.Auth()
+}
+
+func (c *Client) Clone() (*api.Client, error) {
+	vault, err := c.c.Clone()
+	if err != nil {
+		return nil, err
+	}
+	if c.cfg.Token != "" {
+		vault.SetToken(c.cfg.Token)
+	}
+	return vault, nil
 }
 
 func (c *Client) Logical() *api.Logical {
@@ -67,5 +84,13 @@ func (c *Client) logicalWrite(ctx context.Context, operation, path string, data 
 	defer span.Finish()
 	span.SetTag("operation", operation)
 
-	return c.c.Logical().Write(path, data)
+	return c.Logical().Write(path, data)
+}
+
+func LogicalRead(ctx context.Context, vault *api.Client, operation, path string) (*api.Secret, error) {
+	span, _ := opentracing.StartSpanFromContext(ctx, "vault")
+	defer span.Finish()
+	span.SetTag("operation", operation)
+
+	return vault.Logical().Read(path)
 }
