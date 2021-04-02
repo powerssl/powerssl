@@ -6,12 +6,12 @@ import (
 	"github.com/go-kit/kit/log"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
-	"powerssl.dev/common/auth"
 	"powerssl.dev/common/transport"
 	"powerssl.dev/sdk/controller/acme"
 	acmetransport "powerssl.dev/sdk/controller/acme/transport"
 	"powerssl.dev/sdk/controller/integration"
 	intregrationtransport "powerssl.dev/sdk/controller/integration/transport"
+	"powerssl.dev/sdk/internal"
 )
 
 type GRPCClient struct {
@@ -24,7 +24,7 @@ func NewGRPCClient(ctx context.Context, cfg *transport.ClientConfig, authToken s
 	if err != nil {
 		return nil, err
 	}
-	authSigner := auth.NewSigner(authToken)
+	authSigner := internal.NewSigner(authToken)
 	var _ = authSigner
 	var _ = conn
 	return &GRPCClient{

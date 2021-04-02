@@ -44,13 +44,17 @@ func NewClient(cfg Config) (_ *Client, err error) {
 	}, nil
 }
 
-func (c *Client) Logical() *api.Logical {
-	return c.c.Logical()
+func (c *Client) Clone() (*api.Client, error) {
+	return c.c.Clone()
 }
 
 func (c *Client) PrivateKeyFromKeyToken(keyToken string) (_ crypto.PrivateKey, err error) {
+	var client *api.Client
+	if client, err = c.Clone(); err != nil {
+		return nil, err
+	}
 	var secret *api.Secret
-	if secret, err = c.Logical().Unwrap(keyToken); err != nil {
+	if secret, err = client.Logical().Unwrap(keyToken); err != nil {
 		return nil, err
 	}
 	keysInterface, ok := secret.Data["keys"]

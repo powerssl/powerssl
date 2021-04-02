@@ -6,7 +6,6 @@ import (
 	"github.com/go-kit/kit/log"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
-	"powerssl.dev/common/auth"
 	"powerssl.dev/common/transport"
 	"powerssl.dev/sdk/apiserver/acmeaccount"
 	acmeaccounttransport "powerssl.dev/sdk/apiserver/acmeaccount/transport"
@@ -16,6 +15,7 @@ import (
 	certificatetransport "powerssl.dev/sdk/apiserver/certificate/transport"
 	"powerssl.dev/sdk/apiserver/user"
 	usertransport "powerssl.dev/sdk/apiserver/user/transport"
+	"powerssl.dev/sdk/internal"
 )
 
 type Client struct {
@@ -30,7 +30,7 @@ func NewClient(ctx context.Context, cfg *transport.ClientConfig, authToken strin
 	if err != nil {
 		return nil, err
 	}
-	authSigner := auth.NewSigner(authToken)
+	authSigner := internal.NewSigner(authToken)
 	return &Client{
 		ACMEAccount: acmeaccounttransport.NewGRPCClient(conn, logger, tracer, authSigner),
 		ACMEServer:  acmeservertransport.NewGRPCClient(conn, logger, tracer, authSigner),

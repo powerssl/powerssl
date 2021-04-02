@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
@@ -195,6 +196,7 @@ func decodeGRPCUpdateRequest(_ context.Context, grpcReq interface{}) (interface{
 	}
 	return endpoint.UpdateRequest{
 		Name:       req.GetName(),
+		UpdateMask:  req.GetUpdateMask().GetPaths(),
 		ACMEServer: acmeServer,
 	}, nil
 }
@@ -221,8 +223,14 @@ func encodeGRPCUpdateRequest(_ context.Context, request interface{}) (interface{
 	if err != nil {
 		return nil, err
 	}
+	var messageType *apiv1.ACMEServer
+	updateMask, err := fieldmaskpb.New(messageType, req.UpdateMask...)
+	if err != nil {
+		return nil, err
+	}
 	return &apiv1.UpdateACMEServerRequest{
 		Name:       req.Name,
+		UpdateMask: updateMask,
 		AcmeServer: acmeServer,
 	}, nil
 }
