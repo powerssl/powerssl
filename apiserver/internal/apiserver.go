@@ -22,11 +22,11 @@ import (
 	"powerssl.dev/apiserver/internal/certificate"
 	"powerssl.dev/apiserver/internal/repository"
 	"powerssl.dev/apiserver/internal/user"
+	"powerssl.dev/backend/auth"
 	temporalclient "powerssl.dev/backend/temporal/client"
 	backendtransport "powerssl.dev/backend/transport"
 	"powerssl.dev/backend/vault"
 	"powerssl.dev/common"
-	"powerssl.dev/common/auth"
 	"powerssl.dev/common/tracing"
 	"powerssl.dev/common/transport"
 )

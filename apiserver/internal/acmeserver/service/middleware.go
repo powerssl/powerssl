@@ -3,108 +3,13 @@ package service
 import (
 	"context"
 
-	"github.com/freerware/work/v4/unit"
 	"github.com/go-kit/kit/log"
 
-	"powerssl.dev/apiserver/internal/repository"
-	"powerssl.dev/apiserver/internal/unitofwork"
 	"powerssl.dev/sdk/apiserver/acmeserver"
 	"powerssl.dev/sdk/apiserver/api"
 )
 
 type Middleware func(acmeserver.Service) acmeserver.Service
-
-func UnitOfWorkMiddleware(repositories *repository.Repositories, logger log.Logger) Middleware {
-	return func(next acmeserver.Service) acmeserver.Service {
-		return unitOfWorkMiddleware{repositories, logger, next}
-	}
-}
-
-type unitOfWorkMiddleware struct {
-	*repository.Repositories
-	logger log.Logger
-	next   acmeserver.Service
-}
-
-func (u unitOfWorkMiddleware) Create(ctx context.Context, acmeServer *api.ACMEServer) (_ *api.ACMEServer, err error) {
-	var unit unit.Unit
-	if unit, err = u.UnitOfWork(); err != nil {
-		return nil, err
-	}
-	if ctx, err = unitofwork.SetUnit(ctx, unit); err != nil {
-		return nil, err
-	}
-	defer func() {
-		if err == nil {
-			err = unit.Save(ctx)
-		}
-	}()
-	return u.next.Create(ctx, acmeServer)
-}
-
-func (u unitOfWorkMiddleware) Delete(ctx context.Context, name string) (err error) {
-	var unit unit.Unit
-	if unit, err = u.UnitOfWork(); err != nil {
-		return err
-	}
-	if ctx, err = unitofwork.SetUnit(ctx, unit); err != nil {
-		return err
-	}
-	defer func() {
-		if err == nil {
-			err = unit.Save(ctx)
-		}
-	}()
-	return u.next.Delete(ctx, name)
-}
-
-func (u unitOfWorkMiddleware) Get(ctx context.Context, name string) (_ *api.ACMEServer, err error) {
-	var unit unit.Unit
-	if unit, err = u.UnitOfWork(); err != nil {
-		return nil, err
-	}
-	if ctx, err = unitofwork.SetUnit(ctx, unit); err != nil {
-		return nil, err
-	}
-	defer func() {
-		if err == nil {
-			err = unit.Save(ctx)
-		}
-	}()
-	return u.next.Get(ctx, name)
-}
-
-func (u unitOfWorkMiddleware) List(ctx context.Context, pageSize int, pageToken string) (_ []*api.ACMEServer, _ string, err error) {
-	var unit unit.Unit
-	if unit, err = u.UnitOfWork(); err != nil {
-		return nil, "", err
-	}
-	if ctx, err = unitofwork.SetUnit(ctx, unit); err != nil {
-		return nil, "", err
-	}
-	defer func() {
-		if err == nil {
-			err = unit.Save(ctx)
-		}
-	}()
-	return u.next.List(ctx, pageSize, pageToken)
-}
-
-func (u unitOfWorkMiddleware) Update(ctx context.Context, name string, acmeServer *api.ACMEServer) (_ *api.ACMEServer, err error) {
-	var unit unit.Unit
-	if unit, err = u.UnitOfWork(); err != nil {
-		return nil, err
-	}
-	if ctx, err = unitofwork.SetUnit(ctx, unit); err != nil {
-		return nil, err
-	}
-	defer func() {
-		if err == nil {
-			err = unit.Save(ctx)
-		}
-	}()
-	return u.next.Update(ctx, name, acmeServer)
-}
 
 func LoggingMiddleware(logger log.Logger) Middleware {
 	return func(next acmeserver.Service) acmeserver.Service {
@@ -145,9 +50,9 @@ func (mw loggingMiddleware) List(ctx context.Context, pageSize int, pageToken st
 	return mw.next.List(ctx, pageSize, pageToken)
 }
 
-func (mw loggingMiddleware) Update(ctx context.Context, name string, acmeServer *api.ACMEServer) (*api.ACMEServer, error) {
+func (mw loggingMiddleware) Update(ctx context.Context, name string, updateMask []string, acmeServer *api.ACMEServer) (*api.ACMEServer, error) {
 	defer func() {
 		mw.logger.Log("method", "Update", "name", name, "acmeServer", true)
 	}()
-	return mw.next.Update(ctx, name, acmeServer)
+	return mw.next.Update(ctx, name, updateMask, acmeServer)
 }

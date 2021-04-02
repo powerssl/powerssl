@@ -21,7 +21,6 @@ func New(repositories *repository.Repositories, logger log.Logger, temporalClien
 	var svc acmeaccount.Service
 	{
 		svc = NewBasicService(repositories, logger, temporalClient)
-		svc = UnitOfWorkMiddleware(repositories, logger)(svc)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
@@ -46,10 +45,12 @@ func (s basicService) Create(ctx context.Context, parent string, apiACMEAccount 
 	if acmeAccount, err = model.NewACMEAccountFromAPI(parent, apiACMEAccount, ""); err != nil {
 		return nil, err
 	}
-	if acmeAccount.ACMEServer, err = s.ACMEServers.FindByName(ctx, parent); err != nil {
-		return nil, err
-	}
-	if err = s.ACMEAccounts.Add(ctx, acmeAccount); err != nil {
+	if err = s.Transaction(ctx, func(ctx context.Context) error {
+		if acmeAccount.ACMEServer, err = s.ACMEServers.FindOneByName(ctx, parent); err != nil {
+			return err
+		}
+		return s.ACMEAccounts.Insert(ctx, acmeAccount)
+	}); err != nil {
 		return nil, err
 	}
 	_, err = s.temporal.ExecuteWorkflow(ctx, temporalclient.StartWorkflowOptions{
@@ -66,26 +67,25 @@ func (s basicService) Create(ctx context.Context, parent string, apiACMEAccount 
 
 func (s basicService) Delete(ctx context.Context, name string) (err error) {
 	var acmeAccount *model.ACMEAccount
-	if acmeAccount, err = s.ACMEAccounts.FindByName(ctx, name); err != nil {
-		return err
-	}
-	if err = s.ACMEAccounts.Remove(ctx, acmeAccount); err != nil {
-		return err
-	}
-	return nil
+	return s.Transaction(ctx, func(ctx context.Context) error {
+		if acmeAccount, err = s.ACMEAccounts.FindOneByName(ctx, name); err != nil {
+			return err
+		}
+		return s.ACMEAccounts.Delete(ctx, acmeAccount)
+	})
 }
 
 func (s basicService) Get(ctx context.Context, name string) (_ *api.ACMEAccount, err error) {
 	var acmeAccount *model.ACMEAccount
-	if acmeAccount, err = s.ACMEAccounts.FindByName(ctx, name); err != nil {
+	if acmeAccount, err = s.ACMEAccounts.FindOneByName(ctx, name); err != nil {
 		return nil, err
 	}
 	return acmeAccount.ToAPI(), nil
 }
 
 func (s basicService) List(ctx context.Context, parent string, pageSize int, pageToken string) (_ []*api.ACMEAccount, _ string, err error) {
-	var acmeAccounts *model.ACMEAccounts
-	if acmeAccounts, err = s.ACMEAccounts.GetAll(ctx); err != nil {
+	var acmeAccounts model.ACMEAccounts
+	if acmeAccounts, err = s.ACMEAccounts.FindAllByParent(ctx, parent); err != nil {
 		return nil, "", errors.Wrap(err, "getting all acme accounts")
 	}
 	// TODO: paging
@@ -95,22 +95,17 @@ func (s basicService) List(ctx context.Context, parent string, pageSize int, pag
 
 func (s basicService) Update(ctx context.Context, name string, updateMask []string, apiACMEAccount *api.ACMEAccount) (_ *api.ACMEAccount, err error) {
 	var acmeAccount *model.ACMEAccount
-	if acmeAccount, err = s.ACMEAccounts.FindByName(ctx, name); err != nil {
+	if err = s.Transaction(ctx, func(ctx context.Context) error {
+		if acmeAccount, err = s.ACMEAccounts.FindOneByName(ctx, name); err != nil {
+			return err
+		}
+		var clauses map[string]interface{}
+		if clauses, err = acmeAccount.UpdateWithMask(ctx, updateMask, apiACMEAccount); err != nil {
+			return err
+		}
+		return s.ACMEAccounts.Update(ctx, acmeAccount, clauses)
+	}); err != nil {
 		return nil, err
 	}
-	//var updates []string
-	//for _, path := range updateMask {
-	//	switch path {
-	//	case "account_url", "contacts":
-	//		updates = append(updates, path)
-	//	default:
-	//		// TODO: error
-	//	}
-	//}
-	//var updatedACMEAccount *model.ACMEAccount
-	//updatedACMEAccount, err = model.NewACMEAccountFromAPI(acmeAccount.ACMEServer.Name(), apiACMEAccount, acmeAccount.ID)
-	//if err = unitofwork.GetUnit(ctx).Alter(updatedACMEAccount); err != nil {
-	//	return nil, err
-	//}
 	return acmeAccount.ToAPI(), nil
 }

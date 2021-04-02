@@ -1,14 +1,18 @@
 package model
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
 
-	"github.com/gogo/status"
+	"github.com/golang/protobuf/protoc-gen-go/generator"
 	"github.com/google/uuid"
+	"github.com/mennanov/fieldmask-utils"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
+	"powerssl.dev/backend/auth"
 	"powerssl.dev/sdk/apiserver/api"
 )
 
@@ -90,6 +94,57 @@ func (a *ACMEAccount) ToAPI() *api.ACMEAccount {
 		Contacts:             contacts,
 		AccountURL:           a.AccountURL,
 	}
+}
+
+func (a *ACMEAccount) UpdateWithMask(ctx context.Context, paths []string, acmeAccount *api.ACMEAccount) (_ map[string]interface{}, err error) {
+	paths = a.sanitizeUpdateMask(paths, auth.IsInternal(ctx))
+	var mask fieldmask_utils.Mask
+	if mask, err = fieldmask_utils.MaskFromPaths(paths, generator.CamelCase); err != nil {
+		return nil, err
+	}
+	if err = fieldmask_utils.StructToStruct(mask, acmeAccount, a); err != nil {
+		return nil, err
+	}
+	clauses := make(map[string]interface{})
+	for _, path := range paths {
+		switch path {
+		case "display_name":
+			clauses[path] = a.DisplayName
+		case "title":
+			clauses[path] = a.Title
+		case "description":
+			clauses[path] = a.Description
+		case "terms_of_service_agreed":
+			clauses[path] = a.TermsOfServiceAgreed
+		case "contacts":
+			clauses[path] = a.Contacts
+		case "account_url":
+			clauses[path] = a.AccountURL
+		}
+	}
+	return clauses, nil
+}
+
+func (a *ACMEAccount) sanitizeUpdateMask(paths []string, internal bool) []string {
+	allowed := map[string]struct{}{
+		"display_name": {},
+		"title":        {},
+		"description":  {},
+		"contacts":     {},
+	}
+	if internal {
+		allowed["terms_of_service_agreed"] = struct{}{}
+		allowed["contacts"] = struct{}{}
+		allowed["account_url"] = struct{}{}
+	}
+	n := 0
+	for _, path := range paths {
+		if _, ok := allowed[path]; ok {
+			paths[n] = path
+			n++
+		}
+	}
+	return paths[:n]
 }
 
 type ACMEAccounts []*ACMEAccount

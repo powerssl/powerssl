@@ -4,117 +4,189 @@ import (
 	"context"
 	"strings"
 
-	"github.com/gogo/status"
+	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"powerssl.dev/apiserver/internal/model"
 	"powerssl.dev/apiserver/internal/repository/interface"
-	"powerssl.dev/apiserver/internal/unitofwork"
 )
 
-type Repository struct {
-	db     *sqlx.DB
-	logger *zap.Logger
-}
+const tableName = "acme_accounts"
 
 var _ _interface.ACMEAccountRepository = &Repository{}
 
-func NewRepository(db *sqlx.DB, logger *zap.Logger) *Repository {
+func prefixWithTableName(str string) string {
+	return tableName + "." + str
+}
+
+type Repository struct {
+	_interface.SQLX
+	logger *zap.Logger
+}
+
+func NewRepository(interfacer _interface.SQLX, logger *zap.Logger) *Repository {
 	return &Repository{
-		db:     db,
+		SQLX:   interfacer,
 		logger: logger,
 	}
 }
 
-func (r Repository) Add(ctx context.Context, acmeAccount *model.ACMEAccount) (err error) {
-	return r.AddRange(ctx, &model.ACMEAccounts{acmeAccount})
+func (r Repository) Delete(ctx context.Context, acmeAccounts ...*model.ACMEAccount) (err error) {
+	ids := make([]string, len(acmeAccounts))
+	for i, acmeAccount := range acmeAccounts {
+		ids[i] = acmeAccount.ID
+	}
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	builder := psql.
+		Update(tableName).
+		Set("deleted_at", sq.Expr("now()")).
+		Where(sq.Eq{"id": ids}).
+		Where(sq.NotEq{"deleted_at": nil})
+	var sql string
+	var args []interface{}
+	if sql, args, err = builder.ToSql(); err != nil {
+		return err
+	}
+	_, err = r.ExecerContext(ctx).ExecContext(ctx, sql, args...)
+	return err
 }
 
-func (r Repository) AddRange(ctx context.Context, acmeAccounts *model.ACMEAccounts) (err error) {
-	unitOfWork := unitofwork.GetUnit(ctx)
-	for _, acmeAccount := range *acmeAccounts {
-		if err := unitOfWork.Add(acmeAccount); err != nil {
-			return err
+func (r Repository) FindAll(ctx context.Context) (_ model.ACMEAccounts, err error) {
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	builder := psql.
+		Select("*").
+		From(tableName).
+		Where(sq.Eq{"deleted_at": nil})
+	var sql string
+	var args []interface{}
+	if sql, args, err = builder.ToSql(); err != nil {
+		return nil, err
+	}
+	var acmeAccounts []*model.ACMEAccount
+	if err = sqlx.SelectContext(ctx, r.QueryerContext(ctx), &acmeAccounts, sql, args...); err != nil {
+		return nil, err
+	}
+	return acmeAccounts, nil
+}
+
+func (r Repository) FindAllByParent(ctx context.Context, parent string) (_ model.ACMEAccounts, err error) {
+	var acmeServerID string
+	if parent != "-" {
+		s := strings.Split(parent, "/")
+		if len(s) != 2 {
+			return nil, status.Error(codes.InvalidArgument, "malformed name")
 		}
+		acmeServerID = s[1]
 	}
-	return nil
-}
-
-func (r Repository) Find(ctx context.Context, predicate string) (_ *model.ACMEAccount, err error) {
-	var acmeAccount model.ACMEAccount
-	if err = r.db.GetContext(ctx, &acmeAccount, `select * from acme_accounts where `+predicate+` limit 1`); err != nil {
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	builder := psql.
+		Select("*").
+		From(tableName).
+		Where(sq.Eq{"deleted_at": nil})
+	if acmeServerID != "" {
+		builder = builder.Where(sq.Eq{"acme_server_id": acmeServerID})
+	}
+	var sql string
+	var args []interface{}
+	if sql, args, err = builder.ToSql(); err != nil {
 		return nil, err
 	}
-	if err := unitofwork.GetUnit(ctx).Register(&acmeAccount); err != nil {
+	var acmeAccounts []*model.ACMEAccount
+	if err = sqlx.SelectContext(ctx, r.QueryerContext(ctx), &acmeAccounts, sql, args...); err != nil {
 		return nil, err
 	}
-	return &acmeAccount, err
+	return acmeAccounts, nil
 }
 
-func (r Repository) Get(ctx context.Context, id string) (_ *model.ACMEAccount, err error) {
-	var acmeAccount model.ACMEAccount
-	if err = r.db.GetContext(ctx, &acmeAccount, `select * from acme_accounts where id = $1 and deleted_at is null limit 1`, id); err != nil {
-		return nil, err
-	}
-	if err := unitofwork.GetUnit(ctx).Register(&acmeAccount); err != nil {
-		return nil, err
-	}
-	return &acmeAccount, err
-}
-
-func (r Repository) GetAll(ctx context.Context) (_ *model.ACMEAccounts, err error) {
-	var acmeAccounts model.ACMEAccounts
-	if err = r.db.SelectContext(ctx, &acmeAccounts, `select id, display_name, title, description, terms_of_service_agreed, contacts, account_url, created_at, updated_at, deleted_at from acme_accounts where deleted_at is null`); err != nil {
-		return nil, err
-	}
-	for _, acmeAccount := range acmeAccounts {
-		if err := unitofwork.GetUnit(ctx).Register(acmeAccount); err != nil {
-			return nil, err
-		}
-	}
-	return &acmeAccounts, err
-}
-
-func (r Repository) Remove(ctx context.Context, acmeAccount *model.ACMEAccount) (err error) {
-	return r.RemoveRange(ctx, &model.ACMEAccounts{acmeAccount})
-}
-
-func (r Repository) RemoveRange(ctx context.Context, acmeAccounts *model.ACMEAccounts) (err error) {
-	unitOfWork := unitofwork.GetUnit(ctx)
-	for _, acmeAccount := range *acmeAccounts {
-		if err := unitOfWork.Remove(acmeAccount); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (r Repository) FindByName(ctx context.Context, name string) (_ *model.ACMEAccount, err error) {
+func (r Repository) FindOneByName(ctx context.Context, name string) (_ *model.ACMEAccount, err error) {
 	s := strings.Split(name, "/")
 	if len(s) != 4 || s[0] != "acmeServers" || s[2] != "acmeAccounts" {
 		return nil, status.Error(codes.InvalidArgument, "malformed name")
 	}
 	acmeServerID, acmeAccountID := s[1], s[3]
-
-	var acmeAccount model.ACMEAccount
-	if acmeServerID == "-" {
-		if err = r.db.GetContext(ctx, &acmeAccount,
-			`select acme_accounts.* from acme_accounts where acme_accounts.id = $1`,
-			acmeAccountID); err != nil {
-			return nil, err
-		}
-	} else {
-		if err = r.db.GetContext(ctx, &acmeAccount,
-			`select acme_accounts.* from acme_accounts inner join acme_servers ON acme_accounts.acme_server_id = acme_servers.id where acme_accounts.id = $1 AND acme_servers.id = $2`,
-			acmeAccountID, acmeServerID); err != nil {
-			return nil, err
-		}
-
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	builder := psql.
+		Select(prefixWithTableName("*")).
+		From(tableName).
+		Where(sq.Eq{
+			prefixWithTableName("id"):         acmeAccountID,
+			prefixWithTableName("deleted_at"): nil,
+		}).
+		Limit(1)
+	if acmeServerID != "-" {
+		builder = builder.
+			InnerJoin("acme_servers on acme_accounts.acme_server_id = acme_servers.id").
+			Where(sq.Eq{
+				"acme_servers.id":         acmeServerID,
+				"acme_servers.deleted_at": nil,
+			})
 	}
-	if err := unitofwork.GetUnit(ctx).Register(&acmeAccount); err != nil {
+	var sql string
+	var args []interface{}
+	if sql, args, err = builder.ToSql(); err != nil {
 		return nil, err
 	}
-	return &acmeAccount, err
+	var acmeAccount model.ACMEAccount
+	if err = sqlx.GetContext(ctx, r.QueryerContext(ctx), &acmeAccount, sql, args...); err != nil {
+		return nil, err
+	}
+	acmeAccount.ACMEServer = &model.ACMEServer{
+		ID: acmeAccount.ACMEServerID,
+	}
+	return &acmeAccount, nil
+}
+
+func (r Repository) Insert(ctx context.Context, acmeAccounts ...*model.ACMEAccount) (err error) {
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	builder := psql.
+		Insert(tableName).
+		Columns("id",
+			"acme_server_id",
+			"display_name",
+			"title",
+			"description",
+			"terms_of_service_agreed",
+			"contacts",
+			"account_url")
+	for _, acmeAccount := range acmeAccounts {
+		builder = builder.Values(acmeAccount.ID,
+			acmeAccount.ACMEServerID,
+			acmeAccount.DisplayName,
+			acmeAccount.Title,
+			acmeAccount.Description,
+			acmeAccount.TermsOfServiceAgreed,
+			acmeAccount.Contacts,
+			acmeAccount.AccountURL)
+	}
+	var sql string
+	var args []interface{}
+	if sql, args, err = builder.ToSql(); err != nil {
+		return err
+	}
+	_, err = r.ExecerContext(ctx).ExecContext(ctx, sql, args...)
+	return err
+}
+
+func (r Repository) Update(ctx context.Context, acmeAccount *model.ACMEAccount, clauses map[string]interface{}) (err error) {
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	builder := psql.
+		Update(tableName).
+		SetMap(clauses).
+		Set("updated_at", sq.Expr("now()")).
+		Where(sq.Eq{
+			"id":         acmeAccount.ID,
+			"deleted_at": nil,
+		})
+	var sql string
+	var args []interface{}
+	if sql, args, err = builder.ToSql(); err != nil {
+		return err
+	}
+	if _, err = r.ExecerContext(ctx).ExecContext(ctx, sql, args...); err != nil {
+		return err
+	}
+	return nil
 }

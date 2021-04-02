@@ -7,7 +7,6 @@ import (
 
 	"powerssl.dev/apiserver/internal/model"
 	"powerssl.dev/apiserver/internal/repository"
-	"powerssl.dev/apiserver/internal/unitofwork"
 	"powerssl.dev/sdk/apiserver/acmeserver"
 	"powerssl.dev/sdk/apiserver/api"
 )
@@ -16,7 +15,6 @@ func New(repositories *repository.Repositories, logger log.Logger) acmeserver.Se
 	var svc acmeserver.Service
 	{
 		svc = NewBasicService(repositories, logger)
-		svc = UnitOfWorkMiddleware(repositories, logger)(svc)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
@@ -36,7 +34,7 @@ func NewBasicService(repositories *repository.Repositories, logger log.Logger) a
 
 func (s basicService) Create(ctx context.Context, apiACMEServer *api.ACMEServer) (_ *api.ACMEServer, err error) {
 	acmeServer := model.NewACMEServerFromAPI(apiACMEServer, "")
-	if err = s.ACMEServers.Add(ctx, acmeServer); err != nil {
+	if err = s.ACMEServers.Insert(ctx, acmeServer); err != nil {
 		return nil, err
 	}
 	return acmeServer.ToAPI(), nil
@@ -44,41 +42,43 @@ func (s basicService) Create(ctx context.Context, apiACMEServer *api.ACMEServer)
 
 func (s basicService) Delete(ctx context.Context, name string) (err error) {
 	var acmeServer *model.ACMEServer
-	if acmeServer, err = s.ACMEServers.FindByName(ctx, name); err != nil {
-		return err
-	}
-	if err = s.ACMEServers.Remove(ctx, acmeServer); err != nil {
-		return err
-	}
-	return nil
+	return s.Transaction(ctx, func(ctx context.Context) error {
+		if acmeServer, err = s.ACMEServers.FindOneByName(ctx, name); err != nil {
+			return err
+		}
+		return s.ACMEServers.Delete(ctx, acmeServer)
+	})
 }
 
 func (s basicService) Get(ctx context.Context, name string) (_ *api.ACMEServer, err error) {
 	var acmeServer *model.ACMEServer
-	if acmeServer, err = s.ACMEServers.FindByName(ctx, name); err != nil {
+	if acmeServer, err = s.ACMEServers.FindOneByName(ctx, name); err != nil {
 		return nil, err
 	}
 	return acmeServer.ToAPI(), nil
 }
 
 func (s basicService) List(ctx context.Context, pageSize int, pageToken string) (_ []*api.ACMEServer, _ string, err error) {
-	var acmeServers *model.ACMEServers
+	var acmeServers model.ACMEServers
 	var nextPageToken string
-	if acmeServers, nextPageToken, err = s.ACMEServers.GetRange(ctx, pageSize, pageToken); err != nil {
+	if acmeServers, nextPageToken, err = s.ACMEServers.FindAll(ctx, pageSize, pageToken); err != nil {
 		return nil, "", err
 	}
 	return acmeServers.ToAPI(), nextPageToken, nil
 }
 
-func (s basicService) Update(ctx context.Context, name string, apiACMEServer *api.ACMEServer) (_ *api.ACMEServer, err error) {
+func (s basicService) Update(ctx context.Context, name string, updateMask []string, apiACMEServer *api.ACMEServer) (_ *api.ACMEServer, err error) {
 	var acmeServer *model.ACMEServer
-	if acmeServer, err = s.ACMEServers.FindByName(ctx, name); err != nil {
-		return nil, err
-	}
-	if err = acmeServer.Update([]string{}, model.NewACMEServerFromAPI(apiACMEServer, acmeServer.ID)); err != nil {
-		return nil, err
-	}
-	if err = unitofwork.GetUnit(ctx).Alter(acmeServer); err != nil {
+	if err = s.Transaction(ctx, func(ctx context.Context) error {
+		if acmeServer, err = s.ACMEServers.FindOneByName(ctx, name); err != nil {
+			return err
+		}
+		var clauses map[string]interface{}
+		if clauses, err = acmeServer.UpdateWithMask(ctx, updateMask, apiACMEServer); err != nil {
+			return err
+		}
+		return s.ACMEServers.Update(ctx, acmeServer, clauses)
+	}); err != nil {
 		return nil, err
 	}
 	return acmeServer.ToAPI(), nil

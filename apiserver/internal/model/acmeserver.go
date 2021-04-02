@@ -1,13 +1,15 @@
 package model
 
 import (
+	"context"
 	"fmt"
-	"strings"
 	"time"
 
+	"github.com/golang/protobuf/protoc-gen-go/generator"
 	"github.com/google/uuid"
 	"github.com/mennanov/fieldmask-utils"
 
+	"powerssl.dev/backend/auth"
 	"powerssl.dev/sdk/apiserver/api"
 )
 
@@ -55,9 +57,45 @@ func (a *ACMEServer) ToAPI() *api.ACMEServer {
 	}
 }
 
-func (a *ACMEServer) Update(updateMask []string, acmeServer *ACMEServer) error {
-	mask := fieldmask_utils.MaskFromString(strings.Join(updateMask, ","))
-	return fieldmask_utils.StructToStruct(mask, acmeServer, a)
+func (a *ACMEServer) UpdateWithMask(ctx context.Context, paths []string, acmeServer *api.ACMEServer) (_ map[string]interface{}, err error) {
+	paths = a.sanitizeUpdateMask(paths, auth.IsInternal(ctx))
+	var mask fieldmask_utils.Mask
+	if mask, err = fieldmask_utils.MaskFromPaths(paths, generator.CamelCase); err != nil {
+		return nil, err
+	}
+	if err = fieldmask_utils.StructToStruct(mask, acmeServer, a); err != nil {
+		return nil, err
+	}
+	clauses := make(map[string]interface{})
+	for _, path := range paths {
+		switch path {
+		case "display_name":
+			clauses[path] = a.DisplayName
+		case "directory_url":
+			clauses[path] = a.DirectoryURL
+		case "integration_name":
+			clauses[path] = a.IntegrationName
+		}
+	}
+	return clauses, nil
+}
+
+func (a *ACMEServer) sanitizeUpdateMask(paths []string, internal bool) []string {
+	allowed := map[string]struct{}{
+		"display_name": {},
+	}
+	if internal {
+		allowed["directory_url"] = struct{}{}
+		allowed["integration_name"] = struct{}{}
+	}
+	n := 0
+	for _, path := range paths {
+		if _, ok := allowed[path]; ok {
+			paths[n] = path
+			n++
+		}
+	}
+	return paths[:n]
 }
 
 type ACMEServers []*ACMEServer

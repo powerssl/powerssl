@@ -7,15 +7,10 @@ import (
 )
 
 type ACMEAccountRepository interface {
-	// Generic
-	Add(ctx context.Context, acmeAccount *model.ACMEAccount) (err error)
-	AddRange(ctx context.Context, acmeAccounts *model.ACMEAccounts) (err error)
-	Find(ctx context.Context, predicate string) (acmeAccount *model.ACMEAccount, err error)
-	Get(ctx context.Context, id string) (acmeAccount *model.ACMEAccount, err error)
-	GetAll(ctx context.Context) (acmeAccounts *model.ACMEAccounts, err error)
-	Remove(ctx context.Context, acmeAccount *model.ACMEAccount) (err error)
-	RemoveRange(ctx context.Context, acmeAccounts *model.ACMEAccounts) (err error)
-
-	// Custom
-	FindByName(ctx context.Context, name string) (acmeAccount *model.ACMEAccount, err error)
+	Delete(ctx context.Context, acmeAccounts ...*model.ACMEAccount) (err error)
+	FindAll(ctx context.Context) (acmeAccounts model.ACMEAccounts, err error)
+	FindAllByParent(ctx context.Context, parent string) (acmeAccounts model.ACMEAccounts, err error)
+	FindOneByName(ctx context.Context, name string) (acmeAccount *model.ACMEAccount, err error)
+	Insert(ctx context.Context, acmeAccounts ...*model.ACMEAccount) (err error)
+	Update(ctx context.Context, acmeAccount *model.ACMEAccount, clauses map[string]interface{}) (err error)
 }

@@ -8,146 +8,160 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gogo/status"
+	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"powerssl.dev/apiserver/internal/model"
 	"powerssl.dev/apiserver/internal/repository/interface"
-	"powerssl.dev/apiserver/internal/unitofwork"
 )
 
-type Repository struct {
-	db     *sqlx.DB
-	logger *zap.Logger
-}
+const tableName = "acme_servers"
 
 var _ _interface.ACMEServerRepository = &Repository{}
 
-func NewRepository(db *sqlx.DB, logger *zap.Logger) *Repository {
+type Repository struct {
+	_interface.SQLX
+	logger *zap.Logger
+}
+
+func NewRepository(interfacer _interface.SQLX, logger *zap.Logger) *Repository {
 	return &Repository{
-		db:     db,
+		SQLX:   interfacer,
 		logger: logger,
 	}
 }
 
-func (r Repository) Add(ctx context.Context, acmeServer *model.ACMEServer) (err error) {
-	return r.AddRange(ctx, &model.ACMEServers{acmeServer})
+func (r Repository) Delete(ctx context.Context, acmeServers ...*model.ACMEServer) (err error) {
+	ids := make([]string, len(acmeServers))
+	for i, acmeServer := range acmeServers {
+		ids[i] = acmeServer.ID
+	}
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	builder := psql.
+		Update(tableName).
+		Set("deleted_at", sq.Expr("now()")).
+		Where(sq.Eq{"id": ids}).
+		Where(sq.NotEq{"deleted_at": nil})
+	var sql string
+	var args []interface{}
+	if sql, args, err = builder.ToSql(); err != nil {
+		return err
+	}
+	_, err = r.ExecerContext(ctx).ExecContext(ctx, sql, args...)
+	return err
 }
 
-func (r Repository) AddRange(ctx context.Context, acmeServers *model.ACMEServers) (err error) {
-	unitOfWork := unitofwork.GetUnit(ctx)
-	for _, acmeServer := range *acmeServers {
-		if err := unitOfWork.Add(acmeServer); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (r Repository) Find(ctx context.Context, predicate string) (_ *model.ACMEServer, err error) {
-	var acmeServer model.ACMEServer
-	if err = r.db.GetContext(ctx, &acmeServer, `select * from acme_servers where `+predicate+` limit 1`); err != nil {
-		return nil, err
-	}
-	if err := unitofwork.GetUnit(ctx).Register(&acmeServer); err != nil {
-		return nil, err
-	}
-	return &acmeServer, err
-}
-
-func (r Repository) Get(ctx context.Context, id string) (_ *model.ACMEServer, err error) {
-	var acmeServer model.ACMEServer
-	if err = r.db.GetContext(ctx, &acmeServer, `select * from acme_servers where id = $1 and deleted_at is null limit 1`, id); err != nil {
-		return nil, err
-	}
-	if err := unitofwork.GetUnit(ctx).Register(&acmeServer); err != nil {
-		return nil, err
-	}
-	return &acmeServer, err
-}
-
-func (r Repository) GetAll(ctx context.Context) (_ *model.ACMEServers, err error) {
-	var acmeServers model.ACMEServers
-	if err = r.db.SelectContext(ctx, &acmeServers, `select id, display_name, directory_url, integration_name, created_at, updated_at, deleted_at from acme_servers where deleted_at is null`); err != nil {
-		return nil, err
-	}
-	for _, acmeServer := range acmeServers {
-		if err := unitofwork.GetUnit(ctx).Register(acmeServer); err != nil {
-			return nil, err
-		}
-	}
-	return &acmeServers, err
-}
-
-func (r Repository) GetRange(ctx context.Context, pageSize int, pageToken string) (_ *model.ACMEServers, _ string, err error) {
+func (r Repository) FindAll(ctx context.Context, pageSize int, pageToken string) (_ model.ACMEServers, nextPageToken string, err error) {
 	if pageSize < 1 {
 		pageSize = 10
 	} else if pageSize > 20 {
 		pageSize = 20
 	}
 	offset := pageSize + 1
-	var acmeServers model.ACMEServers
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	builder := psql.
+		Select("*").
+		From(tableName).
+		Where(sq.Eq{"deleted_at": nil}).
+		OrderBy("created_at desc").
+		Limit(uint64(offset))
 	if pageToken != "" {
 		var createdAt time.Time
 		if createdAt, _, err = decodeCursor(pageToken); err != nil {
 			return nil, "", err
 		}
-		if err = r.db.SelectContext(ctx, &acmeServers, `
-select id, display_name, directory_url, integration_name, created_at, updated_at, deleted_at
-from acme_servers
-where deleted_at is null and created_at = $1
-order by created_at desc
-limit $2
-`, createdAt, offset); err != nil {
-			return nil, "", err
-		}
-	} else {
-		if err = r.db.SelectContext(ctx, &acmeServers, `
-select id, display_name, directory_url, integration_name, created_at, updated_at, deleted_at
-from acme_servers
-where deleted_at is null
-order by created_at desc
-limit $1
-`, offset); err != nil {
-			return nil, "", err
-		}
+		builder = builder.
+			Where(sq.Eq{"created_at": createdAt})
 	}
-	for _, acmeServer := range acmeServers {
-		if err = unitofwork.GetUnit(ctx).Register(acmeServer); err != nil {
-			return nil, "", err
-		}
+	var sql string
+	var args []interface{}
+	if sql, args, err = builder.ToSql(); err != nil {
+		return nil, "", err
 	}
-	var nextPageToken string
+	var acmeServers []*model.ACMEServer
+	if err = sqlx.SelectContext(ctx, r.QueryerContext(ctx), &acmeServers, sql, args...); err != nil {
+		return nil, "", err
+	}
 	if len(acmeServers) > pageSize {
 		acmeServer := acmeServers[len(acmeServers)-1]
 		nextPageToken = encodeCursor(acmeServer.CreatedAt, acmeServer.ID)
 		acmeServers = acmeServers[:len(acmeServers)-1]
 	}
-	return &acmeServers, nextPageToken, err
+	return acmeServers, "", nil
 }
 
-func (r Repository) Remove(ctx context.Context, acmeServer *model.ACMEServer) (err error) {
-	return r.RemoveRange(ctx, &model.ACMEServers{acmeServer})
-}
-
-func (r Repository) RemoveRange(ctx context.Context, acmeServers *model.ACMEServers) (err error) {
-	unitOfWork := unitofwork.GetUnit(ctx)
-	for _, acmeServer := range *acmeServers {
-		if err := unitOfWork.Remove(acmeServer); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (r Repository) FindByName(ctx context.Context, name string) (acmeServer *model.ACMEServer, err error) {
+func (r Repository) FindOneByName(ctx context.Context, name string) (_ *model.ACMEServer, err error) {
 	s := strings.Split(name, "/")
 	if len(s) != 2 {
 		return nil, status.Error(codes.InvalidArgument, "malformed name")
 	}
-	return r.Get(ctx, s[1])
+	acmeServerID := s[1]
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	builder := psql.
+		Select("*").
+		From(tableName).
+		Where(sq.Eq{
+			"id":         acmeServerID,
+			"deleted_at": nil,
+		}).
+		Limit(1)
+	var sql string
+	var args []interface{}
+	if sql, args, err = builder.ToSql(); err != nil {
+		return nil, err
+	}
+	var acmeServer model.ACMEServer
+	if err = sqlx.GetContext(ctx, r.QueryerContext(ctx), &acmeServer, sql, args...); err != nil {
+		return nil, err
+	}
+	return &acmeServer, nil
+}
+
+func (r Repository) Insert(ctx context.Context, acmeServers ...*model.ACMEServer) (err error) {
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	builder := psql.
+		Insert(tableName).
+		Columns("id",
+			"display_name",
+			"directory_url",
+			"integration_name")
+	for _, acmeServer := range acmeServers {
+		builder = builder.Values(acmeServer.ID,
+			acmeServer.DisplayName,
+			acmeServer.DirectoryURL,
+			acmeServer.IntegrationName)
+	}
+	var sql string
+	var args []interface{}
+	if sql, args, err = builder.ToSql(); err != nil {
+		return err
+	}
+	_, err = r.ExecerContext(ctx).ExecContext(ctx, sql, args...)
+	return err
+}
+
+func (r Repository) Update(ctx context.Context, acmeServer *model.ACMEServer, clauses map[string]interface{}) (err error) {
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	builder := psql.
+		Update(tableName).
+		SetMap(clauses).
+		Set("updated_at", sq.Expr("now()")).
+		Where(sq.Eq{
+			"id":         acmeServer.ID,
+			"deleted_at": nil,
+		})
+	var sql string
+	var args []interface{}
+	if sql, args, err = builder.ToSql(); err != nil {
+		return err
+	}
+	if _, err = r.ExecerContext(ctx).ExecContext(ctx, sql, args...); err != nil {
+		return err
+	}
+	return nil
 }
 
 func decodeCursor(encodedCursor string) (_ time.Time, _ string, err error) {
