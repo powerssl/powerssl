@@ -6,7 +6,6 @@ import (
 	"crypto"
 	"crypto/rsa"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -21,9 +20,9 @@ import (
 
 	"powerssl.dev/auth/internal/asset"
 	"powerssl.dev/auth/internal/template"
+	"powerssl.dev/backend/auth"
 	"powerssl.dev/backend/httpfs"
 	"powerssl.dev/common"
-	"powerssl.dev/common/auth"
 	"powerssl.dev/common/transport"
 )
 
@@ -55,103 +54,12 @@ func Run(cfg *Config) (err error) {
 	return nil
 }
 
-func jwksEndpoint(signKeys ...*rsa.PrivateKey) (func(w http.ResponseWriter, req *http.Request), error) {
-	jsonWebKeys := make([]jose.JSONWebKey, len(signKeys))
-	for i, signKey := range signKeys {
-		jsonWebKey := jose.JSONWebKey{
-			Algorithm: "RS256",
-			Key:       signKey,
-			Use:       "sig",
-		}
-		publicJSONWebKey := jsonWebKey.Public()
-		thumbprint, err := publicJSONWebKey.Thumbprint(crypto.SHA1)
-		if err != nil {
-			return nil, err
-		}
-		publicJSONWebKey.KeyID = base64.URLEncoding.EncodeToString(thumbprint)
-		jsonWebKeys[i] = publicJSONWebKey
-	}
-	jwks, err := json.Marshal(&jose.JSONWebKeySet{Keys: jsonWebKeys})
-	if err != nil {
-		return nil, err
-	}
-	return func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Add("Content-Type", "application/jwk+json")
-		_, _ = fmt.Fprintln(w, string(jwks))
-	}, nil
-}
-
-func ServeHTTP(ctx context.Context, addr string, insecure bool, certFile, keyFile string, logger log.Logger, jwtPrivateKeyFile, webappURI string) error {
-	signBytes, err := ioutil.ReadFile(jwtPrivateKeyFile)
-	if err != nil {
-		return fmt.Errorf("failed to load signing key %v", err)
-	}
-	signKey, err := jwt.ParseRSAPrivateKeyFromPEM(signBytes)
-	if err != nil {
-		return fmt.Errorf("failed to load signing key %v", err)
-	}
-
-	var buffer []byte
-	{
-		tmpl := bindatahtmltemplate.Must(bindatahtmltemplate.New("index", template.Asset).Parse("index.html"))
-		data := map[string]interface{}{
-			"WebAppURI": webappURI,
-		}
-		var buf bytes.Buffer
-		if err := tmpl.Execute(&buf, data); err != nil {
-			return err
-		}
-		buffer = buf.Bytes()
-	}
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		if req.URL.Path == "/" {
-			_, _ = w.Write(buffer)
-			return
-		}
-		if req.URL.Path == "/favicon.ico" {
-			w.Header().Add("content-type", "image/x-icon")
-			_, _ = w.Write(asset.MustAsset("favicon.ico"))
-			return
-		}
-		http.NotFound(w, req)
-	})
-	jwksHandler, err := jwksEndpoint(signKey)
-	if err != nil {
+func ServeHTTP(ctx context.Context, addr string, insecure bool, certFile, keyFile string, logger log.Logger, jwtPrivateKeyFile, webappURI string) (err error) {
+	var mux *http.ServeMux
+	if mux, err = buildMux(jwtPrivateKeyFile, webappURI); err != nil {
 		return err
 	}
-	mux.HandleFunc("/.well-known/jwks.json", jwksHandler)
-	mux.HandleFunc("/jwt", func(w http.ResponseWriter, req *http.Request) {
-		expiresAt := time.Now().Add(time.Hour * 24).Unix()
-		subject := req.URL.Query().Get("sub")
-		tokenString, err := generateToken(signKey, subject, expiresAt)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Add("Content-Type", "application/jwt")
-		_, _ = fmt.Fprint(w, tokenString)
-	})
-	mux.HandleFunc("/service", func(w http.ResponseWriter, req *http.Request) {
-		key := jose.JSONWebKey{Key: signKey}
-		public := key.Public()
-		thumbprint, err := public.Thumbprint(crypto.SHA1)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		token := jwt.NewWithClaims(auth.Method, &jwt.StandardClaims{})
-		token.Header["kid"] = base64.URLEncoding.EncodeToString(thumbprint)
-		tokenString, err := token.SignedString(signKey)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Add("Content-Type", "application/jwt")
-		_, _ = fmt.Fprint(w, tokenString)
-	})
-	mux.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(httpfs.NewFileSystem(asset.AssetFile()))))
+
 	srv := http.Server{
 		Addr:    addr,
 		Handler: mux,
@@ -183,6 +91,86 @@ func ServeHTTP(ctx context.Context, addr string, insecure bool, certFile, keyFil
 		}
 		return ctx.Err()
 	}
+}
+
+func buildMux(jwtPrivateKeyFile, webappURI string) (_ *http.ServeMux, err error) {
+	var buffer []byte
+	{
+		tmpl := bindatahtmltemplate.Must(bindatahtmltemplate.New("index", template.Asset).Parse("index.html"))
+		data := map[string]interface{}{
+			"WebAppURI": webappURI,
+		}
+		var buf bytes.Buffer
+		if err = tmpl.Execute(&buf, data); err != nil {
+			return nil, err
+		}
+		buffer = buf.Bytes()
+	}
+
+	signBytes, err := ioutil.ReadFile(jwtPrivateKeyFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load signing key %v", err)
+	}
+	signKey, err := jwt.ParseRSAPrivateKeyFromPEM(signBytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load signing key %v", err)
+	}
+
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+		if req.URL.Path == "/" {
+			_, _ = w.Write(buffer)
+			return
+		}
+		if req.URL.Path == "/favicon.ico" {
+			w.Header().Add("content-type", "image/x-icon")
+			_, _ = w.Write(asset.MustAsset("favicon.ico"))
+			return
+		}
+		http.NotFound(w, req)
+	})
+
+	var jwksHandler http.HandlerFunc
+	if jwksHandler, err = jwksEndpoint(signKey); err != nil {
+		return nil, err
+	}
+	mux.HandleFunc("/.well-known/jwks.json", jwksHandler)
+
+	mux.HandleFunc("/jwt", func(w http.ResponseWriter, req *http.Request) {
+		expiresAt := time.Now().Add(time.Hour * 24).Unix()
+		subject := req.URL.Query().Get("sub")
+		tokenString, err := generateToken(signKey, subject, expiresAt)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Add("Content-Type", "application/jwt")
+		_, _ = fmt.Fprint(w, tokenString)
+	})
+
+	mux.HandleFunc("/service", func(w http.ResponseWriter, req *http.Request) {
+		key := jose.JSONWebKey{Key: signKey}
+		public := key.Public()
+		var thumbprint []byte
+		if thumbprint, err = public.Thumbprint(crypto.SHA1); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		token := jwt.NewWithClaims(auth.Method, &jwt.StandardClaims{})
+		token.Header["kid"] = base64.URLEncoding.EncodeToString(thumbprint)
+		var tokenString string
+		if tokenString, err = token.SignedString(signKey); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Add("Content-Type", "application/jwt")
+		_, _ = fmt.Fprint(w, tokenString)
+	})
+
+	mux.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(httpfs.NewFileSystem(asset.AssetFile()))))
+
+	return mux, nil
 }
 
 func generateToken(signKey *rsa.PrivateKey, subject string, expiresAt int64) (string, error) {
