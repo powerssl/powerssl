@@ -8,15 +8,16 @@ import (
 	stdopentracing "github.com/opentracing/opentracing-go"
 	temporalclient "go.temporal.io/sdk/client"
 	"google.golang.org/grpc"
-	"powerssl.dev/backend/middleware"
-	"powerssl.dev/sdk/apiserver/acmeaccount"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
-	"powerssl.dev/apiserver/internal/acmeaccount/service"
-	"powerssl.dev/apiserver/internal/repository"
+	"powerssl.dev/backend/middleware"
 	backendtransport "powerssl.dev/backend/transport"
+	"powerssl.dev/sdk/apiserver/acmeaccount"
 	"powerssl.dev/sdk/apiserver/acmeaccount/endpoint"
 	"powerssl.dev/sdk/apiserver/acmeaccount/transport"
+
+	"powerssl.dev/apiserver/internal/acmeaccount/service"
+	"powerssl.dev/apiserver/internal/repository"
 )
 
 func NewService(repositories *repository.Repositories, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, temporalClient temporalclient.Client, auth kitendpoint.Middleware) backendtransport.Service {

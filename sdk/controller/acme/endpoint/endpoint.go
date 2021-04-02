@@ -3,10 +3,10 @@ package endpoint // import "powerssl.dev/sdk/controller/acme/endpoint"
 import (
 	"context"
 	"crypto/x509"
-	"powerssl.dev/sdk/controller/acme"
 
 	"github.com/go-kit/kit/endpoint"
 
+	"powerssl.dev/sdk/controller/acme"
 	"powerssl.dev/sdk/controller/api"
 )
 

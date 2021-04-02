@@ -12,6 +12,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
+
 	"powerssl.dev/sdk/apiserver/acmeserver/endpoint"
 )
 

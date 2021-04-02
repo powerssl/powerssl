@@ -10,11 +10,12 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	integrationactivity "powerssl.dev/controller/internal/integration/activity"
-	"powerssl.dev/controller/internal/integration/activity/acme"
 	service "powerssl.dev/sdk/controller/acme"
 	"powerssl.dev/sdk/controller/api"
 	"powerssl.dev/workflow/activity"
+
+	integrationactivity "powerssl.dev/controller/internal/integration/activity"
+	"powerssl.dev/controller/internal/integration/activity/acme"
 )
 
 func New(logger log.Logger, temporalClient temporalclient.Client) service.Service {

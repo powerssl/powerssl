@@ -11,6 +11,7 @@ import (
 	stdopentracing "github.com/opentracing/opentracing-go"
 
 	apiv1 "powerssl.dev/api/controller/v1"
+
 	"powerssl.dev/sdk/controller/acme/endpoint"
 )
 

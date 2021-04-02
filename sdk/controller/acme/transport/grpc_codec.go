@@ -7,6 +7,7 @@ import (
 	"github.com/gogo/protobuf/types"
 
 	apiv1 "powerssl.dev/api/controller/v1"
+
 	"powerssl.dev/sdk/controller/acme/endpoint"
 	"powerssl.dev/sdk/controller/api"
 )

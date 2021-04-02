@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 
 	cmdutil "powerssl.dev/common/cmd"
+
 	"powerssl.dev/powerutil/internal/pki"
 )
 

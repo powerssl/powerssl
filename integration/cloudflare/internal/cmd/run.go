@@ -5,8 +5,9 @@ import (
 	"github.com/spf13/viper"
 
 	cmdutil "powerssl.dev/common/cmd"
-	"powerssl.dev/integration/cloudflare/internal"
 	"powerssl.dev/sdk/integration"
+
+	"powerssl.dev/integration/cloudflare/internal"
 )
 
 func newCmdRun() *cobra.Command {

@@ -4,8 +4,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"powerssl.dev/agent/internal"
 	cmdutil "powerssl.dev/common/cmd"
+
+	"powerssl.dev/agent/internal"
 )
 
 func newCmdRun() *cobra.Command {

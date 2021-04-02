@@ -7,15 +7,16 @@ import (
 	"github.com/go-kit/kit/tracing/opentracing"
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
+
+	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/backend/middleware"
 	backendtransport "powerssl.dev/backend/transport"
 	"powerssl.dev/sdk/apiserver/acmeserver"
-
-	apiv1 "powerssl.dev/api/apiserver/v1"
-	"powerssl.dev/apiserver/internal/acmeserver/service"
-	"powerssl.dev/apiserver/internal/repository"
 	"powerssl.dev/sdk/apiserver/acmeserver/endpoint"
 	"powerssl.dev/sdk/apiserver/acmeserver/transport"
+
+	"powerssl.dev/apiserver/internal/acmeserver/service"
+	"powerssl.dev/apiserver/internal/repository"
 )
 
 func NewService(repositories *repository.Repositories, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, auth kitendpoint.Middleware) backendtransport.Service {

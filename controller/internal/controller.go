@@ -20,11 +20,12 @@ import (
 	"powerssl.dev/common"
 	"powerssl.dev/common/tracing"
 	"powerssl.dev/common/transport"
+	"powerssl.dev/sdk/apiserver"
+	sharedactivity "powerssl.dev/workflow/activity"
+
 	"powerssl.dev/controller/internal/acme"
 	"powerssl.dev/controller/internal/activity"
 	"powerssl.dev/controller/internal/integration"
-	"powerssl.dev/sdk/apiserver"
-	sharedactivity "powerssl.dev/workflow/activity"
 )
 
 const component = "powerssl-controller"

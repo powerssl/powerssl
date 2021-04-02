@@ -8,6 +8,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
+
 	"powerssl.dev/sdk/apiserver/acmeserver/endpoint"
 	"powerssl.dev/sdk/apiserver/api"
 )
@@ -196,7 +197,7 @@ func decodeGRPCUpdateRequest(_ context.Context, grpcReq interface{}) (interface{
 	}
 	return endpoint.UpdateRequest{
 		Name:       req.GetName(),
-		UpdateMask:  req.GetUpdateMask().GetPaths(),
+		UpdateMask: req.GetUpdateMask().GetPaths(),
 		ACMEServer: acmeServer,
 	}, nil
 }

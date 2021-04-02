@@ -9,7 +9,6 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"io/ioutil"
 	"net"
 	"net/url"
@@ -18,6 +17,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
+	"github.com/go-playground/validator/v10"
 	middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/johanbrandhorst/certify"

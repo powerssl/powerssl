@@ -2,10 +2,10 @@ package endpoint // import "powerssl.dev/sdk/apiserver/acmeserver/endpoint"
 
 import (
 	"context"
-	"powerssl.dev/sdk/apiserver/acmeserver"
 
 	"github.com/go-kit/kit/endpoint"
 
+	"powerssl.dev/sdk/apiserver/acmeserver"
 	"powerssl.dev/sdk/apiserver/api"
 )
 
@@ -108,7 +108,7 @@ type ListResponse struct {
 
 type UpdateRequest struct {
 	Name       string
-	UpdateMask  []string
+	UpdateMask []string
 	ACMEServer *api.ACMEServer
 }
 

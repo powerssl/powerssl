@@ -6,9 +6,10 @@ import (
 	"github.com/spf13/cobra"
 
 	cmdutil "powerssl.dev/common/cmd"
+	"powerssl.dev/sdk/apiserver"
+
 	"powerssl.dev/powerctl/internal"
 	"powerssl.dev/powerctl/internal/resource"
-	"powerssl.dev/sdk/apiserver"
 )
 
 func newCmdGet() *cobra.Command {

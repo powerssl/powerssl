@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/vault/api"
 	"github.com/opentracing/opentracing-go"
+
 	"powerssl.dev/backend/ctxkey"
 )
 

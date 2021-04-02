@@ -11,6 +11,7 @@ import (
 	"go.temporal.io/server/tools/sql"
 
 	"powerssl.dev/common"
+
 	"powerssl.dev/temporal/internal/migration"
 )
 

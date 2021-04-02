@@ -17,11 +17,6 @@ import (
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 
-	"powerssl.dev/apiserver/internal/acmeaccount"
-	"powerssl.dev/apiserver/internal/acmeserver"
-	"powerssl.dev/apiserver/internal/certificate"
-	"powerssl.dev/apiserver/internal/repository"
-	"powerssl.dev/apiserver/internal/user"
 	"powerssl.dev/backend/auth"
 	temporalclient "powerssl.dev/backend/temporal/client"
 	backendtransport "powerssl.dev/backend/transport"
@@ -29,6 +24,12 @@ import (
 	"powerssl.dev/common"
 	"powerssl.dev/common/tracing"
 	"powerssl.dev/common/transport"
+
+	"powerssl.dev/apiserver/internal/acmeaccount"
+	"powerssl.dev/apiserver/internal/acmeserver"
+	"powerssl.dev/apiserver/internal/certificate"
+	"powerssl.dev/apiserver/internal/repository"
+	"powerssl.dev/apiserver/internal/user"
 )
 
 const component = "powerssl-apiserver"

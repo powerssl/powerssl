@@ -7,9 +7,10 @@ import (
 	"github.com/gogo/status"
 	"google.golang.org/grpc/codes"
 
-	"powerssl.dev/apiserver/internal/repository"
 	"powerssl.dev/sdk/apiserver/api"
 	"powerssl.dev/sdk/apiserver/user"
+
+	"powerssl.dev/apiserver/internal/repository"
 )
 
 var ErrUnimplemented = status.Error(codes.Unimplemented, "Coming soon")

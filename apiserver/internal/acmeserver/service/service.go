@@ -5,10 +5,11 @@ import (
 
 	"github.com/go-kit/kit/log"
 
-	"powerssl.dev/apiserver/internal/model"
-	"powerssl.dev/apiserver/internal/repository"
 	"powerssl.dev/sdk/apiserver/acmeserver"
 	"powerssl.dev/sdk/apiserver/api"
+
+	"powerssl.dev/apiserver/internal/model"
+	"powerssl.dev/apiserver/internal/repository"
 )
 
 func New(repositories *repository.Repositories, logger log.Logger) acmeserver.Service {

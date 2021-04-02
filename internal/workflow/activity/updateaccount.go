@@ -1,8 +1,6 @@
 package activity
 
-import (
-	"powerssl.dev/sdk/apiserver/api"
-)
+import "powerssl.dev/sdk/apiserver/api"
 
 const UpdateAccount = "UpdateAccount"
 

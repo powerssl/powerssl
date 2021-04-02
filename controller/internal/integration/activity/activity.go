@@ -9,9 +9,10 @@ import (
 	temporalactivity "go.temporal.io/sdk/activity"
 	temporalclient "go.temporal.io/sdk/client"
 
-	"powerssl.dev/controller/internal/integration"
-	"powerssl.dev/sdk/controller/api"
 	apiv1 "powerssl.dev/api/controller/v1"
+	"powerssl.dev/sdk/controller/api"
+
+	"powerssl.dev/controller/internal/integration"
 )
 
 type Activity struct {

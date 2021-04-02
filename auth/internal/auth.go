@@ -18,12 +18,13 @@ import (
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/square/go-jose.v2"
 
-	"powerssl.dev/auth/internal/asset"
-	"powerssl.dev/auth/internal/template"
 	"powerssl.dev/backend/auth"
 	"powerssl.dev/backend/httpfs"
 	"powerssl.dev/common"
 	"powerssl.dev/common/transport"
+
+	"powerssl.dev/auth/internal/asset"
+	"powerssl.dev/auth/internal/template"
 )
 
 func Run(cfg *Config) (err error) {

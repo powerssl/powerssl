@@ -6,10 +6,11 @@ import (
 	temporalactivity "go.temporal.io/sdk/activity"
 
 	"powerssl.dev/backend/vault"
-	"powerssl.dev/controller/internal/acme/service"
-	"powerssl.dev/controller/internal/integration/activity"
 	"powerssl.dev/sdk/controller/api"
 	sharedactivity "powerssl.dev/workflow/activity"
+
+	"powerssl.dev/controller/internal/acme/service"
+	"powerssl.dev/controller/internal/integration/activity"
 )
 
 func CreateACMEAccount(ctx context.Context, params *sharedactivity.CreateACMEAccountParams) (_ *sharedactivity.CreateACMEAccountResults, err error) {

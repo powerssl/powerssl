@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/viper"
 
 	cmdutil "powerssl.dev/common/cmd"
+
 	"powerssl.dev/grpcgateway/internal"
 )
 

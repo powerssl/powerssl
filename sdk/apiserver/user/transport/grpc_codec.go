@@ -7,6 +7,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
+
 	"powerssl.dev/sdk/apiserver/api"
 	"powerssl.dev/sdk/apiserver/user/endpoint"
 )

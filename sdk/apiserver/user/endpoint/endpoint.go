@@ -2,11 +2,11 @@ package endpoint // import "powerssl.dev/sdk/apiserver/user/endpoint"
 
 import (
 	"context"
-	"powerssl.dev/sdk/apiserver/user"
 
 	"github.com/go-kit/kit/endpoint"
 
 	"powerssl.dev/sdk/apiserver/api"
+	"powerssl.dev/sdk/apiserver/user"
 )
 
 type Endpoints struct {

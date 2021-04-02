@@ -11,9 +11,10 @@ import (
 	"github.com/spf13/cobra"
 
 	cmdutil "powerssl.dev/common/cmd"
-	"powerssl.dev/powerctl/internal"
 	"powerssl.dev/sdk/apiserver"
 	"powerssl.dev/sdk/apiserver/api"
+
+	"powerssl.dev/powerctl/internal"
 )
 
 type certificate struct{}

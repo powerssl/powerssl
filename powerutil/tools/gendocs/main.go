@@ -2,6 +2,7 @@ package main
 
 import (
 	cmdutil "powerssl.dev/common/cmd"
+
 	"powerssl.dev/powerutil/internal/cmd"
 )
 

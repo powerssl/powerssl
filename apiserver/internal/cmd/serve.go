@@ -4,8 +4,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"powerssl.dev/apiserver/internal"
 	cmdutil "powerssl.dev/common/cmd"
+
+	"powerssl.dev/apiserver/internal"
 )
 
 func newCmdServe() *cobra.Command {

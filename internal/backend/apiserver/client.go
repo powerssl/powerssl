@@ -3,8 +3,9 @@ package apiserver
 import (
 	"context"
 
-	"powerssl.dev/backend/ctxkey"
 	"powerssl.dev/sdk/apiserver"
+
+	"powerssl.dev/backend/ctxkey"
 )
 
 var clientValue = ctxkey.New("dev.powerssl.backend.apiserver")

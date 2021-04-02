@@ -1,8 +1,9 @@
 package main
 
 import (
-	"powerssl.dev/agent/internal/cmd"
 	cmdutil "powerssl.dev/common/cmd"
+
+	"powerssl.dev/agent/internal/cmd"
 )
 
 func main() {

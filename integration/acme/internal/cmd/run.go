@@ -5,9 +5,10 @@ import (
 	"github.com/spf13/viper"
 
 	cmdutil "powerssl.dev/common/cmd"
-	"powerssl.dev/integration/acme/internal"
 	"powerssl.dev/sdk/integration"
 	"powerssl.dev/sdk/integration/vault"
+
+	"powerssl.dev/integration/acme/internal"
 )
 
 func newCmdRun() *cobra.Command {

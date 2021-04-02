@@ -19,10 +19,11 @@ import (
 	"powerssl.dev/common/tracing"
 	"powerssl.dev/common/transport"
 	"powerssl.dev/sdk/apiserver"
-	"powerssl.dev/worker/internal/activity"
-	"powerssl.dev/worker/internal/workflow"
 	sharedworkflow "powerssl.dev/workflow"
 	sharedactivity "powerssl.dev/workflow/activity"
+
+	"powerssl.dev/worker/internal/activity"
+	"powerssl.dev/worker/internal/workflow"
 )
 
 const component = "powerssl-worker"

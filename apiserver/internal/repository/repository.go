@@ -7,10 +7,11 @@ import (
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 
+	"powerssl.dev/backend/ctxkey"
+
 	"powerssl.dev/apiserver/internal/repository/acmeaccount"
 	"powerssl.dev/apiserver/internal/repository/acmeserver"
 	"powerssl.dev/apiserver/internal/repository/interface"
-	"powerssl.dev/backend/ctxkey"
 )
 
 var transactionValue = ctxkey.New("dev.powerssl.apiserver.internal.repository")

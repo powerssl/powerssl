@@ -2,10 +2,10 @@ package endpoint // import "powerssl.dev/sdk/apiserver/acmeaccount/endpoint"
 
 import (
 	"context"
-	"powerssl.dev/sdk/apiserver/acmeaccount"
 
 	"github.com/go-kit/kit/endpoint"
 
+	"powerssl.dev/sdk/apiserver/acmeaccount"
 	"powerssl.dev/sdk/apiserver/api"
 )
 

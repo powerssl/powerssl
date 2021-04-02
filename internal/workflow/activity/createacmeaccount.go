@@ -1,8 +1,6 @@
 package activity
 
-import (
-	"powerssl.dev/sdk/controller/api"
-)
+import "powerssl.dev/sdk/controller/api"
 
 const CreateACMEAccount = "CreateACMEAccount"
 
