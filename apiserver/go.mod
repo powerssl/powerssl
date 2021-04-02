@@ -13,14 +13,15 @@ replace powerssl.dev/sdk => ../sdk
 replace powerssl.dev/workflow => ../internal/workflow
 
 require (
+	github.com/Masterminds/squirrel v1.5.0
 	github.com/ahmetb/govvv v0.3.0
-	github.com/freerware/work/v4 v4.0.0-beta.2
 	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/go-kit/kit v0.10.0
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/gogo/status v1.1.0
 	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/golang-migrate/migrate/v4 v4.14.1
+	github.com/golang/protobuf v1.4.3
 	github.com/google/uuid v1.1.4
 	github.com/jmoiron/sqlx v1.3.1
 	github.com/lib/pq v1.9.0
