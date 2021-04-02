@@ -7,17 +7,16 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
-	"powerssl.dev/common"
 
 	stdjwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-kit/kit/auth/jwt"
 	"github.com/go-kit/kit/endpoint"
 	"gopkg.in/square/go-jose.v2"
+
+	"powerssl.dev/common"
 )
 
 var Method = stdjwt.SigningMethodRS256
-
-// var Signer = stdjwt.NewSigner("TODO", key, auth.Method, stdjwt.StandardClaims{})
 
 func ClaimsFromContext(ctx context.Context) *stdjwt.StandardClaims {
 	claims, ok := ctx.Value(jwt.JWTClaimsContextKey).(*stdjwt.StandardClaims)
@@ -62,14 +61,10 @@ func NewParser(jwksURL string, tlsConfig *tls.Config) (endpoint.Middleware, erro
 	}, Method, jwt.StandardClaimsFactory), nil
 }
 
-func NewSigner(token string) endpoint.Middleware {
-	return func(next endpoint.Endpoint) endpoint.Endpoint {
-		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-			return next(context.WithValue(ctx, jwt.JWTTokenContextKey, token), request)
-		}
-	}
-}
-
 func SubjectFromContext(ctx context.Context) string {
 	return ClaimsFromContext(ctx).Subject
+}
+
+func IsInternal(ctx context.Context) bool {
+	return SubjectFromContext(ctx) == "{...}"
 }
