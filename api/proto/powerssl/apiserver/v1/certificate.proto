@@ -68,14 +68,12 @@ message Certificate {
   // Certificate names have the form `certificates/{certificate_id}`.
   // The name is ignored when creating a certificate.
   string name = 1;
-
   google.protobuf.Timestamp create_time = 2;
   google.protobuf.Timestamp update_time = 3;
   string display_name = 4;
   string title = 5;
   string description = 6;
   map<string, string> labels = 7;
-
   repeated string dnsnames = 8;
   KeyAlgorithm key_algorithm = 9;
   int32 key_size = 10;
@@ -103,15 +101,17 @@ message GetCertificateRequest {
 
 // Request message for CertificateService.List.
 message ListCertificatesRequest {
-  // Requested page size. Server may return fewer certificates than requested.
-  // If unspecified, server will pick an appropriate default.
-  int32 page_size = 1;
+  string query = 1;
 
   // A token identifying a page of results the server should return.
   // Typically, this is the value of
   // [ListCertificatesResponse.next_page_token][powerssl.apiserver.v1.ListCertificatesResponse.next_page_token].
   // returned from the previous call to `List` method.
   string page_token = 2;
+
+  // Requested page size. Server may return fewer certificates than requested.
+  // If unspecified, server will pick an appropriate default.
+  int32 page_size = 3;
 }
 
 // Response message for CertificateService.List.

@@ -59,19 +59,16 @@ message CertificateIssue {
   // `certificates/{certificate_id}/issues/{issue_id}`. The name is ignored when
   // creating a certificate issue.
   string name = 1;
-
   google.protobuf.Timestamp create_time = 2;
   google.protobuf.Timestamp update_time = 3;
   string display_name = 4;
   string title = 5;
   string description = 6;
   map<string, string> labels = 7;
-
   repeated string dnsnames = 8;
   string key_algorithm = 9;
   int32 key_size = 10;
   string digest_algorithm = 11;
-  bool auto_renew = 12;
 }
 
 message CreateCertificateIssueRequest {

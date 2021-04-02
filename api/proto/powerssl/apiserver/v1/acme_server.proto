@@ -41,11 +41,12 @@ service ACMEServerService {
 
 message ACMEServer {
   string name = 1;
-
   google.protobuf.Timestamp create_time = 2;
   google.protobuf.Timestamp update_time = 3;
   string display_name = 4;
-
+  string title = 5;
+  string description = 6;
+  map<string, string> labels = 7;
   string directory_url = 8;
   string integration_name = 9;
 }
@@ -63,8 +64,9 @@ message GetACMEServerRequest {
 }
 
 message ListACMEServersRequest {
-  int32 page_size = 1;
+  string query = 1;
   string page_token = 2;
+  int32 page_size = 3;
 }
 
 message ListACMEServersResponse {

@@ -117,17 +117,22 @@ paths:
           schema:
             type: string
             pattern: ^acmeServers\/\w+$
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: pageToken
+          in: query
+          required: false
+          schema:
+            type: string
         - name: pageSize
           in: query
           required: false
           schema:
             type: integer
             format: int32
-        - name: pageToken
-          in: query
-          required: false
-          schema:
-            type: string
       tags:
         - ACMEAccountService
       security:

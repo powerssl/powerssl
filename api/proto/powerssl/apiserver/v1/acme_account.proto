@@ -41,14 +41,12 @@ service ACMEAccountService {
 
 message ACMEAccount {
   string name = 1;
-
   google.protobuf.Timestamp create_time = 2;
   google.protobuf.Timestamp update_time = 3;
   string display_name = 4;
   string title = 5;
   string description = 6;
   map<string, string> labels = 7;
-
   bool terms_of_service_agreed = 8;
   repeated string contacts = 9;
   string account_url = 10;
@@ -69,8 +67,9 @@ message GetACMEAccountRequest {
 
 message ListACMEAccountsRequest {
   string parent = 1;
-  int32 page_size = 2;
+  string query = 2;
   string page_token = 3;
+  int32 page_size = 4;
 }
 
 message ListACMEAccountsResponse {

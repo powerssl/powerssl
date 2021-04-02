@@ -25,15 +25,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/rpcStatus'
       parameters:
-        - name: pageSize
-          description: |-
-            Requested page size. Server may return fewer certificates than requested.
-            If unspecified, server will pick an appropriate default.
+        - name: query
           in: query
           required: false
           schema:
-            type: integer
-            format: int32
+            type: string
         - name: pageToken
           description: |-
             A token identifying a page of results the server should return.
@@ -44,6 +40,15 @@ paths:
           required: false
           schema:
             type: string
+        - name: pageSize
+          description: |-
+            Requested page size. Server may return fewer certificates than requested.
+            If unspecified, server will pick an appropriate default.
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
       tags:
         - CertificateService
       security:

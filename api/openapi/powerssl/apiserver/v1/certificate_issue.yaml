@@ -233,8 +233,6 @@ components:
           format: int32
         digestAlgorithm:
           type: string
-        autoRenew:
-          type: boolean
       description: A CertificateIssue ...
     v1CreateCertificateIssueRequest:
       type: object

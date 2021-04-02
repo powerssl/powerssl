@@ -22,17 +22,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/rpcStatus'
       parameters:
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: pageToken
+          in: query
+          required: false
+          schema:
+            type: string
         - name: pageSize
           in: query
           required: false
           schema:
             type: integer
             format: int32
-        - name: pageToken
-          in: query
-          required: false
-          schema:
-            type: string
       tags:
         - ACMEServerService
       security:
@@ -185,6 +190,14 @@ components:
           format: date-time
         displayName:
           type: string
+        title:
+          type: string
+        description:
+          type: string
+        labels:
+          type: object
+          additionalProperties:
+            type: string
         directoryUrl:
           type: string
         integrationName:
