@@ -14,9 +14,9 @@ All documentation is available on the [PowerSSL documentation](https://docs.powe
 Developing PowerSSL
 -------------------
 
-If you wish to work on PowerSSL itself or any of its built-in systems, you'll first need [Go](https://www.golang.org)
-installed on your machine (version 1.16+ is *required*). Ensure *gcc-5* package is installed as its a required build
-dependency.
+If you wish to work on PowerSSL itself or any of its built-in systems, you'll
+first need [Go](https://www.golang.org) installed on your machine (version
+1.16+ is *required*). Ensure *gcc-5* package is installed as its a required build dependency.
 
 You can then download any required build tools by bootstrapping your environment:
 
@@ -25,7 +25,8 @@ $ make bootstrap
 ...
 ```
 
-To compile a version of PowerSSL, run `make` or `make build`. This will put the PowerSSL binaries in the `bin` folder:
+To compile a version of PowerSSL, run `make` or `make build`.
+This will put the PowerSSL binaries in the `bin` folder:
 
 ```sh
 $ make build
@@ -33,7 +34,6 @@ $ make build
 ```
 
 To install all user tools
-
 ```sh
 $ make install
 ...
@@ -53,5 +53,6 @@ $ make run
 ...
 ```
 
-Visit [localhost:8080](http://localhost:8080) in your browser. Perform a login on the command line. Afterwards
-execute `powerctl login --ca-file $(pwd)/local/certs/ca.pem` from the workspace dir.
+Visit [localhost:8080](http://localhost:8080) in your browser.
+Perform a login on the command line.
+Afterwards execute `powerctl login --ca-file $(pwd)/local/certs/ca.pem` from the workspace dir.
