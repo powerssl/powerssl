@@ -4,9 +4,9 @@ go 1.16
 
 replace powerssl.dev/api => ../api
 
-replace powerssl.dev/common => ../internal/common
+replace powerssl.dev/backend => ../backend
 
-replace powerssl.dev/backend => ../internal/backend
+replace powerssl.dev/common => ../common
 
 replace powerssl.dev/sdk => ../sdk
 

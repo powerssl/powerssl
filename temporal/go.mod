@@ -2,7 +2,7 @@ module powerssl.dev/temporal
 
 go 1.16
 
-replace powerssl.dev/common => ../internal/common
+replace powerssl.dev/common => ../common
 
 replace github.com/apache/thrift => github.com/apache/thrift v0.0.0-20161221203622-b2a4d4ae21c7
 

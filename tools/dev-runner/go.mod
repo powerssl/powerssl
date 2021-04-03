@@ -2,7 +2,7 @@ module powerssl.dev/tools/dev-runner
 
 go 1.16
 
-replace powerssl.dev/common => ../../internal/common
+replace powerssl.dev/common => ../../common
 
 require (
 	github.com/ahmetb/govvv v0.3.0
