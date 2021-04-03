@@ -49,9 +49,9 @@ func RunRegisterNamespace(address, namespace, description, ownerEmail string, wo
 	}
 
 	return namespaceClient.Register(context.Background(), &workflowservice.RegisterNamespaceRequest{
-		Namespace: namespace,
-		Description: description,
-		OwnerEmail: ownerEmail,
+		Namespace:                        namespace,
+		Description:                      description,
+		OwnerEmail:                       ownerEmail,
 		WorkflowExecutionRetentionPeriod: workflowExecutionRetentionPeriod,
 	})
 }

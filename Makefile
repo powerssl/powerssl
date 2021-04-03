@@ -61,6 +61,15 @@ docs-%:
 # Document all targets
 docs: docs-agent docs-apiserver docs-auth docs-controller docs-grpcgateway docs-powerctl docs-powerutil docs-temporal docs-webapp docs-worker
 
+.PHONY: generate
+# Generate all targets
+generate: generate-agent generate-api generate-apiserver generate-auth generate-controller generate-grpcgateway generate-powerctl generate-powerutil generate-temporal generate-webapp generate-worker
+
+.PHONY: generate-%
+# Generate single target
+generate-%:
+	@$(MAKE) -C $(*) generate
+
 .PHONY: generate-circleci-config
 # Generate CircleCI config
 generate-circleci-config:
