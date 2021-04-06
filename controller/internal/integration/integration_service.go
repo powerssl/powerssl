@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 
-	"github.com/go-kit/kit/log"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
 	apiv1 "powerssl.dev/api/controller/v1"
 	backendtransport "powerssl.dev/backend/transport"
+	"powerssl.dev/common/log"
 )
 
 var errUnknown = errors.New("unknown error")
@@ -64,7 +64,7 @@ func (s *integrationServiceServer) Register(request *apiv1.RegisterIntegrationRe
 			return stream.Context().Err()
 		case activity := <-integration.activity:
 			if err := stream.Send(activity); err != nil {
-				s.logger.Log("err", err)
+				s.logger.Error(err)
 				s.unregister(integration)
 				return errUnknown
 			}
@@ -76,13 +76,15 @@ func (s *integrationServiceServer) Register(request *apiv1.RegisterIntegrationRe
 }
 
 func (s *integrationServiceServer) register(integration *Integration) {
-	s.logger.Log("interation", integration.UUID, "action", "connect", "name", integration.Name, "kind", integration.Kind)
+	s.logger.Infow("connected integration", "integration", integration.UUID, "name", integration.Name, "kind", integration.Kind)
 
 	Put(integration)
 }
 
 func (s *integrationServiceServer) unregister(integration *Integration) {
-	s.logger.Log("integration", integration.UUID, "action", "disconnect")
+	s.logger.Infow("disconnected integration", "integration", integration.UUID)
 
-	Delete(integration.UUID)
+	if err := Delete(integration.UUID); err != nil {
+		s.logger.Debug(err)
+	}
 }

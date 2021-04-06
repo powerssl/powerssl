@@ -3,14 +3,14 @@ package transport // import "powerssl.dev/sdk/controller/acme/transport"
 import (
 	"context"
 	"fmt"
-	"google.golang.org/protobuf/types/known/emptypb"
 
-	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/tracing/opentracing"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 	stdopentracing "github.com/opentracing/opentracing-go"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	apiv1 "powerssl.dev/api/controller/v1"
+	"powerssl.dev/common/log"
 
 	"powerssl.dev/sdk/controller/acme/endpoint"
 )
@@ -62,8 +62,10 @@ type grpcServer struct {
 }
 
 func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger, tracer stdopentracing.Tracer) apiv1.ACMEServiceServer {
+	kitLogger := log.KitLogger(logger)
+
 	options := []grpctransport.ServerOption{
-		grpctransport.ServerErrorLogger(logger),
+		grpctransport.ServerErrorLogger(kitLogger),
 	}
 
 	return &grpcServer{
@@ -71,182 +73,182 @@ func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger, tracer stdop
 			endpoints.GetCreateAccountRequestEndpoint,
 			decodeGRPCGetCreateAccountRequestRequest,
 			encodeGRPCGetCreateAccountRequestResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetCreateAccountRequest", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetCreateAccountRequest", serviceName), kitLogger)))...,
 		),
 		setCreateAccountResponse: grpctransport.NewServer(
 			endpoints.SetCreateAccountResponseEndpoint,
 			decodeGRPCSetCreateAccountResponseRequest,
 			encodeGRPCSetCreateAccountResponseResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetCreateAccountResponse", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetCreateAccountResponse", serviceName), kitLogger)))...,
 		),
 
 		getDeactivateAccountRequest: grpctransport.NewServer(
 			endpoints.GetDeactivateAccountRequestEndpoint,
 			decodeGRPCGetDeactivateAccountRequestRequest,
 			encodeGRPCGetDeactivateAccountRequestResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetDeactivateAccountRequest", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetDeactivateAccountRequest", serviceName), kitLogger)))...,
 		),
 		setDeactivateAccountResponse: grpctransport.NewServer(
 			endpoints.SetDeactivateAccountResponseEndpoint,
 			decodeGRPCSetDeactivateAccountResponseRequest,
 			encodeGRPCSetDeactivateAccountResponseResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetDeactivateAccountResponse", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetDeactivateAccountResponse", serviceName), kitLogger)))...,
 		),
 
 		getRekeyAccountRequest: grpctransport.NewServer(
 			endpoints.GetRekeyAccountRequestEndpoint,
 			decodeGRPCGetRekeyAccountRequestRequest,
 			encodeGRPCGetRekeyAccountRequestResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetRekeyAccountRequest", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetRekeyAccountRequest", serviceName), kitLogger)))...,
 		),
 		setRekeyAccountResponse: grpctransport.NewServer(
 			endpoints.SetRekeyAccountResponseEndpoint,
 			decodeGRPCSetRekeyAccountResponseRequest,
 			encodeGRPCSetRekeyAccountResponseResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetRekeyAccountResponse", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetRekeyAccountResponse", serviceName), kitLogger)))...,
 		),
 
 		getUpdateAccountRequest: grpctransport.NewServer(
 			endpoints.GetUpdateAccountRequestEndpoint,
 			decodeGRPCGetUpdateAccountRequestRequest,
 			encodeGRPCGetUpdateAccountRequestResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetUpdateAccountRequest", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetUpdateAccountRequest", serviceName), kitLogger)))...,
 		),
 		setUpdateAccountResponse: grpctransport.NewServer(
 			endpoints.SetUpdateAccountResponseEndpoint,
 			decodeGRPCSetUpdateAccountResponseRequest,
 			encodeGRPCSetUpdateAccountResponseResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetUpdateAccountResponse", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetUpdateAccountResponse", serviceName), kitLogger)))...,
 		),
 
 		getCreateOrderRequest: grpctransport.NewServer(
 			endpoints.GetCreateOrderRequestEndpoint,
 			decodeGRPCGetCreateOrderRequestRequest,
 			encodeGRPCGetCreateOrderRequestResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetCreateOrderRequest", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetCreateOrderRequest", serviceName), kitLogger)))...,
 		),
 		setCreateOrderResponse: grpctransport.NewServer(
 			endpoints.SetCreateOrderResponseEndpoint,
 			decodeGRPCSetCreateOrderResponseRequest,
 			encodeGRPCSetCreateOrderResponseResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetCreateOrderResponse", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetCreateOrderResponse", serviceName), kitLogger)))...,
 		),
 
 		getFinalizeOrderRequest: grpctransport.NewServer(
 			endpoints.GetFinalizeOrderRequestEndpoint,
 			decodeGRPCGetFinalizeOrderRequestRequest,
 			encodeGRPCGetFinalizeOrderRequestResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetFinalizeOrderRequest", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetFinalizeOrderRequest", serviceName), kitLogger)))...,
 		),
 		setFinalizeOrderResponse: grpctransport.NewServer(
 			endpoints.SetFinalizeOrderResponseEndpoint,
 			decodeGRPCSetFinalizeOrderResponseRequest,
 			encodeGRPCSetFinalizeOrderResponseResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetFinalizeOrderResponse", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetFinalizeOrderResponse", serviceName), kitLogger)))...,
 		),
 
 		getGetOrderRequest: grpctransport.NewServer(
 			endpoints.GetGetOrderRequestEndpoint,
 			decodeGRPCGetGetOrderRequestRequest,
 			encodeGRPCGetGetOrderRequestResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetGetOrderRequest", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetGetOrderRequest", serviceName), kitLogger)))...,
 		),
 		setGetOrderResponse: grpctransport.NewServer(
 			endpoints.SetGetOrderResponseEndpoint,
 			decodeGRPCSetGetOrderResponseRequest,
 			encodeGRPCSetGetOrderResponseResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetGetOrderResponse", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetGetOrderResponse", serviceName), kitLogger)))...,
 		),
 
 		getCreateAuthorizationRequest: grpctransport.NewServer(
 			endpoints.GetCreateAuthorizationRequestEndpoint,
 			decodeGRPCGetCreateAuthorizationRequestRequest,
 			encodeGRPCGetCreateAuthorizationRequestResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetCreateAuthorizationRequest", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetCreateAuthorizationRequest", serviceName), kitLogger)))...,
 		),
 		setCreateAuthorizationResponse: grpctransport.NewServer(
 			endpoints.SetCreateAuthorizationResponseEndpoint,
 			decodeGRPCSetCreateAuthorizationResponseRequest,
 			encodeGRPCSetCreateAuthorizationResponseResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetCreateAuthorizationResponse", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetCreateAuthorizationResponse", serviceName), kitLogger)))...,
 		),
 
 		getDeactivateAuthorizationRequest: grpctransport.NewServer(
 			endpoints.GetDeactivateAuthorizationRequestEndpoint,
 			decodeGRPCGetDeactivateAuthorizationRequestRequest,
 			encodeGRPCGetDeactivateAuthorizationRequestResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetDeactivateAuthorizationRequest", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetDeactivateAuthorizationRequest", serviceName), kitLogger)))...,
 		),
 		setDeactivateAuthorizationResponse: grpctransport.NewServer(
 			endpoints.SetDeactivateAuthorizationResponseEndpoint,
 			decodeGRPCSetDeactivateAuthorizationResponseRequest,
 			encodeGRPCSetDeactivateAuthorizationResponseResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetDeactivateAuthorizationResponse", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetDeactivateAuthorizationResponse", serviceName), kitLogger)))...,
 		),
 
 		getGetAuthorizationRequest: grpctransport.NewServer(
 			endpoints.GetGetAuthorizationRequestEndpoint,
 			decodeGRPCGetGetAuthorizationRequestRequest,
 			encodeGRPCGetGetAuthorizationRequestResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetGetAuthorizationRequest", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetGetAuthorizationRequest", serviceName), kitLogger)))...,
 		),
 		setGetAuthorizationResponse: grpctransport.NewServer(
 			endpoints.SetGetAuthorizationResponseEndpoint,
 			decodeGRPCSetGetAuthorizationResponseRequest,
 			encodeGRPCSetGetAuthorizationResponseResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetGetAuthorizationResponse", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetGetAuthorizationResponse", serviceName), kitLogger)))...,
 		),
 
 		getGetChallengeRequest: grpctransport.NewServer(
 			endpoints.GetGetChallengeRequestEndpoint,
 			decodeGRPCGetGetChallengeRequestRequest,
 			encodeGRPCGetGetChallengeRequestResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetGetChallengeRequest", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetGetChallengeRequest", serviceName), kitLogger)))...,
 		),
 		setGetChallengeResponse: grpctransport.NewServer(
 			endpoints.SetGetChallengeResponseEndpoint,
 			decodeGRPCSetGetChallengeResponseRequest,
 			encodeGRPCSetGetChallengeResponseResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetGetChallengeResponse", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetGetChallengeResponse", serviceName), kitLogger)))...,
 		),
 
 		getValidateChallengeRequest: grpctransport.NewServer(
 			endpoints.GetValidateChallengeRequestEndpoint,
 			decodeGRPCGetValidateChallengeRequestRequest,
 			encodeGRPCGetValidateChallengeRequestResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetValidateChallengeRequest", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetValidateChallengeRequest", serviceName), kitLogger)))...,
 		),
 		setValidateChallengeResponse: grpctransport.NewServer(
 			endpoints.SetValidateChallengeResponseEndpoint,
 			decodeGRPCSetValidateChallengeResponseRequest,
 			encodeGRPCSetValidateChallengeResponseResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetValidateChallengeResponse", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetValidateChallengeResponse", serviceName), kitLogger)))...,
 		),
 
 		getGetCertificateRequest: grpctransport.NewServer(
 			endpoints.GetGetCertificateRequestEndpoint,
 			decodeGRPCGetGetCertificateRequestRequest,
 			encodeGRPCGetGetCertificateRequestResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetGetCertificateRequest", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetGetCertificateRequest", serviceName), kitLogger)))...,
 		),
 		setGetCertificateResponse: grpctransport.NewServer(
 			endpoints.SetGetCertificateResponseEndpoint,
 			decodeGRPCSetGetCertificateResponseRequest,
 			encodeGRPCSetGetCertificateResponseResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetGetCertificateResponse", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetGetCertificateResponse", serviceName), kitLogger)))...,
 		),
 
 		getRevokeCertificateRequest: grpctransport.NewServer(
 			endpoints.GetRevokeCertificateRequestEndpoint,
 			decodeGRPCGetRevokeCertificateRequestRequest,
 			encodeGRPCGetRevokeCertificateRequestResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetRevokeCertificateRequest", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/GetRevokeCertificateRequest", serviceName), kitLogger)))...,
 		),
 		setRevokeCertificateResponse: grpctransport.NewServer(
 			endpoints.SetRevokeCertificateResponseEndpoint,
 			decodeGRPCSetRevokeCertificateResponseRequest,
 			encodeGRPCSetRevokeCertificateResponseResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetRevokeCertificateResponse", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/SetRevokeCertificateResponse", serviceName), kitLogger)))...,
 		),
 	}
 }

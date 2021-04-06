@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-kit/kit/auth/jwt"
 	kitendpoint "github.com/go-kit/kit/endpoint"
-	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/tracing/opentracing"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 	"github.com/gogo/protobuf/types"
@@ -13,6 +12,7 @@ import (
 	"google.golang.org/grpc"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
+	"powerssl.dev/common/log"
 
 	"powerssl.dev/sdk/apiserver/acmeserver"
 	"powerssl.dev/sdk/apiserver/acmeserver/endpoint"
@@ -23,7 +23,7 @@ const serviceName = "powerssl.apiserver.v1.ACMEServerService"
 func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentracing.Tracer, authSigner kitendpoint.Middleware) acmeserver.Service {
 	options := []grpctransport.ClientOption{
 		grpctransport.ClientBefore(jwt.ContextToGRPC()),
-		grpctransport.ClientBefore(opentracing.ContextToGRPC(tracer, logger)),
+		grpctransport.ClientBefore(opentracing.ContextToGRPC(tracer, log.KitLogger(logger))),
 	}
 
 	var createEndpoint kitendpoint.Endpoint

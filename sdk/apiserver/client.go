@@ -3,9 +3,9 @@ package apiserver // import "powerssl.dev/sdk/apiserver"
 import (
 	"context"
 
-	"github.com/go-kit/kit/log"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
+	"powerssl.dev/common/log"
 	"powerssl.dev/common/transport"
 
 	"powerssl.dev/sdk/apiserver/acmeaccount"

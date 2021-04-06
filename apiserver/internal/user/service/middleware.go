@@ -3,8 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/go-kit/kit/log"
-
+	"powerssl.dev/common/log"
 	"powerssl.dev/sdk/apiserver/api"
 	"powerssl.dev/sdk/apiserver/user"
 )
@@ -22,37 +21,37 @@ type loggingMiddleware struct {
 	next   user.Service
 }
 
-func (mw loggingMiddleware) Create(ctx context.Context, user *api.User) (*api.User, error) {
+func (mw loggingMiddleware) Create(ctx context.Context, user *api.User) (_ *api.User, err error) {
 	defer func() {
-		mw.logger.Log("method", "Create", "user", true)
+		mw.logger.Infow("Called method", "method", "Create", "user", true, "err", err)
 	}()
 	return mw.next.Create(ctx, user)
 }
 
-func (mw loggingMiddleware) Delete(ctx context.Context, name string) error {
+func (mw loggingMiddleware) Delete(ctx context.Context, name string) (err error) {
 	defer func() {
-		mw.logger.Log("method", "Delete", "name", name)
+		mw.logger.Infow("Called method", "method", "Delete", "name", name, "err", err)
 	}()
 	return mw.next.Delete(ctx, name)
 }
 
-func (mw loggingMiddleware) Get(ctx context.Context, name string) (*api.User, error) {
+func (mw loggingMiddleware) Get(ctx context.Context, name string) (_ *api.User, err error) {
 	defer func() {
-		mw.logger.Log("method", "Get", "name", name)
+		mw.logger.Infow("Called method", "method", "Get", "name", name, "err", err)
 	}()
 	return mw.next.Get(ctx, name)
 }
 
-func (mw loggingMiddleware) List(ctx context.Context, pageSize int, pageToken string) ([]*api.User, string, error) {
+func (mw loggingMiddleware) List(ctx context.Context, pageSize int, pageToken string) (_ []*api.User, _ string, err error) {
 	defer func() {
-		mw.logger.Log("method", "List", "pageSize", pageSize, "pageToken", pageToken)
+		mw.logger.Infow("Called method", "method", "List", "pageSize", pageSize, "pageToken", pageToken, "err", err)
 	}()
 	return mw.next.List(ctx, pageSize, pageToken)
 }
 
-func (mw loggingMiddleware) Update(ctx context.Context, name string, user *api.User) (*api.User, error) {
+func (mw loggingMiddleware) Update(ctx context.Context, name string, user *api.User) (_ *api.User, err error) {
 	defer func() {
-		mw.logger.Log("method", "Update", "name", name, "user", true)
+		mw.logger.Infow("Called method", "method", "Update", "name", name, "user", true, "err", err)
 	}()
 	return mw.next.Update(ctx, name, user)
 }

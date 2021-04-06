@@ -4,7 +4,6 @@ import (
 	"context"
 	"io"
 
-	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/prometheus"
 	"github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
@@ -18,6 +17,7 @@ import (
 	backendtransport "powerssl.dev/backend/transport"
 	"powerssl.dev/backend/vault"
 	"powerssl.dev/common"
+	"powerssl.dev/common/log"
 	"powerssl.dev/common/tracing"
 	"powerssl.dev/common/transport"
 	"powerssl.dev/sdk/apiserver"
@@ -31,7 +31,11 @@ import (
 const component = "powerssl-controller"
 
 func Run(cfg *Config) (err error) {
-	zapLogger, logger := common.NewZapAndKitLogger()
+	var logger log.Logger
+	if logger, err = log.NewLogger(false); err != nil {
+		return err
+	}
+	defer common.ErrWrapSync(logger, &err)
 
 	cfg.ServerConfig.VaultToken = cfg.VaultClientConfig.Token
 	cfg.ServerConfig.VaultURL = cfg.VaultClientConfig.URL
@@ -45,7 +49,7 @@ func Run(cfg *Config) (err error) {
 	var tracer opentracing.Tracer
 	{
 		var closer io.Closer
-		if tracer, closer, err = tracing.Init(component, cfg.Tracer, log.With(logger, "component", "tracing")); err != nil {
+		if tracer, closer, err = tracing.Init(component, cfg.Tracer, logger.With("component", "tracing")); err != nil {
 			return err
 		}
 		defer common.ErrWrapCloser(closer, &err)
@@ -68,7 +72,7 @@ func Run(cfg *Config) (err error) {
 	var temporalClient temporalclient.Client
 	{
 		var closer io.Closer
-		if temporalClient, closer, err = temporalclient.NewClient(cfg.TemporalClientConfig, zapLogger, tracer, component); err != nil {
+		if temporalClient, closer, err = temporalclient.NewClient(cfg.TemporalClientConfig, logger, tracer, component); err != nil {
 			return err
 		}
 		defer func() {
@@ -86,12 +90,12 @@ func Run(cfg *Config) (err error) {
 
 	if cfg.Metrics.Addr != "" {
 		g.Go(func() error {
-			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, logger.With("component", "metrics"))
 		})
 	}
 
 	g.Go(func() error {
-		return backendtransport.ServeGRPC(ctx, cfg.ServerConfig, log.With(logger, "transport", "gRPC"), backendtransport.Services{
+		return backendtransport.ServeGRPC(ctx, cfg.ServerConfig, logger.With("transport", "gRPC"), backendtransport.Services{
 			acme.NewService(logger, tracer, duration, temporalClient),
 			integration.NewService(ctx, logger), // TODO: tracing
 		})

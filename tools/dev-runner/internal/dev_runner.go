@@ -19,6 +19,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"powerssl.dev/common"
+	"powerssl.dev/common/log"
 
 	"powerssl.dev/tools/dev-runner/internal/component"
 )
@@ -28,7 +29,12 @@ func Run() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	g, ctx = errgroup.WithContext(ctx)
 	g.Go(func() error {
-		logger := common.NewLogger(ioutil.Discard)
+		var logger log.Logger
+		var err error
+		if logger, err = log.NewLogger(false); err != nil {
+			return err
+		}
+		defer common.ErrWrapSync(logger, &err)
 		return common.InterruptHandler(ctx, logger)
 	})
 

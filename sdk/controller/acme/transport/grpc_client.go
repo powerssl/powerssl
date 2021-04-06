@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	kitendpoint "github.com/go-kit/kit/endpoint"
-	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/tracing/opentracing"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 	"github.com/gogo/protobuf/types"
@@ -12,6 +11,7 @@ import (
 	"google.golang.org/grpc"
 
 	apiv1 "powerssl.dev/api/controller/v1"
+	"powerssl.dev/common/log"
 
 	"powerssl.dev/sdk/controller/acme"
 	"powerssl.dev/sdk/controller/acme/endpoint"
@@ -20,8 +20,10 @@ import (
 const serviceName = "powerssl.controller.v1.ACMEService"
 
 func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentracing.Tracer) acme.Service {
+	kitLogger := log.KitLogger(logger)
+
 	options := []grpctransport.ClientOption{
-		grpctransport.ClientBefore(opentracing.ContextToGRPC(tracer, logger)),
+		grpctransport.ClientBefore(opentracing.ContextToGRPC(tracer, kitLogger)),
 	}
 
 	var getCreateAccountRequestEndpoint kitendpoint.Endpoint

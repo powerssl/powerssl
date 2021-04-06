@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 
 	"powerssl.dev/backend/ctxkey"
+	"powerssl.dev/common/log"
 
 	"powerssl.dev/apiserver/internal/repository/acmeaccount"
 	"powerssl.dev/apiserver/internal/repository/acmeserver"
@@ -22,7 +22,7 @@ type Repositories struct {
 	ACMEServers  _interface.ACMEServerRepository
 }
 
-func NewRepositories(db *sqlx.DB, logger *zap.Logger) *Repositories {
+func NewRepositories(db *sqlx.DB, logger log.Logger) *Repositories {
 	bar := &sqlxInterface{db: db}
 	return &Repositories{
 		db:           db,

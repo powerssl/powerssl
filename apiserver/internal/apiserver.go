@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 
 	kitendpoint "github.com/go-kit/kit/endpoint"
-	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/prometheus"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -22,6 +21,7 @@ import (
 	backendtransport "powerssl.dev/backend/transport"
 	"powerssl.dev/backend/vault"
 	"powerssl.dev/common"
+	"powerssl.dev/common/log"
 	"powerssl.dev/common/tracing"
 	"powerssl.dev/common/transport"
 
@@ -35,7 +35,11 @@ import (
 const component = "powerssl-apiserver"
 
 func Run(cfg *Config) (err error) {
-	zapLogger, logger := common.NewZapAndKitLogger()
+	var logger log.Logger
+	if logger, err = log.NewLogger(false); err != nil {
+		return err
+	}
+	defer common.ErrWrapSync(logger, &err)
 
 	cfg.ServerConfig.VaultToken = cfg.VaultClientConfig.Token
 	cfg.ServerConfig.VaultURL = cfg.VaultClientConfig.URL
@@ -49,7 +53,7 @@ func Run(cfg *Config) (err error) {
 	var tracer opentracing.Tracer
 	{
 		var closer io.Closer
-		if tracer, closer, err = tracing.Init(component, cfg.Tracer, log.With(logger, "component", "tracing")); err != nil {
+		if tracer, closer, err = tracing.Init(component, cfg.Tracer, logger.With("component", "tracing")); err != nil {
 			return err
 		}
 		defer common.ErrWrapCloser(closer, &err)
@@ -62,13 +66,13 @@ func Run(cfg *Config) (err error) {
 			return err
 		}
 		defer common.ErrWrapCloser(db, &err)
-		repositories = repository.NewRepositories(db, zapLogger)
+		repositories = repository.NewRepositories(db, logger)
 	}
 
 	var temporalClient temporalclient.Client
 	{
 		var closer io.Closer
-		if temporalClient, closer, err = temporalclient.NewClient(cfg.TemporalClientConfig, zapLogger, tracer, component); err != nil {
+		if temporalClient, closer, err = temporalclient.NewClient(cfg.TemporalClientConfig, logger, tracer, component); err != nil {
 			return err
 		}
 		defer func() {
@@ -102,7 +106,7 @@ func Run(cfg *Config) (err error) {
 			return fmt.Errorf("failed to append %q to RootCAs: %v", cfg.CAFile, err)
 		}
 		if ok := rootCAs.AppendCertsFromPEM(byt); !ok {
-			_ = logger.Log("no certs appended, using system certs only")
+			logger.Infow("no certs appended, using system certs only")
 		}
 	}
 
@@ -119,12 +123,12 @@ func Run(cfg *Config) (err error) {
 
 	if cfg.Metrics.Addr != "" {
 		g.Go(func() error {
-			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, logger.With("component", "metrics"))
 		})
 	}
 
 	g.Go(func() error {
-		return backendtransport.ServeGRPC(ctx, cfg.ServerConfig, log.With(logger, "transport", "gRPC"), backendtransport.Services{
+		return backendtransport.ServeGRPC(ctx, cfg.ServerConfig, logger.With("transport", "gRPC"), backendtransport.Services{
 			acmeaccount.NewService(repositories, logger, tracer, duration, temporalClient, authMiddleware),
 			acmeserver.NewService(repositories, logger, tracer, duration, authMiddleware),
 			certificate.NewService(repositories, logger, tracer, duration, authMiddleware),

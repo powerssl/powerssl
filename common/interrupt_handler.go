@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/go-kit/kit/log"
+	"powerssl.dev/common/log"
 )
 
 type InterruptError struct {
@@ -22,10 +22,10 @@ func InterruptHandler(ctx context.Context, logger log.Logger) error {
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 	select {
 	case sig := <-c:
-		logger.Log("signal", sig)
+		logger.Infow("interrupt signal received", "signal", sig)
 		return InterruptError{Signal: sig}
 	case <-ctx.Done():
-		logger.Log("err", ctx.Err())
+		logger.Error(ctx.Err())
 		return ctx.Err()
 	}
 }

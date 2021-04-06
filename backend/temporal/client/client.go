@@ -13,9 +13,9 @@ import (
 	"github.com/uber-go/tally"
 	temporalclient "go.temporal.io/sdk/client"
 	temporalconverter "go.temporal.io/sdk/converter"
-	temporallog "go.temporal.io/sdk/log"
 	temporalworkflow "go.temporal.io/sdk/workflow"
-	"go.uber.org/zap"
+
+	"powerssl.dev/common/log"
 )
 
 func getHostName() string {
@@ -25,15 +25,6 @@ func getHostName() string {
 	}
 	return hostName
 }
-
-type temporalLogger struct {
-	sugar *zap.SugaredLogger
-}
-
-func (l temporalLogger) Debug(msg string, keyvals ...interface{}) { l.sugar.Debugw(msg, keyvals...) }
-func (l temporalLogger) Info(msg string, keyvals ...interface{})  { l.sugar.Infow(msg, keyvals...) }
-func (l temporalLogger) Warn(msg string, keyvals ...interface{})  { l.sugar.Warnw(msg, keyvals...) }
-func (l temporalLogger) Error(msg string, keyvals ...interface{}) { l.sugar.Errorw(msg, keyvals...) }
 
 type Client = temporalclient.Client
 
@@ -49,7 +40,7 @@ type Config struct {
 	TLSKeyFile         string
 }
 
-func NewClient(cfg Config, zapLogger *zap.Logger, tracer opentracing.Tracer, component string) (temporalclient.Client, io.Closer, error) {
+func NewClient(cfg Config, logger log.Logger, tracer opentracing.Tracer, component string) (temporalclient.Client, io.Closer, error) {
 	var err error
 	var tlsConnectionOptions tls.Config
 
@@ -78,16 +69,11 @@ func NewClient(cfg Config, zapLogger *zap.Logger, tracer opentracing.Tracer, com
 
 	scope, closer := tally.NewRootScope(tally.ScopeOptions{Separator: "_"}, time.Second)
 
-	var logger temporallog.Logger
-	if zapLogger != nil {
-		logger = temporalLogger{zapLogger.Sugar()}
-	}
-
 	var client temporalclient.Client
 	if client, err = temporalclient.NewClient(temporalclient.Options{
 		HostPort:           cfg.HostPort,
 		Namespace:          cfg.Namespace,
-		Logger:             logger,
+		Logger:             temporalLogger{logger},
 		MetricsScope:       scope,
 		Identity:           identity,
 		DataConverter:      cfg.DataConverter,

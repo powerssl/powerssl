@@ -7,9 +7,9 @@ import (
 	"time"
 
 	bindatahtmltemplate "github.com/arschles/go-bindata-html-template"
-	"github.com/go-kit/kit/log"
 
 	"powerssl.dev/backend/httpfs"
+	"powerssl.dev/common/log"
 
 	"powerssl.dev/webapp/internal/asset"
 	"powerssl.dev/webapp/internal/template"
@@ -59,16 +59,16 @@ func ServeHTTP(ctx context.Context, addr string, insecure bool, certFile, keyFil
 		}
 		close(c)
 	}()
-	_ = logger.Log("listening", addr)
+	logger.Infof("listening on %s", addr)
 	select {
 	case err := <-c:
-		_ = logger.Log("err", err)
+		logger.Error(err)
 		if err != http.ErrServerClosed {
 			return err
 		}
 		return nil
 	case <-ctx.Done():
-		_ = logger.Log("err", ctx.Err())
+		logger.Error(ctx.Err())
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 		if err := srv.Shutdown(shutdownCtx); err != nil {

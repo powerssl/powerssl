@@ -5,8 +5,9 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/go-kit/kit/log"
 	"github.com/opentracing/opentracing-go"
+
+	"powerssl.dev/common/log"
 )
 
 func NewNoopTracer(_ string, _ log.Logger) (opentracing.Tracer, io.Closer, error) {

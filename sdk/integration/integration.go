@@ -6,12 +6,12 @@ import (
 	"io"
 	"time"
 
-	"github.com/go-kit/kit/log"
 	"github.com/opentracing/opentracing-go"
 	"golang.org/x/sync/errgroup"
 
 	apiv1 "powerssl.dev/api/controller/v1"
 	"powerssl.dev/common"
+	"powerssl.dev/common/log"
 	"powerssl.dev/common/tracing"
 	"powerssl.dev/common/transport"
 
@@ -41,7 +41,11 @@ type integration struct {
 }
 
 func Run(cfg *Config, kind kind, name string, handler interface{}) (err error) {
-	_, logger := common.NewZapAndKitLogger()
+	var logger log.Logger
+	if logger, err = log.NewLogger(false); err != nil {
+		return err
+	}
+	defer common.ErrWrapSync(logger, &err)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
@@ -51,7 +55,7 @@ func Run(cfg *Config, kind kind, name string, handler interface{}) (err error) {
 	var tracer opentracing.Tracer
 	{
 		var closer io.Closer
-		if tracer, closer, err = tracing.Init(fmt.Sprintf("powerssl-integration-%s", kind), cfg.Tracer, log.With(logger, "component", "tracing")); err != nil {
+		if tracer, closer, err = tracing.Init(fmt.Sprintf("powerssl-integration-%s", kind), cfg.Tracer, logger.With("component", "tracing")); err != nil {
 			return err
 		}
 		defer common.ErrWrapCloser(closer, &err)
@@ -75,7 +79,7 @@ func Run(cfg *Config, kind kind, name string, handler interface{}) (err error) {
 
 	if cfg.Metrics.Addr != "" {
 		g.Go(func() error {
-			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, logger.With("component", "metrics"))
 		})
 	}
 
@@ -93,7 +97,7 @@ func Run(cfg *Config, kind kind, name string, handler interface{}) (err error) {
 			case <-ctx.Done():
 				return ctx.Err()
 			default:
-				_ = logger.Log("err", i.run(ctx))
+				logger.Error(i.run(ctx))
 				time.Sleep(time.Second)
 			}
 		}
@@ -125,12 +129,12 @@ func (i *integration) run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	_ = i.logger.Log("connected", true)
+	i.logger.Info("connected")
 	for {
 		activity, err := stream.Recv()
 		if err != nil {
 			if err == io.EOF {
-				_ = i.logger.Log("err", "EOF")
+				i.logger.Error("EOF")
 				break
 			}
 			return err
@@ -147,7 +151,7 @@ func (i *integration) run(ctx context.Context) error {
 
 func (i *integration) loggingMiddleware(ctx context.Context, activity *api.Activity) (err error) {
 	defer func() {
-		_ = i.logger.Log("activity", activity.Token, "name", activity.Name, "err", err)
+		i.logger.Infow("Received activity", "activity", activity.Token, "name", activity.Name, "err", err)
 	}()
 
 	return i.tracingMiddleware(ctx, activity)

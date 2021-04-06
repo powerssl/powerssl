@@ -6,8 +6,9 @@ import (
 	"net/http/pprof"
 	"time"
 
-	"github.com/go-kit/kit/log"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"powerssl.dev/common/log"
 )
 
 func ServeMetrics(ctx context.Context, addr string, logger log.Logger) error {
@@ -28,16 +29,16 @@ func ServeMetrics(ctx context.Context, addr string, logger log.Logger) error {
 		c <- srv.ListenAndServe()
 		close(c)
 	}()
-	_ = logger.Log("listening", addr)
+	logger.Infof("listening on %s", addr)
 	select {
 	case err := <-c:
-		_ = logger.Log("err", err)
+		logger.Error(err)
 		if err != http.ErrServerClosed {
 			return err
 		}
 		return nil
 	case <-ctx.Done():
-		_ = logger.Log("err", ctx.Err())
+		logger.Error(ctx.Err())
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 		if err := srv.Shutdown(shutdownCtx); err != nil {

@@ -3,8 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/go-kit/kit/log"
-
+	"powerssl.dev/common/log"
 	"powerssl.dev/sdk/apiserver/acmeserver"
 	"powerssl.dev/sdk/apiserver/api"
 

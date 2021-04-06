@@ -2,7 +2,6 @@ package acme
 
 import (
 	kitendpoint "github.com/go-kit/kit/endpoint"
-	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
 	"github.com/go-kit/kit/tracing/opentracing"
 	stdopentracing "github.com/opentracing/opentracing-go"
@@ -12,6 +11,7 @@ import (
 	apiv1 "powerssl.dev/api/controller/v1"
 	"powerssl.dev/backend/middleware"
 	backendtransport "powerssl.dev/backend/transport"
+	"powerssl.dev/common/log"
 	"powerssl.dev/sdk/controller/acme"
 	"powerssl.dev/sdk/controller/acme/endpoint"
 	"powerssl.dev/sdk/controller/acme/transport"
@@ -37,7 +37,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		getCreateAccountRequestEndpoint = endpoint.MakeGetCreateAccountRequestEndpoint(svc)
 		getCreateAccountRequestEndpoint = opentracing.TraceServer(tracer, "GetCreateAccountRequest")(getCreateAccountRequestEndpoint)
-		getCreateAccountRequestEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "GetCreateAccountRequest"))(getCreateAccountRequestEndpoint)
+		getCreateAccountRequestEndpoint = middleware.LoggingMiddleware(logger.With("method", "GetCreateAccountRequest"))(getCreateAccountRequestEndpoint)
 		getCreateAccountRequestEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "GetCreateAccountRequest"))(getCreateAccountRequestEndpoint)
 	}
 
@@ -45,7 +45,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		setCreateAccountResponseEndpoint = endpoint.MakeSetCreateAccountResponseEndpoint(svc)
 		setCreateAccountResponseEndpoint = opentracing.TraceServer(tracer, "SetCreateAccountResponse")(setCreateAccountResponseEndpoint)
-		setCreateAccountResponseEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "SetCreateAccountResponse"))(setCreateAccountResponseEndpoint)
+		setCreateAccountResponseEndpoint = middleware.LoggingMiddleware(logger.With("method", "SetCreateAccountResponse"))(setCreateAccountResponseEndpoint)
 		setCreateAccountResponseEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "SetCreateAccountResponse"))(setCreateAccountResponseEndpoint)
 	}
 
@@ -53,7 +53,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		getDeactivateAccountRequestEndpoint = endpoint.MakeGetDeactivateAccountRequestEndpoint(svc)
 		getDeactivateAccountRequestEndpoint = opentracing.TraceServer(tracer, "GetDeactivateAccountRequest")(getDeactivateAccountRequestEndpoint)
-		getDeactivateAccountRequestEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "GetDeactivateAccountRequest"))(getDeactivateAccountRequestEndpoint)
+		getDeactivateAccountRequestEndpoint = middleware.LoggingMiddleware(logger.With("method", "GetDeactivateAccountRequest"))(getDeactivateAccountRequestEndpoint)
 		getDeactivateAccountRequestEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "GetDeactivateAccountRequest"))(getDeactivateAccountRequestEndpoint)
 	}
 
@@ -61,7 +61,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		setDeactivateAccountResponseEndpoint = endpoint.MakeSetDeactivateAccountResponseEndpoint(svc)
 		setDeactivateAccountResponseEndpoint = opentracing.TraceServer(tracer, "SetDeactivateAccountResponse")(setDeactivateAccountResponseEndpoint)
-		setDeactivateAccountResponseEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "SetDeactivateAccountResponse"))(setDeactivateAccountResponseEndpoint)
+		setDeactivateAccountResponseEndpoint = middleware.LoggingMiddleware(logger.With("method", "SetDeactivateAccountResponse"))(setDeactivateAccountResponseEndpoint)
 		setDeactivateAccountResponseEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "SetDeactivateAccountResponse"))(setDeactivateAccountResponseEndpoint)
 	}
 
@@ -69,7 +69,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		getRekeyAccountRequestEndpoint = endpoint.MakeGetRekeyAccountRequestEndpoint(svc)
 		getRekeyAccountRequestEndpoint = opentracing.TraceServer(tracer, "GetRekeyAccountRequest")(getRekeyAccountRequestEndpoint)
-		getRekeyAccountRequestEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "GetRekeyAccountRequest"))(getRekeyAccountRequestEndpoint)
+		getRekeyAccountRequestEndpoint = middleware.LoggingMiddleware(logger.With("method", "GetRekeyAccountRequest"))(getRekeyAccountRequestEndpoint)
 		getRekeyAccountRequestEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "GetRekeyAccountRequest"))(getRekeyAccountRequestEndpoint)
 	}
 
@@ -77,7 +77,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		setRekeyAccountResponseEndpoint = endpoint.MakeSetRekeyAccountResponseEndpoint(svc)
 		setRekeyAccountResponseEndpoint = opentracing.TraceServer(tracer, "SetRekeyAccountResponse")(setRekeyAccountResponseEndpoint)
-		setRekeyAccountResponseEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "SetRekeyAccountResponse"))(setRekeyAccountResponseEndpoint)
+		setRekeyAccountResponseEndpoint = middleware.LoggingMiddleware(logger.With("method", "SetRekeyAccountResponse"))(setRekeyAccountResponseEndpoint)
 		setRekeyAccountResponseEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "SetRekeyAccountResponse"))(setRekeyAccountResponseEndpoint)
 	}
 
@@ -85,7 +85,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		getUpdateAccountRequestEndpoint = endpoint.MakeGetUpdateAccountRequestEndpoint(svc)
 		getUpdateAccountRequestEndpoint = opentracing.TraceServer(tracer, "GetUpdateAccountRequest")(getUpdateAccountRequestEndpoint)
-		getUpdateAccountRequestEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "GetUpdateAccountRequest"))(getUpdateAccountRequestEndpoint)
+		getUpdateAccountRequestEndpoint = middleware.LoggingMiddleware(logger.With("method", "GetUpdateAccountRequest"))(getUpdateAccountRequestEndpoint)
 		getUpdateAccountRequestEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "GetUpdateAccountRequest"))(getUpdateAccountRequestEndpoint)
 	}
 
@@ -93,7 +93,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		setUpdateAccountResponseEndpoint = endpoint.MakeSetUpdateAccountResponseEndpoint(svc)
 		setUpdateAccountResponseEndpoint = opentracing.TraceServer(tracer, "SetUpdateAccountResponse")(setUpdateAccountResponseEndpoint)
-		setUpdateAccountResponseEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "SetUpdateAccountResponse"))(setUpdateAccountResponseEndpoint)
+		setUpdateAccountResponseEndpoint = middleware.LoggingMiddleware(logger.With("method", "SetUpdateAccountResponse"))(setUpdateAccountResponseEndpoint)
 		setUpdateAccountResponseEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "SetUpdateAccountResponse"))(setUpdateAccountResponseEndpoint)
 	}
 
@@ -101,7 +101,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		getCreateOrderRequestEndpoint = endpoint.MakeGetCreateOrderRequestEndpoint(svc)
 		getCreateOrderRequestEndpoint = opentracing.TraceServer(tracer, "GetCreateOrderRequest")(getCreateOrderRequestEndpoint)
-		getCreateOrderRequestEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "GetCreateOrderRequest"))(getCreateOrderRequestEndpoint)
+		getCreateOrderRequestEndpoint = middleware.LoggingMiddleware(logger.With("method", "GetCreateOrderRequest"))(getCreateOrderRequestEndpoint)
 		getCreateOrderRequestEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "GetCreateOrderRequest"))(getCreateOrderRequestEndpoint)
 	}
 
@@ -109,7 +109,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		setCreateOrderResponseEndpoint = endpoint.MakeSetCreateOrderResponseEndpoint(svc)
 		setCreateOrderResponseEndpoint = opentracing.TraceServer(tracer, "SetCreateOrderResponse")(setCreateOrderResponseEndpoint)
-		setCreateOrderResponseEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "SetCreateOrderResponse"))(setCreateOrderResponseEndpoint)
+		setCreateOrderResponseEndpoint = middleware.LoggingMiddleware(logger.With("method", "SetCreateOrderResponse"))(setCreateOrderResponseEndpoint)
 		setCreateOrderResponseEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "SetCreateOrderResponse"))(setCreateOrderResponseEndpoint)
 	}
 
@@ -117,7 +117,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		getFinalizeOrderRequestEndpoint = endpoint.MakeGetFinalizeOrderRequestEndpoint(svc)
 		getFinalizeOrderRequestEndpoint = opentracing.TraceServer(tracer, "GetFinalizeOrderRequest")(getFinalizeOrderRequestEndpoint)
-		getFinalizeOrderRequestEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "GetFinalizeOrderRequest"))(getFinalizeOrderRequestEndpoint)
+		getFinalizeOrderRequestEndpoint = middleware.LoggingMiddleware(logger.With("method", "GetFinalizeOrderRequest"))(getFinalizeOrderRequestEndpoint)
 		getFinalizeOrderRequestEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "GetFinalizeOrderRequest"))(getFinalizeOrderRequestEndpoint)
 	}
 
@@ -125,7 +125,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		setFinalizeOrderResponseEndpoint = endpoint.MakeSetFinalizeOrderResponseEndpoint(svc)
 		setFinalizeOrderResponseEndpoint = opentracing.TraceServer(tracer, "SetFinalizeOrderResponse")(setFinalizeOrderResponseEndpoint)
-		setFinalizeOrderResponseEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "SetFinalizeOrderResponse"))(setFinalizeOrderResponseEndpoint)
+		setFinalizeOrderResponseEndpoint = middleware.LoggingMiddleware(logger.With("method", "SetFinalizeOrderResponse"))(setFinalizeOrderResponseEndpoint)
 		setFinalizeOrderResponseEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "SetFinalizeOrderResponse"))(setFinalizeOrderResponseEndpoint)
 	}
 
@@ -133,7 +133,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		getGetOrderRequestEndpoint = endpoint.MakeGetGetOrderRequestEndpoint(svc)
 		getGetOrderRequestEndpoint = opentracing.TraceServer(tracer, "GetGetOrderRequest")(getGetOrderRequestEndpoint)
-		getGetOrderRequestEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "GetGetOrderRequest"))(getGetOrderRequestEndpoint)
+		getGetOrderRequestEndpoint = middleware.LoggingMiddleware(logger.With("method", "GetGetOrderRequest"))(getGetOrderRequestEndpoint)
 		getGetOrderRequestEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "GetGetOrderRequest"))(getGetOrderRequestEndpoint)
 	}
 
@@ -141,7 +141,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		setGetOrderResponseEndpoint = endpoint.MakeSetGetOrderResponseEndpoint(svc)
 		setGetOrderResponseEndpoint = opentracing.TraceServer(tracer, "SetGetOrderResponse")(setGetOrderResponseEndpoint)
-		setGetOrderResponseEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "SetGetOrderResponse"))(setGetOrderResponseEndpoint)
+		setGetOrderResponseEndpoint = middleware.LoggingMiddleware(logger.With("method", "SetGetOrderResponse"))(setGetOrderResponseEndpoint)
 		setGetOrderResponseEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "SetGetOrderResponse"))(setGetOrderResponseEndpoint)
 	}
 
@@ -149,7 +149,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		getCreateAuthorizationRequestEndpoint = endpoint.MakeGetCreateAuthorizationRequestEndpoint(svc)
 		getCreateAuthorizationRequestEndpoint = opentracing.TraceServer(tracer, "GetCreateAuthorizationRequest")(getCreateAuthorizationRequestEndpoint)
-		getCreateAuthorizationRequestEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "GetCreateAuthorizationRequest"))(getCreateAuthorizationRequestEndpoint)
+		getCreateAuthorizationRequestEndpoint = middleware.LoggingMiddleware(logger.With("method", "GetCreateAuthorizationRequest"))(getCreateAuthorizationRequestEndpoint)
 		getCreateAuthorizationRequestEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "GetCreateAuthorizationRequest"))(getCreateAuthorizationRequestEndpoint)
 	}
 
@@ -157,7 +157,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		setCreateAuthorizationResponseEndpoint = endpoint.MakeSetCreateAuthorizationResponseEndpoint(svc)
 		setCreateAuthorizationResponseEndpoint = opentracing.TraceServer(tracer, "SetCreateAuthorizationResponse")(setCreateAuthorizationResponseEndpoint)
-		setCreateAuthorizationResponseEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "SetCreateAuthorizationResponse"))(setCreateAuthorizationResponseEndpoint)
+		setCreateAuthorizationResponseEndpoint = middleware.LoggingMiddleware(logger.With("method", "SetCreateAuthorizationResponse"))(setCreateAuthorizationResponseEndpoint)
 		setCreateAuthorizationResponseEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "SetCreateAuthorizationResponse"))(setCreateAuthorizationResponseEndpoint)
 	}
 
@@ -165,7 +165,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		getDeactivateAuthorizationRequestEndpoint = endpoint.MakeGetDeactivateAuthorizationRequestEndpoint(svc)
 		getDeactivateAuthorizationRequestEndpoint = opentracing.TraceServer(tracer, "GetDeactivateAuthorizationRequest")(getDeactivateAuthorizationRequestEndpoint)
-		getDeactivateAuthorizationRequestEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "GetDeactivateAuthorizationRequest"))(getDeactivateAuthorizationRequestEndpoint)
+		getDeactivateAuthorizationRequestEndpoint = middleware.LoggingMiddleware(logger.With("method", "GetDeactivateAuthorizationRequest"))(getDeactivateAuthorizationRequestEndpoint)
 		getDeactivateAuthorizationRequestEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "GetDeactivateAuthorizationRequest"))(getDeactivateAuthorizationRequestEndpoint)
 	}
 
@@ -173,7 +173,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		setDeactivateAuthorizationResponseEndpoint = endpoint.MakeSetDeactivateAuthorizationResponseEndpoint(svc)
 		setDeactivateAuthorizationResponseEndpoint = opentracing.TraceServer(tracer, "SetDeactivateAuthorizationResponse")(setDeactivateAuthorizationResponseEndpoint)
-		setDeactivateAuthorizationResponseEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "SetDeactivateAuthorizationResponse"))(setDeactivateAuthorizationResponseEndpoint)
+		setDeactivateAuthorizationResponseEndpoint = middleware.LoggingMiddleware(logger.With("method", "SetDeactivateAuthorizationResponse"))(setDeactivateAuthorizationResponseEndpoint)
 		setDeactivateAuthorizationResponseEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "SetDeactivateAuthorizationResponse"))(setDeactivateAuthorizationResponseEndpoint)
 	}
 
@@ -181,7 +181,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		getGetAuthorizationRequestEndpoint = endpoint.MakeGetGetAuthorizationRequestEndpoint(svc)
 		getGetAuthorizationRequestEndpoint = opentracing.TraceServer(tracer, "GetGetAuthorizationRequest")(getGetAuthorizationRequestEndpoint)
-		getGetAuthorizationRequestEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "GetGetAuthorizationRequest"))(getGetAuthorizationRequestEndpoint)
+		getGetAuthorizationRequestEndpoint = middleware.LoggingMiddleware(logger.With("method", "GetGetAuthorizationRequest"))(getGetAuthorizationRequestEndpoint)
 		getGetAuthorizationRequestEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "GetGetAuthorizationRequest"))(getGetAuthorizationRequestEndpoint)
 	}
 
@@ -189,7 +189,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		setGetAuthorizationResponseEndpoint = endpoint.MakeSetGetAuthorizationResponseEndpoint(svc)
 		setGetAuthorizationResponseEndpoint = opentracing.TraceServer(tracer, "SetGetAuthorizationResponse")(setGetAuthorizationResponseEndpoint)
-		setGetAuthorizationResponseEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "SetGetAuthorizationResponse"))(setGetAuthorizationResponseEndpoint)
+		setGetAuthorizationResponseEndpoint = middleware.LoggingMiddleware(logger.With("method", "SetGetAuthorizationResponse"))(setGetAuthorizationResponseEndpoint)
 		setGetAuthorizationResponseEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "SetGetAuthorizationResponse"))(setGetAuthorizationResponseEndpoint)
 	}
 
@@ -197,7 +197,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		getGetChallengeRequestEndpoint = endpoint.MakeGetGetChallengeRequestEndpoint(svc)
 		getGetChallengeRequestEndpoint = opentracing.TraceServer(tracer, "GetGetChallengeRequest")(getGetChallengeRequestEndpoint)
-		getGetChallengeRequestEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "GetGetChallengeRequest"))(getGetChallengeRequestEndpoint)
+		getGetChallengeRequestEndpoint = middleware.LoggingMiddleware(logger.With("method", "GetGetChallengeRequest"))(getGetChallengeRequestEndpoint)
 		getGetChallengeRequestEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "GetGetChallengeRequest"))(getGetChallengeRequestEndpoint)
 	}
 
@@ -205,7 +205,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		setGetChallengeResponseEndpoint = endpoint.MakeSetGetChallengeResponseEndpoint(svc)
 		setGetChallengeResponseEndpoint = opentracing.TraceServer(tracer, "SetGetChallengeResponse")(setGetChallengeResponseEndpoint)
-		setGetChallengeResponseEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "SetGetChallengeResponse"))(setGetChallengeResponseEndpoint)
+		setGetChallengeResponseEndpoint = middleware.LoggingMiddleware(logger.With("method", "SetGetChallengeResponse"))(setGetChallengeResponseEndpoint)
 		setGetChallengeResponseEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "SetGetChallengeResponse"))(setGetChallengeResponseEndpoint)
 	}
 
@@ -213,7 +213,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		getValidateChallengeRequestEndpoint = endpoint.MakeGetValidateChallengeRequestEndpoint(svc)
 		getValidateChallengeRequestEndpoint = opentracing.TraceServer(tracer, "GetValidateChallengeRequest")(getValidateChallengeRequestEndpoint)
-		getValidateChallengeRequestEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "GetValidateChallengeRequest"))(getValidateChallengeRequestEndpoint)
+		getValidateChallengeRequestEndpoint = middleware.LoggingMiddleware(logger.With("method", "GetValidateChallengeRequest"))(getValidateChallengeRequestEndpoint)
 		getValidateChallengeRequestEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "GetValidateChallengeRequest"))(getValidateChallengeRequestEndpoint)
 	}
 
@@ -221,7 +221,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		setValidateChallengeResponseEndpoint = endpoint.MakeSetValidateChallengeResponseEndpoint(svc)
 		setValidateChallengeResponseEndpoint = opentracing.TraceServer(tracer, "SetValidateChallengeResponse")(setValidateChallengeResponseEndpoint)
-		setValidateChallengeResponseEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "SetValidateChallengeResponse"))(setValidateChallengeResponseEndpoint)
+		setValidateChallengeResponseEndpoint = middleware.LoggingMiddleware(logger.With("method", "SetValidateChallengeResponse"))(setValidateChallengeResponseEndpoint)
 		setValidateChallengeResponseEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "SetValidateChallengeResponse"))(setValidateChallengeResponseEndpoint)
 	}
 
@@ -229,7 +229,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		getGetCertificateRequestEndpoint = endpoint.MakeGetGetCertificateRequestEndpoint(svc)
 		getGetCertificateRequestEndpoint = opentracing.TraceServer(tracer, "GetGetCertificateRequest")(getGetCertificateRequestEndpoint)
-		getGetCertificateRequestEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "GetGetCertificateRequest"))(getGetCertificateRequestEndpoint)
+		getGetCertificateRequestEndpoint = middleware.LoggingMiddleware(logger.With("method", "GetGetCertificateRequest"))(getGetCertificateRequestEndpoint)
 		getGetCertificateRequestEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "GetGetCertificateRequest"))(getGetCertificateRequestEndpoint)
 	}
 
@@ -237,7 +237,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		setGetCertificateResponseEndpoint = endpoint.MakeSetGetCertificateResponseEndpoint(svc)
 		setGetCertificateResponseEndpoint = opentracing.TraceServer(tracer, "SetGetCertificateResponse")(setGetCertificateResponseEndpoint)
-		setGetCertificateResponseEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "SetGetCertificateResponse"))(setGetCertificateResponseEndpoint)
+		setGetCertificateResponseEndpoint = middleware.LoggingMiddleware(logger.With("method", "SetGetCertificateResponse"))(setGetCertificateResponseEndpoint)
 		setGetCertificateResponseEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "SetGetCertificateResponse"))(setGetCertificateResponseEndpoint)
 	}
 
@@ -245,7 +245,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		getRevokeCertificateRequestEndpoint = endpoint.MakeGetRevokeCertificateRequestEndpoint(svc)
 		getRevokeCertificateRequestEndpoint = opentracing.TraceServer(tracer, "GetRevokeCertificateRequest")(getRevokeCertificateRequestEndpoint)
-		getRevokeCertificateRequestEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "GetRevokeCertificateRequest"))(getRevokeCertificateRequestEndpoint)
+		getRevokeCertificateRequestEndpoint = middleware.LoggingMiddleware(logger.With("method", "GetRevokeCertificateRequest"))(getRevokeCertificateRequestEndpoint)
 		getRevokeCertificateRequestEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "GetRevokeCertificateRequest"))(getRevokeCertificateRequestEndpoint)
 	}
 
@@ -253,7 +253,7 @@ func makeEndpoints(svc acme.Service, logger log.Logger, tracer stdopentracing.Tr
 	{
 		setRevokeCertificateResponseEndpoint = endpoint.MakeSetRevokeCertificateResponseEndpoint(svc)
 		setRevokeCertificateResponseEndpoint = opentracing.TraceServer(tracer, "SetRevokeCertificateResponse")(setRevokeCertificateResponseEndpoint)
-		setRevokeCertificateResponseEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "SetRevokeCertificateResponse"))(setRevokeCertificateResponseEndpoint)
+		setRevokeCertificateResponseEndpoint = middleware.LoggingMiddleware(logger.With("method", "SetRevokeCertificateResponse"))(setRevokeCertificateResponseEndpoint)
 		setRevokeCertificateResponseEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "SetRevokeCertificateResponse"))(setRevokeCertificateResponseEndpoint)
 	}
 

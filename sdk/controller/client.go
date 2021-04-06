@@ -3,9 +3,9 @@ package controller // import "powerssl.dev/sdk/controller"
 import (
 	"context"
 
-	"github.com/go-kit/kit/log"
 	stdopentracing "github.com/opentracing/opentracing-go"
 
+	"powerssl.dev/common/log"
 	"powerssl.dev/common/transport"
 
 	"powerssl.dev/sdk/controller/acme"

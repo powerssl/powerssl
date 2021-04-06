@@ -4,12 +4,12 @@ import (
 	"context"
 	"crypto/x509"
 
-	"github.com/go-kit/kit/log"
 	temporalclient "go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/temporal"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"powerssl.dev/common/log"
 	service "powerssl.dev/sdk/controller/acme"
 	"powerssl.dev/sdk/controller/api"
 	"powerssl.dev/workflow/activity"
@@ -48,7 +48,7 @@ func appErr(err *api.Error) error {
 }
 
 func (s basicService) integrationErr(err error) error {
-	s.logger.Log("err", err)
+	s.logger.Error(err)
 	return status.Error(codes.Internal, "")
 }
 

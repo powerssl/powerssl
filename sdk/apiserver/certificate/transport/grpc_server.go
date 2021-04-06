@@ -5,13 +5,13 @@ import (
 	"fmt"
 
 	"github.com/go-kit/kit/auth/jwt"
-	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/tracing/opentracing"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
+	"powerssl.dev/common/log"
 
 	"powerssl.dev/sdk/apiserver/certificate/endpoint"
 )
@@ -26,8 +26,10 @@ type grpcServer struct {
 }
 
 func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger, tracer stdopentracing.Tracer) apiv1.CertificateServiceServer {
+	kitLoger := log.KitLogger(logger)
+
 	options := []grpctransport.ServerOption{
-		grpctransport.ServerErrorLogger(logger),
+		grpctransport.ServerErrorLogger(kitLoger),
 		grpctransport.ServerBefore(jwt.GRPCToContext()),
 	}
 
@@ -36,31 +38,31 @@ func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger, tracer stdop
 			endpoints.CreateEndpoint,
 			decodeGRPCCreateRequest,
 			encodeGRPCCreateResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/Create", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/Create", serviceName), kitLoger)))...,
 		),
 		delete: grpctransport.NewServer(
 			endpoints.DeleteEndpoint,
 			decodeGRPCDeleteRequest,
 			encodeGRPCDeleteResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/Delete", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/Delete", serviceName), kitLoger)))...,
 		),
 		get: grpctransport.NewServer(
 			endpoints.GetEndpoint,
 			decodeGRPCGetRequest,
 			encodeGRPCGetResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/Get", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/Get", serviceName), kitLoger)))...,
 		),
 		list: grpctransport.NewServer(
 			endpoints.ListEndpoint,
 			decodeGRPCListRequest,
 			encodeGRPCListResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/List", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/List", serviceName), kitLoger)))...,
 		),
 		update: grpctransport.NewServer(
 			endpoints.UpdateEndpoint,
 			decodeGRPCUpdateRequest,
 			encodeGRPCUpdateResponse,
-			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/Update", serviceName), logger)))...,
+			append(options, grpctransport.ServerBefore(opentracing.GRPCToContext(tracer, fmt.Sprintf("/%s/Update", serviceName), kitLoger)))...,
 		),
 	}
 }

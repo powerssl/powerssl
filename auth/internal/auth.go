@@ -13,7 +13,6 @@ import (
 
 	bindatahtmltemplate "github.com/arschles/go-bindata-html-template"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/go-kit/kit/log"
 	"github.com/pborman/uuid"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/square/go-jose.v2"
@@ -21,6 +20,7 @@ import (
 	"powerssl.dev/backend/auth"
 	"powerssl.dev/backend/httpfs"
 	"powerssl.dev/common"
+	"powerssl.dev/common/log"
 	"powerssl.dev/common/transport"
 
 	"powerssl.dev/auth/internal/asset"
@@ -28,7 +28,11 @@ import (
 )
 
 func Run(cfg *Config) (err error) {
-	_, logger := common.NewZapAndKitLogger()
+	var logger log.Logger
+	if logger, err = log.NewLogger(false); err != nil {
+		return err
+	}
+	defer common.ErrWrapSync(logger, &err)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
@@ -37,12 +41,12 @@ func Run(cfg *Config) (err error) {
 
 	if cfg.Metrics.Addr != "" {
 		g.Go(func() error {
-			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, logger.With("component", "metrics"))
 		})
 	}
 
 	g.Go(func() error {
-		return ServeHTTP(ctx, cfg.Addr, cfg.Insecure, cfg.TLS.CertFile, cfg.TLS.PrivateKeyFile, log.With(logger, "component", "http"), cfg.JWT.PrivateKeyFile, cfg.WebApp.URI)
+		return ServeHTTP(ctx, cfg.Addr, cfg.Insecure, cfg.TLS.CertFile, cfg.TLS.PrivateKeyFile, logger.With("component", "http"), cfg.JWT.PrivateKeyFile, cfg.WebApp.URI)
 	})
 
 	if err = g.Wait(); err != nil {
@@ -75,19 +79,19 @@ func ServeHTTP(ctx context.Context, addr string, insecure bool, certFile, keyFil
 		}
 		close(c)
 	}()
-	_ = logger.Log("listening", addr)
+	logger.Infof("listening on %s", addr)
 	select {
-	case err := <-c:
-		_ = logger.Log("err", err)
+	case err = <-c:
+		logger.Error(err)
 		if err != http.ErrServerClosed {
 			return err
 		}
 		return nil
 	case <-ctx.Done():
-		_ = logger.Log("err", ctx.Err())
+		logger.Error(ctx.Err())
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
-		if err := srv.Shutdown(shutdownCtx); err != nil {
+		if err = srv.Shutdown(shutdownCtx); err != nil {
 			return err
 		}
 		return ctx.Err()

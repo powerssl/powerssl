@@ -3,10 +3,10 @@ package service
 import (
 	"context"
 
-	"github.com/go-kit/kit/log"
 	"github.com/gogo/status"
 	"google.golang.org/grpc/codes"
 
+	"powerssl.dev/common/log"
 	"powerssl.dev/sdk/apiserver/api"
 	"powerssl.dev/sdk/apiserver/user"
 

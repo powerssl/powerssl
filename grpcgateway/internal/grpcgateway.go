@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kit/kit/log"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"golang.org/x/net/context"
 	"golang.org/x/sync/errgroup"
@@ -18,13 +17,18 @@ import (
 	"powerssl.dev/api/openapi"
 	"powerssl.dev/backend/httpfs"
 	"powerssl.dev/common"
+	"powerssl.dev/common/log"
 	"powerssl.dev/common/transport"
 
 	"powerssl.dev/grpcgateway/internal/swaggerui"
 )
 
 func Run(cfg *Config) (err error) {
-	_, logger := common.NewZapAndKitLogger()
+	var logger log.Logger
+	if logger, err = log.NewLogger(false); err != nil {
+		return err
+	}
+	defer common.ErrWrapSync(logger, &err)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
@@ -40,12 +44,12 @@ func Run(cfg *Config) (err error) {
 
 	if cfg.Metrics.Addr != "" {
 		g.Go(func() error {
-			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, log.With(logger, "component", "metrics"))
+			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, logger.With("component", "metrics"))
 		})
 	}
 
 	g.Go(func() error {
-		return ServeHTTP(ctx, cfg.Addr, log.With(logger, "component", "http"), conn)
+		return ServeHTTP(ctx, cfg.Addr, logger.With("component", "http"), conn)
 	})
 
 	if err = g.Wait(); err != nil {
@@ -86,19 +90,19 @@ func ServeHTTP(ctx context.Context, addr string, logger log.Logger, conn *grpc.C
 		c <- srv.ListenAndServe()
 		close(c)
 	}()
-	_ = logger.Log("listening", addr)
+	logger.Infof("listening on %s", addr)
 	select {
-	case err := <-c:
-		_ = logger.Log("err", err)
+	case err = <-c:
+		logger.Error(err)
 		if err != http.ErrServerClosed {
 			return err
 		}
 		return nil
 	case <-ctx.Done():
-		_ = logger.Log("err", ctx.Err())
+		logger.Error(ctx.Err())
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
-		if err := srv.Shutdown(shutdownCtx); err != nil {
+		if err = srv.Shutdown(shutdownCtx); err != nil {
 			return err
 		}
 		return ctx.Err()

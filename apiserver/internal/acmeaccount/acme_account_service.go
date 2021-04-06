@@ -2,7 +2,6 @@ package acmeaccount
 
 import (
 	kitendpoint "github.com/go-kit/kit/endpoint"
-	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
 	"github.com/go-kit/kit/tracing/opentracing"
 	stdopentracing "github.com/opentracing/opentracing-go"
@@ -12,6 +11,7 @@ import (
 	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/backend/middleware"
 	backendtransport "powerssl.dev/backend/transport"
+	"powerssl.dev/common/log"
 	"powerssl.dev/sdk/apiserver/acmeaccount"
 	"powerssl.dev/sdk/apiserver/acmeaccount/endpoint"
 	"powerssl.dev/sdk/apiserver/acmeaccount/transport"
@@ -39,7 +39,7 @@ func makeEndpoints(svc acmeaccount.Service, logger log.Logger, tracer stdopentra
 		createEndpoint = endpoint.MakeCreateEndpoint(svc)
 		createEndpoint = auth(createEndpoint)
 		createEndpoint = opentracing.TraceServer(tracer, "Create")(createEndpoint)
-		createEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Create"))(createEndpoint)
+		createEndpoint = middleware.LoggingMiddleware(logger.With("method", "Create"))(createEndpoint)
 		createEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Create"))(createEndpoint)
 	}
 
@@ -48,7 +48,7 @@ func makeEndpoints(svc acmeaccount.Service, logger log.Logger, tracer stdopentra
 		deleteEndpoint = endpoint.MakeDeleteEndpoint(svc)
 		deleteEndpoint = auth(deleteEndpoint)
 		deleteEndpoint = opentracing.TraceServer(tracer, "Delete")(deleteEndpoint)
-		deleteEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Delete"))(deleteEndpoint)
+		deleteEndpoint = middleware.LoggingMiddleware(logger.With("method", "Delete"))(deleteEndpoint)
 		deleteEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Delete"))(deleteEndpoint)
 	}
 
@@ -57,7 +57,7 @@ func makeEndpoints(svc acmeaccount.Service, logger log.Logger, tracer stdopentra
 		getEndpoint = endpoint.MakeGetEndpoint(svc)
 		getEndpoint = auth(getEndpoint)
 		getEndpoint = opentracing.TraceServer(tracer, "Get")(getEndpoint)
-		getEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Get"))(getEndpoint)
+		getEndpoint = middleware.LoggingMiddleware(logger.With("method", "Get"))(getEndpoint)
 		getEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Get"))(getEndpoint)
 	}
 
@@ -66,7 +66,7 @@ func makeEndpoints(svc acmeaccount.Service, logger log.Logger, tracer stdopentra
 		listEndpoint = endpoint.MakeListEndpoint(svc)
 		listEndpoint = auth(listEndpoint)
 		listEndpoint = opentracing.TraceServer(tracer, "List")(listEndpoint)
-		listEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "List"))(listEndpoint)
+		listEndpoint = middleware.LoggingMiddleware(logger.With("method", "List"))(listEndpoint)
 		listEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "List"))(listEndpoint)
 	}
 
@@ -75,7 +75,7 @@ func makeEndpoints(svc acmeaccount.Service, logger log.Logger, tracer stdopentra
 		updateEndpoint = endpoint.MakeUpdateEndpoint(svc)
 		updateEndpoint = auth(updateEndpoint)
 		updateEndpoint = opentracing.TraceServer(tracer, "Update")(updateEndpoint)
-		updateEndpoint = middleware.LoggingMiddleware(log.With(logger, "method", "Update"))(updateEndpoint)
+		updateEndpoint = middleware.LoggingMiddleware(logger.With("method", "Update"))(updateEndpoint)
 		updateEndpoint = middleware.InstrumentingMiddleware(duration.With("method", "Update"))(updateEndpoint)
 	}
 

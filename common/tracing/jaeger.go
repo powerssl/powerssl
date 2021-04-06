@@ -3,11 +3,12 @@ package tracing // import "powerssl.dev/common/tracing"
 import (
 	"io"
 
-	"github.com/go-kit/kit/log"
 	"github.com/opentracing/opentracing-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
-	jaegerlog "github.com/uber/jaeger-lib/client/log/go-kit"
+	jaegerzap "github.com/uber/jaeger-client-go/log/zap"
 	jaegerprometheus "github.com/uber/jaeger-lib/metrics/prometheus"
+
+	"powerssl.dev/common/log"
 )
 
 func NewJaegerTracer(serviceName string, logger log.Logger) (opentracing.Tracer, io.Closer, error) {
@@ -16,7 +17,7 @@ func NewJaegerTracer(serviceName string, logger log.Logger) (opentracing.Tracer,
 		return nil, nil, err
 	}
 
-	jaegerLogger := jaegerlog.NewLogger(logger)
+	jaegerLogger := jaegerzap.NewLogger(logger.Desugar())
 	jeagerMetricsFactory := jaegerprometheus.New()
 
 	closer, err := cfg.InitGlobalTracer(

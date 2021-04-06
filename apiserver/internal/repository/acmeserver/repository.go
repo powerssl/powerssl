@@ -10,9 +10,10 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"powerssl.dev/common/log"
 
 	"powerssl.dev/apiserver/internal/model"
 	"powerssl.dev/apiserver/internal/repository/interface"
@@ -24,10 +25,10 @@ var _ _interface.ACMEServerRepository = &Repository{}
 
 type Repository struct {
 	_interface.SQLX
-	logger *zap.Logger
+	logger log.Logger
 }
 
-func NewRepository(interfacer _interface.SQLX, logger *zap.Logger) *Repository {
+func NewRepository(interfacer _interface.SQLX, logger log.Logger) *Repository {
 	return &Repository{
 		SQLX:   interfacer,
 		logger: logger,

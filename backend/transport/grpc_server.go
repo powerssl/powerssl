@@ -9,13 +9,12 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"net"
 	"net/url"
-	"runtime/debug"
 	"time"
 
-	"github.com/go-kit/kit/log"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
 	"github.com/go-playground/validator/v10"
 	middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -28,6 +27,7 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
 	"powerssl.dev/common"
+	"powerssl.dev/common/log"
 )
 
 type ServerConfig struct {
@@ -124,7 +124,7 @@ func ServeGRPC(ctx context.Context, cfg ServerConfig, logger log.Logger, service
 				// TODO: ???
 				hello.ServerName = cfg.CommonName
 				if cert, err = c.GetCertificate(hello); err != nil {
-					logger.Log("err", err)
+					logger.Error(err)
 				}
 				return cert, err
 			}
@@ -150,13 +150,13 @@ func ServeGRPC(ctx context.Context, cfg ServerConfig, logger log.Logger, service
 		c <- srv.Serve(listener)
 		close(c)
 	}()
-	logger.Log("listening", cfg.Addr, "secure", !cfg.Insecure)
+	logger.With("secure", !cfg.Insecure).Infof("listening on %s", cfg.Addr)
 	select {
 	case err = <-c:
-		logger.Log("err", err)
+		logger.Error(err)
 		return err
 	case <-ctx.Done():
-		logger.Log("err", ctx.Err())
+		logger.Error(ctx.Err())
 		srv.GracefulStop()
 		return ctx.Err()
 	}
@@ -164,8 +164,7 @@ func ServeGRPC(ctx context.Context, cfg ServerConfig, logger log.Logger, service
 
 func recoveryHandler(logger log.Logger) func(interface{}) error {
 	return func(err interface{}) error {
-		logger.Log("err", err)
-		debug.PrintStack()
+		logger.With(zap.Stack("stack")).Errorf("%s", err)
 		return errors.New("unknown error")
 
 	}

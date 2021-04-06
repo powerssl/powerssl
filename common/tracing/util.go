@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/go-kit/kit/log"
 	"github.com/opentracing/opentracing-go"
+
+	"powerssl.dev/common/log"
 )
 
 func Init(serviceName, implementation string, logger log.Logger) (opentracing.Tracer, io.Closer, error) {
@@ -27,18 +28,20 @@ func ContextWithSpanFromContext(ctx context.Context, spanCtx context.Context) co
 }
 
 func JSONCarrierFromSpan(span opentracing.Span) (string, error) {
-	textMapCarrier := TextMapCarrierFromSpan(span)
-	bytes, err := json.Marshal(textMapCarrier)
-	if err != nil {
+	textMapCarrier, err := TextMapCarrierFromSpan(span)
+	var bytes []byte
+	if bytes, err = json.Marshal(textMapCarrier); err != nil {
 		return "", err
 	}
 	return string(bytes), nil
 }
 
-func TextMapCarrierFromSpan(span opentracing.Span) opentracing.TextMapCarrier {
+func TextMapCarrierFromSpan(span opentracing.Span) (opentracing.TextMapCarrier, error) {
 	textMapCarrier := opentracing.TextMapCarrier{}
-	span.Tracer().Inject(span.Context(), opentracing.TextMap, textMapCarrier)
-	return textMapCarrier
+	if err := span.Tracer().Inject(span.Context(), opentracing.TextMap, textMapCarrier); err != nil {
+		return nil, err
+	}
+	return textMapCarrier, nil
 }
 
 func WireContextFromJSON(s string) (opentracing.SpanContext, error) {

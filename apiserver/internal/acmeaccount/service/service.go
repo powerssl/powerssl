@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-kit/kit/log"
 	"github.com/pkg/errors"
 	temporalclient "go.temporal.io/sdk/client"
 
 	"powerssl.dev/backend/temporal"
+	"powerssl.dev/common/log"
 	"powerssl.dev/sdk/apiserver/acmeaccount"
 	"powerssl.dev/sdk/apiserver/api"
 	"powerssl.dev/workflow"

@@ -4,11 +4,11 @@ import (
 	"context"
 	"io"
 
-	"github.com/go-kit/kit/log"
 	"github.com/opentracing/opentracing-go"
 	"golang.org/x/sync/errgroup"
 
 	"powerssl.dev/common"
+	"powerssl.dev/common/log"
 	"powerssl.dev/common/tracing"
 	"powerssl.dev/sdk/apiserver"
 )
@@ -16,7 +16,11 @@ import (
 const component = "powerssl-agent"
 
 func Run(cfg *Config) (err error) {
-	_, logger := common.NewZapAndKitLogger()
+	var logger log.Logger
+	if logger, err = log.NewLogger(false); err != nil {
+		return err
+	}
+	defer common.ErrWrapSync(logger, &err)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
@@ -26,7 +30,7 @@ func Run(cfg *Config) (err error) {
 	var tracer opentracing.Tracer
 	{
 		var closer io.Closer
-		if tracer, closer, err = tracing.Init(component, "", log.With(logger, "component", "tracing")); err != nil {
+		if tracer, closer, err = tracing.Init(component, "", logger.With("component", "tracing")); err != nil {
 			return err
 		}
 		defer common.ErrWrapCloser(closer, &err)
