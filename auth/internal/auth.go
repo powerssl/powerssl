@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	bindatahtmltemplate "github.com/arschles/go-bindata-html-template"
@@ -24,6 +25,7 @@ import (
 	"powerssl.dev/common/transport"
 
 	"powerssl.dev/auth/internal/asset"
+	"powerssl.dev/auth/internal/oauth2"
 	"powerssl.dev/auth/internal/template"
 )
 
@@ -45,6 +47,10 @@ func Run(cfg *Config) (err error) {
 		})
 	}
 
+	if cfg.OAuth2.GitHub.ClientID != "" && cfg.OAuth2.GitHub.ClientSecret != "" {
+		oauth2.InitGitHubOauth2Config(cfg.Auth.URI, cfg.OAuth2.GitHub.ClientID, cfg.OAuth2.GitHub.ClientSecret)
+	}
+
 	g.Go(func() error {
 		return ServeHTTP(ctx, cfg.Addr, cfg.Insecure, cfg.TLS.CertFile, cfg.TLS.PrivateKeyFile, logger.With("component", "http"), cfg.JWT.PrivateKeyFile, cfg.WebApp.URI)
 	})
@@ -61,7 +67,7 @@ func Run(cfg *Config) (err error) {
 
 func ServeHTTP(ctx context.Context, addr string, insecure bool, certFile, keyFile string, logger log.Logger, jwtPrivateKeyFile, webappURI string) (err error) {
 	var mux *http.ServeMux
-	if mux, err = buildMux(jwtPrivateKeyFile, webappURI); err != nil {
+	if mux, err = buildMux(logger, jwtPrivateKeyFile, webappURI); err != nil {
 		return err
 	}
 
@@ -98,7 +104,7 @@ func ServeHTTP(ctx context.Context, addr string, insecure bool, certFile, keyFil
 	}
 }
 
-func buildMux(jwtPrivateKeyFile, webappURI string) (_ *http.ServeMux, err error) {
+func buildMux(logger log.Logger, jwtPrivateKeyFile, webappURI string) (_ *http.ServeMux, err error) {
 	var buffer []byte
 	{
 		tmpl := bindatahtmltemplate.Must(bindatahtmltemplate.New("index", template.Asset).Parse("index.html"))
@@ -142,16 +148,59 @@ func buildMux(jwtPrivateKeyFile, webappURI string) (_ *http.ServeMux, err error)
 	}
 	mux.HandleFunc("/.well-known/jwks.json", jwksHandler)
 
+	mux.HandleFunc("/callback", func(w http.ResponseWriter, req *http.Request) {
+		state := req.FormValue("state")
+		stateS := strings.Split(state, ":")
+		if len(stateS) < 2 {
+			logger.Error("state is too short")
+			http.Error(w, "state is too short", http.StatusInternalServerError)
+			return
+		}
+		provider := stateS[len(stateS)-1]
+		var username string
+		if username, err = oauth2.UserInfo(context.Background(), provider, state, req.FormValue("code")); err != nil {
+			logger.Error(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		http.SetCookie(w, &http.Cookie{
+			Name:    "username",
+			Value:   username,
+			Expires: time.Now().Add(24 * time.Hour),
+		})
+		http.Redirect(w, req, webappURI, http.StatusTemporaryRedirect)
+	})
+
 	mux.HandleFunc("/jwt", func(w http.ResponseWriter, req *http.Request) {
 		expiresAt := time.Now().Add(time.Hour * 24).Unix()
 		subject := req.URL.Query().Get("sub")
 		tokenString, err := generateToken(signKey, subject, expiresAt)
 		if err != nil {
+			logger.Error(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		w.Header().Add("Content-Type", "application/jwt")
 		_, _ = fmt.Fprint(w, tokenString)
+	})
+
+	mux.HandleFunc("/login", func(w http.ResponseWriter, req *http.Request) {
+		var url string
+		if url, err = oauth2.AuthCodeURL(req.FormValue("provider")); err != nil {
+			logger.Error(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Add("Content-Type", "application/json")
+		_, _ = fmt.Fprint(w, "{\"action\":\"redirect\",\"url\":\""+url+"\"}")
+	})
+
+	mux.HandleFunc("/logout", func(w http.ResponseWriter, req *http.Request) {
+		http.SetCookie(w, &http.Cookie{
+			Name:    "username",
+			Value:   "",
+			Expires: time.Unix(0, 0),
+		})
 	})
 
 	mux.HandleFunc("/service", func(w http.ResponseWriter, req *http.Request) {

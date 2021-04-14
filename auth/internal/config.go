@@ -8,6 +8,9 @@ import (
 
 type Config struct {
 	Addr     string `validate:"required,hostname_port"`
+	Auth struct {
+		URI string `validate:"required,uri"`
+	}
 	Insecure bool
 	JWT      struct {
 		PrivateKeyFile string `mapstructure:"private-key-file" validate:"required"`
@@ -15,6 +18,12 @@ type Config struct {
 	Metrics struct {
 		Addr string
 	}
+	OAuth2 struct {
+		GitHub struct {
+			ClientID     string `mapstructure:"client-id"`
+			ClientSecret string `mapstructure:"client-secret"`
+		} `mapstructure:"github"`
+	} `mapstructure:"oauth2"`
 	TLS struct {
 		CertFile       string `mapstructure:"cert-file"`
 		PrivateKeyFile string `mapstructure:"private-key-file"`
