@@ -26,8 +26,10 @@ PATH="$(dirname "$(gobin -m -p github.com/grpc-ecosystem/grpc-gateway/v2/protoc-
 PATH="$(dirname "$(gobin -m -p github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2)"):$PATH"
 PATH="$(dirname "$(gobin -m -p google.golang.org/grpc/cmd/protoc-gen-go-grpc)"):$PATH"
 PATH="$(dirname "$(gobin -m -p google.golang.org/protobuf/cmd/protoc-gen-go)"):$PATH"
+PATH="$PWD/bin:$PATH"
 protoc --proto_path="$proto_path" --go_out="$mappings:$tmp" --go-grpc_out="$mappings:$tmp" --grpc-gateway_out="$tmp" --openapiv2_out="$tmp" proto/powerssl/apiserver/**/*.proto
 protoc --proto_path="$proto_path" --go_out="$mappings:$tmp" --go-grpc_out="$mappings:$tmp" --grpc-gateway_out="$tmp" proto/powerssl/controller/**/*.proto
+protoc --proto_path="$proto_path" --js_out=import_style=commonjs,binary:"$tmp" --grpc-web_out=import_style=commonjs,mode=grpcweb:"$tmp" proto/powerssl/apiserver/**/*.proto
 
 while IFS= read -r -d '' file
 do
@@ -54,3 +56,11 @@ do
   mkdir -p "$(dirname "$file")"
   yq eval -P "$ofile" > "${file/json/yaml}"
 done <   <(find "$tmp" -type f -name '*.swagger.json' -print0)
+
+jsdir="../../webapp/src"
+while IFS= read -r -d '' file
+do
+  mkdir -p "$jsdir/$(dirname "${file/$tmp\/powerssl\/}")"
+  sed -i -e '/var google_api_annotations_pb/ { N; d; }' "$file"
+  mv "$file" "$jsdir/${file/$tmp\/powerssl\/}"
+done <   <(find "$tmp" -type f -name '*.js' -print0)
