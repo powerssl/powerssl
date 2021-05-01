@@ -45,7 +45,7 @@ func (r Repository) Delete(ctx context.Context, acmeServers ...*model.ACMEServer
 		Update(tableName).
 		Set("deleted_at", sq.Expr("now()")).
 		Where(sq.Eq{"id": ids}).
-		Where(sq.NotEq{"deleted_at": nil})
+		Where(sq.Eq{"deleted_at": nil})
 	var sql string
 	var args []interface{}
 	if sql, args, err = builder.ToSql(); err != nil {
