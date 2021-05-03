@@ -6,11 +6,11 @@ max_lease_ttl = "720h"
 ui = "true"
 
 listener "tcp" {
-  address = "localhost:8200"
-  tls_cert_file = "local/certs/localhost.pem"
-  tls_key_file = "local/certs/localhost-key.pem"
+  address = "0.0.0.0:8200"
+  tls_cert_file = "/etc/ssl/certs/localhost.pem"
+  tls_key_file = "/etc/ssl/private/localhost-key.pem"
 }
 
 storage "postgresql" {
-  connection_url = "postgres://powerssl:powerssl@localhost:5432/vault?sslmode=disable"
+  connection_url = "postgres://powerssl:powerssl@host.docker.internal:5432/vault?sslmode=disable"
 }

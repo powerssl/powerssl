@@ -144,8 +144,9 @@ func Run() error {
 	}
 
 	addComponent(component.Component{
-		Command: "vault",
-		Args:    "server -config tools/dev-runner/configs/vault.hcl",
+		Name:    "vault",
+		Command: "docker",
+		Args:    fmt.Sprintf("run --rm --cap-add=IPC_LOCK -v %s/tools/dev-runner/configs:/vault/config -v %s/local/certs/localhost.pem:/etc/ssl/certs/localhost.pem -v %s/local/certs/localhost-key.pem:/etc/ssl/private/localhost-key.pem -p 8200:8200 vault:1.7.0 server", wd, wd, wd),
 	})
 
 	if err = waitForService("localhost:8200", time.Minute); err != nil {
