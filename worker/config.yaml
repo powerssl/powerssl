@@ -15,5 +15,4 @@ temporal:
 tracer: jaeger
 vault:
   ca-file:
-  token: powerssl-worker
   url: https://localhost:8200

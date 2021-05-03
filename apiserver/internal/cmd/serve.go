@@ -57,6 +57,8 @@ func newCmdServe() *cobra.Command {
 	cmd.Flags().String("tls-cert-file", "", "File containing the default x509 Certificate for GRPC")
 	cmd.Flags().String("tls-private-key-file", "", "File containing the default x509 private key matching --tls-cert-file")
 	cmd.Flags().String("tracer", "jaeger", "Tracing implementation")
+	cmd.Flags().String("vault-role-id", "", "Vault AppRole RoleID")
+	cmd.Flags().String("vault-secret-id", "", "Vault AppRole SecretID")
 	cmd.Flags().String("vault-token", "", "Vault Token")
 	cmd.Flags().String("vault-url", "", "Vault URL")
 
@@ -77,6 +79,8 @@ func newCmdServe() *cobra.Command {
 	cmdutil.Must(viper.BindPFlag("tls.private-key-file", cmd.Flags().Lookup("tls-private-key-file")))
 	cmdutil.Must(viper.BindPFlag("tracer", cmd.Flags().Lookup("tracer")))
 	cmdutil.Must(viper.BindPFlag("vault.ca-file", cmd.Flags().Lookup("ca-file")))
+	cmdutil.Must(viper.BindPFlag("vault.role-id", cmd.Flags().Lookup("vault-role-id")))
+	cmdutil.Must(viper.BindPFlag("vault.secret-id", cmd.Flags().Lookup("vault-secret-id")))
 	cmdutil.Must(viper.BindPFlag("vault.token", cmd.Flags().Lookup("vault-token")))
 	cmdutil.Must(viper.BindPFlag("vault.url", cmd.Flags().Lookup("vault-url")))
 

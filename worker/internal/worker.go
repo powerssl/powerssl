@@ -70,7 +70,7 @@ func Run(cfg *Config) (err error) {
 
 	var vaultClient *vault.Client
 	{
-		if vaultClient, err = vault.New(cfg.VaultClientConfig); err != nil {
+		if vaultClient, err = vault.New(&cfg.VaultClientConfig); err != nil {
 			return err
 		}
 	}

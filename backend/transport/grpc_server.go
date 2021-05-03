@@ -106,9 +106,9 @@ func ServeGRPC(ctx context.Context, cfg ServerConfig, logger log.Logger, service
 				Cache:      certify.NewMemCache(),
 				CommonName: cfg.CommonName,
 				Issuer: &vault.Issuer{
-					Role:  cfg.VaultRole,
-					Token: cfg.VaultToken,
 					URL:   vaultURL,
+					Role:  cfg.VaultRole,
+					AuthMethod: vault.ConstantToken(cfg.VaultToken),
 					TLSConfig: &tls.Config{
 						RootCAs: certPool,
 					},

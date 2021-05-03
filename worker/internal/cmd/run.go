@@ -55,6 +55,8 @@ func newCmdRun() *cobra.Command {
 	cmd.Flags().String("temporal-host-port", "localhost:7233", "Host and port for this client to connect to")
 	cmd.Flags().String("temporal-namespace", "powerssl", "Namespace name for this client to work with")
 	cmd.Flags().String("tracer", "jaeger", "Tracing implementation")
+	cmd.Flags().String("vault-role-id", "", "Vault AppRole RoleID")
+	cmd.Flags().String("vault-secret-id", "", "Vault AppRole SecretID")
 	cmd.Flags().String("vault-token", "", "Vault Token")
 	cmd.Flags().String("vault-url", "", "Vault URL")
 
@@ -71,6 +73,8 @@ func newCmdRun() *cobra.Command {
 	cmdutil.Must(viper.BindPFlag("temporal.namespace", cmd.Flags().Lookup("temporal-namespace")))
 	cmdutil.Must(viper.BindPFlag("tracer", cmd.Flags().Lookup("tracer")))
 	cmdutil.Must(viper.BindPFlag("vault.ca-file", cmd.Flags().Lookup("ca-file")))
+	cmdutil.Must(viper.BindPFlag("vault.role-id", cmd.Flags().Lookup("vault-role-id")))
+	cmdutil.Must(viper.BindPFlag("vault.secret-id", cmd.Flags().Lookup("vault-secret-id")))
 	cmdutil.Must(viper.BindPFlag("vault.token", cmd.Flags().Lookup("vault-token")))
 	cmdutil.Must(viper.BindPFlag("vault.url", cmd.Flags().Lookup("vault-url")))
 

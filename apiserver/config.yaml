@@ -21,5 +21,4 @@ tls:
 tracer: jaeger
 vault:
   ca-file:
-  token: powerssl-apiserver
   url: https://localhost:8200

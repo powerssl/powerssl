@@ -20,9 +20,13 @@ func SetClient(ctx context.Context, client *Client) context.Context {
 }
 
 type ClientConfig struct {
+	AppRole struct {
+		RoleID   string `mapstructure:"role-id"`
+		SecretID string `mapstructure:"secret-id"`
+	} `mapstructure:",squash"`
 	CAFile string `mapstructure:"ca-file"`
-	Token  string `validate:"required"`
-	URL    string `validate:"required,url"`
+	Token  string
+	URL    string `validate:"url"`
 }
 
 type Client struct {
@@ -30,7 +34,7 @@ type Client struct {
 	cfg ClientConfig
 }
 
-func New(cfg ClientConfig) (*Client, error) {
+func New(cfg *ClientConfig) (*Client, error) {
 	conf := api.DefaultConfig()
 	if cfg.CAFile != "" {
 		if err := conf.ConfigureTLS(&api.TLSConfig{
@@ -47,13 +51,23 @@ func New(cfg ClientConfig) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	if cfg.Token == "" && cfg.AppRole.RoleID != "" && cfg.AppRole.SecretID != "" {
+		var resp *api.Secret
+		if resp, err = c.Logical().Write("auth/approle/login", map[string]interface{}{
+			"role_id":   cfg.AppRole.RoleID,
+			"secret_id": cfg.AppRole.SecretID,
+		}); err != nil {
+			return nil, err
+		}
+		cfg.Token = resp.Auth.ClientToken
+	}
 	if cfg.Token != "" {
 		c.SetToken(cfg.Token)
 	}
 
 	return &Client{
 		c:   c,
-		cfg: cfg,
+		cfg: *cfg,
 	}, nil
 }
 

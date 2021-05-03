@@ -41,10 +41,6 @@ func Run(cfg *Config) (err error) {
 	}
 	defer common.ErrWrapSync(logger, &err)
 
-	cfg.ServerConfig.VaultToken = cfg.VaultClientConfig.Token
-	cfg.ServerConfig.VaultURL = cfg.VaultClientConfig.URL
-	cfg.ServerConfig.VaultRole = component
-
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
 		return common.InterruptHandler(ctx, logger)
@@ -83,9 +79,12 @@ func Run(cfg *Config) (err error) {
 
 	var vaultClient *vault.Client
 	{
-		if vaultClient, err = vault.New(cfg.VaultClientConfig); err != nil {
+		if vaultClient, err = vault.New(&cfg.VaultClientConfig); err != nil {
 			return err
 		}
+		cfg.ServerConfig.VaultToken = cfg.VaultClientConfig.Token
+		cfg.ServerConfig.VaultURL = cfg.VaultClientConfig.URL
+		cfg.ServerConfig.VaultRole = component
 	}
 	var _ = vaultClient // TODO: Needed here?
 
