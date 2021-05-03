@@ -95,7 +95,7 @@ release-image-%:
 
 .PHONY: run
 # Run development environment
-run: bin/powerssl-dev-runner bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-grpcgateway bin/powerssl-temporal bin/powerssl-webapp bin/powerssl-worker local/certs/ca-key.pem local/certs/ca.pem local/certs/localhost-key.pem local/certs/localhost.pem local/certs/vault-key.pem local/certs/vault.pem
+run: bin/powerssl-dev-runner bin/powerssl-apiserver bin/powerssl-auth bin/powerssl-controller bin/powerssl-grpcgateway bin/powerssl-temporal bin/powerssl-webapp bin/powerssl-worker local/certs/ca-key.pem local/certs/ca.pem local/certs/localhost-key.pem local/certs/localhost.pem
 	@bin/powerssl-dev-runner
 
 .PHONY: tidy-go
