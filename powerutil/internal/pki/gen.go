@@ -14,6 +14,7 @@ func Gen(ca, caKey, hostname, keyAlgo string, keySize int) ([]byte, []byte, []by
 			A: keyAlgo,
 			S: keySize,
 		},
+		CN:    hostname,
 		Hosts: []string{hostname},
 	}
 
@@ -30,7 +31,10 @@ func Gen(ca, caKey, hostname, keyAlgo string, keySize int) ([]byte, []byte, []by
 		return nil, nil, nil, err
 	}
 
-	signReq := cfsslsigner.SignRequest{Request: string(csr)}
+	signReq := cfsslsigner.SignRequest{
+		Request: string(csr),
+		Hosts:   []string{hostname},
+	}
 	cert, err := s.Sign(signReq)
 	if err != nil {
 		return nil, nil, nil, err
