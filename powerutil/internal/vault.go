@@ -15,12 +15,19 @@ import (
 )
 
 const (
-	PkiPath     = "pki"
+	AppRolePath = "approle"
+	PKIPath     = "pki"
 	TransitPath = "transit"
 )
 
+var appRoles = map[string][]string{
+	"powerssl-apiserver":  {"powerssl-apiserver"},
+	"powerssl-controller": {"powerssl-controller"},
+	"powerssl-worker":     {"powerssl-worker"},
+}
+
 var mounts = map[string]*api.MountInput{
-	PkiPath: {
+	PKIPath: {
 		Type:        "pki",
 		Description: "PowerSSL PKI",
 		Config: api.MountConfigInput{
@@ -33,38 +40,26 @@ var mounts = map[string]*api.MountInput{
 	},
 }
 
-var roles = map[string]map[string]interface{}{
-	fmt.Sprintf("%s/roles/powerssl-apiserver", PkiPath): {
+var pkiRoles = map[string]map[string]interface{}{
+	fmt.Sprintf("%s/roles/powerssl-apiserver", PKIPath): {
 		"allowed_domains":    "apiserver",
 		"allow_localhost":    true, // TODO: Disable in production
 		"allow_bare_domains": true,
 		"max_ttl":            "24h",
 	},
-	fmt.Sprintf("%s/roles/powerssl-controller", PkiPath): {
+	fmt.Sprintf("%s/roles/powerssl-controller", PKIPath): {
 		"allowed_domains":    "controller",
 		"allow_localhost":    true, // TODO: Disable in production
 		"allow_bare_domains": true,
 		"max_ttl":            "24h",
 	},
-	fmt.Sprintf("%s/roles/powerssl-worker", PkiPath): {
-		"allowed_domains":    "worker",
-		"allow_localhost":    true, // TODO: Disable in production
-		"allow_bare_domains": true,
-		"max_ttl":            "24h",
-	},
-}
-
-var tokens = map[string][]string{
-	"powerssl-apiserver":  {"powerssl-apiserver"},
-	"powerssl-controller": {"powerssl-controller"},
-	"powerssl-worker":     {"powerssl-worker"},
 }
 
 func RunVault(addr, ca, caKey string) error {
 	var keys []string
 	var rootToken string
 	{
-		c, err := vault.New(vault.ClientConfig{
+		c, err := vault.New(&vault.ClientConfig{
 			CAFile: ca,
 			URL:    addr,
 		})
@@ -94,7 +89,7 @@ func RunVault(addr, ca, caKey string) error {
 		}
 	}
 
-	c, err := vault.New(vault.ClientConfig{
+	c, err := vault.New(&vault.ClientConfig{
 		CAFile: ca,
 		Token:  rootToken,
 		URL:    addr,
@@ -103,27 +98,27 @@ func RunVault(addr, ca, caKey string) error {
 		return err
 	}
 
-	if err := vaultUnseal(c, keys); err != nil {
+	if err = vaultUnseal(c, keys); err != nil {
 		return err
 	}
 
-	if err := vaultMount(c); err != nil {
+	if err = vaultMount(c); err != nil {
 		return err
 	}
 
-	if err := vaultInitPKI(c, addr, ca, caKey); err != nil {
+	if err = vaultInitPKI(c, addr, ca, caKey); err != nil {
 		return err
 	}
 
-	if err := vaultWritePKIRoles(c); err != nil {
+	if err = vaultWritePKIRoles(c); err != nil {
 		return err
 	}
 
-	if err := vaultPutPolicies(c); err != nil {
+	if err = vaultPutPolicies(c); err != nil {
 		return err
 	}
 
-	if err := vaultCreateTokens(c); err != nil {
+	if err = vaultCreateAppRoles(c); err != nil {
 		return err
 	}
 
@@ -212,7 +207,7 @@ func vaultPutPolicies(c *vault.Client) error {
 }
 
 func vaultWritePKIRoles(c *vault.Client) error {
-	for path, data := range roles {
+	for path, data := range pkiRoles {
 		if _, err := c.Logical().Write(path, data); err != nil {
 			return err
 		}
@@ -229,13 +224,16 @@ func vaultMount(c *vault.Client) error {
 	return nil
 }
 
-func vaultCreateTokens(c *vault.Client) error {
-	for id, policies := range tokens {
-		opts := &api.TokenCreateRequest{
-			ID:       id,
-			Policies: policies,
-		}
-		if _, err := c.Auth().Token().Create(opts); err != nil {
+func vaultCreateAppRoles(c *vault.Client) (err error) {
+	if err = c.Sys().EnableAuthWithOptions(AppRolePath, &api.EnableAuthOptions{
+		Type: "approle",
+	}); err != nil {
+		return err
+	}
+	for name, policies := range appRoles {
+		if _, err = c.Logical().Write(fmt.Sprintf("auth/approle/role/%s", name), map[string]interface{}{
+			"policies": policies,
+		}); err != nil {
 			return err
 		}
 	}
@@ -246,7 +244,7 @@ func vaultInitPKI(c *vault.Client, addr, ca, caKey string) error {
 	var cert, csr string
 
 	{
-		path := fmt.Sprintf("%s/intermediate/generate/internal", PkiPath)
+		path := fmt.Sprintf("%s/intermediate/generate/internal", PKIPath)
 		data := map[string]interface{}{
 			"common_name": "PowerSSL Intermediate Authority",
 			"ttl":         "8760h",
@@ -270,7 +268,7 @@ func vaultInitPKI(c *vault.Client, addr, ca, caKey string) error {
 	}
 
 	{
-		path := fmt.Sprintf("%s/intermediate/set-signed", PkiPath)
+		path := fmt.Sprintf("%s/intermediate/set-signed", PKIPath)
 		data := map[string]interface{}{
 			"certificate": cert,
 		}
@@ -281,7 +279,7 @@ func vaultInitPKI(c *vault.Client, addr, ca, caKey string) error {
 	}
 
 	{
-		path := fmt.Sprintf("%s/config/urls", PkiPath)
+		path := fmt.Sprintf("%s/config/urls", PKIPath)
 		data := map[string]interface{}{
 			"crl_distribution_points": fmt.Sprintf("%s/v1/pki/crl", addr),
 			"issuing_certificates":    fmt.Sprintf("%s/v1/pki/ca", addr),

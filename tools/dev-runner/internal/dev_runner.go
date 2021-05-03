@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/ghodss/yaml"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
@@ -96,9 +95,23 @@ func Run() error {
 			interrupts[comp.Command] = make(chan struct{})
 			localComp := comp
 			g.Go(func() error {
-				if val, ok := localComp.Env["POWERSSL_AUTH_TOKEN"]; ok && val == component.GenerateAuthToken {
+				if val, ok := localComp.Env["POWERSSL_AUTH_TOKEN"]; ok && val == component.Generate {
 					var err error
-					if localComp.Env["POWERSSL_AUTH_TOKEN"], err = serviceToken(); err != nil {
+					if localComp.Env["POWERSSL_AUTH_TOKEN"], err = serviceToken(comp.Name); err != nil {
+						of.SystemOutput(err.Error())
+						cancel()
+					}
+				}
+				if val, ok := localComp.Env["POWERSSL_VAULT_ROLE_ID"]; ok && val == component.Generate {
+					var err error
+					if localComp.Env["POWERSSL_VAULT_ROLE_ID"], err = vaultRoleID(comp.Name); err != nil {
+						of.SystemOutput(err.Error())
+						cancel()
+					}
+				}
+				if val, ok := localComp.Env["POWERSSL_VAULT_SECRET_ID"]; ok && val == component.Generate {
+					var err error
+					if localComp.Env["POWERSSL_VAULT_SECRET_ID"], err = vaultSecretID(comp.Name); err != nil {
 						of.SystemOutput(err.Error())
 						cancel()
 					}
@@ -331,44 +344,7 @@ func handleTemporal(of *Outlet) error {
 	return nil
 }
 
-func handleVault(of *Outlet) error {
-	var command, args string
-	if _, err := os.Stat("local/vault/secret.yaml"); os.IsNotExist(err) {
-		command = "bin/powerutil"
-		args = "vault --ca local/certs/ca.pem --ca-key local/certs/ca-key.pem"
-	} else {
-		var byt []byte
-		if byt, err = ioutil.ReadFile("local/vault/secret.yaml"); err != nil {
-			return fmt.Errorf("config error: %s", err)
-		}
-		var config map[string]interface{}
-		if err = yaml.Unmarshal(byt, &config); err != nil {
-			return fmt.Errorf("config error: %s", err)
-		}
-
-		command = "vault"
-		args = fmt.Sprintf("operator unseal -address https://localhost:8200 -ca-cert local/certs/ca.pem %s", config["keys"].([]interface{})[0].(string))
-	}
-
-	comp := component.Component{
-		Name:    "vault",
-		Command: command,
-		Args:    args,
-	}
-	cmd, _, err := makeCmd(comp, 0, of)
-	if err != nil {
-		return err
-	}
-	if err = cmd.Start(); err != nil {
-		return fmt.Errorf("failed to start %s: %s", comp.Command, err)
-	}
-	if err = cmd.Wait(); err != nil {
-		return fmt.Errorf("failed to wait %s: %s", comp.Command, err)
-	}
-	return nil
-}
-
-func serviceToken() (_ string, err error) {
+func serviceToken(_ string) (_ string, err error) {
 	if err = waitForService("localhost:8843", time.Minute); err != nil {
 		return "", err
 	}
@@ -383,8 +359,8 @@ func serviceToken() (_ string, err error) {
 	}
 	rootCAs.AppendCertsFromPEM(certs)
 	tlsConfig := &tls.Config{
-		InsecureSkipVerify: false,
-		RootCAs:            rootCAs,
+		ServerName: "localhost",
+		RootCAs:    rootCAs,
 	}
 	tr := &http.Transport{TLSClientConfig: tlsConfig}
 	httpClient := &http.Client{Transport: tr}
