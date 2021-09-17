@@ -13,7 +13,6 @@ replace powerssl.dev/sdk => ../sdk
 replace powerssl.dev/workflow => ../workflow
 
 require (
-	github.com/ahmetb/govvv v0.3.0
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/spf13/cobra v1.2.1

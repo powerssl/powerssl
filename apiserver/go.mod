@@ -14,7 +14,6 @@ replace powerssl.dev/workflow => ../workflow
 
 require (
 	github.com/Masterminds/squirrel v1.5.0
-	github.com/ahmetb/govvv v0.3.0
 	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/go-kit/kit v0.11.0
 	github.com/go-playground/validator/v10 v10.9.0

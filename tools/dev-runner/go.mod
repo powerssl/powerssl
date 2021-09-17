@@ -5,7 +5,6 @@ go 1.17
 replace powerssl.dev/common => ../../common
 
 require (
-	github.com/ahmetb/govvv v0.3.0
 	github.com/daviddengcn/go-colortext v1.0.0
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/ghodss/yaml v1.0.0

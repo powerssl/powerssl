@@ -6,7 +6,7 @@ if [ "${STATIC_ENABLED:=1}" == "0" ]; then
 	unset STATIC_ENABLED
 fi
 
-ldflags=$(gobin -m -run github.com/ahmetb/govvv build -flags -pkg powerssl.dev/common/version)
+ldflags=$(go run github.com/ahmetb/govvv@v0.3.0 build -flags -pkg powerssl.dev/common/version)
 
 set -x
 

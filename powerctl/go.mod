@@ -9,7 +9,6 @@ replace powerssl.dev/common => ../common
 replace powerssl.dev/sdk => ../sdk
 
 require (
-	github.com/ahmetb/govvv v0.3.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/jinzhu/inflection v1.0.0
 	github.com/mitchellh/go-homedir v1.1.0

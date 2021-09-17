@@ -11,7 +11,6 @@ replace powerssl.dev/common => ../common
 replace powerssl.dev/sdk => ../sdk
 
 require (
-	github.com/ahmetb/govvv v0.3.0
 	github.com/cloudflare/cfssl v1.6.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-bindata/go-bindata v3.1.2+incompatible

@@ -9,7 +9,6 @@ replace powerssl.dev/common => ../../common
 replace powerssl.dev/sdk => ../../sdk
 
 require (
-	github.com/ahmetb/govvv v0.3.0
 	github.com/eggsampler/acme/v2 v2.0.1
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/spf13/cobra v1.2.1

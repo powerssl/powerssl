@@ -5,7 +5,6 @@ go 1.17
 replace powerssl.dev/common => ../common
 
 require (
-	github.com/ahmetb/govvv v0.3.0
 	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/spf13/cobra v1.2.1
