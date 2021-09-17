@@ -3,7 +3,7 @@ package internal
 import (
 	"fmt"
 
-	temporalconfig "go.temporal.io/server/common/service/config"
+	temporalconfig "go.temporal.io/server/common/config"
 	"go.temporal.io/server/temporal"
 )
 
