@@ -116,10 +116,10 @@ commands:
 executors:
   golang-executor:
     docker:
-    - image: circleci/golang:1.16
+    - image: circleci/golang:1.17
   golang-node-executor:
     docker:
-    - image: circleci/golang:1.16-node
+    - image: circleci/golang:1.17-node
 jobs:
   build_agent:
     executor: golang-executor
