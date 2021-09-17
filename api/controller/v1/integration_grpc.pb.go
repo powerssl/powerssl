@@ -11,6 +11,7 @@ import (
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
+// Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
 // IntegrationServiceClient is the client API for IntegrationService service.
@@ -29,7 +30,7 @@ func NewIntegrationServiceClient(cc grpc.ClientConnInterface) IntegrationService
 }
 
 func (c *integrationServiceClient) Register(ctx context.Context, in *RegisterIntegrationRequest, opts ...grpc.CallOption) (IntegrationService_RegisterClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_IntegrationService_serviceDesc.Streams[0], "/powerssl.controller.v1.IntegrationService/Register", opts...)
+	stream, err := c.cc.NewStream(ctx, &IntegrationService_ServiceDesc.Streams[0], "/powerssl.controller.v1.IntegrationService/Register", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -84,8 +85,8 @@ type UnsafeIntegrationServiceServer interface {
 	mustEmbedUnimplementedIntegrationServiceServer()
 }
 
-func RegisterIntegrationServiceServer(s *grpc.Server, srv IntegrationServiceServer) {
-	s.RegisterService(&_IntegrationService_serviceDesc, srv)
+func RegisterIntegrationServiceServer(s grpc.ServiceRegistrar, srv IntegrationServiceServer) {
+	s.RegisterService(&IntegrationService_ServiceDesc, srv)
 }
 
 func _IntegrationService_Register_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -109,7 +110,10 @@ func (x *integrationServiceRegisterServer) Send(m *Activity) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-var _IntegrationService_serviceDesc = grpc.ServiceDesc{
+// IntegrationService_ServiceDesc is the grpc.ServiceDesc for IntegrationService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var IntegrationService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "powerssl.controller.v1.IntegrationService",
 	HandlerType: (*IntegrationServiceServer)(nil),
 	Methods:     []grpc.MethodDesc{},

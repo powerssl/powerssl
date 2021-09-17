@@ -164,7 +164,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/v1UpdateUserRequest'
+              type: object
+              properties:
+                updateMask:
+                  type: string
+                  description: The field mask with paths to update.
+                user:
+                  $ref: '#/components/schemas/v1User'
+              description: Request message for UserService.Update.
         required: true
       tags:
         - UserService
@@ -175,11 +182,9 @@ components:
     protobufAny:
       type: object
       properties:
-        typeUrl:
+        '@type':
           type: string
-        value:
-          type: string
-          format: byte
+      additionalProperties: {}
     rpcStatus:
       type: object
       properties:
@@ -215,18 +220,6 @@ components:
             field in the subsequent call to `List` method to retrieve the next
             page of results.
       description: Response message for UserService.List.
-    v1UpdateUserRequest:
-      type: object
-      properties:
-        name:
-          type: string
-          description: The name of the user to update.
-        updateMask:
-          type: string
-          description: The field mask with paths to update.
-        user:
-          $ref: '#/components/schemas/v1User'
-      description: Request message for UserService.Update.
     v1User:
       type: object
       properties:

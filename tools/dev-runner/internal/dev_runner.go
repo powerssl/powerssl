@@ -191,10 +191,10 @@ func Run() error {
 
 	addComponent(component.Component{
 		Name:    "grpcwebproxy",
-		Command: "gobin",
+		Command: "go",
 		Args: strings.Join([]string{
-			"-run",
-			"github.com/improbable-eng/grpc-web/go/grpcwebproxy",
+			"run",
+			"github.com/improbable-eng/grpc-web/go/grpcwebproxy@latest",
 			"--allowed_origins https://localhost:8443",
 			"--backend_addr localhost:8082",
 			"--backend_tls",

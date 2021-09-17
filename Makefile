@@ -1,6 +1,5 @@
 root_path := $(abspath .)
 include makefiles/common.mk
-include makefiles/go_bootstrap.mk
 
 bin/powerssl-dev-runner:
 	@$(MAKE) build-tool-dev-runner

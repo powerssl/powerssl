@@ -14,7 +14,6 @@ require (
 	github.com/arschles/assert v2.0.0+incompatible // indirect
 	github.com/arschles/go-bindata-html-template v0.0.0-20170123182818-839a6918b9ff
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v1.1.0 // indirect

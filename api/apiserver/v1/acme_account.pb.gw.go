@@ -353,7 +353,7 @@ func RegisterACMEAccountServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/Create")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/Create", runtime.WithHTTPPathPattern("/v1/{parent=acmeServers/*}/acmeAccounts"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -376,7 +376,7 @@ func RegisterACMEAccountServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/Delete")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/Delete", runtime.WithHTTPPathPattern("/v1/{name=acmeServers/*/acmeAccounts/*}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -399,7 +399,7 @@ func RegisterACMEAccountServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/Get")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/Get", runtime.WithHTTPPathPattern("/v1/{name=acmeServers/*/acmeAccounts/*}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -422,7 +422,7 @@ func RegisterACMEAccountServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/List")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/List", runtime.WithHTTPPathPattern("/v1/{parent=acmeServers/*}/acmeAccounts"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -445,7 +445,7 @@ func RegisterACMEAccountServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/Update")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/Update", runtime.WithHTTPPathPattern("/v1/{name=acmeServers/*/acmeAccounts/*}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -507,7 +507,7 @@ func RegisterACMEAccountServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/Create")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/Create", runtime.WithHTTPPathPattern("/v1/{parent=acmeServers/*}/acmeAccounts"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -527,7 +527,7 @@ func RegisterACMEAccountServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/Delete")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/Delete", runtime.WithHTTPPathPattern("/v1/{name=acmeServers/*/acmeAccounts/*}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -547,7 +547,7 @@ func RegisterACMEAccountServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/Get")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/Get", runtime.WithHTTPPathPattern("/v1/{name=acmeServers/*/acmeAccounts/*}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -567,7 +567,7 @@ func RegisterACMEAccountServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/List")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/List", runtime.WithHTTPPathPattern("/v1/{parent=acmeServers/*}/acmeAccounts"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -587,7 +587,7 @@ func RegisterACMEAccountServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/Update")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/powerssl.apiserver.v1.ACMEAccountService/Update", runtime.WithHTTPPathPattern("/v1/{name=acmeServers/*/acmeAccounts/*}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return

@@ -12,6 +12,7 @@ import (
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
+// Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
 // CertificateServiceClient is the client API for CertificateService service.
@@ -132,8 +133,8 @@ type UnsafeCertificateServiceServer interface {
 	mustEmbedUnimplementedCertificateServiceServer()
 }
 
-func RegisterCertificateServiceServer(s *grpc.Server, srv CertificateServiceServer) {
-	s.RegisterService(&_CertificateService_serviceDesc, srv)
+func RegisterCertificateServiceServer(s grpc.ServiceRegistrar, srv CertificateServiceServer) {
+	s.RegisterService(&CertificateService_ServiceDesc, srv)
 }
 
 func _CertificateService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -226,7 +227,10 @@ func _CertificateService_Update_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-var _CertificateService_serviceDesc = grpc.ServiceDesc{
+// CertificateService_ServiceDesc is the grpc.ServiceDesc for CertificateService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var CertificateService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "powerssl.apiserver.v1.CertificateService",
 	HandlerType: (*CertificateServiceServer)(nil),
 	Methods: []grpc.MethodDesc{

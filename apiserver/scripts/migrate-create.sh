@@ -2,4 +2,4 @@
 
 set -euxo pipefail
 
-gobin -m -run github.com/golang-migrate/migrate/v4/cmd/migrate create -ext sql -dir db/migrations "$@"
+go run github.com/golang-migrate/migrate/v4/cmd/migrate@v4.14.1 create -ext sql -dir db/migrations "$@"

@@ -1,6 +1,6 @@
 package api // import "powerssl.dev/sdk/controller/api"
 
-//go:generate gobin -m -run golang.org/x/tools/cmd/stringer -type=AccountStatus -trimprefix=AccountStatus
+//go:generate go run golang.org/x/tools/cmd/stringer@v0.1.5 -type=AccountStatus -trimprefix=AccountStatus
 type AccountStatus uint
 
 const (

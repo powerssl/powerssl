@@ -18,4 +18,4 @@ trap 'rm -rf "$basedir"' EXIT
 mkdir "$basedir"
 ln -s "$base" "$basename"
 
-gobin -m -run github.com/go-bindata/go-bindata/go-bindata -ignore '\.go$' -fs -modtime 726710400 -pkg migration -prefix "$basename" "$basename/schema/postgresql/..."
+go run github.com/go-bindata/go-bindata/v3/go-bindata@v3.1.3 -ignore '\.go$' -fs -modtime 726710400 -pkg migration -prefix "$basename" "$basename/schema/postgresql/..."

@@ -149,7 +149,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/v1UpdateACMEServerRequest'
+              type: object
+              properties:
+                updateMask:
+                  type: string
+                acmeServer:
+                  $ref: '#/components/schemas/v1ACMEServer'
         required: true
       tags:
         - ACMEServerService
@@ -160,11 +165,9 @@ components:
     protobufAny:
       type: object
       properties:
-        typeUrl:
+        '@type':
           type: string
-        value:
-          type: string
-          format: byte
+      additionalProperties: {}
     rpcStatus:
       type: object
       properties:
@@ -216,15 +219,6 @@ components:
             $ref: '#/components/schemas/v1ACMEServer'
         nextPageToken:
           type: string
-    v1UpdateACMEServerRequest:
-      type: object
-      properties:
-        name:
-          type: string
-        updateMask:
-          type: string
-        acmeServer:
-          $ref: '#/components/schemas/v1ACMEServer'
   securitySchemes:
     bearerAuth:
       type: http

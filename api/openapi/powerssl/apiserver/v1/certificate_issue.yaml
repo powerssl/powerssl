@@ -92,7 +92,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/v1UpdateCertificateIssueRequest'
+              type: object
+              properties:
+                updateMask:
+                  type: string
+                certificateIssue:
+                  $ref: '#/components/schemas/v1CertificateIssue'
         required: true
       tags:
         - CertificateIssueService
@@ -168,7 +173,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/v1CreateCertificateIssueRequest'
+              type: object
+              properties:
+                certificateIssue:
+                  $ref: '#/components/schemas/v1CertificateIssue'
         required: true
       tags:
         - CertificateIssueService
@@ -179,11 +187,9 @@ components:
     protobufAny:
       type: object
       properties:
-        typeUrl:
+        '@type':
           type: string
-        value:
-          type: string
-          format: byte
+      additionalProperties: {}
     rpcStatus:
       type: object
       properties:
@@ -234,13 +240,6 @@ components:
         digestAlgorithm:
           type: string
       description: A CertificateIssue ...
-    v1CreateCertificateIssueRequest:
-      type: object
-      properties:
-        parent:
-          type: string
-        certificateIssue:
-          $ref: '#/components/schemas/v1CertificateIssue'
     v1ListCertificateIssuesResponse:
       type: object
       properties:
@@ -250,15 +249,6 @@ components:
             $ref: '#/components/schemas/v1CertificateIssue'
         nextPageToken:
           type: string
-    v1UpdateCertificateIssueRequest:
-      type: object
-      properties:
-        name:
-          type: string
-        updateMask:
-          type: string
-        certificateIssue:
-          $ref: '#/components/schemas/v1CertificateIssue'
   securitySchemes:
     bearerAuth:
       type: http

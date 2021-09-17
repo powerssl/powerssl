@@ -169,7 +169,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/v1UpdateCertificateRequest'
+              type: object
+              properties:
+                updateMask:
+                  type: string
+                  description: The field mask with paths to update.
+                certificate:
+                  $ref: '#/components/schemas/v1Certificate'
+              description: Request message for CertificateService.Update.
         required: true
       tags:
         - CertificateService
@@ -180,11 +187,9 @@ components:
     protobufAny:
       type: object
       properties:
-        typeUrl:
+        '@type':
           type: string
-        value:
-          type: string
-          format: byte
+      additionalProperties: {}
     rpcStatus:
       type: object
       properties:
@@ -272,18 +277,6 @@ components:
             field in the subsequent call to `List` method to retrieve the next
             page of results.
       description: Response message for CertificateService.List.
-    v1UpdateCertificateRequest:
-      type: object
-      properties:
-        name:
-          type: string
-          description: The name of the certificate to update.
-        updateMask:
-          type: string
-          description: The field mask with paths to update.
-        certificate:
-          $ref: '#/components/schemas/v1Certificate'
-      description: Request message for CertificateService.Update.
   securitySchemes:
     bearerAuth:
       type: http

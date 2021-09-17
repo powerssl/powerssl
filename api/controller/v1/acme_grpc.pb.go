@@ -12,6 +12,7 @@ import (
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
+// Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
 // ACMEServiceClient is the client API for ACMEService service.
@@ -440,8 +441,8 @@ type UnsafeACMEServiceServer interface {
 	mustEmbedUnimplementedACMEServiceServer()
 }
 
-func RegisterACMEServiceServer(s *grpc.Server, srv ACMEServiceServer) {
-	s.RegisterService(&_ACMEService_serviceDesc, srv)
+func RegisterACMEServiceServer(s grpc.ServiceRegistrar, srv ACMEServiceServer) {
+	s.RegisterService(&ACMEService_ServiceDesc, srv)
 }
 
 func _ACMEService_GetCreateAccountRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -948,7 +949,10 @@ func _ACMEService_SetRevokeCertificateResponse_Handler(srv interface{}, ctx cont
 	return interceptor(ctx, in, info, handler)
 }
 
-var _ACMEService_serviceDesc = grpc.ServiceDesc{
+// ACMEService_ServiceDesc is the grpc.ServiceDesc for ACMEService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var ACMEService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "powerssl.controller.v1.ACMEService",
 	HandlerType: (*ACMEServiceServer)(nil),
 	Methods: []grpc.MethodDesc{

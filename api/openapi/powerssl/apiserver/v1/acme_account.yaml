@@ -87,7 +87,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/v1UpdateACMEAccountRequest'
+              type: object
+              properties:
+                updateMask:
+                  type: string
+                acmeAccount:
+                  $ref: '#/components/schemas/v1ACMEAccount'
         required: true
       tags:
         - ACMEAccountService
@@ -164,7 +169,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/v1CreateACMEAccountRequest'
+              type: object
+              properties:
+                acmeAccount:
+                  $ref: '#/components/schemas/v1ACMEAccount'
         required: true
       tags:
         - ACMEAccountService
@@ -175,11 +183,9 @@ components:
     protobufAny:
       type: object
       properties:
-        typeUrl:
+        '@type':
           type: string
-        value:
-          type: string
-          format: byte
+      additionalProperties: {}
     rpcStatus:
       type: object
       properties:
@@ -221,13 +227,6 @@ components:
             type: string
         accountUrl:
           type: string
-    v1CreateACMEAccountRequest:
-      type: object
-      properties:
-        parent:
-          type: string
-        acmeAccount:
-          $ref: '#/components/schemas/v1ACMEAccount'
     v1ListACMEAccountsResponse:
       type: object
       properties:
@@ -237,15 +236,6 @@ components:
             $ref: '#/components/schemas/v1ACMEAccount'
         nextPageToken:
           type: string
-    v1UpdateACMEAccountRequest:
-      type: object
-      properties:
-        name:
-          type: string
-        updateMask:
-          type: string
-        acmeAccount:
-          $ref: '#/components/schemas/v1ACMEAccount'
   securitySchemes:
     bearerAuth:
       type: http

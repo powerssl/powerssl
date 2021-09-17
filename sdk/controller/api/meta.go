@@ -1,6 +1,6 @@
 package api // import "powerssl.dev/sdk/controller/api"
 
-//go:generate gobin -m -run golang.org/x/tools/cmd/stringer -type=ActivityName -trimprefix=Activity
+//go:generate go run golang.org/x/tools/cmd/stringer@v0.1.5 -type=ActivityName -trimprefix=Activity
 type ActivityName uint
 
 const (

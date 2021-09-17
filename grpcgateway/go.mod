@@ -11,7 +11,6 @@ replace powerssl.dev/common => ../common
 replace powerssl.dev/sdk => ../sdk
 
 require (
-	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.6.0
 	github.com/spf13/cobra v1.2.1

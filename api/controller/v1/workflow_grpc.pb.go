@@ -11,6 +11,7 @@ import (
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
+// Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
 // WorkflowServiceClient is the client API for WorkflowService service.
@@ -61,8 +62,8 @@ type UnsafeWorkflowServiceServer interface {
 	mustEmbedUnimplementedWorkflowServiceServer()
 }
 
-func RegisterWorkflowServiceServer(s *grpc.Server, srv WorkflowServiceServer) {
-	s.RegisterService(&_WorkflowService_serviceDesc, srv)
+func RegisterWorkflowServiceServer(s grpc.ServiceRegistrar, srv WorkflowServiceServer) {
+	s.RegisterService(&WorkflowService_ServiceDesc, srv)
 }
 
 func _WorkflowService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -83,7 +84,10 @@ func _WorkflowService_Create_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-var _WorkflowService_serviceDesc = grpc.ServiceDesc{
+// WorkflowService_ServiceDesc is the grpc.ServiceDesc for WorkflowService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var WorkflowService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "powerssl.controller.v1.WorkflowService",
 	HandlerType: (*WorkflowServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
