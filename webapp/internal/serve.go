@@ -3,48 +3,53 @@ package internal
 import (
 	"bytes"
 	"context"
+	"html/template"
 	"net/http"
+	"strconv"
 	"time"
 
-	bindatahtmltemplate "github.com/arschles/go-bindata-html-template"
-
-	"powerssl.dev/backend/httpfs"
 	"powerssl.dev/common/log"
 
 	"powerssl.dev/webapp/internal/asset"
-	"powerssl.dev/webapp/internal/template"
 )
 
 func ServeHTTP(ctx context.Context, addr string, insecure bool, certFile, keyFile string, logger log.Logger, authURI, apiAddr, grpcWebURI string) error {
 	var buffer []byte
 	{
-		tmpl := bindatahtmltemplate.Must(bindatahtmltemplate.New("index", template.Asset).Parse("index.html"))
-		data := map[string]interface{}{
+		tmpl, err := template.ParseFS(asset.Template, "index.html")
+		if err != nil {
+			return err
+		}
+		var buf bytes.Buffer
+		if err = tmpl.Execute(&buf, map[string]string{
 			"APIAddr":    apiAddr,
 			"AuthURI":    authURI,
 			"GRPCWebURI": grpcWebURI,
-		}
-		var buf bytes.Buffer
-		if err := tmpl.Execute(&buf, data); err != nil {
+		}); err != nil {
 			return err
 		}
 		buffer = buf.Bytes()
 	}
-
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		if req.URL.Path == "/" {
-			_, _ = w.Write(buffer)
-			return
+	mux.Handle("/css/", http.FileServer(http.FS(asset.CSS)))
+	mux.Handle("/js/", http.FileServer(http.FS(asset.JS)))
+	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		if request.URL.Path == "/favicon.ico" {
+			writer.Header().Set("Content-Type", "image/x-ico")
+			writer.Header().Set("Content-Length", strconv.Itoa(len(asset.Favicon)))
+			_, err := writer.Write(asset.Favicon)
+			if err != nil {
+				http.Error(writer, err.Error(), http.StatusInternalServerError)
+			}
+		} else {
+			writer.Header().Set("Content-Type", "text/html")
+			writer.Header().Set("Content-Length", strconv.Itoa(len(buffer)))
+			_, err := writer.Write(buffer)
+			if err != nil {
+				http.Error(writer, err.Error(), http.StatusInternalServerError)
+			}
 		}
-		if req.URL.Path == "/favicon.ico" {
-			w.Header().Add("content-type", "image/x-icon")
-			_, _ = w.Write(asset.MustAsset("favicon.ico"))
-			return
-		}
-		http.NotFound(w, req)
 	})
-	mux.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(httpfs.NewFileSystem(asset.AssetFile()))))
 	srv := http.Server{
 		Addr:    addr,
 		Handler: mux,

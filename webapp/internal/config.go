@@ -8,14 +8,14 @@ import (
 
 type Config struct {
 	APIServer struct {
-		Addr string `validate:"required,hostname_port"`
+		Addr string
 	}
 	Addr string `validate:"required,hostname_port"`
 	Auth struct {
-		URI string `validate:"required,uri"`
+		URI string
 	}
 	GRPCWeb struct {
-		URI string `validate:"required,uri"`
+		URI string
 	}
 	Insecure bool
 	Metrics  struct {
