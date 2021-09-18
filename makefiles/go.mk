@@ -1,4 +1,3 @@
-include $(mkfile_dir)/go_bootstrap.mk
 include $(mkfile_dir)/go_generate.mk
 
 .PHONY: build
