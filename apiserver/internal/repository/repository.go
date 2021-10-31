@@ -1,60 +1,50 @@
 package repository
 
 import (
-	"context"
 	"fmt"
+	"reflect"
 
-	"github.com/jmoiron/sqlx"
-
-	"powerssl.dev/backend/ctxkey"
-	"powerssl.dev/common/log"
-
-	"powerssl.dev/apiserver/internal/repository/acmeaccount"
-	"powerssl.dev/apiserver/internal/repository/acmeserver"
-	"powerssl.dev/apiserver/internal/repository/interface"
+	"github.com/golang/protobuf/protoc-gen-go/generator"
+	fieldmaskutils "github.com/mennanov/fieldmask-utils"
 )
 
-var transactionValue = ctxkey.New("dev.powerssl.apiserver.internal.repository")
-
-type Repositories struct {
-	db           *sqlx.DB
-	ACMEAccounts _interface.ACMEAccountRepository
-	ACMEServers  _interface.ACMEServerRepository
-}
-
-func NewRepositories(db *sqlx.DB, logger log.Logger) *Repositories {
-	bar := &sqlxInterface{db: db}
-	return &Repositories{
-		db:           db,
-		ACMEAccounts: acmeaccount.NewRepository(bar, logger),
-		ACMEServers:  acmeserver.NewRepository(bar, logger),
+func setUpdateParams(paths []string, src interface{}, dst interface{}) (err error) {
+	var mask fieldmaskutils.Mask
+	if mask, err = fieldmaskutils.MaskFromPaths(paths, generator.CamelCase); err != nil {
+		return err
 	}
-}
-
-func (r *Repositories) Transaction(ctx context.Context, fn func(context.Context) error) (err error) {
-	var tx *sqlx.Tx
-	if tx, err = r.db.BeginTxx(ctx, nil); err != nil {
-		return fmt.Errorf("failed to start transaction %w", err)
-	}
-	defer func() {
-		if err == nil {
-			return
-		}
-
-		if rollbackErr := tx.Rollback(); rollbackErr != nil {
-			err = fmt.Errorf("failed to rollback (%s) %w", rollbackErr.Error(), err)
-		}
-	}()
-
-	ctx = context.WithValue(ctx, transactionValue, tx)
-	if err = fn(ctx); err != nil {
-		err = fmt.Errorf("failed to execute transaction %w", err)
+	if err = fieldmaskutils.StructToStruct(mask, src, dst); err != nil {
 		return err
 	}
 
-	if err = tx.Commit(); err != nil {
-		err = fmt.Errorf("failed to commit transaction %w", err)
-	}
+	defer func() {
+		if e := recover(); e != nil {
+			if err != nil {
+				err = fmt.Errorf("%w: %v", err, e)
+			} else {
+				err = fmt.Errorf("%v", e)
+			}
+		}
+	}()
 
-	return err
+	ps := reflect.ValueOf(dst)
+	s := ps.Elem()
+	if s.Kind() != reflect.Struct {
+		return fmt.Errorf("kind of element is not a struct")
+	}
+	for name := range mask {
+		name = fmt.Sprintf("Set%s", name)
+		f := s.FieldByName(name)
+		if !f.IsValid() {
+			return fmt.Errorf("field %v is invalid", name)
+		}
+		if !f.CanSet() {
+			return fmt.Errorf("field %v connot be set", name)
+		}
+		if f.Kind() == reflect.Bool {
+			return fmt.Errorf("field %v kind is not bool", name)
+		}
+		f.SetBool(true)
+	}
+	return nil
 }

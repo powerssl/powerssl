@@ -18,16 +18,6 @@ import (
 	"powerssl.dev/common/log"
 )
 
-func getHostName() string {
-	hostName, err := os.Hostname()
-	if err != nil {
-		hostName = "Unknown"
-	}
-	return hostName
-}
-
-type Client = temporalclient.Client
-
 type Config struct {
 	CAFile             string `mapstructure:"ca-file"`
 	DataConverter      temporalconverter.DataConverter
@@ -40,10 +30,10 @@ type Config struct {
 	TLSKeyFile         string
 }
 
-func NewClient(cfg Config, logger log.Logger, tracer opentracing.Tracer, component string) (temporalclient.Client, io.Closer, error) {
-	var err error
-	var tlsConnectionOptions tls.Config
+type Client = temporalclient.Client
 
+func NewClient(cfg Config, logger log.Logger, tracer opentracing.Tracer, component string) (client temporalclient.Client, closer io.Closer, err error) {
+	var tlsConnectionOptions tls.Config
 	if cfg.TLSCertFile != "" && cfg.TLSKeyFile != "" {
 		var cert tls.Certificate
 		if cert, err = tls.LoadX509KeyPair(cfg.TLSCertFile, cfg.TLSKeyFile); err != nil {
@@ -51,7 +41,6 @@ func NewClient(cfg Config, logger log.Logger, tracer opentracing.Tracer, compone
 		}
 		tlsConnectionOptions.Certificates = []tls.Certificate{cert}
 	}
-
 	if cfg.CAFile != "" {
 		var caData []byte
 		if caData, err = ioutil.ReadFile(cfg.CAFile); err != nil {
@@ -69,11 +58,10 @@ func NewClient(cfg Config, logger log.Logger, tracer opentracing.Tracer, compone
 
 	scope, closer := tally.NewRootScope(tally.ScopeOptions{Separator: "_"}, time.Second)
 
-	var client temporalclient.Client
 	if client, err = temporalclient.NewClient(temporalclient.Options{
 		HostPort:           cfg.HostPort,
 		Namespace:          cfg.Namespace,
-		Logger:             temporalLogger{logger},
+		Logger:             temporalLogger{Logger: logger},
 		MetricsScope:       scope,
 		Identity:           identity,
 		DataConverter:      cfg.DataConverter,
@@ -87,5 +75,27 @@ func NewClient(cfg Config, logger log.Logger, tracer opentracing.Tracer, compone
 	}); err != nil {
 		return nil, nil, err
 	}
+	closer = clientCloser{
+		client: client,
+		closer: closer,
+	}
 	return client, closer, nil
+}
+
+type clientCloser struct {
+	client temporalclient.Client
+	closer io.Closer
+}
+
+func (c clientCloser) Close() error {
+	c.client.Close()
+	return c.closer.Close()
+}
+
+func getHostName() string {
+	hostName, err := os.Hostname()
+	if err != nil {
+		hostName = "Unknown"
+	}
+	return hostName
 }

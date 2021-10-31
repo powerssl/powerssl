@@ -1,6 +1,6 @@
 create table acme_accounts (
                               id uuid not null,
-                              acme_server_id uuid references acme_servers,
+                              acme_server_id uuid not null references acme_servers,
                               display_name varchar not null,
                               title varchar not null,
                               description varchar not null,

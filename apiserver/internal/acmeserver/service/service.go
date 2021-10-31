@@ -2,83 +2,106 @@ package service
 
 import (
 	"context"
+	"strings"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
 
 	"powerssl.dev/common/log"
 	"powerssl.dev/sdk/apiserver/acmeserver"
 	"powerssl.dev/sdk/apiserver/api"
 
-	"powerssl.dev/apiserver/internal/model"
 	"powerssl.dev/apiserver/internal/repository"
 )
 
-func New(repositories *repository.Repositories, logger log.Logger) acmeserver.Service {
+func New(db *pgx.Conn, logger log.Logger) acmeserver.Service {
 	var svc acmeserver.Service
 	{
-		svc = NewBasicService(repositories, logger)
+		svc = NewBasicService(db, logger)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
 }
 
 type basicService struct {
-	*repository.Repositories
-	logger log.Logger
+	Queries *repository.Queries
+	db      *pgx.Conn
+	logger  log.Logger
 }
 
-func NewBasicService(repositories *repository.Repositories, logger log.Logger) acmeserver.Service {
+func NewBasicService(db *pgx.Conn, logger log.Logger) acmeserver.Service {
 	return basicService{
-		logger:       logger,
-		Repositories: repositories,
+		Queries: repository.New(db),
+		db:      db,
+		logger:  logger,
 	}
 }
 
 func (s basicService) Create(ctx context.Context, apiACMEServer *api.ACMEServer) (_ *api.ACMEServer, err error) {
-	acmeServer := model.NewACMEServerFromAPI(apiACMEServer, "")
-	if err = s.ACMEServers.Insert(ctx, acmeServer); err != nil {
+	acmeServer, err := s.Queries.CreateACMEServerFromAPI(ctx, apiACMEServer)
+	if err != nil {
 		return nil, err
 	}
 	return acmeServer.ToAPI(), nil
 }
 
-func (s basicService) Delete(ctx context.Context, name string) (err error) {
-	var acmeServer *model.ACMEServer
-	return s.Transaction(ctx, func(ctx context.Context) error {
-		if acmeServer, err = s.ACMEServers.FindOneByName(ctx, name); err != nil {
-			return err
-		}
-		return s.ACMEServers.Delete(ctx, acmeServer)
-	})
+func (s basicService) Delete(ctx context.Context, name string) error {
+	queries, rollback, err := s.Queries.NewTx(ctx)
+	defer rollback(&err)
+	n := strings.Split(name, "/")
+	id, err := uuid.Parse(n[1])
+	if err != nil {
+		return err
+	}
+	acmeServer, err := queries.GetACMEServer(ctx, id)
+	if err != nil {
+		return err
+	}
+	if err = queries.DeleteACMEServer(ctx, acmeServer.ID); err != nil {
+		return err
+	}
+	return queries.Tx().Commit(ctx)
 }
 
 func (s basicService) Get(ctx context.Context, name string) (_ *api.ACMEServer, err error) {
-	var acmeServer *model.ACMEServer
-	if acmeServer, err = s.ACMEServers.FindOneByName(ctx, name); err != nil {
+	n := strings.Split(name, "/")
+	id, err := uuid.Parse(n[1])
+	if err != nil {
+		return nil, err
+	}
+	acmeServer, err := s.Queries.GetACMEServer(ctx, id)
+	if err != nil {
 		return nil, err
 	}
 	return acmeServer.ToAPI(), nil
 }
 
 func (s basicService) List(ctx context.Context, pageSize int, pageToken string) (_ []*api.ACMEServer, _ string, err error) {
-	var acmeServers model.ACMEServers
 	var nextPageToken string
-	if acmeServers, nextPageToken, err = s.ACMEServers.FindAll(ctx, pageSize, pageToken); err != nil {
+	acmeServers, err := s.Queries.ListACMEServers(ctx, repository.ListACMEServersParams{
+		SqlOrder:  "created_at",
+		SqlOffset: 0,
+		SqlLimit:  int32(pageSize),
+	})
+	if err != nil {
 		return nil, "", err
 	}
-	return acmeServers.ToAPI(), nextPageToken, nil
+	return repository.AcmeServers(acmeServers).ToAPI(), nextPageToken, nil
 }
 
 func (s basicService) Update(ctx context.Context, name string, updateMask []string, apiACMEServer *api.ACMEServer) (_ *api.ACMEServer, err error) {
-	var acmeServer *model.ACMEServer
-	if err = s.Transaction(ctx, func(ctx context.Context) error {
-		if acmeServer, err = s.ACMEServers.FindOneByName(ctx, name); err != nil {
-			return err
-		}
-		var clauses map[string]interface{}
-		if clauses, err = acmeServer.UpdateWithMask(ctx, updateMask, apiACMEServer); err != nil {
-			return err
-		}
-		return s.ACMEServers.Update(ctx, acmeServer, clauses)
-	}); err != nil {
+	queries, rollback, err := s.Queries.NewTx(ctx)
+	defer rollback(&err)
+	n := strings.Split(name, "/")
+	id, err := uuid.Parse(n[1])
+	if err != nil {
+		return nil, err
+	}
+	acmeServer, err := queries.UpdateACMEServerWithMask(ctx, id, updateMask, apiACMEServer)
+	if err != nil {
+		return nil, err
+	}
+	if err = queries.Tx().Commit(ctx); err != nil {
 		return nil, err
 	}
 	return acmeServer.ToAPI(), nil

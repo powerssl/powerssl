@@ -12,7 +12,10 @@ type Middleware func(acmeserver.Service) acmeserver.Service
 
 func LoggingMiddleware(logger log.Logger) Middleware {
 	return func(next acmeserver.Service) acmeserver.Service {
-		return loggingMiddleware{logger, next}
+		return loggingMiddleware{
+			logger: logger,
+			next:   next,
+		}
 	}
 }
 

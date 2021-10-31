@@ -62,10 +62,7 @@ func Run(cfg *Config) (err error) {
 		if temporalClient, closer, err = temporalclient.NewClient(cfg.TemporalClientConfig, logger, tracer, component); err != nil {
 			return err
 		}
-		defer func() {
-			temporalClient.Close()
-			common.ErrWrapCloser(closer, &err)
-		}()
+		defer common.ErrWrapCloser(closer, &err)
 	}
 
 	var vaultClient *vault.Client

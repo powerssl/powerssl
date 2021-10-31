@@ -4,34 +4,33 @@ import (
 	"context"
 
 	"github.com/gogo/status"
+	"github.com/jackc/pgx/v4"
 	"google.golang.org/grpc/codes"
 
 	"powerssl.dev/common/log"
 	"powerssl.dev/sdk/apiserver/api"
 	"powerssl.dev/sdk/apiserver/user"
-
-	"powerssl.dev/apiserver/internal/repository"
 )
 
 var ErrUnimplemented = status.Error(codes.Unimplemented, "Coming soon")
 
-func New(repositories *repository.Repositories, logger log.Logger) user.Service {
+func New(db *pgx.Conn, logger log.Logger) user.Service {
 	var svc user.Service
 	{
-		svc = NewBasicService(repositories, logger)
+		svc = NewBasicService(db, logger)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
 }
 
 type basicService struct {
-	*repository.Repositories
+	db *pgx.Conn
 	logger log.Logger
 }
 
-func NewBasicService(repositories *repository.Repositories, logger log.Logger) user.Service {
+func NewBasicService(db *pgx.Conn, logger log.Logger) user.Service {
 	return basicService{
-		Repositories: repositories,
+		db: db,
 		logger:       logger,
 	}
 }

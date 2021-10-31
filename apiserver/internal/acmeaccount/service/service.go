@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
 	temporalclient "go.temporal.io/sdk/client"
 
 	"powerssl.dev/backend/temporal"
@@ -14,52 +15,46 @@ import (
 	"powerssl.dev/sdk/apiserver/api"
 	"powerssl.dev/workflow"
 
-	"powerssl.dev/apiserver/internal/model"
 	"powerssl.dev/apiserver/internal/repository"
 )
 
-func New(repositories *repository.Repositories, logger log.Logger, temporalClient temporalclient.Client) acmeaccount.Service {
+func New(db *pgx.Conn, logger log.Logger, temporalClient temporalclient.Client) acmeaccount.Service {
 	var svc acmeaccount.Service
 	{
-		svc = NewBasicService(repositories, logger, temporalClient)
+		svc = NewBasicService(db, logger, temporalClient)
 		svc = LoggingMiddleware(logger)(svc)
 	}
 	return svc
 }
 
 type basicService struct {
-	*repository.Repositories
+	Queries  *repository.Queries
+	db       *pgx.Conn
 	logger   log.Logger
 	temporal temporalclient.Client
 }
 
-func NewBasicService(repositories *repository.Repositories, logger log.Logger, temporalClient temporalclient.Client) acmeaccount.Service {
+func NewBasicService(db *pgx.Conn, logger log.Logger, temporalClient temporalclient.Client) acmeaccount.Service {
 	return basicService{
-		Repositories: repositories,
-		logger:       logger,
-		temporal:     temporalClient,
+		Queries:  repository.New(db),
+		db:       db,
+		logger:   logger,
+		temporal: temporalClient,
 	}
 }
 
 func (s basicService) Create(ctx context.Context, parent string, apiACMEAccount *api.ACMEAccount) (_ *api.ACMEAccount, err error) {
-	var acmeAccount *model.ACMEAccount
-	if acmeAccount, err = model.NewACMEAccountFromAPI(parent, apiACMEAccount, ""); err != nil {
+	acmeAccount, err := s.Queries.CreateACMEAccountFromAPI(ctx, parent, apiACMEAccount)
+	if err != nil {
 		return nil, err
 	}
-	if err = s.Transaction(ctx, func(ctx context.Context) error {
-		if acmeAccount.ACMEServer, err = s.ACMEServers.FindOneByName(ctx, parent); err != nil {
-			return err
-		}
-		return s.ACMEAccounts.Insert(ctx, acmeAccount)
-	}); err != nil {
-		return nil, err
-	}
+	acmeServer, err := s.Queries.GetACMEServer(ctx, acmeAccount.AcmeServerID)
 	_, err = s.temporal.ExecuteWorkflow(ctx, temporalclient.StartWorkflowOptions{
 		ID:        fmt.Sprintf("%s/create-account", acmeAccount.Name()),
 		TaskQueue: temporal.WorkerTaskQueue,
 	}, workflow.CreateAccount, workflow.CreateAccountParams{
 		Account:              acmeAccount.Name(),
-		DirectoryURL:         acmeAccount.ACMEServer.DirectoryURL,
+		DirectoryURL:         acmeServer.DirectoryUrl,
 		TermsOfServiceAgreed: acmeAccount.TermsOfServiceAgreed,
 		Contacts:             strings.Split(acmeAccount.Contacts, ","),
 	})
@@ -67,45 +62,62 @@ func (s basicService) Create(ctx context.Context, parent string, apiACMEAccount 
 }
 
 func (s basicService) Delete(ctx context.Context, name string) (err error) {
-	var acmeAccount *model.ACMEAccount
-	return s.Transaction(ctx, func(ctx context.Context) error {
-		if acmeAccount, err = s.ACMEAccounts.FindOneByName(ctx, name); err != nil {
-			return err
-		}
-		return s.ACMEAccounts.Delete(ctx, acmeAccount)
-	})
+	queries, rollback, err := s.Queries.NewTx(ctx)
+	defer rollback(&err)
+	n := strings.Split(name, "/")
+	id, err := uuid.Parse(n[3])
+	if err != nil {
+		return err
+	}
+	acmeAccount, err := queries.GetACMEAccount(ctx, id)
+	if err != nil {
+		return err
+	}
+	if err = queries.DeleteACMEAccount(ctx, acmeAccount.ID); err != nil {
+		return err
+	}
+	return queries.Tx().Commit(ctx)
 }
 
 func (s basicService) Get(ctx context.Context, name string) (_ *api.ACMEAccount, err error) {
-	var acmeAccount *model.ACMEAccount
-	if acmeAccount, err = s.ACMEAccounts.FindOneByName(ctx, name); err != nil {
+	n := strings.Split(name, "/")
+	id, err := uuid.Parse(n[3])
+	if err != nil {
+		return nil, err
+	}
+	acmeAccount, err := s.Queries.GetACMEAccount(ctx, id)
+	if err != nil {
 		return nil, err
 	}
 	return acmeAccount.ToAPI(), nil
 }
 
 func (s basicService) List(ctx context.Context, parent string, pageSize int, pageToken string) (_ []*api.ACMEAccount, _ string, err error) {
-	var acmeAccounts model.ACMEAccounts
-	if acmeAccounts, err = s.ACMEAccounts.FindAllByParent(ctx, parent); err != nil {
-		return nil, "", errors.Wrap(err, "getting all acme accounts")
+	var nextPageToken string
+	acmeAccounts, err := s.Queries.ListACMEAccounts(ctx, repository.ListACMEAccountsParams{
+		SqlOrder:  "created_at",
+		SqlOffset: 0,
+		SqlLimit:  int32(pageSize),
+	})
+	if err != nil {
+		return nil, "", err
 	}
-	// TODO: paging
-	_, nextPageToken := pageSize, pageToken
-	return acmeAccounts.ToAPI(), nextPageToken, nil
+	return repository.AcmeAccounts(acmeAccounts).ToAPI(), nextPageToken, nil
 }
 
 func (s basicService) Update(ctx context.Context, name string, updateMask []string, apiACMEAccount *api.ACMEAccount) (_ *api.ACMEAccount, err error) {
-	var acmeAccount *model.ACMEAccount
-	if err = s.Transaction(ctx, func(ctx context.Context) error {
-		if acmeAccount, err = s.ACMEAccounts.FindOneByName(ctx, name); err != nil {
-			return err
-		}
-		var clauses map[string]interface{}
-		if clauses, err = acmeAccount.UpdateWithMask(ctx, updateMask, apiACMEAccount); err != nil {
-			return err
-		}
-		return s.ACMEAccounts.Update(ctx, acmeAccount, clauses)
-	}); err != nil {
+	queries, rollback, err := s.Queries.NewTx(ctx)
+	defer rollback(&err)
+	n := strings.Split(name, "/")
+	id, err := uuid.Parse(n[1])
+	if err != nil {
+		return nil, err
+	}
+	acmeAccount, err := queries.UpdateACMEAccountWithMask(ctx, id, updateMask, apiACMEAccount)
+	if err != nil {
+		return nil, err
+	}
+	if err = queries.Tx().Commit(ctx); err != nil {
 		return nil, err
 	}
 	return acmeAccount.ToAPI(), nil

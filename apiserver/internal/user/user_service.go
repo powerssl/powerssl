@@ -4,6 +4,7 @@ import (
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/metrics"
 	"github.com/go-kit/kit/tracing/opentracing"
+	"github.com/jackc/pgx/v4"
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 
@@ -15,12 +16,11 @@ import (
 	"powerssl.dev/sdk/apiserver/user/endpoint"
 	"powerssl.dev/sdk/apiserver/user/transport"
 
-	"powerssl.dev/apiserver/internal/repository"
 	"powerssl.dev/apiserver/internal/user/service"
 )
 
-func NewService(repositories *repository.Repositories, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, auth kitendpoint.Middleware) backendtransport.Service {
-	svc := service.New(repositories, logger)
+func NewService(db *pgx.Conn, logger log.Logger, tracer stdopentracing.Tracer, duration metrics.Histogram, auth kitendpoint.Middleware) backendtransport.Service {
+	svc := service.New(db, logger)
 	endpoints := makeEndpoints(svc, logger, tracer, duration, auth)
 
 	return backendtransport.Service{

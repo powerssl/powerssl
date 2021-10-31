@@ -10,7 +10,7 @@ import (
 
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/metrics/prometheus"
-	"github.com/jmoiron/sqlx"
+	"github.com/jackc/pgx/v4"
 	_ "github.com/lib/pq"
 	"github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
@@ -28,7 +28,6 @@ import (
 	"powerssl.dev/apiserver/internal/acmeaccount"
 	"powerssl.dev/apiserver/internal/acmeserver"
 	"powerssl.dev/apiserver/internal/certificate"
-	"powerssl.dev/apiserver/internal/repository"
 	"powerssl.dev/apiserver/internal/user"
 )
 
@@ -55,14 +54,12 @@ func Run(cfg *Config) (err error) {
 		defer common.ErrWrapCloser(closer, &err)
 	}
 
-	var repositories *repository.Repositories
+	var db *pgx.Conn
 	{
-		var db *sqlx.DB
-		if db, err = sqlx.Connect(cfg.DB.Dialect, cfg.DB.Connection); err != nil {
+		if db, err = pgx.Connect(ctx, cfg.DB.Connection); err != nil {
 			return err
 		}
-		defer common.ErrWrapCloser(db, &err)
-		repositories = repository.NewRepositories(db, logger)
+		defer common.ErrWrapCloserWithCtx(db, ctx, &err)
 	}
 
 	var temporalClient temporalclient.Client
@@ -71,10 +68,7 @@ func Run(cfg *Config) (err error) {
 		if temporalClient, closer, err = temporalclient.NewClient(cfg.TemporalClientConfig, logger, tracer, component); err != nil {
 			return err
 		}
-		defer func() {
-			temporalClient.Close()
-			common.ErrWrapCloser(closer, &err)
-		}()
+		defer common.ErrWrapCloser(closer, &err)
 	}
 
 	var vaultClient *vault.Client
@@ -128,10 +122,10 @@ func Run(cfg *Config) (err error) {
 
 	g.Go(func() error {
 		return backendtransport.ServeGRPC(ctx, cfg.ServerConfig, logger.With("transport", "gRPC"), backendtransport.Services{
-			acmeaccount.NewService(repositories, logger, tracer, duration, temporalClient, authMiddleware),
-			acmeserver.NewService(repositories, logger, tracer, duration, authMiddleware),
-			certificate.NewService(repositories, logger, tracer, duration, authMiddleware),
-			user.NewService(repositories, logger, tracer, duration, authMiddleware),
+			acmeaccount.NewService(db, logger, tracer, duration, temporalClient, authMiddleware),
+			acmeserver.NewService(db, logger, tracer, duration, authMiddleware),
+			certificate.NewService(db, logger, tracer, duration, authMiddleware),
+			user.NewService(db, logger, tracer, duration, authMiddleware),
 		})
 	})
 
