@@ -3,24 +3,45 @@ package oauth2
 import (
 	"context"
 	"fmt"
+
+	"golang.org/x/oauth2"
 )
 
 var oauthStateString = "foo" // TODO: Randomize it
 
-func AuthCodeURL(provider string) (string, error) {
+type OAuth2 struct {
+	cfg          *Config
+	gitHubConfig *oauth2.Config
+}
+
+func New(cfg *Config) *OAuth2 {
+	o := &OAuth2{
+		cfg: cfg,
+	}
+	o.init()
+	return o
+}
+
+func (o *OAuth2) AuthCodeURL(provider string) (*string, error) {
 	switch provider {
-	case "github":
-		return gitHubAuthCodeURL(), nil
+	case providerGitHub:
+		return o.gitHubAuthCodeURL(), nil
 	default:
-		return "", fmt.Errorf("provider %v not found", provider)
+		return nil, fmt.Errorf("provider %v not found", provider)
 	}
 }
 
-func UserInfo(ctx context.Context, provider, state, code string) (string, error) {
+func (o *OAuth2) UserInfo(ctx context.Context, provider, state, code string) (*string, error) {
 	switch provider {
-	case "github":
-		return gitHubUserInfo(ctx, state, code)
+	case providerGitHub:
+		return o.gitHubUserInfo(ctx, state, code)
 	default:
-		return "", fmt.Errorf("provider %v not found", provider)
+		return nil, fmt.Errorf("provider %v not found", provider)
+	}
+}
+
+func (o *OAuth2) init() {
+	if o.cfg.GitHub != nil {
+		o.initGitHub()
 	}
 }

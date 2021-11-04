@@ -10,11 +10,11 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	apiv1 "powerssl.dev/api/controller/v1"
-	"powerssl.dev/common"
+	error2 "powerssl.dev/common/error"
+	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
+	"powerssl.dev/common/metrics"
 	"powerssl.dev/common/tracing"
-	"powerssl.dev/common/transport"
-
 	"powerssl.dev/sdk/controller"
 	"powerssl.dev/sdk/controller/api"
 	integrationacme "powerssl.dev/sdk/integration/acme"
@@ -45,11 +45,11 @@ func Run(cfg *Config, kind kind, name string, handler interface{}) (err error) {
 	if logger, err = log.NewLogger(false); err != nil {
 		return err
 	}
-	defer common.ErrWrapSync(logger, &err)
+	defer error2.ErrWrapSync(logger, &err)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
-		return common.InterruptHandler(ctx, logger)
+		return interrupthandler.InterruptHandler(ctx, logger)
 	})
 
 	var tracer opentracing.Tracer
@@ -58,7 +58,7 @@ func Run(cfg *Config, kind kind, name string, handler interface{}) (err error) {
 		if tracer, closer, err = tracing.Init(fmt.Sprintf("powerssl-integration-%s", kind), cfg.Tracer, logger.With("component", "tracing")); err != nil {
 			return err
 		}
-		defer common.ErrWrapCloser(closer, &err)
+		defer error2.ErrWrapCloser(closer, &err)
 	}
 
 	var controllerClient *controller.GRPCClient
@@ -79,7 +79,7 @@ func Run(cfg *Config, kind kind, name string, handler interface{}) (err error) {
 
 	if cfg.Metrics.Addr != "" {
 		g.Go(func() error {
-			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, logger.With("component", "metrics"))
+			return metrics.ServeMetrics(ctx, cfg.Metrics.Addr, logger.With("component", "metrics"))
 		})
 	}
 
@@ -105,7 +105,7 @@ func Run(cfg *Config, kind kind, name string, handler interface{}) (err error) {
 
 	if err = g.Wait(); err != nil {
 		switch err.(type) {
-		case common.InterruptError:
+		case interrupthandler.InterruptError:
 		default:
 			return err
 		}

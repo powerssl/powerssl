@@ -9,7 +9,6 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
 	"io/ioutil"
 	"net"
 	"net/url"
@@ -21,12 +20,14 @@ import (
 	recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/johanbrandhorst/certify"
 	"github.com/johanbrandhorst/certify/issuers/vault"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/reflection"
 
-	"powerssl.dev/common"
+	error2 "powerssl.dev/common/error"
 	"powerssl.dev/common/log"
 )
 
@@ -58,20 +59,15 @@ func (kgf keyGeneratorFunc) Generate() (crypto.PrivateKey, error) {
 	return kgf()
 }
 
-type Service struct {
-	ServiceName        string
-	RegisterGRPCServer func(baseServer *grpc.Server)
+type Server struct {
+	cfg    ServerConfig
+	health *health.Server
+	logger log.Logger
+	grpc   *grpc.Server
 }
 
-type Services []Service
-
-func ServeGRPC(ctx context.Context, cfg ServerConfig, logger log.Logger, services Services) (err error) {
-	var listener net.Listener
-	if listener, err = net.Listen("tcp", cfg.Addr); err != nil {
-		return err
-	}
-	defer common.ErrWrapCloser(listener, &err)
-
+func New(cfg ServerConfig, logger log.Logger) (_ *Server, err error) {
+	logger = logger.With("transport", "gRPC")
 	recoveryOptions := []recovery.Option{
 		recovery.WithRecoveryHandler(recoveryHandler(logger)),
 	}
@@ -89,25 +85,25 @@ func ServeGRPC(ctx context.Context, cfg ServerConfig, logger log.Logger, service
 		var creds credentials.TransportCredentials
 		if cfg.CertFile != "" && cfg.KeyFile != "" {
 			if creds, err = credentials.NewServerTLSFromFile(cfg.CertFile, cfg.KeyFile); err != nil {
-				return fmt.Errorf("failed to load TLS credentials %v", err)
+				return nil, fmt.Errorf("failed to load TLS credentials %v", err)
 			}
 		} else {
 			certPool := x509.NewCertPool()
 			var caData []byte
 			if caData, err = ioutil.ReadFile(cfg.CAFile); err != nil {
-				return err
+				return nil, err
 			}
 			certPool.AppendCertsFromPEM(caData)
 			var vaultURL *url.URL
 			if vaultURL, err = url.Parse(cfg.VaultURL); err != nil {
-				return err
+				return nil, err
 			}
 			c := &certify.Certify{
 				Cache:      certify.NewMemCache(),
 				CommonName: cfg.CommonName,
 				Issuer: &vault.Issuer{
-					URL:   vaultURL,
-					Role:  cfg.VaultRole,
+					URL:        vaultURL,
+					Role:       cfg.VaultRole,
 					AuthMethod: vault.ConstantToken(cfg.VaultToken),
 					TLSConfig: &tls.Config{
 						RootCAs: certPool,
@@ -138,28 +134,43 @@ func ServeGRPC(ctx context.Context, cfg ServerConfig, logger log.Logger, service
 	}
 
 	srv := grpc.NewServer(options...)
+	reflection.Register(srv)
 	healthSrv := health.NewServer()
 	healthpb.RegisterHealthServer(srv, healthSrv)
-	for _, service := range services {
-		service.RegisterGRPCServer(srv)
-		healthSrv.SetServingStatus(service.ServiceName, healthpb.HealthCheckResponse_SERVING)
-	}
+	return &Server{
+		health: healthSrv,
+		cfg:    cfg,
+		logger: logger,
+		grpc:   srv,
+	}, nil
+}
 
+func (s *Server) Serve(ctx context.Context) (err error) {
+	var listener net.Listener
+	if listener, err = net.Listen("tcp", s.cfg.Addr); err != nil {
+		return err
+	}
+	defer error2.ErrWrapCloser(listener, &err)
 	c := make(chan error)
 	go func() {
-		c <- srv.Serve(listener)
+		c <- s.grpc.Serve(listener)
 		close(c)
 	}()
-	logger.With("secure", !cfg.Insecure).Infof("listening on %s", cfg.Addr)
+	s.logger.With("secure", !s.cfg.Insecure).Infof("listening on %s", s.cfg.Addr)
 	select {
 	case err = <-c:
-		logger.Error(err)
+		s.logger.Error(err)
 		return err
 	case <-ctx.Done():
-		logger.Error(ctx.Err())
-		srv.GracefulStop()
+		s.logger.Error(ctx.Err())
+		s.grpc.GracefulStop()
 		return ctx.Err()
 	}
+}
+
+func (s *Server) RegisterService(sd *grpc.ServiceDesc, ss interface{}) {
+	s.grpc.RegisterService(sd, ss)
+	s.health.SetServingStatus(sd.ServiceName, healthpb.HealthCheckResponse_SERVING)
 }
 
 func recoveryHandler(logger log.Logger) func(interface{}) error {

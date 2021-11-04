@@ -5,8 +5,8 @@ import (
 
 	temporalclient "powerssl.dev/backend/temporal/client"
 	"powerssl.dev/backend/vault"
-	"powerssl.dev/common"
 	"powerssl.dev/common/transport"
+	validator2 "powerssl.dev/common/validator"
 )
 
 type APIServerClientConfig = transport.ClientConfig
@@ -27,5 +27,5 @@ type Config struct {
 func (cfg *Config) Validate() error {
 	validate := validator.New()
 	validate.RegisterStructValidation(transport.ClientConfigValidator, transport.ClientConfig{})
-	return common.ValidateConfig(validate, cfg)
+	return validator2.ValidateConfig(validate, cfg)
 }

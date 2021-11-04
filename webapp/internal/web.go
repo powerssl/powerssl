@@ -5,9 +5,10 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"powerssl.dev/common"
+	error2 "powerssl.dev/common/error"
+	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/transport"
+	"powerssl.dev/common/metrics"
 )
 
 func Run(cfg *Config) (err error) {
@@ -15,16 +16,16 @@ func Run(cfg *Config) (err error) {
 	if logger, err = log.NewLogger(false); err != nil {
 		return err
 	}
-	defer common.ErrWrapSync(logger, &err)
+	defer error2.ErrWrapSync(logger, &err)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
-		return common.InterruptHandler(ctx, logger)
+		return interrupthandler.InterruptHandler(ctx, logger)
 	})
 
 	if cfg.Metrics.Addr != "" {
 		g.Go(func() error {
-			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, logger.With("component", "metrics"))
+			return metrics.ServeMetrics(ctx, cfg.Metrics.Addr, logger.With("component", "metrics"))
 		})
 	}
 
@@ -34,7 +35,7 @@ func Run(cfg *Config) (err error) {
 
 	if err = g.Wait(); err != nil {
 		switch err.(type) {
-		case common.InterruptError:
+		case interrupthandler.InterruptError:
 		default:
 			return err
 		}

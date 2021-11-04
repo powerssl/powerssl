@@ -1,11 +1,14 @@
 package cmd // import "powerssl.dev/common/cmd"
 
 import (
+	"context"
 	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"powerssl.dev/common/runner"
 )
 
 func Execute(cmd *cobra.Command) {
@@ -27,6 +30,12 @@ func HandleError(f func(cmd *cobra.Command, args []string) error) func(cmd *cobr
 			os.Exit(1)
 		}
 	}
+}
+
+func Run(f func(ctx context.Context) ([]func() error, func(), error)) func(cmd *cobra.Command, args []string) {
+	return HandleError(func(cmd *cobra.Command, args []string) error {
+		return runner.Run(f)
+	})
 }
 
 func initConfig(cmd *cobra.Command, component string, cfgFile *string, verbose *bool) func() {

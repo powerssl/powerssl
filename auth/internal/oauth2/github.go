@@ -3,46 +3,47 @@ package oauth2
 import (
 	"context"
 	"fmt"
-	oauth2github "golang.org/x/oauth2/github"
 
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
+	oauth2github "golang.org/x/oauth2/github"
 )
 
-var gitHubOauthConfig *oauth2.Config
+const providerGitHub = "github"
 
-func InitGitHubOauth2Config(authURI, clientID, clientSecret string) {
-	gitHubOauthConfig = &oauth2.Config{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
+func (o *OAuth2) initGitHub() {
+	o.gitHubConfig = &oauth2.Config{
+		ClientID:     o.cfg.GitHub.ClientID,
+		ClientSecret: o.cfg.GitHub.ClientSecret,
 		Endpoint:     oauth2github.Endpoint,
-		RedirectURL:  authURI + "/callback",
+		RedirectURL:  o.cfg.AuthURI + "/callback",
 		Scopes:       []string{"user:email"},
 	}
 }
 
-func gitHubAuthCodeURL() string {
-	return gitHubOauthConfig.AuthCodeURL(gitHubState())
+func (o *OAuth2) gitHubAuthCodeURL() *string {
+	authCodeURL := o.gitHubConfig.AuthCodeURL(o.gitHubState())
+	return &authCodeURL
 }
 
-func gitHubState() string {
+func (o *OAuth2) gitHubState() string {
 	return oauthStateString + ":github"
 }
 
-func gitHubUserInfo(ctx context.Context, state, code string) (string, error) {
-	if state != gitHubState() {
-		return "", fmt.Errorf("invalid oauth2 state")
+func (o *OAuth2) gitHubUserInfo(ctx context.Context, state, code string) (*string, error) {
+	if state != o.gitHubState() {
+		return nil, fmt.Errorf("invalid oauth2 state")
 	}
-	token, err := gitHubOauthConfig.Exchange(ctx, code)
+	token, err := o.gitHubConfig.Exchange(ctx, code)
 	if err != nil {
-		return "", fmt.Errorf("code exchange failed: %s", err.Error())
+		return nil, fmt.Errorf("code exchange failed: %s", err.Error())
 	}
 	ts := oauth2.StaticTokenSource(token)
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 	var user *github.User
 	if user, _, err = client.Users.Get(ctx, ""); err != nil {
-		return "", err
+		return nil, err
 	}
-	return *user.Login, nil
+	return user.Login, nil
 }

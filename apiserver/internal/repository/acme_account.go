@@ -8,12 +8,15 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
+	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/backend/auth"
-	"powerssl.dev/sdk/apiserver/api"
 )
 
-var acmeAccountUpdateMaskSanitizer = NewUpdateMaskSanitizer().
+var acmeAccountMessageType *apiv1.ACMEAccount
+var acmeAccountUpdateMaskSanitizer = NewUpdateMaskSanitizer(acmeAccountMessageType).
 	Allowed("display_name", "title", "description", "contacts").
 	Internal("terms_of_service_agreed", "contacts", "account_url")
 
@@ -21,26 +24,26 @@ func (a *AcmeAccount) Name() string {
 	return fmt.Sprintf("acmeServers/%s/acmeAccounts/%s", a.AcmeServerID, a.ID)
 }
 
-func (a *AcmeAccount) ToAPI() *api.ACMEAccount {
+func (a *AcmeAccount) ToAPI() *apiv1.ACMEAccount {
 	var contacts []string
 	if a.Contacts != "" {
 		contacts = strings.Split(a.Contacts, ",")
 	}
-	return &api.ACMEAccount{
+	return &apiv1.ACMEAccount{
 		Name:                 a.Name(),
-		CreateTime:           a.CreatedAt,
-		UpdateTime:           a.UpdatedAt,
+		CreateTime:           timestamppb.New(a.CreatedAt),
+		UpdateTime:           timestamppb.New(a.UpdatedAt),
 		DisplayName:          a.DisplayName,
 		Title:                a.Title,
 		Description:          a.Description,
 		Labels:               map[string]string{"not": "implemented"},
 		TermsOfServiceAgreed: a.TermsOfServiceAgreed,
 		Contacts:             contacts,
-		AccountURL:           a.AccountUrl,
+		AccountUrl:           a.AccountUrl,
 	}
 }
 
-func (q *Queries) CreateACMEAccountFromAPI(ctx context.Context, parent string, acmeAccount *api.ACMEAccount) (AcmeAccount, error) {
+func (q *Queries) CreateACMEAccountFromAPI(ctx context.Context, parent string, acmeAccount *apiv1.ACMEAccount) (AcmeAccount, error) {
 	s := strings.Split(parent, "/")
 	if len(s) != 2 || s[0] != "acmeServers" {
 		return AcmeAccount{}, status.Error(codes.InvalidArgument, "malformed parent")
@@ -59,10 +62,10 @@ func (q *Queries) CreateACMEAccountFromAPI(ctx context.Context, parent string, a
 	})
 }
 
-func (q *Queries) UpdateACMEAccountWithMask(ctx context.Context, id uuid.UUID, paths []string, acmeAccount *api.ACMEAccount) (AcmeAccount, error) {
-	paths = acmeAccountUpdateMaskSanitizer.Sanitize(paths, auth.IsInternal(ctx))
+func (q *Queries) UpdateACMEAccountWithMask(ctx context.Context, id uuid.UUID, fm *fieldmaskpb.FieldMask, acmeAccount *apiv1.ACMEAccount) (AcmeAccount, error) {
+	fm = acmeAccountUpdateMaskSanitizer.Sanitize(fm, auth.IsInternal(ctx))
 	updateParams := UpdateACMEAccountParams{ID: id}
-	if err := setUpdateParams(paths, acmeAccount, &updateParams); err != nil {
+	if err := setUpdateParams(fm, acmeAccount, &updateParams); err != nil {
 		return AcmeAccount{}, err
 	}
 	return q.UpdateACMEAccount(ctx, updateParams)
@@ -70,8 +73,8 @@ func (q *Queries) UpdateACMEAccountWithMask(ctx context.Context, id uuid.UUID, p
 
 type AcmeAccounts []AcmeAccount
 
-func (a AcmeAccounts) ToAPI() []*api.ACMEAccount {
-	acmeAccounts := make([]*api.ACMEAccount, len(a))
+func (a AcmeAccounts) ToAPI() []*apiv1.ACMEAccount {
+	acmeAccounts := make([]*apiv1.ACMEAccount, len(a))
 	for i, account := range a {
 		acmeAccounts[i] = account.ToAPI()
 	}

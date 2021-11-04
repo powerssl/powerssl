@@ -12,6 +12,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-kit/kit v0.11.0
 	github.com/go-playground/validator/v10 v10.9.0
+	github.com/google/wire v0.5.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/hashicorp/vault/api v1.1.1
 	github.com/johanbrandhorst/certify v1.9.0

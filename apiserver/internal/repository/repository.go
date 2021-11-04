@@ -6,11 +6,12 @@ import (
 
 	"github.com/golang/protobuf/protoc-gen-go/generator"
 	fieldmaskutils "github.com/mennanov/fieldmask-utils"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-func setUpdateParams(paths []string, src interface{}, dst interface{}) (err error) {
+func setUpdateParams(fm *fieldmaskpb.FieldMask, src interface{}, dst interface{}) (err error) {
 	var mask fieldmaskutils.Mask
-	if mask, err = fieldmaskutils.MaskFromPaths(paths, generator.CamelCase); err != nil {
+	if mask, err = fieldmaskutils.MaskFromProtoFieldMask(fm, generator.CamelCase); err != nil {
 		return err
 	}
 	if err = fieldmaskutils.StructToStruct(mask, src, dst); err != nil {

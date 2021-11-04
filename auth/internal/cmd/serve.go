@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"context"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -10,7 +12,7 @@ import (
 )
 
 func newCmdServe() *cobra.Command {
-	var config internal.Config
+	var config *internal.Config
 	var noMetrics bool
 
 	cmd := &cobra.Command{
@@ -26,11 +28,12 @@ func newCmdServe() *cobra.Command {
 			}
 			return config.Validate()
 		},
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
-			return internal.Run(&config)
+		Run: cmdutil.Run(func(ctx context.Context) ([]func() error, func(), error) {
+			return internal.Initialize(ctx, config)
 		}),
 	}
 
+	// TODO: Config doesn't map anymore
 	cmd.Flags().BoolVar(&noMetrics, "no-metrics", false, "Do not serve metrics")
 	cmd.Flags().Bool("insecure", false, "Do not use TLS for the server")
 	cmd.Flags().String("addr", ":8080", "GRPC")

@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"context"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -10,7 +12,7 @@ import (
 )
 
 func newCmdServe() *cobra.Command {
-	var config internal.Config
+	var config *internal.Config
 	var noMetrics bool
 
 	cmd := &cobra.Command{
@@ -24,13 +26,13 @@ func newCmdServe() *cobra.Command {
 			if noMetrics {
 				config.Metrics.Addr = ""
 			}
-			if !viper.IsSet("apiserver.ca-file") || config.APIServerClientConfig.CAFile == "" {
-				config.APIServerClientConfig.CAFile = viper.GetString("ca-file")
+			if !viper.IsSet("apiserver.ca-file") || config.APIServerClient.CAFile == "" {
+				config.APIServerClient.CAFile = viper.GetString("ca-file")
 			}
 			return config.Validate()
 		},
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
-			return internal.Run(&config)
+		Run: cmdutil.Run(func(ctx context.Context) ([]func() error, func(), error) {
+			return internal.Initialize(ctx, config)
 		}),
 	}
 

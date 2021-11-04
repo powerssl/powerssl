@@ -17,7 +17,8 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 
-	"powerssl.dev/common"
+	error2 "powerssl.dev/common/error"
+	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
 
 	"powerssl.dev/tools/dev-runner/internal/component"
@@ -33,8 +34,8 @@ func Run() error {
 		if logger, err = log.NewLogger(false); err != nil {
 			return err
 		}
-		defer common.ErrWrapSync(logger, &err)
-		return common.InterruptHandler(ctx, logger)
+		defer error2.ErrWrapSync(logger, &err)
+		return interrupthandler.InterruptHandler(ctx, logger)
 	})
 
 	go func() {
@@ -64,7 +65,7 @@ func Run() error {
 		if watcher, err = fsnotify.NewWatcher(); err != nil {
 			of.ErrorOutput(fmt.Sprintf("watcher error: %s", err))
 		}
-		defer common.ErrWrapCloser(watcher, &err)
+		defer error2.ErrWrapCloser(watcher, &err)
 	}
 
 	interrupts := make(map[string]chan struct{}, len(component.Components)+1)
@@ -225,7 +226,7 @@ func Run() error {
 
 	if err = g.Wait(); err != nil {
 		switch err.(type) {
-		case common.InterruptError:
+		case interrupthandler.InterruptError:
 		default:
 			return err
 		}
@@ -241,7 +242,7 @@ func handlePostgres(of *Outlet) error {
 			return errors.Wrap(err, "connecting default database")
 		}
 		defer func() {
-			common.ErrWrapCloser(db, &err)
+			error2.ErrWrapCloser(db, &err)
 		}()
 		for {
 			if err = db.Ping(); err == nil {
@@ -267,7 +268,7 @@ func handlePostgres(of *Outlet) error {
 				return errors.Wrap(err, "creating database vault")
 			}
 		}
-		common.ErrWrapCloser(db, &err)
+		error2.ErrWrapCloser(db, &err)
 	}
 	{
 		var err error
@@ -275,7 +276,7 @@ func handlePostgres(of *Outlet) error {
 		if db, err = sql.Open("postgres", "postgresql://powerssl:powerssl@localhost:5432/vault?sslmode=disable"); err != nil {
 			return errors.Wrap(err, "connecting vault database")
 		}
-		defer common.ErrWrapCloser(db, &err)
+		defer error2.ErrWrapCloser(db, &err)
 		for {
 			if err = db.Ping(); err == nil {
 				break
@@ -289,7 +290,7 @@ func handlePostgres(of *Outlet) error {
 				return errors.Wrap(err, "creating vault table and index")
 			}
 		}
-		common.ErrWrapCloser(db, &err)
+		error2.ErrWrapCloser(db, &err)
 	}
 	{
 		comp := component.Component{
@@ -369,7 +370,7 @@ func serviceToken(_ string) (_ string, err error) {
 	if resp, err = httpClient.Get("https://localhost:8843/service"); err != nil {
 		return
 	}
-	defer common.ErrWrapCloser(resp.Body, &err)
+	defer error2.ErrWrapCloser(resp.Body, &err)
 	var byt []byte
 	if byt, err = ioutil.ReadAll(resp.Body); err != nil {
 		return

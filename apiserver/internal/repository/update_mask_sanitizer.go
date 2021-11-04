@@ -1,50 +1,39 @@
 package repository
 
+import (
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
+)
+
 type UpdateMaskSanitizer struct {
-	allowed  map[string]struct{}
-	internal map[string]struct{}
+	m        proto.Message
+	allowed  *fieldmaskpb.FieldMask
+	internal *fieldmaskpb.FieldMask
 }
 
-func NewUpdateMaskSanitizer() *UpdateMaskSanitizer {
-	return &UpdateMaskSanitizer{
-		allowed:  make(map[string]struct{}),
-		internal: make(map[string]struct{}),
-	}
+func NewUpdateMaskSanitizer(m proto.Message) *UpdateMaskSanitizer {
+	return &UpdateMaskSanitizer{m: m}
 }
 
 func (s *UpdateMaskSanitizer) Allowed(paths ...string) *UpdateMaskSanitizer {
-	for _, path := range paths {
-		s.allowed[path] = struct{}{}
+	var err error
+	if s.allowed, err = fieldmaskpb.New(s.m, paths...); err != nil {
+		panic(err)
 	}
 	return s
 }
 
 func (s *UpdateMaskSanitizer) Internal(paths ...string) *UpdateMaskSanitizer {
-	for _, path := range paths {
-		s.internal[path] = struct{}{}
+	var err error
+	if s.internal, err = fieldmaskpb.New(s.m, paths...); err != nil {
+		panic(err)
 	}
 	return s
 }
 
-func (s *UpdateMaskSanitizer) Sanitize(paths []string, internal bool) []string {
-	n := 0
-	for _, path := range paths {
-		if _, ok := s.allowed[path]; ok {
-			paths[n] = path
-			n++
-		}
-	}
-	allowedPaths := paths[:n]
-	var internalPaths []string
+func (s *UpdateMaskSanitizer) Sanitize(fm *fieldmaskpb.FieldMask, internal bool) *fieldmaskpb.FieldMask {
 	if internal {
-		n = 0
-		for _, path := range paths {
-			if _, ok := s.internal[path]; ok {
-				paths[n] = path
-				n++
-			}
-		}
-		internalPaths = paths[:n]
+		return fieldmaskpb.Intersect(fm, s.allowed, s.internal)
 	}
-	return append(allowedPaths, internalPaths...)
+	return fieldmaskpb.Intersect(fm, s.allowed)
 }

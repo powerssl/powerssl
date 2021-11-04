@@ -14,10 +14,11 @@ import (
 	"powerssl.dev/backend/temporal"
 	temporalclient "powerssl.dev/backend/temporal/client"
 	"powerssl.dev/backend/vault"
-	"powerssl.dev/common"
+	error2 "powerssl.dev/common/error"
+	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
+	"powerssl.dev/common/metrics"
 	"powerssl.dev/common/tracing"
-	"powerssl.dev/common/transport"
 	"powerssl.dev/sdk/apiserver"
 	sharedworkflow "powerssl.dev/workflow"
 	sharedactivity "powerssl.dev/workflow/activity"
@@ -33,11 +34,11 @@ func Run(cfg *Config) (err error) {
 	if logger, err = log.NewLogger(false); err != nil {
 		return err
 	}
-	defer common.ErrWrapSync(logger, &err)
+	defer error2.ErrWrapSync(logger, &err)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
-		return common.InterruptHandler(ctx, logger)
+		return interrupthandler.InterruptHandler(ctx, logger)
 	})
 
 	var tracer opentracing.Tracer
@@ -46,7 +47,7 @@ func Run(cfg *Config) (err error) {
 		if tracer, closer, err = tracing.Init(component, cfg.Tracer, logger.With("component", "tracing")); err != nil {
 			return err
 		}
-		defer common.ErrWrapCloser(closer, &err)
+		defer error2.ErrWrapCloser(closer, &err)
 	}
 
 	var apiserverClient *apiserver.Client
@@ -62,7 +63,7 @@ func Run(cfg *Config) (err error) {
 		if temporalClient, closer, err = temporalclient.NewClient(cfg.TemporalClientConfig, logger, tracer, component); err != nil {
 			return err
 		}
-		defer common.ErrWrapCloser(closer, &err)
+		defer error2.ErrWrapCloser(closer, &err)
 	}
 
 	var vaultClient *vault.Client
@@ -74,7 +75,7 @@ func Run(cfg *Config) (err error) {
 
 	if cfg.Metrics.Addr != "" {
 		g.Go(func() error {
-			return transport.ServeMetrics(ctx, cfg.Metrics.Addr, logger.With("component", "metrics"))
+			return metrics.ServeMetrics(ctx, cfg.Metrics.Addr, logger.With("component", "metrics"))
 		})
 	}
 
@@ -107,7 +108,7 @@ func Run(cfg *Config) (err error) {
 
 	if err = g.Wait(); err != nil {
 		switch err.(type) {
-		case common.InterruptError:
+		case interrupthandler.InterruptError:
 		default:
 			return err
 		}

@@ -11,7 +11,7 @@ import (
 	"powerssl.dev/common/log"
 )
 
-func Init(serviceName, implementation string, logger log.Logger) (opentracing.Tracer, io.Closer, error) {
+func Init(serviceName string, implementation string, logger log.Logger) (opentracing.Tracer, io.Closer, error) {
 	switch implementation {
 	case "":
 		return NewNoopTracer(serviceName, logger)
