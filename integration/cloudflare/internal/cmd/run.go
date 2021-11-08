@@ -1,18 +1,20 @@
 package cmd
 
 import (
+	"context"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/sdk/integration"
 
-	"powerssl.dev/integration/cloudflare/internal"
+	cloudflare "powerssl.dev/integration/cloudflare/internal"
 )
 
 func newCmdRun() *cobra.Command {
-	var config integration.Config
 	var noMetrics, noTracing bool
+	config := cloudflare.NewConfig(name)
 
 	cmd := &cobra.Command{
 		Use:   "run",
@@ -23,18 +25,19 @@ func newCmdRun() *cobra.Command {
 				return err
 			}
 			if noMetrics {
-				config.Metrics.Addr = ""
+				config.Integration.Metrics.Addr = ""
 			}
 			if noTracing {
-				config.Tracer = ""
+				config.Integration.Tracer = ""
 			}
-			if !viper.IsSet("controller.ca-file") || config.ControllerClientConfig.CAFile == "" {
-				config.ControllerClientConfig.CAFile = viper.GetString("ca-file")
+			if !viper.IsSet("controller.ca-file") || config.Integration.ControllerClientConfig.CAFile == "" {
+				config.Integration.ControllerClientConfig.CAFile = viper.GetString("ca-file")
 			}
-			return config.Validate()
+			return config.Integration.Validate()
 		},
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
-			return integration.Run(&config, integration.KindDNS, "cloudflare", cloudflare.New())
+		Run: cmdutil.Run(func(ctx context.Context) ([]func() error, func(), error) {
+			handler := cloudflare.New()
+			return integration.InitializeDNS(ctx, config.Integration, handler)
 		}),
 	}
 

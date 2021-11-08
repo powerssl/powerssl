@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"powerssl.dev/sdk/controller/api"
+	apiv1 "powerssl.dev/api/controller/v1"
 )
 
 type Integration interface {
@@ -25,14 +25,14 @@ func New(client interface{}, handler Integration) *integration {
 	}
 }
 
-func (i *integration) HandleActivity(ctx context.Context, activity *api.Activity) error {
+func (i *integration) HandleActivity(ctx context.Context, activity *apiv1.Activity) error {
 	var err error
-	switch activity.Name {
-	case api.ActivityDNSCreateRecord:
+	switch activity.GetName() {
+	case apiv1.Activity_DNS_CREATE_RECORD:
 		err = i.createRecord(ctx, activity)
-	case api.ActivityDNSDeleteRecord:
+	case apiv1.Activity_DNS_DELETE_RECORD:
 		err = i.deleteRecord(ctx, activity)
-	case api.ActivityDNSVerifyDomain:
+	case apiv1.Activity_DNS_VERIFY_DOMAIN:
 		err = i.verifyDomain(ctx, activity)
 	default:
 		err = fmt.Errorf("activity %s not implemented", activity.Name)
@@ -40,20 +40,20 @@ func (i *integration) HandleActivity(ctx context.Context, activity *api.Activity
 	return err
 }
 
-func (i *integration) createRecord(ctx context.Context, activity *api.Activity) error {
-	i.handler.CreateRecord(ctx, "domain", "recordType", "content")
+func (i *integration) createRecord(ctx context.Context, activity *apiv1.Activity) error {
+	_ = i.handler.CreateRecord(ctx, "domain", "recordType", "content")
 
 	return nil
 }
 
-func (i *integration) deleteRecord(ctx context.Context, activity *api.Activity) error {
-	i.handler.DeleteRecord(ctx, "domain", "recordType")
+func (i *integration) deleteRecord(ctx context.Context, activity *apiv1.Activity) error {
+	_ = i.handler.DeleteRecord(ctx, "domain", "recordType")
 
 	return nil
 }
 
-func (i *integration) verifyDomain(ctx context.Context, activity *api.Activity) error {
-	i.handler.VerifyDomain(ctx, "domain")
+func (i *integration) verifyDomain(ctx context.Context, activity *apiv1.Activity) error {
+	_ = i.handler.VerifyDomain(ctx, "domain")
 
 	return nil
 }

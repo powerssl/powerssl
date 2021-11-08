@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-kit/kit/endpoint"
 
-	"powerssl.dev/sdk/apiserver/acmeserver"
 	"powerssl.dev/sdk/apiserver/api"
 )
 
@@ -114,67 +113,4 @@ type UpdateRequest struct {
 
 type UpdateResponse struct {
 	ACMEServer *api.ACMEServer
-}
-
-func MakeCreateEndpoint(s acmeserver.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(CreateRequest)
-		acmeServer, err := s.Create(ctx, req.ACMEServer)
-		if err != nil {
-			return nil, err
-		}
-		return CreateResponse{
-			ACMEServer: acmeServer,
-		}, nil
-	}
-}
-
-func MakeDeleteEndpoint(s acmeserver.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(DeleteRequest)
-		if err := s.Delete(ctx, req.Name); err != nil {
-			return nil, err
-		}
-		return DeleteResponse{}, nil
-	}
-}
-
-func MakeGetEndpoint(s acmeserver.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(GetRequest)
-		acmeServer, err := s.Get(ctx, req.Name)
-		if err != nil {
-			return nil, err
-		}
-		return GetResponse{
-			ACMEServer: acmeServer,
-		}, nil
-	}
-}
-
-func MakeListEndpoint(s acmeserver.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(ListRequest)
-		acmeServers, nextPageToken, err := s.List(ctx, req.PageSize, req.PageToken)
-		if err != nil {
-			return nil, err
-		}
-		return ListResponse{
-			ACMEServers:   acmeServers,
-			NextPageToken: nextPageToken,
-		}, nil
-	}
-}
-
-func MakeUpdateEndpoint(s acmeserver.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(UpdateRequest)
-		acmeServer, err := s.Update(ctx, req.Name, req.UpdateMask, req.ACMEServer)
-		if err != nil {
-			return nil, err
-		}
-		return UpdateResponse{
-			ACMEServer: acmeServer,
-		}, nil
-	}
 }

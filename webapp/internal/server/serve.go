@@ -1,4 +1,4 @@
-package internal
+package server
 
 import (
 	"bytes"
@@ -8,12 +8,28 @@ import (
 	"strconv"
 	"time"
 
-	"powerssl.dev/common/log"
+	"go.uber.org/zap"
 
 	"powerssl.dev/webapp/internal/asset"
 )
 
-func ServeHTTP(ctx context.Context, addr string, insecure bool, certFile, keyFile string, logger log.Logger, authURI, apiAddr, grpcWebURI string) error {
+type Server struct {
+	cfg    *Config
+	logger *zap.SugaredLogger
+}
+
+func ServeHTTP(ctx context.Context, cfg *Config, logger *zap.SugaredLogger) error {
+	return New(cfg, logger).ServeHTTP(ctx)
+}
+
+func New(cfg *Config, logger *zap.SugaredLogger) *Server {
+	return &Server{
+		cfg:    cfg,
+		logger: logger,
+	}
+}
+
+func (s *Server) ServeHTTP(ctx context.Context) error {
 	var buffer []byte
 	{
 		tmpl, err := template.ParseFS(asset.Template, "index.html")
@@ -22,9 +38,9 @@ func ServeHTTP(ctx context.Context, addr string, insecure bool, certFile, keyFil
 		}
 		var buf bytes.Buffer
 		if err = tmpl.Execute(&buf, map[string]string{
-			"APIAddr":    apiAddr,
-			"AuthURI":    authURI,
-			"GRPCWebURI": grpcWebURI,
+			"APIAddr":    s.cfg.APIAddr,
+			"AuthURI":    s.cfg.AuthURI,
+			"GRPCWebURI": s.cfg.GRPCWebURI,
 		}); err != nil {
 			return err
 		}
@@ -51,29 +67,29 @@ func ServeHTTP(ctx context.Context, addr string, insecure bool, certFile, keyFil
 		}
 	})
 	srv := http.Server{
-		Addr:    addr,
+		Addr:    s.cfg.Addr,
 		Handler: mux,
 	}
 
 	c := make(chan error)
 	go func() {
-		if insecure {
+		if s.cfg.Insecure {
 			c <- srv.ListenAndServe()
 		} else {
-			c <- srv.ListenAndServeTLS(certFile, keyFile)
+			c <- srv.ListenAndServeTLS(s.cfg.CertFile, s.cfg.KeyFile)
 		}
 		close(c)
 	}()
-	logger.Infof("listening on %s", addr)
+	s.logger.Infof("listening on %s", s.cfg.Addr)
 	select {
 	case err := <-c:
-		logger.Error(err)
+		s.logger.Error(err)
 		if err != http.ErrServerClosed {
 			return err
 		}
 		return nil
 	case <-ctx.Done():
-		logger.Error(ctx.Err())
+		s.logger.Error(ctx.Err())
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 		if err := srv.Shutdown(shutdownCtx); err != nil {

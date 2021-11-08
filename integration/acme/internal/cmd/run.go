@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"context"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -8,12 +10,12 @@ import (
 	"powerssl.dev/sdk/integration"
 	"powerssl.dev/sdk/integration/vault"
 
-	"powerssl.dev/integration/acme/internal"
+	acme "powerssl.dev/integration/acme/internal"
 )
 
 func newCmdRun() *cobra.Command {
-	var config integration.Config
 	var noMetrics, noTracing bool
+	config := acme.NewConfig(name)
 
 	cmd := &cobra.Command{
 		Use:   "run",
@@ -24,25 +26,26 @@ func newCmdRun() *cobra.Command {
 				return err
 			}
 			if noMetrics {
-				config.Metrics.Addr = ""
+				config.Integration.Metrics.Addr = ""
 			}
 			if noTracing {
-				config.Tracer = ""
+				config.Integration.Tracer = ""
 			}
-			if !viper.IsSet("controller.ca-file") || config.ControllerClientConfig.CAFile == "" {
-				config.ControllerClientConfig.CAFile = viper.GetString("ca-file")
+			if !viper.IsSet("controller.ca-file") || config.Integration.ControllerClientConfig.CAFile == "" {
+				config.Integration.ControllerClientConfig.CAFile = viper.GetString("ca-file")
 			}
-			return config.Validate()
-		},
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
-			handler, err := acme.New(vault.Config{
+			config.Vault = vault.Config{
 				Address: "https://localhost:8200",
-				CAFile:  config.ControllerClientConfig.CAFile, // TODO: Wrong config
-			})
-			if err != nil {
-				return err
+				CAFile:  config.Integration.ControllerClientConfig.CAFile, // TODO: Wrong config
 			}
-			return integration.Run(&config, integration.KindACME, "acme", handler)
+			return config.Integration.Validate()
+		},
+		Run: cmdutil.Run(func(ctx context.Context) ([]func() error, func(), error) {
+			handler, err := acme.New(config.Vault)
+			if err != nil {
+				return nil, nil, err
+			}
+			return integration.InitializeACME(ctx, config.Integration, handler)
 		}),
 	}
 

@@ -3,7 +3,6 @@ package transport // import "powerssl.dev/sdk/apiserver/acmeaccount/transport"
 import (
 	"context"
 
-	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -55,30 +54,6 @@ func decodeGRPCACMEAccounts(grpcACMEAccounts []*apiv1.ACMEAccount) ([]*api.ACMEA
 	return acmeAccounts, nil
 }
 
-func encodeGRPCACMEAccounts(acmeAccounts []*api.ACMEAccount) ([]*apiv1.ACMEAccount, error) {
-	grpcACMEAccounts := make([]*apiv1.ACMEAccount, len(acmeAccounts))
-	for i, acmeAccount := range acmeAccounts {
-		grpcACMEAccount, err := encodeGRPCACMEAccount(acmeAccount)
-		if err != nil {
-			return nil, err
-		}
-		grpcACMEAccounts[i] = grpcACMEAccount
-	}
-	return grpcACMEAccounts, nil
-}
-
-func decodeGRPCCreateRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	req := grpcReq.(*apiv1.CreateACMEAccountRequest)
-	acmeAccount, err := decodeGRPCACMEAccount(req.GetAcmeAccount())
-	if err != nil {
-		return nil, err
-	}
-	return endpoint.CreateRequest{
-		Parent:      req.GetParent(),
-		ACMEAccount: acmeAccount,
-	}, nil
-}
-
 func decodeGRPCCreateResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
 	reply := grpcReply.(*apiv1.ACMEAccount)
 	acmeAccount, err := decodeGRPCACMEAccount(reply)
@@ -88,11 +63,6 @@ func decodeGRPCCreateResponse(_ context.Context, grpcReply interface{}) (interfa
 	return endpoint.CreateResponse{
 		ACMEAccount: acmeAccount,
 	}, nil
-}
-
-func encodeGRPCCreateResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(endpoint.CreateResponse)
-	return encodeGRPCACMEAccount(resp.ACMEAccount)
 }
 
 func encodeGRPCCreateRequest(_ context.Context, request interface{}) (interface{}, error) {
@@ -107,32 +77,14 @@ func encodeGRPCCreateRequest(_ context.Context, request interface{}) (interface{
 	}, nil
 }
 
-func decodeGRPCDeleteRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	req := grpcReq.(*apiv1.DeleteACMEAccountRequest)
-	return endpoint.DeleteRequest{
-		Name: req.GetName(),
-	}, nil
-}
-
 func decodeGRPCDeleteResponse(_ context.Context, _ interface{}) (interface{}, error) {
 	return endpoint.DeleteResponse{}, nil
-}
-
-func encodeGRPCDeleteResponse(_ context.Context, _ interface{}) (interface{}, error) {
-	return &emptypb.Empty{}, nil
 }
 
 func encodeGRPCDeleteRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(endpoint.DeleteRequest)
 	return &apiv1.DeleteACMEAccountRequest{
 		Name: req.Name,
-	}, nil
-}
-
-func decodeGRPCGetRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	req := grpcReq.(*apiv1.GetACMEAccountRequest)
-	return endpoint.GetRequest{
-		Name: req.GetName(),
 	}, nil
 }
 
@@ -147,24 +99,10 @@ func decodeGRPCGetResponse(_ context.Context, grpcReply interface{}) (interface{
 	}, nil
 }
 
-func encodeGRPCGetResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(endpoint.GetResponse)
-	return encodeGRPCACMEAccount(resp.ACMEAccount)
-}
-
 func encodeGRPCGetRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(endpoint.GetRequest)
 	return &apiv1.GetACMEAccountRequest{
 		Name: req.Name,
-	}, nil
-}
-
-func decodeGRPCListRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	req := grpcReq.(*apiv1.ListACMEAccountsRequest)
-	return endpoint.ListRequest{
-		Parent:    req.GetParent(),
-		PageSize:  int(req.GetPageSize()),
-		PageToken: req.GetPageToken(),
 	}, nil
 }
 
@@ -180,37 +118,12 @@ func decodeGRPCListResponse(_ context.Context, grpcReply interface{}) (interface
 	}, nil
 }
 
-func encodeGRPCListResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(endpoint.ListResponse)
-	acmeAccounts, err := encodeGRPCACMEAccounts(resp.ACMEAccounts)
-	if err != nil {
-		return nil, err
-	}
-	return &apiv1.ListACMEAccountsResponse{
-		AcmeAccounts:  acmeAccounts,
-		NextPageToken: resp.NextPageToken,
-	}, nil
-}
-
 func encodeGRPCListRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(endpoint.ListRequest)
 	return &apiv1.ListACMEAccountsRequest{
 		Parent:    req.Parent,
 		PageSize:  int32(req.PageSize),
 		PageToken: req.PageToken,
-	}, nil
-}
-
-func decodeGRPCUpdateRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	req := grpcReq.(*apiv1.UpdateACMEAccountRequest)
-	acmeAccount, err := decodeGRPCACMEAccount(req.GetAcmeAccount())
-	if err != nil {
-		return nil, err
-	}
-	return endpoint.UpdateRequest{
-		Name:        req.GetName(),
-		UpdateMask:  req.GetUpdateMask().GetPaths(),
-		ACMEAccount: acmeAccount,
 	}, nil
 }
 
@@ -223,11 +136,6 @@ func decodeGRPCUpdateResponse(_ context.Context, grpcReply interface{}) (interfa
 	return endpoint.UpdateResponse{
 		ACMEAccount: acmeAccount,
 	}, nil
-}
-
-func encodeGRPCUpdateResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(endpoint.UpdateResponse)
-	return encodeGRPCACMEAccount(resp.ACMEAccount)
 }
 
 func encodeGRPCUpdateRequest(_ context.Context, request interface{}) (interface{}, error) {

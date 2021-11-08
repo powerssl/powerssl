@@ -5,7 +5,7 @@ import (
 
 	cmdutil "powerssl.dev/common/cmd"
 
-	"powerssl.dev/powerutil/internal"
+	"powerssl.dev/powerutil/internal/vault"
 )
 
 func newCmdVault() *cobra.Command {
@@ -16,7 +16,7 @@ func newCmdVault() *cobra.Command {
 		Short: "Vault migrations",
 		Args:  cobra.NoArgs,
 		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
-			return internal.RunVault(addr, ca, caKey)
+			return vault.RunVault(addr, ca, caKey)
 		}),
 	}
 

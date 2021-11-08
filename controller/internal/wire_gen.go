@@ -18,6 +18,7 @@ import (
 	"powerssl.dev/controller/internal/service"
 	"powerssl.dev/controller/internal/service/acme"
 	"powerssl.dev/controller/internal/service/integration"
+	"powerssl.dev/controller/internal/worker"
 	"powerssl.dev/sdk/apiserver"
 )
 
@@ -74,8 +75,8 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 		cleanup()
 		return nil, nil, err
 	}
-	internalWorkerF := provideWorkerF(ctx, apiserverClient, vaultClient, clientClient)
-	v := provideRunnerF(f, metricsF, serverF, internalWorkerF)
+	workerF := worker.Provide(ctx, apiserverClient, vaultClient, clientClient)
+	v := provideRunnerF(f, metricsF, serverF, workerF)
 	return v, func() {
 		cleanup3()
 		cleanup2()

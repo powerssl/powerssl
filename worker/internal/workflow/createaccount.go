@@ -49,7 +49,7 @@ func CreateAccount(ctx temporalworkflow.Context, params workflow.CreateAccountPa
 		Name:       params.Account,
 		UpdateMask: []string{"account_url"},
 		ACMEAccount: &api.ACMEAccount{
-			AccountURL: createACMEAccountResult.Account.URL,
+			AccountURL: createACMEAccountResult.Account.GetUrl(),
 		},
 	}).Get(ctx, nil); err != nil {
 		return err

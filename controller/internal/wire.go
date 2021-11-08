@@ -17,6 +17,7 @@ import (
 	"powerssl.dev/sdk/apiserver"
 
 	"powerssl.dev/controller/internal/service"
+	"powerssl.dev/controller/internal/worker"
 )
 
 func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error) {
@@ -29,7 +30,6 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 		provideRunnerF,
 		provideTemporalClientComponent,
 		provideTracingComponent,
-		provideWorkerF,
 		service.Provider,
 		tracing.Provider,
 		transport.Provider,
@@ -43,5 +43,6 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 			"Tracer",
 			"VaultClientConfig",
 		),
+		worker.Provide,
 	))
 }

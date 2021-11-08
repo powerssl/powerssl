@@ -6,7 +6,6 @@ import (
 	"github.com/go-kit/kit/endpoint"
 
 	"powerssl.dev/sdk/apiserver/api"
-	"powerssl.dev/sdk/apiserver/user"
 )
 
 type Endpoints struct {
@@ -112,67 +111,4 @@ type UpdateRequest struct {
 
 type UpdateResponse struct {
 	User *api.User
-}
-
-func MakeCreateEndpoint(s user.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(CreateRequest)
-		user, err := s.Create(ctx, req.User)
-		if err != nil {
-			return nil, err
-		}
-		return CreateResponse{
-			User: user,
-		}, nil
-	}
-}
-
-func MakeDeleteEndpoint(s user.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(DeleteRequest)
-		if err := s.Delete(ctx, req.Name); err != nil {
-			return nil, err
-		}
-		return DeleteResponse{}, nil
-	}
-}
-
-func MakeGetEndpoint(s user.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(GetRequest)
-		user, err := s.Get(ctx, req.Name)
-		if err != nil {
-			return nil, err
-		}
-		return GetResponse{
-			User: user,
-		}, nil
-	}
-}
-
-func MakeListEndpoint(s user.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(ListRequest)
-		users, nextPageToken, err := s.List(ctx, req.PageSize, req.PageToken)
-		if err != nil {
-			return nil, err
-		}
-		return ListResponse{
-			Users:         users,
-			NextPageToken: nextPageToken,
-		}, nil
-	}
-}
-
-func MakeUpdateEndpoint(s user.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(UpdateRequest)
-		user, err := s.Update(ctx, req.Name, req.User)
-		if err != nil {
-			return nil, err
-		}
-		return UpdateResponse{
-			User: user,
-		}, nil
-	}
 }

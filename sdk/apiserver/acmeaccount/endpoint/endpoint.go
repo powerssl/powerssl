@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-kit/kit/endpoint"
 
-	"powerssl.dev/sdk/apiserver/acmeaccount"
 	"powerssl.dev/sdk/apiserver/api"
 )
 
@@ -118,67 +117,4 @@ type UpdateRequest struct {
 
 type UpdateResponse struct {
 	ACMEAccount *api.ACMEAccount
-}
-
-func MakeCreateEndpoint(s acmeaccount.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(CreateRequest)
-		acmeAccount, err := s.Create(ctx, req.Parent, req.ACMEAccount)
-		if err != nil {
-			return nil, err
-		}
-		return CreateResponse{
-			ACMEAccount: acmeAccount,
-		}, nil
-	}
-}
-
-func MakeDeleteEndpoint(s acmeaccount.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(DeleteRequest)
-		if err := s.Delete(ctx, req.Name); err != nil {
-			return nil, err
-		}
-		return DeleteResponse{}, nil
-	}
-}
-
-func MakeGetEndpoint(s acmeaccount.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(GetRequest)
-		acmeAccount, err := s.Get(ctx, req.Name)
-		if err != nil {
-			return nil, err
-		}
-		return GetResponse{
-			ACMEAccount: acmeAccount,
-		}, nil
-	}
-}
-
-func MakeListEndpoint(s acmeaccount.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(ListRequest)
-		acmeAccounts, nextPageToken, err := s.List(ctx, req.Parent, req.PageSize, req.PageToken)
-		if err != nil {
-			return nil, err
-		}
-		return ListResponse{
-			ACMEAccounts:  acmeAccounts,
-			NextPageToken: nextPageToken,
-		}, nil
-	}
-}
-
-func MakeUpdateEndpoint(s acmeaccount.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(UpdateRequest)
-		acmeAccount, err := s.Update(ctx, req.Name, req.UpdateMask, req.ACMEAccount)
-		if err != nil {
-			return nil, err
-		}
-		return UpdateResponse{
-			ACMEAccount: acmeAccount,
-		}, nil
-	}
 }

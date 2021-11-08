@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"fmt"
 
+	apiv1 "powerssl.dev/api/controller/v1"
 	"powerssl.dev/sdk/controller/acme"
 	"powerssl.dev/sdk/controller/api"
 )
@@ -42,36 +43,36 @@ func New(client acme.Service, handler Integration) *integration {
 	}
 }
 
-func (i *integration) HandleActivity(ctx context.Context, activity *api.Activity) error {
+func (i *integration) HandleActivity(ctx context.Context, activity *apiv1.Activity) error {
 	var err error
-	switch activity.Name {
-	case api.ActivityACMECreateAccount:
+	switch activity.GetName() {
+	case apiv1.Activity_ACME_CREATE_ACCOUNT:
 		err = i.createAccount(ctx, activity)
-	case api.ActivityACMECreateAuthorization:
+	case apiv1.Activity_ACME_CREATE_AUTHORIZATION:
 		err = i.createAuthorization(ctx, activity)
-	case api.ActivityACMECreateOrder:
+	case apiv1.Activity_ACME_CREATE_ORDER:
 		err = i.createOrder(ctx, activity)
-	case api.ActivityACMEDeactivateAccount:
+	case apiv1.Activity_ACME_DEACTIVATE_ACCOUNT:
 		err = i.deactivateAccount(ctx, activity)
-	case api.ActivityACMEDeactivateAuthorization:
+	case apiv1.Activity_ACME_DEACTIVATE_AUTHORIZATION:
 		err = i.deactivateAuthorization(ctx, activity)
-	case api.ActivityACMEFinalizeOrder:
+	case apiv1.Activity_ACME_FINALIZE_ORDER:
 		err = i.finalizeOrder(ctx, activity)
-	case api.ActivityACMEGetAuthorization:
+	case apiv1.Activity_ACME_GET_AUTHORIZATION:
 		err = i.getAuthorization(ctx, activity)
-	case api.ActivityACMEGetCertificate:
+	case apiv1.Activity_ACME_GET_CERTIFICATE:
 		err = i.getCertificate(ctx, activity)
-	case api.ActivityACMEGetChallenge:
+	case apiv1.Activity_ACME_GET_CHALLENGE:
 		err = i.getChallenge(ctx, activity)
-	case api.ActivityACMEGetOrder:
+	case apiv1.Activity_ACME_GET_ORDER:
 		err = i.getOrder(ctx, activity)
-	case api.ActivityACMERekeyAccount:
+	case apiv1.Activity_ACME_REKEY_ACCOUNT:
 		err = i.rekeyAccount(ctx, activity)
-	case api.ActivityACMERevokeCertificate:
+	case apiv1.Activity_ACME_REVOKE_CERTIFICATE:
 		err = i.revokeCertificate(ctx, activity)
-	case api.ActivityACMEUpdateAccount:
+	case apiv1.Activity_ACME_UPDATE_ACCOUNT:
 		err = i.updateAccount(ctx, activity)
-	case api.ActivityACMEValidateChallenge:
+	case apiv1.Activity_ACME_VALIDATE_CHALLENGE:
 		err = i.validateChallenge(ctx, activity)
 	default:
 		err = fmt.Errorf("activity %s not implemented", activity.Name)
@@ -79,8 +80,16 @@ func (i *integration) HandleActivity(ctx context.Context, activity *api.Activity
 	return err
 }
 
-func (i *integration) createAccount(ctx context.Context, activity *api.Activity) error {
-	activity, keyToken, directoryURL, termsOfServiceAgreed, contacts, err := i.client.GetCreateAccountRequest(ctx, activity)
+func apiActivity(activity *apiv1.Activity) *api.Activity {
+	return &api.Activity{
+		Name:      api.ActivityName(activity.GetName()),
+		Signature: activity.GetSignature(),
+		Token:     activity.GetToken(),
+	}
+}
+
+func (i *integration) createAccount(ctx context.Context, activity *apiv1.Activity) error {
+	apiActivity, keyToken, directoryURL, termsOfServiceAgreed, contacts, err := i.client.GetCreateAccountRequest(ctx, apiActivity(activity))
 	if err != nil {
 		return err
 	}
@@ -89,14 +98,11 @@ func (i *integration) createAccount(ctx context.Context, activity *api.Activity)
 	if err != nil {
 		erro = &api.Error{Message: err.Error()}
 	}
-	if err := i.client.SetCreateAccountResponse(ctx, activity, account, erro); err != nil {
-		return err
-	}
-	return nil
+	return i.client.SetCreateAccountResponse(ctx, apiActivity, account, erro)
 }
 
-func (i *integration) createAuthorization(ctx context.Context, activity *api.Activity) error {
-	activity, directoryURL, accountURL, identifier, err := i.client.GetCreateAuthorizationRequest(ctx, activity)
+func (i *integration) createAuthorization(ctx context.Context, activity *apiv1.Activity) error {
+	apiActivity, directoryURL, accountURL, identifier, err := i.client.GetCreateAuthorizationRequest(ctx, apiActivity(activity))
 	if err != nil {
 		return err
 	}
@@ -105,14 +111,11 @@ func (i *integration) createAuthorization(ctx context.Context, activity *api.Act
 	if err != nil {
 		erro = &api.Error{Message: err.Error()}
 	}
-	if err := i.client.SetCreateAuthorizationResponse(ctx, activity, authorization, erro); err != nil {
-		return err
-	}
-	return nil
+	return i.client.SetCreateAuthorizationResponse(ctx, apiActivity, authorization, erro)
 }
 
-func (i *integration) createOrder(ctx context.Context, activity *api.Activity) error {
-	activity, directoryURL, accountURL, identifiers, notBefore, notAfter, err := i.client.GetCreateOrderRequest(ctx, activity)
+func (i *integration) createOrder(ctx context.Context, activity *apiv1.Activity) error {
+	apiActivity, directoryURL, accountURL, identifiers, notBefore, notAfter, err := i.client.GetCreateOrderRequest(ctx, apiActivity(activity))
 	if err != nil {
 		return err
 	}
@@ -121,14 +124,11 @@ func (i *integration) createOrder(ctx context.Context, activity *api.Activity) e
 	if err != nil {
 		erro = &api.Error{Message: err.Error()}
 	}
-	if err := i.client.SetCreateOrderResponse(ctx, activity, order, erro); err != nil {
-		return err
-	}
-	return nil
+	return i.client.SetCreateOrderResponse(ctx, apiActivity, order, erro)
 }
 
-func (i *integration) deactivateAccount(ctx context.Context, activity *api.Activity) error {
-	activity, accountURL, err := i.client.GetDeactivateAccountRequest(ctx, activity)
+func (i *integration) deactivateAccount(ctx context.Context, activity *apiv1.Activity) error {
+	apiActivity, accountURL, err := i.client.GetDeactivateAccountRequest(ctx, apiActivity(activity))
 	if err != nil {
 		return err
 	}
@@ -137,14 +137,11 @@ func (i *integration) deactivateAccount(ctx context.Context, activity *api.Activ
 	if err != nil {
 		erro = &api.Error{Message: err.Error()}
 	}
-	if err := i.client.SetDeactivateAccountResponse(ctx, activity, account, erro); err != nil {
-		return err
-	}
-	return nil
+	return i.client.SetDeactivateAccountResponse(ctx, apiActivity, account, erro)
 }
 
-func (i *integration) deactivateAuthorization(ctx context.Context, activity *api.Activity) error {
-	activity, accountURL, authorizationURL, err := i.client.GetDeactivateAuthorizationRequest(ctx, activity)
+func (i *integration) deactivateAuthorization(ctx context.Context, activity *apiv1.Activity) error {
+	apiActivity, accountURL, authorizationURL, err := i.client.GetDeactivateAuthorizationRequest(ctx, apiActivity(activity))
 	if err != nil {
 		return err
 	}
@@ -153,14 +150,11 @@ func (i *integration) deactivateAuthorization(ctx context.Context, activity *api
 	if err != nil {
 		erro = &api.Error{Message: err.Error()}
 	}
-	if err := i.client.SetDeactivateAuthorizationResponse(ctx, activity, authorization, erro); err != nil {
-		return err
-	}
-	return nil
+	return i.client.SetDeactivateAuthorizationResponse(ctx, apiActivity, authorization, erro)
 }
 
-func (i *integration) finalizeOrder(ctx context.Context, activity *api.Activity) error {
-	activity, accountURL, orderURL, certificateSigningRequest, err := i.client.GetFinalizeOrderRequest(ctx, activity)
+func (i *integration) finalizeOrder(ctx context.Context, activity *apiv1.Activity) error {
+	apiActivity, accountURL, orderURL, certificateSigningRequest, err := i.client.GetFinalizeOrderRequest(ctx, apiActivity(activity))
 	if err != nil {
 		return err
 	}
@@ -169,14 +163,11 @@ func (i *integration) finalizeOrder(ctx context.Context, activity *api.Activity)
 	if err != nil {
 		erro = &api.Error{Message: err.Error()}
 	}
-	if err := i.client.SetFinalizeOrderResponse(ctx, activity, order, erro); err != nil {
-		return err
-	}
-	return nil
+	return i.client.SetFinalizeOrderResponse(ctx, apiActivity, order, erro)
 }
 
-func (i *integration) getAuthorization(ctx context.Context, activity *api.Activity) error {
-	activity, accountURL, authorizationURL, err := i.client.GetGetAuthorizationRequest(ctx, activity)
+func (i *integration) getAuthorization(ctx context.Context, activity *apiv1.Activity) error {
+	apiActivity, accountURL, authorizationURL, err := i.client.GetGetAuthorizationRequest(ctx, apiActivity(activity))
 	if err != nil {
 		return err
 	}
@@ -185,14 +176,11 @@ func (i *integration) getAuthorization(ctx context.Context, activity *api.Activi
 	if err != nil {
 		erro = &api.Error{Message: err.Error()}
 	}
-	if err := i.client.SetGetAuthorizationResponse(ctx, activity, authorization, erro); err != nil {
-		return err
-	}
-	return nil
+	return i.client.SetGetAuthorizationResponse(ctx, apiActivity, authorization, erro)
 }
 
-func (i *integration) getCertificate(ctx context.Context, activity *api.Activity) error {
-	activity, accountURL, certificateURL, err := i.client.GetGetCertificateRequest(ctx, activity)
+func (i *integration) getCertificate(ctx context.Context, activity *apiv1.Activity) error {
+	apiActivity, accountURL, certificateURL, err := i.client.GetGetCertificateRequest(ctx, apiActivity(activity))
 	if err != nil {
 		return err
 	}
@@ -201,14 +189,11 @@ func (i *integration) getCertificate(ctx context.Context, activity *api.Activity
 	if err != nil {
 		erro = &api.Error{Message: err.Error()}
 	}
-	if err := i.client.SetGetCertificateResponse(ctx, activity, certificates, erro); err != nil {
-		return err
-	}
-	return nil
+	return i.client.SetGetCertificateResponse(ctx, apiActivity, certificates, erro)
 }
 
-func (i *integration) getChallenge(ctx context.Context, activity *api.Activity) error {
-	activity, accountURL, challengeURL, err := i.client.GetGetChallengeRequest(ctx, activity)
+func (i *integration) getChallenge(ctx context.Context, activity *apiv1.Activity) error {
+	apiActivity, accountURL, challengeURL, err := i.client.GetGetChallengeRequest(ctx, apiActivity(activity))
 	if err != nil {
 		return err
 	}
@@ -217,14 +202,11 @@ func (i *integration) getChallenge(ctx context.Context, activity *api.Activity) 
 	if err != nil {
 		erro = &api.Error{Message: err.Error()}
 	}
-	if err := i.client.SetGetChallengeResponse(ctx, activity, challenge, erro); err != nil {
-		return err
-	}
-	return nil
+	return i.client.SetGetChallengeResponse(ctx, apiActivity, challenge, erro)
 }
 
-func (i *integration) getOrder(ctx context.Context, activity *api.Activity) error {
-	activity, accountURL, orderURL, err := i.client.GetGetOrderRequest(ctx, activity)
+func (i *integration) getOrder(ctx context.Context, activity *apiv1.Activity) error {
+	apiActivity, accountURL, orderURL, err := i.client.GetGetOrderRequest(ctx, apiActivity(activity))
 	if err != nil {
 		return err
 	}
@@ -233,14 +215,11 @@ func (i *integration) getOrder(ctx context.Context, activity *api.Activity) erro
 	if err != nil {
 		erro = &api.Error{Message: err.Error()}
 	}
-	if err := i.client.SetGetOrderResponse(ctx, activity, order, erro); err != nil {
-		return err
-	}
-	return nil
+	return i.client.SetGetOrderResponse(ctx, apiActivity, order, erro)
 }
 
-func (i *integration) rekeyAccount(ctx context.Context, activity *api.Activity) error {
-	activity, accountURL, directoryURL, err := i.client.GetRekeyAccountRequest(ctx, activity)
+func (i *integration) rekeyAccount(ctx context.Context, activity *apiv1.Activity) error {
+	apiActivity, accountURL, directoryURL, err := i.client.GetRekeyAccountRequest(ctx, apiActivity(activity))
 	if err != nil {
 		return err
 	}
@@ -249,14 +228,11 @@ func (i *integration) rekeyAccount(ctx context.Context, activity *api.Activity) 
 	if err != nil {
 		erro = &api.Error{Message: err.Error()}
 	}
-	if err := i.client.SetRekeyAccountResponse(ctx, activity, account, erro); err != nil {
-		return err
-	}
-	return nil
+	return i.client.SetRekeyAccountResponse(ctx, apiActivity, account, erro)
 }
 
-func (i *integration) revokeCertificate(ctx context.Context, activity *api.Activity) error {
-	activity, directoryURL, accountURL, certificate, reason, err := i.client.GetRevokeCertificateRequest(ctx, activity)
+func (i *integration) revokeCertificate(ctx context.Context, activity *apiv1.Activity) error {
+	apiActivity, directoryURL, accountURL, certificate, reason, err := i.client.GetRevokeCertificateRequest(ctx, apiActivity(activity))
 	if err != nil {
 		return err
 	}
@@ -265,14 +241,11 @@ func (i *integration) revokeCertificate(ctx context.Context, activity *api.Activ
 	if err != nil {
 		erro = &api.Error{Message: err.Error()}
 	}
-	if err := i.client.SetRevokeCertificateResponse(ctx, activity, erro); err != nil {
-		return err
-	}
-	return nil
+	return i.client.SetRevokeCertificateResponse(ctx, apiActivity, erro)
 }
 
-func (i *integration) updateAccount(ctx context.Context, activity *api.Activity) error {
-	activity, accountURL, contacts, err := i.client.GetUpdateAccountRequest(ctx, activity)
+func (i *integration) updateAccount(ctx context.Context, activity *apiv1.Activity) error {
+	apiActivity, accountURL, contacts, err := i.client.GetUpdateAccountRequest(ctx, apiActivity(activity))
 	if err != nil {
 		return err
 	}
@@ -281,14 +254,11 @@ func (i *integration) updateAccount(ctx context.Context, activity *api.Activity)
 	if err != nil {
 		erro = &api.Error{Message: err.Error()}
 	}
-	if err := i.client.SetUpdateAccountResponse(ctx, activity, account, erro); err != nil {
-		return err
-	}
-	return nil
+	return i.client.SetUpdateAccountResponse(ctx, apiActivity, account, erro)
 }
 
-func (i *integration) validateChallenge(ctx context.Context, activity *api.Activity) error {
-	activity, accountURL, challengeURL, err := i.client.GetValidateChallengeRequest(ctx, activity)
+func (i *integration) validateChallenge(ctx context.Context, activity *apiv1.Activity) error {
+	apiActivity, accountURL, challengeURL, err := i.client.GetValidateChallengeRequest(ctx, apiActivity(activity))
 	if err != nil {
 		return err
 	}
@@ -297,8 +267,5 @@ func (i *integration) validateChallenge(ctx context.Context, activity *api.Activ
 	if err != nil {
 		erro = &api.Error{Message: err.Error()}
 	}
-	if err := i.client.SetValidateChallengeResponse(ctx, activity, challenge, erro); err != nil {
-		return err
-	}
-	return nil
+	return i.client.SetValidateChallengeResponse(ctx, apiActivity, challenge, erro)
 }

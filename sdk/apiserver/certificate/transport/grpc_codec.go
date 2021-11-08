@@ -3,7 +3,6 @@ package transport // import "powerssl.dev/sdk/apiserver/certificate/transport"
 import (
 	"context"
 
-	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
@@ -58,29 +57,6 @@ func decodeGRPCCertificates(grpcCertificates []*apiv1.Certificate) ([]*api.Certi
 	return certificates, nil
 }
 
-func encodeGRPCCertificates(certificates []*api.Certificate) ([]*apiv1.Certificate, error) {
-	grpcCertificates := make([]*apiv1.Certificate, len(certificates))
-	for i, certificate := range certificates {
-		grpcCertificate, err := encodeGRPCCertificate(certificate)
-		if err != nil {
-			return nil, err
-		}
-		grpcCertificates[i] = grpcCertificate
-	}
-	return grpcCertificates, nil
-}
-
-func decodeGRPCCreateRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	req := grpcReq.(*apiv1.CreateCertificateRequest)
-	certificate, err := decodeGRPCCertificate(req.GetCertificate())
-	if err != nil {
-		return nil, err
-	}
-	return endpoint.CreateRequest{
-		Certificate: certificate,
-	}, nil
-}
-
 func decodeGRPCCreateResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {
 	reply := grpcReply.(*apiv1.Certificate)
 	certificate, err := decodeGRPCCertificate(reply)
@@ -90,11 +66,6 @@ func decodeGRPCCreateResponse(_ context.Context, grpcReply interface{}) (interfa
 	return endpoint.CreateResponse{
 		Certificate: certificate,
 	}, nil
-}
-
-func encodeGRPCCreateResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(endpoint.CreateResponse)
-	return encodeGRPCCertificate(resp.Certificate)
 }
 
 func encodeGRPCCreateRequest(_ context.Context, request interface{}) (interface{}, error) {
@@ -108,32 +79,14 @@ func encodeGRPCCreateRequest(_ context.Context, request interface{}) (interface{
 	}, nil
 }
 
-func decodeGRPCDeleteRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	req := grpcReq.(*apiv1.DeleteCertificateRequest)
-	return endpoint.DeleteRequest{
-		Name: req.GetName(),
-	}, nil
-}
-
 func decodeGRPCDeleteResponse(_ context.Context, _ interface{}) (interface{}, error) {
 	return endpoint.DeleteResponse{}, nil
-}
-
-func encodeGRPCDeleteResponse(_ context.Context, _ interface{}) (interface{}, error) {
-	return &emptypb.Empty{}, nil
 }
 
 func encodeGRPCDeleteRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(endpoint.DeleteRequest)
 	return &apiv1.DeleteCertificateRequest{
 		Name: req.Name,
-	}, nil
-}
-
-func decodeGRPCGetRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	req := grpcReq.(*apiv1.GetCertificateRequest)
-	return endpoint.GetRequest{
-		Name: req.GetName(),
 	}, nil
 }
 
@@ -148,23 +101,10 @@ func decodeGRPCGetResponse(_ context.Context, grpcReply interface{}) (interface{
 	}, nil
 }
 
-func encodeGRPCGetResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(endpoint.GetResponse)
-	return encodeGRPCCertificate(resp.Certificate)
-}
-
 func encodeGRPCGetRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(endpoint.GetRequest)
 	return &apiv1.GetCertificateRequest{
 		Name: req.Name,
-	}, nil
-}
-
-func decodeGRPCListRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	req := grpcReq.(*apiv1.ListCertificatesRequest)
-	return endpoint.ListRequest{
-		PageSize:  int(req.GetPageSize()),
-		PageToken: req.GetPageToken(),
 	}, nil
 }
 
@@ -180,35 +120,11 @@ func decodeGRPCListResponse(_ context.Context, grpcReply interface{}) (interface
 	}, nil
 }
 
-func encodeGRPCListResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(endpoint.ListResponse)
-	certificates, err := encodeGRPCCertificates(resp.Certificates)
-	if err != nil {
-		return nil, err
-	}
-	return &apiv1.ListCertificatesResponse{
-		Certificates:  certificates,
-		NextPageToken: resp.NextPageToken,
-	}, nil
-}
-
 func encodeGRPCListRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(endpoint.ListRequest)
 	return &apiv1.ListCertificatesRequest{
 		PageSize:  int32(req.PageSize),
 		PageToken: req.PageToken,
-	}, nil
-}
-
-func decodeGRPCUpdateRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	req := grpcReq.(*apiv1.UpdateCertificateRequest)
-	certificate, err := decodeGRPCCertificate(req.GetCertificate())
-	if err != nil {
-		return nil, err
-	}
-	return endpoint.UpdateRequest{
-		Name:        req.GetName(),
-		Certificate: certificate,
 	}, nil
 }
 
@@ -221,11 +137,6 @@ func decodeGRPCUpdateResponse(_ context.Context, grpcReply interface{}) (interfa
 	return endpoint.UpdateResponse{
 		Certificate: certificate,
 	}, nil
-}
-
-func encodeGRPCUpdateResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(endpoint.UpdateResponse)
-	return encodeGRPCCertificate(resp.Certificate)
 }
 
 func encodeGRPCUpdateRequest(_ context.Context, request interface{}) (interface{}, error) {
