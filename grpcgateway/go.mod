@@ -11,11 +11,9 @@ replace powerssl.dev/common => ../common
 replace powerssl.dev/sdk => ../sdk
 
 require (
-	github.com/go-playground/validator/v10 v10.9.0
 	github.com/google/wire v0.5.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.6.0
 	github.com/spf13/cobra v1.2.1
-	github.com/spf13/viper v1.8.1
 	go.uber.org/zap v1.19.1
 	golang.org/x/net v0.0.0-20210917163549-3c21e5b27794
 	google.golang.org/grpc v1.40.0
@@ -33,6 +31,7 @@ require (
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
+	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/subcommands v1.0.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -53,6 +52,7 @@ require (
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/spf13/viper v1.8.1 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/goleak v1.1.11 // indirect

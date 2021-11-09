@@ -15,7 +15,7 @@ var Provider = wire.NewSet(
 	interrupthandler.Provider,
 	log.Provider,
 	tracer.Provider,
-	wire.FieldsOf(new(Config), "APIServerClient", "Log", "Tracer"),
+	wire.FieldsOf(new(*Config), "APIServerClient", "Log", "Tracer"),
 )
 
 func Provide(interruptHandlerF interrupthandler.F, _ *apiserver.Client) []func() error {

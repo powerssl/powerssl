@@ -58,7 +58,7 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 		return nil, nil, err
 	}
 	apiserverConfig := cfg.APIServerClient
-	apiserverClient, err := apiserver.Provide(ctx, apiserverConfig, sugaredLogger, opentracingTracer)
+	apiserverClient, err := apiserver.NewClient(ctx, apiserverConfig, sugaredLogger, opentracingTracer)
 	if err != nil {
 		cleanup3()
 		cleanup2()

@@ -11,10 +11,10 @@ replace powerssl.dev/common => ../common
 replace powerssl.dev/sdk => ../sdk
 
 require (
-	github.com/go-playground/validator/v10 v10.9.0
+	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/spf13/cobra v1.2.1
-	github.com/spf13/viper v1.8.1
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	github.com/spf13/viper v1.8.1 // indirect
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	powerssl.dev/common v0.0.0-00010101000000-000000000000
 )
 

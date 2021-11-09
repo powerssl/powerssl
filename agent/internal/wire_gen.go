@@ -30,7 +30,7 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 		cleanup()
 		return nil, nil, err
 	}
-	client, err := apiserver.Provide(ctx, apiserverConfig, sugaredLogger, opentracingTracer)
+	client, err := apiserver.NewClient(ctx, apiserverConfig, sugaredLogger, opentracingTracer)
 	if err != nil {
 		cleanup2()
 		cleanup()

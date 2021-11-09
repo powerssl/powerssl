@@ -8,7 +8,6 @@ replace powerssl.dev/common => ../common
 
 require (
 	github.com/go-kit/kit v0.11.0
-	github.com/go-playground/validator/v10 v10.9.0
 	github.com/gogo/protobuf v1.3.2
 	github.com/google/wire v0.5.0
 	github.com/hashicorp/vault/api v1.1.1
@@ -29,6 +28,7 @@ require (
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
+	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/golang/mock v1.5.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
