@@ -2,7 +2,6 @@ package integration // import "powerssl.dev/sdk/integration"
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/google/wire"
@@ -11,7 +10,7 @@ import (
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
 	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/tracing"
+	"powerssl.dev/common/tracer"
 	"powerssl.dev/sdk/integration/acme"
 	"powerssl.dev/sdk/integration/dns"
 	"powerssl.dev/sdk/integration/internal"
@@ -19,25 +18,24 @@ import (
 	"powerssl.dev/sdk/controller"
 )
 
+var ProviderACME = wire.NewSet(
+	ProvideACME,
+	provider,
+)
+
+var ProviderDNS = wire.NewSet(
+	ProvideDNS,
+	provider,
+)
+
 var provider = wire.NewSet(
 	Provide,
-	ProvideTracingComponent,
 	controller.Provider,
 	interrupthandler.Provider,
 	log.Provider,
 	metrics.Provider,
-	tracing.Provider,
-	wire.FieldsOf(new(*Config), "AuthToken", "ControllerClientConfig", "Integration", "Metrics", "Tracer"),
-)
-
-var ProviderACME = wire.NewSet(
-	provider,
-	ProvideRunnerACMEF,
-)
-
-var ProviderDNS = wire.NewSet(
-	provider,
-	ProvideRunnerDNSF,
+	tracer.Provider,
+	wire.FieldsOf(new(*Config), "ControllerClient", "Integration", "Log", "Metrics", "Tracer"),
 )
 
 type F func() error
@@ -50,10 +48,9 @@ func Provide(interruptHandlerF interrupthandler.F, metricsServerF metrics.F, run
 	}
 }
 
-func ProvideRunnerACMEF(ctx context.Context, cfg *internal.IntegrationConfig, logger *zap.SugaredLogger, client *controller.GRPCClient, handler acme.Integration) F {
-	name := cfg.Name
+func ProvideACME(ctx context.Context, cfg *internal.IntegrationConfig, logger *zap.SugaredLogger, client *controller.GRPCClient, handler acme.Integration) F {
 	return func() error {
-		integration := internal.NewACME(name, logger, client, handler)
+		integration := internal.NewACME(cfg.Name, logger, client, handler)
 		for {
 			select {
 			case <-ctx.Done():
@@ -66,10 +63,9 @@ func ProvideRunnerACMEF(ctx context.Context, cfg *internal.IntegrationConfig, lo
 	}
 }
 
-func ProvideRunnerDNSF(ctx context.Context, cfg *internal.IntegrationConfig, logger *zap.SugaredLogger, client *controller.GRPCClient, handler dns.Integration) F {
-	name := cfg.Name
+func ProvideDNS(ctx context.Context, cfg *internal.IntegrationConfig, logger *zap.SugaredLogger, client *controller.GRPCClient, handler dns.Integration) F {
 	return func() error {
-		integration := internal.NewDNS(name, logger, client, handler)
+		integration := internal.NewDNS(cfg.Name, logger, client, handler)
 		for {
 			select {
 			case <-ctx.Done():
@@ -80,8 +76,4 @@ func ProvideRunnerDNSF(ctx context.Context, cfg *internal.IntegrationConfig, log
 			}
 		}
 	}
-}
-
-func ProvideTracingComponent(cfg *internal.IntegrationConfig) tracing.TracerComponent {
-	return tracing.TracerComponent(fmt.Sprintf("powerssl-integration-%s", cfg.Kind))
 }

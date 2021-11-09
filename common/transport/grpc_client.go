@@ -10,14 +10,6 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-type ClientConfig struct {
-	Addr                  string `validate:"required,hostname_port"`
-	CAFile                string `mapstructure:"ca-file"`
-	Insecure              bool
-	InsecureSkipTLSVerify bool   `mapstructure:"insecure-skip-tls-verify"`
-	ServerNameOverride    string `mapstructure:"server-name-override"`
-}
-
 func ClientConfigValidator(sl validator.StructLevel) {
 	cfg := sl.Current().Interface().(ClientConfig)
 
@@ -26,7 +18,7 @@ func ClientConfigValidator(sl validator.StructLevel) {
 	}
 }
 
-func NewClientConn(ctx context.Context, cfg *ClientConfig) (*grpc.ClientConn, error) {
+func NewClientConn(ctx context.Context, cfg ClientConfig) (*grpc.ClientConn, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
 

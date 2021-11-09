@@ -1,4 +1,4 @@
-package tracing
+package tracer // import "powerssl.dev/common/tracer"
 
 import (
 	"github.com/google/wire"
@@ -7,15 +7,12 @@ import (
 )
 
 var Provider = wire.NewSet(
-	ProvideTracer,
+	Provide,
 )
 
-type TracerImplementation string
-type TracerComponent string
-
-func ProvideTracer(implementation TracerImplementation, component TracerComponent, logger *zap.SugaredLogger) (opentracing.Tracer, func(), error) {
+func Provide(cfg Config, logger *zap.SugaredLogger) (opentracing.Tracer, func(), error) {
 	logger = logger.With("component", "tracing")
-	tracer, closer, err := Init(string(component), string(implementation), logger)
+	tracer, closer, err := New(cfg, logger)
 	if err != nil {
 		return nil, nil, err
 	}

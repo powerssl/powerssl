@@ -1,4 +1,4 @@
-package validator // import "powerssl.dev/common/validator"
+package config
 
 import (
 	"errors"
@@ -14,15 +14,17 @@ type binding struct {
 	cobra string
 }
 
-func ValidateConfig(validate *validator.Validate, s interface{}) (err error) {
-	if err = validate.Struct(s); err == nil {
-		return nil
+func Validate(i Config) error {
+	i.Defaults()
+	validate := validator.New()
+	if err := validate.Struct(i); err != nil {
+		var errs []string
+		for _, fieldError := range err.(validator.ValidationErrors) {
+			errs = append(errs, "  "+convertFieldError(fieldError))
+		}
+		return errors.New("\n" + strings.Join(unique(errs), "\n") + "\n")
 	}
-	var errs []string
-	for _, fieldError := range err.(validator.ValidationErrors) {
-		errs = append(errs, "  "+convertFieldError(fieldError))
-	}
-	return errors.New("\n" + strings.Join(unique(errs), "\n") + "\n")
+	return nil
 }
 
 func convertFieldError(fieldError validator.FieldError) string {

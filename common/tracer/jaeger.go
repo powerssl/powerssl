@@ -1,4 +1,4 @@
-package tracing // import "powerssl.dev/common/tracing"
+package tracer // import "powerssl.dev/common/tracer"
 
 import (
 	"io"
@@ -7,12 +7,11 @@ import (
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	jaegerzap "github.com/uber/jaeger-client-go/log/zap"
 	jaegerprometheus "github.com/uber/jaeger-lib/metrics/prometheus"
-
-	"powerssl.dev/common/log"
+	"go.uber.org/zap"
 )
 
-func NewJaegerTracer(serviceName string, logger log.Logger) (opentracing.Tracer, io.Closer, error) {
-	cfg, err := jaegercfg.FromEnv()
+func NewJaegerTracer(cfg Config, logger *zap.SugaredLogger) (opentracing.Tracer, io.Closer, error) {
+	config, err := jaegercfg.FromEnv()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -20,8 +19,8 @@ func NewJaegerTracer(serviceName string, logger log.Logger) (opentracing.Tracer,
 	jaegerLogger := jaegerzap.NewLogger(logger.Desugar())
 	jeagerMetricsFactory := jaegerprometheus.New()
 
-	closer, err := cfg.InitGlobalTracer(
-		serviceName,
+	closer, err := config.InitGlobalTracer(
+		cfg.Component,
 		jaegercfg.Logger(jaegerLogger),
 		jaegercfg.Metrics(jeagerMetricsFactory),
 	)

@@ -16,7 +16,6 @@ import (
 	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/api/openapi"
 	"powerssl.dev/backend/httpfs"
-	"powerssl.dev/common/log"
 
 	"powerssl.dev/grpcgateway/internal/swaggerui"
 )
@@ -32,16 +31,16 @@ var serviceHandlers = []serviceHandler{
 type serviceHandler func(context.Context, *runtime.ServeMux, *grpc.ClientConn) error
 
 type Server struct {
-	cfg    *Config
+	cfg    Config
 	logger *zap.SugaredLogger
 	conn   *grpc.ClientConn
 }
 
-func ServeHTTP(ctx context.Context, cfg *Config, logger log.Logger, conn *grpc.ClientConn) error {
+func ServeHTTP(ctx context.Context, cfg Config, logger *zap.SugaredLogger, conn *grpc.ClientConn) error {
 	return New(cfg, logger, conn).ServeHTTP(ctx)
 }
 
-func New(cfg *Config, logger log.Logger, conn *grpc.ClientConn) *Server {
+func New(cfg Config, logger *zap.SugaredLogger, conn *grpc.ClientConn) *Server {
 	return &Server{
 		cfg:    cfg,
 		logger: logger,

@@ -11,7 +11,7 @@ import (
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
 	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/tracing"
+	"powerssl.dev/common/tracer"
 	"powerssl.dev/sdk/controller"
 	"powerssl.dev/sdk/integration/acme"
 	"powerssl.dev/sdk/integration/dns"
@@ -20,30 +20,29 @@ import (
 // Injectors from wire.go:
 
 func InitializeACME(ctx context.Context, cfg *Config, handler acme.Integration) ([]func() error, func(), error) {
-	sugaredLogger, cleanup, err := log.ProvideLogger()
+	config := cfg.Log
+	sugaredLogger, cleanup, err := log.Provide(config)
 	if err != nil {
 		return nil, nil, err
 	}
 	f := interrupthandler.Provide(ctx, sugaredLogger)
-	config := &cfg.Metrics
-	metricsF := metrics.Provide(ctx, config, sugaredLogger)
+	metricsConfig := cfg.Metrics
+	metricsF := metrics.Provide(ctx, metricsConfig, sugaredLogger)
 	integrationConfig := &cfg.Integration
-	clientConfig := &cfg.ControllerClientConfig
-	authToken := cfg.AuthToken
-	tracerImplementation := cfg.Tracer
-	tracerComponent := ProvideTracingComponent(integrationConfig)
-	tracer, cleanup2, err := tracing.ProvideTracer(tracerImplementation, tracerComponent, sugaredLogger)
+	controllerConfig := cfg.ControllerClient
+	tracerConfig := cfg.Tracer
+	opentracingTracer, cleanup2, err := tracer.Provide(tracerConfig, sugaredLogger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	grpcClient, err := controller.Provide(ctx, clientConfig, authToken, sugaredLogger, tracer)
+	grpcClient, err := controller.NewGRPCClient(ctx, controllerConfig, sugaredLogger, opentracingTracer)
 	if err != nil {
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
-	integrationF := ProvideRunnerACMEF(ctx, integrationConfig, sugaredLogger, grpcClient, handler)
+	integrationF := ProvideACME(ctx, integrationConfig, sugaredLogger, grpcClient, handler)
 	v := Provide(f, metricsF, integrationF)
 	return v, func() {
 		cleanup2()
@@ -52,30 +51,29 @@ func InitializeACME(ctx context.Context, cfg *Config, handler acme.Integration) 
 }
 
 func InitializeDNS(ctx context.Context, cfg *Config, handler dns.Integration) ([]func() error, func(), error) {
-	sugaredLogger, cleanup, err := log.ProvideLogger()
+	config := cfg.Log
+	sugaredLogger, cleanup, err := log.Provide(config)
 	if err != nil {
 		return nil, nil, err
 	}
 	f := interrupthandler.Provide(ctx, sugaredLogger)
-	config := &cfg.Metrics
-	metricsF := metrics.Provide(ctx, config, sugaredLogger)
+	metricsConfig := cfg.Metrics
+	metricsF := metrics.Provide(ctx, metricsConfig, sugaredLogger)
 	integrationConfig := &cfg.Integration
-	clientConfig := &cfg.ControllerClientConfig
-	authToken := cfg.AuthToken
-	tracerImplementation := cfg.Tracer
-	tracerComponent := ProvideTracingComponent(integrationConfig)
-	tracer, cleanup2, err := tracing.ProvideTracer(tracerImplementation, tracerComponent, sugaredLogger)
+	controllerConfig := cfg.ControllerClient
+	tracerConfig := cfg.Tracer
+	opentracingTracer, cleanup2, err := tracer.Provide(tracerConfig, sugaredLogger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	grpcClient, err := controller.Provide(ctx, clientConfig, authToken, sugaredLogger, tracer)
+	grpcClient, err := controller.NewGRPCClient(ctx, controllerConfig, sugaredLogger, opentracingTracer)
 	if err != nil {
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
-	integrationF := ProvideRunnerDNSF(ctx, integrationConfig, sugaredLogger, grpcClient, handler)
+	integrationF := ProvideDNS(ctx, integrationConfig, sugaredLogger, grpcClient, handler)
 	v := Provide(f, metricsF, integrationF)
 	return v, func() {
 		cleanup2()

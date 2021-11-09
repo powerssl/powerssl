@@ -20,12 +20,12 @@ type GRPCClient struct {
 	Integration integration.Service
 }
 
-func NewGRPCClient(ctx context.Context, cfg *transport.ClientConfig, authToken string, logger *zap.SugaredLogger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
-	conn, err := transport.NewClientConn(ctx, cfg)
+func NewGRPCClient(ctx context.Context, cfg Config, logger *zap.SugaredLogger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
+	conn, err := transport.NewClientConn(ctx, cfg.Client)
 	if err != nil {
 		return nil, err
 	}
-	authSigner := internal.NewSigner(authToken)
+	authSigner := internal.NewSigner(cfg.AuthToken)
 	var _ = authSigner
 	return &GRPCClient{
 		ACME:        acmetransport.NewGRPCClient(conn, logger, tracer),

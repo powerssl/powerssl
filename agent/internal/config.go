@@ -1,21 +1,19 @@
 package internal
 
 import (
-	"github.com/go-playground/validator/v10"
-
-	"powerssl.dev/common/tracing"
-	"powerssl.dev/common/transport"
-	validator2 "powerssl.dev/common/validator"
+	"powerssl.dev/common/log"
+	"powerssl.dev/common/tracer"
 	"powerssl.dev/sdk/apiserver"
 )
 
+const component = "powerssl-agent"
+
 type Config struct {
-	APIServerClientConfig transport.ClientConfig `mapstructure:"apiserver"`
-	AuthToken             apiserver.AuthToken    `validate:"required"`
-	Tracer                tracing.TracerImplementation
+	APIServerClient apiserver.Config `flag:"apiServerClient"`
+	Log             log.Config       `flag:"log"`
+	Tracer          tracer.Config    `flag:"tracer"`
 }
 
-func (cfg *Config) Validate() error {
-	validate := validator.New()
-	return validator2.ValidateConfig(validate, cfg)
+func (cfg *Config) Defaults() {
+	cfg.Tracer.Component = component
 }

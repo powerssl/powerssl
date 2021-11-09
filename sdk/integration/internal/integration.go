@@ -22,7 +22,7 @@ type IntegrationName string
 
 type IntegrationConfig struct {
 	Kind apiv1.IntegrationKind
-	Name IntegrationName
+	Name string
 }
 
 type integration struct {
@@ -41,7 +41,7 @@ func New(cfg *IntegrationConfig, logger *zap.SugaredLogger, client *controller.G
 	}
 }
 
-func NewACME(name IntegrationName, logger *zap.SugaredLogger, client *controller.GRPCClient, handler acme.Integration) *integration {
+func NewACME(name string, logger *zap.SugaredLogger, client *controller.GRPCClient, handler acme.Integration) *integration {
 	cfg := &IntegrationConfig{
 		Kind: apiv1.IntegrationKind_ACME,
 		Name: name,
@@ -50,7 +50,7 @@ func NewACME(name IntegrationName, logger *zap.SugaredLogger, client *controller
 	return New(cfg, logger, client, acmeHandler)
 }
 
-func NewDNS(name IntegrationName, logger *zap.SugaredLogger, client *controller.GRPCClient, handler dns.Integration) *integration {
+func NewDNS(name string, logger *zap.SugaredLogger, client *controller.GRPCClient, handler dns.Integration) *integration {
 	cfg := &IntegrationConfig{
 		Kind: apiv1.IntegrationKind_DNS,
 		Name: name,

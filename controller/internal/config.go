@@ -1,31 +1,28 @@
 package internal
 
 import (
-	"github.com/go-playground/validator/v10"
-
 	"powerssl.dev/backend/temporal/client"
 	backendtransport "powerssl.dev/backend/transport"
 	"powerssl.dev/backend/vault"
+	"powerssl.dev/common/log"
 	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/tracing"
-	"powerssl.dev/common/transport"
-	validator2 "powerssl.dev/common/validator"
+	"powerssl.dev/common/tracer"
 	"powerssl.dev/sdk/apiserver"
 )
 
+const component = "powerssl-controller"
+
 type Config struct {
-	APIServerClientConfig transport.ClientConfig `mapstructure:"apiserver"`
-	AuthToken             apiserver.AuthToken    `mapstructure:"auth-token" validate:"required"`
-	Metrics               metrics.Config
-	ServerConfig          backendtransport.ServerConfig `mapstructure:",squash"`
-	TemporalClientConfig  client.Config                 `mapstructure:"temporal"`
-	Tracer                tracing.TracerImplementation
-	VaultClientConfig     vault.ClientConfig `mapstructure:"vault"`
+	APIServerClient apiserver.Config              `flag:"apiServerClient" validate:"required"`
+	Log             log.Config                    `flag:"log"`
+	Metrics         metrics.Config                `flag:"metrics"`
+	Server          backendtransport.ServerConfig `flag:"server"`
+	TemporalClient  client.Config                 `flag:"temporalClient"`
+	Tracer          tracer.Config                 `flag:"tracer"`
+	VaultClient     vault.ClientConfig            `flag:"vaultClient"`
 }
 
-func (cfg *Config) Validate() error {
-	validate := validator.New()
-	validate.RegisterStructValidation(transport.ClientConfigValidator, transport.ClientConfig{})
-	validate.RegisterStructValidation(backendtransport.ServerConfigValidator, backendtransport.ServerConfig{})
-	return validator2.ValidateConfig(validate, cfg)
+func (cfg *Config) Defaults() {
+	cfg.TemporalClient.Component = component
+	cfg.Tracer.Component = component
 }

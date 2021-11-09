@@ -6,16 +6,11 @@ import (
 )
 
 type Config struct {
-	Integration *integration.Config
-	Vault       vault.Config
+	Integration integration.Config `flag:"integration"`
+	Vault       vault.Config       `flag:"integration"`
 }
 
-func NewConfig(name integration.IntegrationName) *Config {
-	return &Config{
-		Integration: &integration.Config{
-			Integration: integration.IntegrationConfig{
-				Name: name,
-			},
-		},
-	}
+func (cfg *Config) Defaults() {
+	cfg.Integration.Integration.Name = "acme"
+	cfg.Vault.Address = "https://localhost:8200" // TODO
 }

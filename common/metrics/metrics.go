@@ -8,16 +8,14 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
-
-	"powerssl.dev/common/log"
 )
 
-func ServeMetrics(ctx context.Context, cfg *Config, logger log.Logger) error {
+func ServeMetrics(ctx context.Context, cfg Config, logger *zap.SugaredLogger) error {
 	return NewMetrics(cfg, logger).Serve(ctx)
 }
 
 type Config struct {
-	Addr string
+	Addr string `flag:"addr;;;metrics addr"`
 }
 
 type Metrics struct {
@@ -25,7 +23,7 @@ type Metrics struct {
 	logger *zap.SugaredLogger
 }
 
-func NewMetrics(cfg *Config, logger log.Logger) *Metrics {
+func NewMetrics(cfg Config, logger *zap.SugaredLogger) *Metrics {
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("/debug/pprof/", pprof.Index)

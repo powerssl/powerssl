@@ -1,19 +1,17 @@
 package internal
 
 import (
-	"github.com/go-playground/validator/v10"
-
+	"powerssl.dev/common/log"
 	"powerssl.dev/common/metrics"
-	validator2 "powerssl.dev/common/validator"
 	"powerssl.dev/webapp/internal/server"
 )
 
 type Config struct {
-	Metrics metrics.Config
-	Server  server.Config
+	Log     log.Config     `flag:"log"`
+	Metrics metrics.Config `flag:"metrics"`
+	Server  server.Config  `flag:"server"`
 }
 
-func (cfg *Config) Validate() error {
-	validate := validator.New()
-	return validator2.ValidateConfig(validate, cfg)
+func (cfg *Config) Defaults() {
+	return
 }

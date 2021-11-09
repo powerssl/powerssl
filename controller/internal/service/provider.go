@@ -11,15 +11,15 @@ import (
 )
 
 var Provider = wire.NewSet(
-	ProvideRegisterF,
+	Provide,
 	acme.Provider,
 	integration.Provider,
 )
 
-func ProvideRegisterF(
+func Provide(
 	acmeServiceServer apiv1.ACMEServiceServer,
 	integrationServiceServer apiv1.IntegrationServiceServer,
-) transport.RegisterF {
+) transport.Register {
 	return func(srv *transport.Server) {
 		srv.RegisterService(acme.ServiceDesc, acmeServiceServer)
 		srv.RegisterService(integration.ServiceDesc, integrationServiceServer)

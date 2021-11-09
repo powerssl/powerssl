@@ -19,14 +19,16 @@ func SetClient(ctx context.Context, client *Client) context.Context {
 	return context.WithValue(ctx, clientValue, client)
 }
 
+type AppRole struct {
+	RoleID   string `flag:"roleID;;;vault app role ID" mapstructure:"role-id"`
+	SecretID string `flag:"secretID;;;vault app role secret ID" mapstructure:"secret-id"`
+}
+
 type ClientConfig struct {
-	AppRole struct {
-		RoleID   string `mapstructure:"role-id"`
-		SecretID string `mapstructure:"secret-id"`
-	} `mapstructure:",squash"`
-	CAFile string `mapstructure:"ca-file"`
-	Token  string
-	URL    string `validate:"url"`
+	AppRole AppRole `flag:"appRole;;;vault app role"`
+	CAFile  string  `flag:"caFile;;;vault CA file"`
+	Token   string  `flag:"token;;;vault token"`
+	URL     string  `flag:"url;;;vault URL" validate:"url"`
 }
 
 type Client struct {

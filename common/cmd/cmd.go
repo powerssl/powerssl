@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"powerssl.dev/common/config"
 	"powerssl.dev/common/runner"
 )
 
@@ -32,10 +33,38 @@ func HandleError(f func(cmd *cobra.Command, args []string) error) func(cmd *cobr
 	}
 }
 
+func InitAndRun(cmd *cobra.Command, cfg config.Config, f func(ctx context.Context) ([]func() error, func(), error)) *cobra.Command {
+	config.Flags(cmd.Flags(), cfg)
+	cmd.PreRunE = Validate(func(cmd *cobra.Command, args []string) (config.Config, error) {
+		if err := viper.Unmarshal(&cfg); err != nil {
+			return nil, err
+		}
+		return cfg, nil
+	})
+	cmd.Run = Run(f)
+	return cmd
+}
+
+func Must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func Run(f func(ctx context.Context) ([]func() error, func(), error)) func(cmd *cobra.Command, args []string) {
 	return HandleError(func(cmd *cobra.Command, args []string) error {
 		return runner.Run(f)
 	})
+}
+
+func Validate(f func(cmd *cobra.Command, args []string) (config.Config, error)) func(cmd *cobra.Command, args []string) error {
+	return func(cmd *cobra.Command, args []string) error {
+		i, err := f(cmd, args)
+		if err != nil {
+			return err
+		}
+		return config.Validate(i)
+	}
 }
 
 func initConfig(cmd *cobra.Command, component string, cfgFile *string, verbose *bool) func() {
@@ -54,11 +83,5 @@ func initConfig(cmd *cobra.Command, component string, cfgFile *string, verbose *
 		if err := viper.ReadInConfig(); err == nil && *verbose {
 			cmd.Println("Using config file:", viper.ConfigFileUsed())
 		}
-	}
-}
-
-func Must(err error) {
-	if err != nil {
-		panic(err)
 	}
 }

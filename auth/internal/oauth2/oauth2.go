@@ -41,7 +41,7 @@ func (o *OAuth2) UserInfo(ctx context.Context, provider, state, code string) (*s
 }
 
 func (o *OAuth2) init() {
-	if o.cfg.GitHub != nil {
+	if o.cfg.GitHub.ClientID != "" && o.cfg.GitHub.ClientSecret != "" {
 		o.initGitHub()
 	}
 }

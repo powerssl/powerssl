@@ -8,14 +8,12 @@ import (
 )
 
 var Provider = wire.NewSet(
-	ProvideTemporalClient,
+	Provide,
 )
 
-type TemporalClientComponent string
-
-func ProvideTemporalClient(cfg Config, logger *zap.SugaredLogger, tracer opentracing.Tracer, component TemporalClientComponent) (client.Client, func(), error) {
+func Provide(cfg Config, logger *zap.SugaredLogger, tracer opentracing.Tracer) (client.Client, func(), error) {
 	logger = logger.With("component", "temporal")
-	c, closer, err := NewClient(cfg, logger, tracer, string(component))
+	c, closer, err := NewClient(cfg, logger, tracer)
 	if err != nil {
 		return nil, nil, err
 	}

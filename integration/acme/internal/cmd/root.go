@@ -7,10 +7,7 @@ import (
 	"powerssl.dev/common/version"
 )
 
-const (
-	component = "integration-acme"
-	name      = "acme"
-)
+const component = "integration-acme"
 
 var (
 	cfgFile string

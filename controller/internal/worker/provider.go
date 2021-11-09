@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/wire"
 	activity2 "go.temporal.io/sdk/activity"
+	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
 
 	apiserver2 "powerssl.dev/backend/apiserver"
 	"powerssl.dev/backend/temporal"
-	"powerssl.dev/backend/temporal/client"
 	"powerssl.dev/backend/vault"
 	"powerssl.dev/controller/internal/activity"
 	"powerssl.dev/sdk/apiserver"

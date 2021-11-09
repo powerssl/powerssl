@@ -28,19 +28,18 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	error2 "powerssl.dev/common/error"
-	"powerssl.dev/common/log"
 )
 
 type ServerConfig struct {
-	Addr       string
-	CAFile     string `mapstructure:"ca-file"`
-	CertFile   string `mapstructure:"cert-file"`
-	CommonName string `mapstructure:"common-name"`
-	Insecure   bool
-	KeyFile    string `mapstructure:"key-file"`
-	VaultRole  string
-	VaultToken string
-	VaultURL   string
+	Addr       string `flag:"addr;;;server addr"`
+	CAFile     string `flag:"caFile;;;server CA file"`
+	CertFile   string `flag:"certFile;;;server Cert file"`
+	CommonName string `flag:"commonName;;;server common name"`
+	Insecure   bool   `flag:"insecure;;;server insecure"`
+	KeyFile    string `flag:"keyFile;;;server key file"`
+	VaultRole  string `flag:"vaultRole;;;server vault role"`
+	VaultToken string `flag:"vaultToken;;;server vault token"`
+	VaultURL   string `flag:"vaultURL;;;server vault URL"`
 }
 
 func ServerConfigValidator(sl validator.StructLevel) {
@@ -62,11 +61,11 @@ func (kgf keyGeneratorFunc) Generate() (crypto.PrivateKey, error) {
 type Server struct {
 	cfg    ServerConfig
 	health *health.Server
-	logger log.Logger
+	logger *zap.SugaredLogger
 	grpc   *grpc.Server
 }
 
-func New(cfg ServerConfig, logger log.Logger) (_ *Server, err error) {
+func New(cfg ServerConfig, logger *zap.SugaredLogger) (_ *Server, err error) {
 	logger = logger.With("transport", "gRPC")
 	recoveryOptions := []recovery.Option{
 		recovery.WithRecoveryHandler(recoveryHandler(logger)),
@@ -173,7 +172,7 @@ func (s *Server) RegisterService(sd *grpc.ServiceDesc, ss interface{}) {
 	s.health.SetServingStatus(sd.ServiceName, healthpb.HealthCheckResponse_SERVING)
 }
 
-func recoveryHandler(logger log.Logger) func(interface{}) error {
+func recoveryHandler(logger *zap.SugaredLogger) func(interface{}) error {
 	return func(err interface{}) error {
 		logger.With(zap.Stack("stack")).Errorf("%s", err)
 		return errors.New("unknown error")

@@ -19,30 +19,29 @@ import (
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
 	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/tracing"
+	"powerssl.dev/common/tracer"
 )
 
 // Injectors from wire.go:
 
 func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error) {
-	sugaredLogger, cleanup, err := log.ProvideLogger()
+	config := cfg.Log
+	sugaredLogger, cleanup, err := log.Provide(config)
 	if err != nil {
 		return nil, nil, err
 	}
 	f := interrupthandler.Provide(ctx, sugaredLogger)
-	config := &cfg.Metrics
-	metricsF := metrics.Provide(ctx, config, sugaredLogger)
-	serverConfig := cfg.ServerConfig
-	clientConfig := cfg.TemporalClientConfig
-	tracerImplementation := cfg.Tracer
-	tracerComponent := provideTracingComponent()
-	tracer, cleanup2, err := tracing.ProvideTracer(tracerImplementation, tracerComponent, sugaredLogger)
+	metricsConfig := cfg.Metrics
+	metricsF := metrics.Provide(ctx, metricsConfig, sugaredLogger)
+	serverConfig := cfg.Server
+	clientConfig := cfg.TemporalClient
+	tracerConfig := cfg.Tracer
+	opentracingTracer, cleanup2, err := tracer.Provide(tracerConfig, sugaredLogger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	temporalClientComponent := provideTemporalClientComponent()
-	clientClient, cleanup3, err := client.ProvideTemporalClient(clientConfig, sugaredLogger, tracer, temporalClientComponent)
+	clientClient, cleanup3, err := client.Provide(clientConfig, sugaredLogger, opentracingTracer)
 	if err != nil {
 		cleanup2()
 		cleanup()
@@ -62,8 +61,8 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 	acmeserverService := acmeserver.New(sugaredLogger, queries)
 	certificateService := certificate.New()
 	userService := user.New()
-	registerF := service.ProvideRegisterF(acmeaccountService, acmeserverService, certificateService, userService)
-	serverF, err := transport.ProvideServer(ctx, serverConfig, sugaredLogger, registerF)
+	register := service.Provide(acmeaccountService, acmeserverService, certificateService, userService)
+	transportF, err := transport.Provide(ctx, serverConfig, sugaredLogger, register)
 	if err != nil {
 		cleanup4()
 		cleanup3()
@@ -71,7 +70,7 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 		cleanup()
 		return nil, nil, err
 	}
-	v := provideRunnerF(f, metricsF, serverF)
+	v := Provide(f, metricsF, transportF)
 	return v, func() {
 		cleanup4()
 		cleanup3()

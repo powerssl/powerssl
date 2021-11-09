@@ -14,7 +14,7 @@ import (
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
 	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/tracing"
+	"powerssl.dev/common/tracer"
 	"powerssl.dev/controller/internal/service"
 	"powerssl.dev/controller/internal/service/acme"
 	"powerssl.dev/controller/internal/service/integration"
@@ -25,24 +25,23 @@ import (
 // Injectors from wire.go:
 
 func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error) {
-	sugaredLogger, cleanup, err := log.ProvideLogger()
+	config := cfg.Log
+	sugaredLogger, cleanup, err := log.Provide(config)
 	if err != nil {
 		return nil, nil, err
 	}
 	f := interrupthandler.Provide(ctx, sugaredLogger)
-	config := &cfg.Metrics
-	metricsF := metrics.Provide(ctx, config, sugaredLogger)
-	serverConfig := cfg.ServerConfig
-	clientConfig := cfg.TemporalClientConfig
-	tracerImplementation := cfg.Tracer
-	tracerComponent := provideTracingComponent()
-	tracer, cleanup2, err := tracing.ProvideTracer(tracerImplementation, tracerComponent, sugaredLogger)
+	metricsConfig := cfg.Metrics
+	metricsF := metrics.Provide(ctx, metricsConfig, sugaredLogger)
+	serverConfig := cfg.Server
+	clientConfig := cfg.TemporalClient
+	tracerConfig := cfg.Tracer
+	opentracingTracer, cleanup2, err := tracer.Provide(tracerConfig, sugaredLogger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	temporalClientComponent := provideTemporalClientComponent()
-	clientClient, cleanup3, err := client.ProvideTemporalClient(clientConfig, sugaredLogger, tracer, temporalClientComponent)
+	clientClient, cleanup3, err := client.Provide(clientConfig, sugaredLogger, opentracingTracer)
 	if err != nil {
 		cleanup2()
 		cleanup()
@@ -50,24 +49,23 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 	}
 	acmeService := acme.New(sugaredLogger, clientClient)
 	integrationService := integration.New(ctx, sugaredLogger)
-	registerF := service.ProvideRegisterF(acmeService, integrationService)
-	serverF, err := transport.ProvideServer(ctx, serverConfig, sugaredLogger, registerF)
+	register := service.Provide(acmeService, integrationService)
+	transportF, err := transport.Provide(ctx, serverConfig, sugaredLogger, register)
 	if err != nil {
 		cleanup3()
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
-	transportClientConfig := &cfg.APIServerClientConfig
-	authToken := cfg.AuthToken
-	apiserverClient, err := apiserver.Provide(ctx, transportClientConfig, authToken, sugaredLogger, tracer)
+	apiserverConfig := cfg.APIServerClient
+	apiserverClient, err := apiserver.Provide(ctx, apiserverConfig, sugaredLogger, opentracingTracer)
 	if err != nil {
 		cleanup3()
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
-	vaultClientConfig := &cfg.VaultClientConfig
+	vaultClientConfig := &cfg.VaultClient
 	vaultClient, err := vault.New(vaultClientConfig)
 	if err != nil {
 		cleanup3()
@@ -76,7 +74,7 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 		return nil, nil, err
 	}
 	workerF := worker.Provide(ctx, apiserverClient, vaultClient, clientClient)
-	v := provideRunnerF(f, metricsF, serverF, workerF)
+	v := Provide(f, metricsF, transportF, workerF)
 	return v, func() {
 		cleanup3()
 		cleanup2()

@@ -1,22 +1,19 @@
 package internal
 
 import (
-	"github.com/go-playground/validator/v10"
-
+	"powerssl.dev/common/log"
 	"powerssl.dev/common/metrics"
 	"powerssl.dev/common/transport"
-	validator2 "powerssl.dev/common/validator"
 	"powerssl.dev/grpcgateway/internal/server"
 )
 
 type Config struct {
-	APIServerClient transport.ClientConfig
-	Server          server.Config
-	Metrics         metrics.Config
+	APIServerClient transport.ClientConfig `flag:"apiServerClient"`
+	Log             log.Config             `flag:"log"`
+	Metrics         metrics.Config         `flag:"metrics"`
+	Server          server.Config          `flag:"server"`
 }
 
-func (cfg *Config) Validate() error {
-	validate := validator.New()
-	validate.RegisterStructValidation(transport.ClientConfigValidator, transport.ClientConfig{})
-	return validator2.ValidateConfig(validate, cfg)
+func (cfg *Config) Defaults() {
+	return
 }

@@ -1,28 +1,35 @@
 package internal
 
 import (
-	"powerssl.dev/backend/temporal/client"
-	"powerssl.dev/common/interrupthandler"
-	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/tracing"
+	"github.com/google/wire"
 
+	"powerssl.dev/backend/temporal/client"
+	"powerssl.dev/backend/vault"
+	"powerssl.dev/common/interrupthandler"
+	"powerssl.dev/common/log"
+	"powerssl.dev/common/metrics"
+	"powerssl.dev/common/tracer"
+	"powerssl.dev/sdk/apiserver"
 	"powerssl.dev/worker/internal/worker"
 )
 
-const component = "powerssl-worker"
+var Provider = wire.NewSet(
+	Provide,
+	apiserver.Provider,
+	client.Provider,
+	interrupthandler.Provider,
+	log.Provider,
+	metrics.Provider,
+	tracer.Provider,
+	vault.Provider,
+	wire.FieldsOf(new(*Config), "APIServerClient", "Log", "Metrics", "TemporalClient", "Tracer", "VaultClient"),
+	worker.Provide,
+)
 
-func provideRunnerF(interruptHandlerF interrupthandler.F, metricsServerF metrics.F, workerF worker.F) []func() error {
+func Provide(interruptHandlerF interrupthandler.F, metricsServerF metrics.F, workerF worker.F) []func() error {
 	return []func() error{
 		interruptHandlerF,
 		metricsServerF,
 		workerF,
 	}
-}
-
-func provideTemporalClientComponent() client.TemporalClientComponent {
-	return component
-}
-
-func provideTracingComponent() tracing.TracerComponent {
-	return component
 }

@@ -7,10 +7,7 @@ import (
 	"powerssl.dev/common/version"
 )
 
-const (
-	component = "integration-cloudflare"
-	name      = "cloudflare"
-)
+const component = "integration-cloudflare"
 
 var (
 	cfgFile string

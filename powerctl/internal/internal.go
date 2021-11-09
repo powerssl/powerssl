@@ -3,10 +3,13 @@ package internal
 import (
 	"context"
 	"errors"
+
+	"github.com/opentracing/opentracing-go"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/tracing"
+	"powerssl.dev/common/tracer"
 	"powerssl.dev/common/transport"
 	"powerssl.dev/sdk/apiserver"
 )
@@ -24,18 +27,28 @@ func NewGRPCClient() (_ *apiserver.Client, err error) {
 	if !insecure && !insecureSkipTLSVerify && caFle == "" {
 		return nil, errors.New("provide ca-file")
 	}
-	var logger log.Logger
-	if logger, err = log.NewLogger(false); err != nil {
+	var logger *zap.SugaredLogger
+	if logger, err = log.NewLogger(log.Config{
+		Env: "production",
+	}); err != nil {
 		return nil, err
 	}
 	// TODO: logger.Sync()
-	tracer, _, _ := tracing.NewNoopTracer("powerctl", logger)
-	cfg := &transport.ClientConfig{
-		Addr:                  addr,
-		CAFile:                caFle,
-		Insecure:              insecure,
-		InsecureSkipTLSVerify: insecureSkipTLSVerify,
-		ServerNameOverride:    serverNameOverride,
+	var trace opentracing.Tracer
+	if trace, _, err = tracer.New(tracer.Config{
+		Component:      "powerctl",
+		Implementation: "",
+	}, logger); err != nil {
+		return nil, err
 	}
-	return apiserver.NewClient(context.TODO(), cfg, authToken, logger, tracer)
+	return apiserver.NewClient(context.Background(), apiserver.Config{
+		AuthToken: authToken,
+		Client: transport.ClientConfig{
+			Addr:                  addr,
+			CAFile:                caFle,
+			Insecure:              insecure,
+			InsecureSkipTLSVerify: insecureSkipTLSVerify,
+			ServerNameOverride:    serverNameOverride,
+		},
+	}, logger, trace)
 }

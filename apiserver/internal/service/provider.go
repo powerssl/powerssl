@@ -13,7 +13,7 @@ import (
 )
 
 var Provider = wire.NewSet(
-	ProvideRegisterF,
+	Provide,
 	acmeaccount.Provider,
 	acmeserver.Provider,
 	certificate.Provider,
@@ -21,12 +21,12 @@ var Provider = wire.NewSet(
 	user.Provider,
 )
 
-func ProvideRegisterF(
+func Provide(
 	acmeAccountServiceServer apiv1.ACMEAccountServiceServer,
 	acmeServerServiceServer apiv1.ACMEServerServiceServer,
 	certificateServiceServer apiv1.CertificateServiceServer,
 	userServiceServer apiv1.UserServiceServer,
-) transport.RegisterF {
+) transport.Register {
 	return func(srv *transport.Server) {
 		srv.RegisterService(acmeaccount.ServiceDesc, acmeAccountServiceServer)
 		srv.RegisterService(acmeserver.ServiceDesc, acmeServerServiceServer)

@@ -1,5 +1,5 @@
 package server
 
 type Config struct {
-	Addr string
+	Addr string `flag:"addr;;;server addr"`
 }

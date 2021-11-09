@@ -18,22 +18,23 @@ import (
 // Injectors from wire.go:
 
 func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error) {
-	sugaredLogger, cleanup, err := log.ProvideLogger()
+	config := cfg.Log
+	sugaredLogger, cleanup, err := log.Provide(config)
 	if err != nil {
 		return nil, nil, err
 	}
 	f := interrupthandler.Provide(ctx, sugaredLogger)
-	config := &cfg.Metrics
-	metricsF := metrics.Provide(ctx, config, sugaredLogger)
-	serverConfig := &cfg.Server
-	clientConfig := &cfg.APIServerClient
+	metricsConfig := cfg.Metrics
+	metricsF := metrics.Provide(ctx, metricsConfig, sugaredLogger)
+	serverConfig := cfg.Server
+	clientConfig := cfg.APIServerClient
 	clientConn, err := transport.NewClientConn(ctx, clientConfig)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	serverF := server.Provide(ctx, serverConfig, sugaredLogger, clientConn)
-	v := provideRunnerF(f, metricsF, serverF)
+	v := Provide(f, metricsF, serverF)
 	return v, func() {
 		cleanup()
 	}, nil

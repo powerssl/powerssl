@@ -1,4 +1,4 @@
-package tracing // import "powerssl.dev/common/tracing"
+package tracer // import "powerssl.dev/common/tracer"
 
 import (
 	"context"
@@ -7,18 +7,17 @@ import (
 	"io"
 
 	"github.com/opentracing/opentracing-go"
-
-	"powerssl.dev/common/log"
+	"go.uber.org/zap"
 )
 
-func Init(serviceName string, implementation string, logger log.Logger) (opentracing.Tracer, io.Closer, error) {
-	switch implementation {
+func New(cfg Config, logger *zap.SugaredLogger) (opentracing.Tracer, io.Closer, error) {
+	switch cfg.Implementation {
 	case "":
-		return NewNoopTracer(serviceName, logger)
+		return NewNoopTracer(cfg, logger)
 	case "jaeger":
-		return NewJaegerTracer(serviceName, logger)
+		return NewJaegerTracer(cfg, logger)
 	default:
-		return nil, nil, fmt.Errorf("tracing implementation does not exist: %s", implementation)
+		return nil, nil, fmt.Errorf("tracing implementation does not exist: %s", cfg.Implementation)
 	}
 }
 

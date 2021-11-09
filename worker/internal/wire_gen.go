@@ -13,7 +13,7 @@ import (
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
 	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/tracing"
+	"powerssl.dev/common/tracer"
 	"powerssl.dev/sdk/apiserver"
 	"powerssl.dev/worker/internal/worker"
 )
@@ -21,45 +21,43 @@ import (
 // Injectors from wire.go:
 
 func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error) {
-	sugaredLogger, cleanup, err := log.ProvideLogger()
+	config := cfg.Log
+	sugaredLogger, cleanup, err := log.Provide(config)
 	if err != nil {
 		return nil, nil, err
 	}
 	f := interrupthandler.Provide(ctx, sugaredLogger)
-	config := &cfg.Metrics
-	metricsF := metrics.Provide(ctx, config, sugaredLogger)
-	clientConfig := &cfg.APIServerClientConfig
-	authToken := cfg.AuthToken
-	tracerImplementation := cfg.Tracer
-	tracerComponent := provideTracingComponent()
-	tracer, cleanup2, err := tracing.ProvideTracer(tracerImplementation, tracerComponent, sugaredLogger)
+	metricsConfig := cfg.Metrics
+	metricsF := metrics.Provide(ctx, metricsConfig, sugaredLogger)
+	apiserverConfig := cfg.APIServerClient
+	tracerConfig := cfg.Tracer
+	opentracingTracer, cleanup2, err := tracer.Provide(tracerConfig, sugaredLogger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	apiserverClient, err := apiserver.Provide(ctx, clientConfig, authToken, sugaredLogger, tracer)
+	apiserverClient, err := apiserver.NewClient(ctx, apiserverConfig, sugaredLogger, opentracingTracer)
 	if err != nil {
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
-	vaultClientConfig := &cfg.VaultClientConfig
-	vaultClient, err := vault.New(vaultClientConfig)
+	clientConfig := &cfg.VaultClient
+	vaultClient, err := vault.New(clientConfig)
 	if err != nil {
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
-	config2 := cfg.TemporalClientConfig
-	temporalClientComponent := provideTemporalClientComponent()
-	clientClient, cleanup3, err := client.ProvideTemporalClient(config2, sugaredLogger, tracer, temporalClientComponent)
+	config2 := cfg.TemporalClient
+	clientClient, cleanup3, err := client.Provide(config2, sugaredLogger, opentracingTracer)
 	if err != nil {
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
 	workerF := worker.Provide(ctx, apiserverClient, vaultClient, clientClient)
-	v := provideRunnerF(f, metricsF, workerF)
+	v := Provide(f, metricsF, workerF)
 	return v, func() {
 		cleanup3()
 		cleanup2()

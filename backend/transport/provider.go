@@ -8,19 +8,19 @@ import (
 )
 
 var Provider = wire.NewSet(
-	ProvideServer,
+	Provide,
 )
 
-type ServerF func() error
-type RegisterF func(srv *Server)
+type F func() error
+type Register func(srv *Server)
 
-func ProvideServer(ctx context.Context, cfg ServerConfig, logger *zap.SugaredLogger, registerF RegisterF) (ServerF, error) {
+func Provide(ctx context.Context, cfg ServerConfig, logger *zap.SugaredLogger, f Register) (F, error) {
 	logger = logger.With("component", "grpcServer")
 	srv, err := New(cfg, logger)
 	if err != nil {
 		return nil, err
 	}
-	registerF(srv)
+	f(srv)
 
 	return func() error { return srv.Serve(ctx) }, nil
 }

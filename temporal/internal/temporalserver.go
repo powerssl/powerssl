@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"context"
 	"fmt"
 
 	temporalconfig "go.temporal.io/server/common/config"
@@ -23,4 +24,12 @@ func Run(cfg *Config) error {
 		return fmt.Errorf("unable to start server: %v", err)
 	}
 	return nil
+}
+
+func Initialize(_ context.Context, cfg *Config) ([]func() error, func(), error) {
+	return []func() error{
+		func() error {
+			return Run(cfg)
+		},
+	}, nil, nil
 }

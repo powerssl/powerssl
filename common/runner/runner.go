@@ -16,7 +16,7 @@ func Run(f func(ctx context.Context) ([]func() error, func(), error)) error {
 		return err
 	}
 	defer cleanup()
-	x, fn := fn[0], fn[:1]
+	x, fn := fn[0], fn[1:]
 	return runner.Run(x, fn...)
 }
 

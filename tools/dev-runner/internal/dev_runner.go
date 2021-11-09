@@ -15,6 +15,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
 	error2 "powerssl.dev/common/error"
@@ -29,9 +30,9 @@ func Run() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	g, ctx = errgroup.WithContext(ctx)
 	g.Go(func() error {
-		var logger log.Logger
+		var logger *zap.SugaredLogger
 		var err error
-		if logger, err = log.NewLogger(false); err != nil {
+		if logger, err = log.NewLogger(); err != nil {
 			return err
 		}
 		defer error2.ErrWrapSync(logger, &err)

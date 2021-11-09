@@ -1,19 +1,25 @@
 package internal
 
 import (
+	"github.com/google/wire"
+
 	"powerssl.dev/common/interrupthandler"
-	"powerssl.dev/common/tracing"
+	"powerssl.dev/common/log"
+	"powerssl.dev/common/tracer"
 	"powerssl.dev/sdk/apiserver"
 )
 
-const component = "powerssl-agent"
+var Provider = wire.NewSet(
+	Provide,
+	apiserver.Provider,
+	interrupthandler.Provider,
+	log.Provider,
+	tracer.Provider,
+	wire.FieldsOf(new(Config), "APIServerClient", "Log", "Tracer"),
+)
 
-func provideRunnerF(interruptHandlerF interrupthandler.F, _ *apiserver.Client) []func() error {
+func Provide(interruptHandlerF interrupthandler.F, _ *apiserver.Client) []func() error {
 	return []func() error{
 		interruptHandlerF,
 	}
-}
-
-func provideTracingComponent() tracing.TracerComponent {
-	return component
 }

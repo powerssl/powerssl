@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"powerssl.dev/common/log"
+	"go.uber.org/zap"
 )
 
 type InterruptError struct {
@@ -17,7 +17,7 @@ func (interruptError InterruptError) Error() string {
 	return interruptError.String()
 }
 
-func InterruptHandler(ctx context.Context, logger log.Logger) error {
+func InterruptHandler(ctx context.Context, logger *zap.SugaredLogger) error {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 	select {

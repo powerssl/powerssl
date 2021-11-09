@@ -6,11 +6,11 @@ import (
 )
 
 var Provider = wire.NewSet(
-	ProvideLogger,
+	Provide,
 )
 
-func ProvideLogger() (*zap.SugaredLogger, func(), error) {
-	logger, err := NewLogger(false)
+func Provide(cfg Config) (*zap.SugaredLogger, func(), error) {
+	logger, err := NewLogger(cfg)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -8,6 +8,7 @@ import (
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 	"github.com/gogo/protobuf/types"
 	stdopentracing "github.com/opentracing/opentracing-go"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
 	apiv1 "powerssl.dev/api/controller/v1"
@@ -19,7 +20,7 @@ import (
 
 const serviceName = "powerssl.controller.v1.ACMEService"
 
-func NewGRPCClient(conn *grpc.ClientConn, logger log.Logger, tracer stdopentracing.Tracer) acme.Service {
+func NewGRPCClient(conn *grpc.ClientConn, logger *zap.SugaredLogger, tracer stdopentracing.Tracer) acme.Service {
 	kitLogger := log.KitLogger(logger)
 
 	options := []grpctransport.ClientOption{

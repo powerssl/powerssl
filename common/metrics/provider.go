@@ -13,7 +13,7 @@ var Provider = wire.NewSet(
 
 type F func() error
 
-func Provide(ctx context.Context, cfg *Config, logger *zap.SugaredLogger) F {
+func Provide(ctx context.Context, cfg Config, logger *zap.SugaredLogger) F {
 	logger = logger.With("component", "metricsServer")
 	return func() error {
 		if cfg.Addr == "" {

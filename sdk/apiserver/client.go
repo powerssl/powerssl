@@ -4,8 +4,8 @@ import (
 	"context"
 
 	stdopentracing "github.com/opentracing/opentracing-go"
+	"go.uber.org/zap"
 
-	"powerssl.dev/common/log"
 	"powerssl.dev/common/transport"
 
 	"powerssl.dev/sdk/apiserver/acmeaccount"
@@ -26,12 +26,12 @@ type Client struct {
 	User        user.Service
 }
 
-func NewClient(ctx context.Context, cfg *transport.ClientConfig, authToken string, logger log.Logger, tracer stdopentracing.Tracer) (*Client, error) {
-	conn, err := transport.NewClientConn(ctx, cfg)
+func NewClient(ctx context.Context, cfg Config, logger *zap.SugaredLogger, tracer stdopentracing.Tracer) (*Client, error) {
+	conn, err := transport.NewClientConn(ctx, cfg.Client)
 	if err != nil {
 		return nil, err
 	}
-	authSigner := internal.NewSigner(authToken)
+	authSigner := internal.NewSigner(cfg.AuthToken)
 	return &Client{
 		ACMEAccount: acmeaccounttransport.NewGRPCClient(conn, logger, tracer, authSigner),
 		ACMEServer:  acmeservertransport.NewGRPCClient(conn, logger, tracer, authSigner),

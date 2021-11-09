@@ -1,46 +1,40 @@
 package internal
 
 import (
-	"github.com/go-playground/validator/v10"
-
 	"powerssl.dev/apiserver/internal/repository"
 	"powerssl.dev/backend/temporal/client"
 	"powerssl.dev/backend/transport"
 	"powerssl.dev/backend/vault"
+	"powerssl.dev/common/log"
 	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/tracing"
-	validator2 "powerssl.dev/common/validator"
+	"powerssl.dev/common/tracer"
 )
+
+const component = "powerssl-apiserver"
 
 type (
 	Config struct {
-		CAFile               ConfigCAFile `mapstructure:"ca-file"`
-		DB                   ConfigDB
-		JWKS                 ConfigJWKS
-		Metrics              metrics.Config
-		ServerConfig         transport.ServerConfig `mapstructure:",squash"`
-		TemporalClientConfig client.Config          `mapstructure:"temporal"`
-		Tracer               tracing.TracerImplementation
-		VaultClientConfig    vault.ClientConfig `mapstructure:"vault"`
+		CAFile            string                 `flag:"caFile"`
+		DB                ConfigDB               `flag:"db"`
+		Log               log.Config             `flag:"log"`
+		JWKS              ConfigJWKS             `flag:"jwks"`
+		Metrics           metrics.Config         `flag:"metrics"`
+		Server            transport.ServerConfig `flag:"server"`
+		TemporalClient    client.Config          `flag:"temporalClient"`
+		Tracer            tracer.Config          `flag:"tracer"`
+		VaultClientConfig vault.ClientConfig     `flag:"vaultClient"`
 	}
-	ConfigCAFile string
-	ConfigDB     struct {
-		Connection repository.ConnString `validate:"required"`
-		Dialect    ConfigDBDialect       `validate:"required"`
+	ConfigDB struct {
+		Connection repository.ConnString `flag:"connection" validate:"required"`
 	}
-	ConfigDBDialect string
-	ConfigJWKS      struct {
-		InsecureSkipTLSVerify ConfigJWKSInsecureSkipTLSVerify `mapstructure:"insecure-skip-tls-verify"`
-		ServerNameOverride    ConfigJWKSServerNameOverride    `mapstructure:"server-name-override"`
-		URL                   ConfigJWKSURL                   `validate:"required"`
+	ConfigJWKS struct {
+		InsecureSkipTLSVerify bool   `flag:"insecureSkipTLSVerify" mapstructure:"insecure-skip-tls-verify"`
+		ServerNameOverride    string `flag:"serverNameOverride" mapstructure:"server-name-override"`
+		URL                   string `flag:"url" validate:"required"`
 	}
-	ConfigJWKSInsecureSkipTLSVerify bool
-	ConfigJWKSServerNameOverride    string
-	ConfigJWKSURL                   string
 )
 
-func (cfg *Config) Validate() error {
-	validate := validator.New()
-	validate.RegisterStructValidation(transport.ServerConfigValidator, transport.ServerConfig{})
-	return validator2.ValidateConfig(validate, cfg)
+func (cfg *Config) Defaults() {
+	cfg.TemporalClient.Component = component
+	cfg.Tracer.Component = component
 }

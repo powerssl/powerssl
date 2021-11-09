@@ -1,19 +1,12 @@
 package internal
 
-import (
-	"github.com/go-playground/validator/v10"
-
-	validator2 "powerssl.dev/common/validator"
-)
-
 type Config struct {
-	ConfigDir string   `validate:"required" mapstructure:"config-dir"`
-	Env       string   `validate:"required"`
-	Services  []string `validate:"gt=0,required"`
-	Zone      string
+	ConfigDir string   `flag:"configDir;;config;Config directory to load a set of yaml config files from" validate:"required"`
+	Env       string   `flag:"env;e;development;Environment is one of the input params ex-development" validate:"required"`
+	Services  []string `flag:"services;;frontend,history,matching,worker;Service(s) to start" validate:"gt=0,required"`
+	Zone      string   `flag:"zone;;;Zone is another input param"`
 }
 
-func (cfg *Config) Validate() error {
-	validate := validator.New()
-	return validator2.ValidateConfig(validate, cfg)
+func (cfg *Config) Defaults() {
+	return
 }

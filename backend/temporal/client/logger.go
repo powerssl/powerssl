@@ -1,9 +1,11 @@
 package client // import "powerssl.dev/backend/temporal/client"
 
-import "powerssl.dev/common/log"
+import (
+	"go.uber.org/zap"
+)
 
 type temporalLogger struct {
-	log.Logger
+	*zap.SugaredLogger
 }
 
 func (l temporalLogger) Debug(msg string, keysAndValues ...interface{}) {

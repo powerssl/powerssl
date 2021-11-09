@@ -12,27 +12,11 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/uber-go/tally"
 	temporalclient "go.temporal.io/sdk/client"
-	temporalconverter "go.temporal.io/sdk/converter"
 	temporalworkflow "go.temporal.io/sdk/workflow"
-
-	"powerssl.dev/common/log"
+	"go.uber.org/zap"
 )
 
-type Config struct {
-	CAFile             string `mapstructure:"ca-file"`
-	DataConverter      temporalconverter.DataConverter
-	DisableHealthCheck bool
-	HealthCheckTimeout time.Duration
-	HostPort           string `mapstructure:"host-port" validate:"required,hostname_port"`
-	Identity           string
-	Namespace          string `validate:"required"`
-	TLSCertFile        string
-	TLSKeyFile         string
-}
-
-type Client = temporalclient.Client
-
-func NewClient(cfg Config, logger log.Logger, tracer opentracing.Tracer, component string) (client temporalclient.Client, closer io.Closer, err error) {
+func NewClient(cfg Config, logger *zap.SugaredLogger, tracer opentracing.Tracer) (client temporalclient.Client, closer io.Closer, err error) {
 	var tlsConnectionOptions tls.Config
 	if cfg.TLSCertFile != "" && cfg.TLSKeyFile != "" {
 		var cert tls.Certificate
@@ -53,15 +37,17 @@ func NewClient(cfg Config, logger log.Logger, tracer opentracing.Tracer, compone
 
 	identity := cfg.Identity
 	if identity == "" {
-		identity = fmt.Sprintf("%d@%s@%s", os.Getpid(), getHostName(), component)
+		identity = fmt.Sprintf("%d@%s@%s", os.Getpid(), getHostName(), cfg.Component)
 	}
 
 	scope, closer := tally.NewRootScope(tally.ScopeOptions{Separator: "_"}, time.Second)
 
 	if client, err = temporalclient.NewClient(temporalclient.Options{
-		HostPort:           cfg.HostPort,
-		Namespace:          cfg.Namespace,
-		Logger:             temporalLogger{Logger: logger},
+		HostPort:  cfg.HostPort,
+		Namespace: cfg.Namespace,
+		Logger: temporalLogger{
+			SugaredLogger: logger,
+		},
 		MetricsScope:       scope,
 		Identity:           identity,
 		DataConverter:      cfg.DataConverter,

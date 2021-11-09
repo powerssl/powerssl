@@ -1,31 +1,23 @@
 package integration // import "powerssl.dev/sdk/integration"
 
 import (
-	"github.com/go-playground/validator/v10"
+	"fmt"
 
+	"powerssl.dev/common/log"
 	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/tracing"
-	"powerssl.dev/common/transport"
-	"powerssl.dev/sdk/integration/internal"
-
+	"powerssl.dev/common/tracer"
 	"powerssl.dev/sdk/controller"
+	"powerssl.dev/sdk/integration/internal"
 )
 
-type IntegrationConfig = internal.IntegrationConfig
-
-type IntegrationName = internal.IntegrationName
-
 type Config struct {
-	Integration            internal.IntegrationConfig
-	AuthToken              controller.AuthToken   `mapstructure:"auth-token" validate:"required"`
-	ControllerClientConfig transport.ClientConfig `mapstructure:"controller"`
-	Metrics                metrics.Config
-	Tracer                 tracing.TracerImplementation
+	ControllerClient controller.Config          `flag:"controllerClient"`
+	Integration      internal.IntegrationConfig `flag:"integration"`
+	Log              log.Config                 `flag:"log"`
+	Metrics          metrics.Config             `flag:"metrics"`
+	Tracer           tracer.Config              `flag:"tracer"`
 }
 
-// TODO: Improve config validation errors
-func (cfg *Config) Validate() error {
-	validate := validator.New()
-	validate.RegisterStructValidation(transport.ClientConfigValidator, transport.ClientConfig{})
-	return validate.Struct(cfg)
+func (cfg *Config) Defaults() {
+	cfg.Tracer.Component = fmt.Sprintf("powerssl-integration-%s", cfg.Integration.Kind)
 }
