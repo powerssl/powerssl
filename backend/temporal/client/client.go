@@ -43,11 +43,9 @@ func NewClient(cfg Config, logger *zap.SugaredLogger, tracer opentracing.Tracer)
 	scope, closer := tally.NewRootScope(tally.ScopeOptions{Separator: "_"}, time.Second)
 
 	if client, err = temporalclient.NewClient(temporalclient.Options{
-		HostPort:  cfg.HostPort,
-		Namespace: cfg.Namespace,
-		Logger: temporalLogger{
-			SugaredLogger: logger,
-		},
+		HostPort:           cfg.HostPort,
+		Namespace:          cfg.Namespace,
+		Logger:             newLogger(logger),
 		MetricsScope:       scope,
 		Identity:           identity,
 		DataConverter:      cfg.DataConverter,

@@ -219,3 +219,21 @@ func kebabCase(str string) string {
 	str = matchAllCap.ReplaceAllString(str, "${1}-${2}")
 	return strings.ToLower(str)
 }
+
+func tagInformation(r reflect.Type, path []string, previous string) string {
+	current := path[0]
+	structField, ok := r.FieldByName(current)
+	if !ok {
+		panic(fmt.Sprintf("field %s not found", structField.Name))
+	}
+	tag := structField.Tag.Get(tagName)
+	s := strings.Split(tag, ";")
+	usage := kebabCase(s[0])
+	if previous != "" {
+		usage = previous+"-"+usage
+	}
+	if len(path) > 1 {
+		return tagInformation(structField.Type, path[1:], usage)
+	}
+	return usage
+}

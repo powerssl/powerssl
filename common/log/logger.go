@@ -4,7 +4,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewLogger(cfg Config) (_ *zap.SugaredLogger, err error) {
+func New(cfg Config) (_ *zap.SugaredLogger, err error) {
 	config := zapConfig(cfg)
 	var logger *zap.Logger
 	if logger, err = config.Build(cfg.Options...); err != nil {

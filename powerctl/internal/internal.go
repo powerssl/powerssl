@@ -28,7 +28,7 @@ func NewGRPCClient() (_ *apiserver.Client, err error) {
 		return nil, errors.New("provide ca-file")
 	}
 	var logger *zap.SugaredLogger
-	if logger, err = log.NewLogger(log.Config{
+	if logger, err = log.New(log.Config{
 		Env: "production",
 	}); err != nil {
 		return nil, err

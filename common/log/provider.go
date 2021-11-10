@@ -10,7 +10,7 @@ var Provider = wire.NewSet(
 )
 
 func Provide(cfg Config) (*zap.SugaredLogger, func(), error) {
-	logger, err := NewLogger(cfg)
+	logger, err := New(cfg)
 	if err != nil {
 		return nil, nil, err
 	}

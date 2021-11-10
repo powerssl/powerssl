@@ -29,32 +29,14 @@ import (
 	error2 "powerssl.dev/common/error"
 )
 
-type ServerConfig struct {
-	Addr       string `flag:"addr;;;server addr"`
-	CAFile     string `flag:"caFile;;;server CA file"`
-	CertFile   string `flag:"certFile;;;server Cert file"`
-	CommonName string `flag:"commonName;;;server common name"`
-	Insecure   bool   `flag:"insecure;;;server insecure"`
-	KeyFile    string `flag:"keyFile;;;server key file"`
-	VaultRole  string `flag:"vaultRole;;;server vault role"`
-	VaultToken string `flag:"vaultToken;;;server vault token"`
-	VaultURL   string `flag:"vaultURL;;;server vault URL"`
-}
-
-type keyGeneratorFunc func() (crypto.PrivateKey, error)
-
-func (kgf keyGeneratorFunc) Generate() (crypto.PrivateKey, error) {
-	return kgf()
-}
-
 type Server struct {
-	cfg    ServerConfig
+	cfg    Config
 	health *health.Server
 	logger *zap.SugaredLogger
 	grpc   *grpc.Server
 }
 
-func New(cfg ServerConfig, logger *zap.SugaredLogger) (_ *Server, err error) {
+func New(cfg Config, logger *zap.SugaredLogger) (_ *Server, err error) {
 	logger = logger.With("transport", "gRPC")
 	recoveryOptions := []recovery.Option{
 		recovery.WithRecoveryHandler(recoveryHandler(logger)),
@@ -159,6 +141,12 @@ func (s *Server) Serve(ctx context.Context) (err error) {
 func (s *Server) RegisterService(sd *grpc.ServiceDesc, ss interface{}) {
 	s.grpc.RegisterService(sd, ss)
 	s.health.SetServingStatus(sd.ServiceName, healthpb.HealthCheckResponse_SERVING)
+}
+
+type keyGeneratorFunc func() (crypto.PrivateKey, error)
+
+func (kgf keyGeneratorFunc) Generate() (crypto.PrivateKey, error) {
+	return kgf()
 }
 
 func recoveryHandler(logger *zap.SugaredLogger) func(interface{}) error {

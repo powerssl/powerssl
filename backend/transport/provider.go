@@ -1,4 +1,4 @@
-package transport
+package transport // import "powerssl.dev/backend/transport"
 
 import (
 	"context"
@@ -14,7 +14,7 @@ var Provider = wire.NewSet(
 type F func() error
 type Register func(srv *Server)
 
-func Provide(ctx context.Context, cfg ServerConfig, logger *zap.SugaredLogger, f Register) (F, error) {
+func Provide(ctx context.Context, cfg Config, logger *zap.SugaredLogger, f Register) (F, error) {
 	logger = logger.With("component", "grpcServer")
 	srv, err := New(cfg, logger)
 	if err != nil {

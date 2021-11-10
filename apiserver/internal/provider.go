@@ -24,7 +24,6 @@ var Provider = wire.NewSet(
 	tracer.Provider,
 	transport.Provider,
 	wire.FieldsOf(new(*Config), "DB", "Log", "Metrics", "Server", "TemporalClient", "Tracer"),
-	wire.FieldsOf(new(ConfigDB), "Connection"),
 )
 
 func Provide(interruptHandlerF interrupthandler.F, metricsServerF metrics.F, serverF backendtransport.F) []func() error {

@@ -2,13 +2,21 @@ module powerssl.dev/temporal
 
 go 1.17
 
+replace powerssl.dev/api => ../api
+
 replace powerssl.dev/common => ../common
 
+replace powerssl.dev/backend => ../backend
+
+replace powerssl.dev/sdk => ../sdk
+
 require (
+	github.com/google/wire v0.5.0
 	github.com/spf13/cobra v1.2.1
 	go.temporal.io/api v1.5.0
 	go.temporal.io/sdk v1.10.0
 	go.temporal.io/server v1.12.1
+	go.uber.org/zap v1.19.1
 	powerssl.dev/common v0.0.0-00010101000000-000000000000
 )
 
@@ -40,8 +48,8 @@ require (
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/google/subcommands v1.0.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/google/wire v0.5.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.0.5 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed // indirect
@@ -100,7 +108,6 @@ require (
 	go.temporal.io/version v0.0.0-20201015012359-4d3bb966d193 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	go.uber.org/zap v1.19.1 // indirect
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 // indirect
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
 	golang.org/x/mod v0.4.2 // indirect

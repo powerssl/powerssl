@@ -1,10 +1,15 @@
 package internal
 
+import (
+	"powerssl.dev/common/log"
+	"powerssl.dev/common/metrics"
+	"powerssl.dev/temporal/internal/server"
+)
+
 type Config struct {
-	ConfigDir string   `flag:"configDir;;config;Config directory to load a set of yaml config files from" validate:"required"`
-	Env       string   `flag:"env;e;development;Environment is one of the input params ex-development" validate:"required"`
-	Services  []string `flag:"services;;frontend,history,matching,worker;Service(s) to start" validate:"gt=0,required"`
-	Zone      string   `flag:"zone;;;Zone is another input param"`
+	Log     log.Config     `flag:"log"`
+	Metrics metrics.Config `flag:"metrics"`
+	Server  server.Config  `flag:"server"`
 }
 
 func (cfg *Config) Defaults() {

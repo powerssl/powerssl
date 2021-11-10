@@ -9,39 +9,37 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type binding struct {
-	viper string
-	cobra string
-}
-
-func Validate(i Config) error {
-	i.Defaults()
+func Validate(cfg Config) error {
+	cfg.Defaults()
 	validate := validator.New()
-	if err := validate.Struct(i); err != nil {
-		var errs []string
-		for _, fieldError := range err.(validator.ValidationErrors) {
-			errs = append(errs, "  "+convertFieldError(fieldError))
+	if err := validate.Struct(cfg); err != nil {
+		if _, ok := err.(*validator.InvalidValidationError); ok {
+			return err
 		}
-		return errors.New("\n" + strings.Join(unique(errs), "\n") + "\n")
+		var fieldErrors []string
+		for _, fieldError := range err.(validator.ValidationErrors) {
+			fieldErrors = append(fieldErrors, "  "+convertFieldError(cfg, fieldError))
+		}
+		return errors.New("\n" + strings.Join(unique(fieldErrors), "\n") + "\n")
 	}
 	return nil
 }
 
-func convertFieldError(fieldError validator.FieldError) string {
+func convertFieldError(cfg Config, fieldError validator.FieldError) string {
 	switch fieldError.Tag() {
 	case "gt":
 		if fieldError.Kind() == reflect.Slice {
-			return fmt.Sprintf("%s needs to have more than %v values", convertStructNamespace(fieldError.StructNamespace()), fieldError.Param())
+			return fmt.Sprintf("%s needs to have more than %v values", convertStructNamespace(cfg, fieldError.StructNamespace()), fieldError.Param())
 		}
 		fallthrough
 	case "hostname_port":
-		return fmt.Sprintf("%s with value \"%v\", needs to be an hostname with port", convertStructNamespace(fieldError.StructNamespace()), fieldError.Value())
+		return fmt.Sprintf("%s with value \"%v\", needs to be an hostname with port", convertStructNamespace(cfg, fieldError.StructNamespace()), fieldError.Value())
 	case "required":
-		return fmt.Sprintf("%s is required", convertStructNamespace(fieldError.StructNamespace()))
+		return fmt.Sprintf("%s is required", convertStructNamespace(cfg, fieldError.StructNamespace()))
 	case "uri":
-		return fmt.Sprintf("%s with value \"%v\", needs to be an URI", convertStructNamespace(fieldError.StructNamespace()), fieldError.Value())
+		return fmt.Sprintf("%s with value \"%v\", needs to be an URI", convertStructNamespace(cfg, fieldError.StructNamespace()), fieldError.Value())
 	case "url":
-		return fmt.Sprintf("%s with value \"%v\", needs to be an URL", convertStructNamespace(fieldError.StructNamespace()), fieldError.Value())
+		return fmt.Sprintf("%s with value \"%v\", needs to be an URL", convertStructNamespace(cfg, fieldError.StructNamespace()), fieldError.Value())
 	default:
 		return fmt.Sprintf("namespace: %v, field: %v, struct_namespace: %v, struct_field: %v, tag: %v, actual_tag: %v, kind: %v, type: %v, value: %v, param: %v",
 			fieldError.Namespace(),
@@ -57,42 +55,9 @@ func convertFieldError(fieldError validator.FieldError) string {
 	}
 }
 
-func convertStructNamespace(structNamespace string) string {
-	b, ok := map[string]binding{
-		"APIServer.Addr":                              {"apiserver.addr", "apiserver-addr"},
-		"APIServerClientConfig.Addr":                  {"apiserver.addr", "apiserver-addr"},
-		"APIServerClientConfig.CAFile":                {"apiserver.ca-file", "ca-file"},
-		"APIServerClientConfig.Insecure":              {"apiserver.insecure", "apiserver-insecure"},
-		"APIServerClientConfig.InsecureSkipTLSVerify": {"apiserver.insecure-skip-tls-verify", "apiserver-insecure-skip-tls-verify"},
-		"APIServerClientConfig.ServerNameOverride":    {"apiserver.server-name-override", "apiserver-server-name-override"},
-		"Addr":                            {"addr", "addr"},
-		"Auth.URI":                        {"auth.uri", "auth-uri"},
-		"AuthToken":                       {"auth-token", "auth-token"},
-		"ConfigDir":                       {"config-dir", "config-dir"},
-		"ControllerClientConfig.Addr":     {"controller.addr", "controller-addr"},
-		"ControllerClientConfig.CAFile":   {"controller.ca-file", "ca-file"},
-		"ControllerClientConfig.Insecure": {"controller.insecure", "controller-insecure"},
-		"ControllerClientConfig.InsecureSkipTLSVerify": {"controller.insecure-skip-tls-verify", "controller-insecure-skip-tls-verify"},
-		"ControllerClientConfig.ServerNameOverride":    {"controller.server-name-override", "controller-server-name-override"},
-		"Env":                            {"env", "env"},
-		"GRPCWeb.URI":                    {"grpcweb.uri", "grpcweb-uri"},
-		"JWT.PrivateKeyFile":             {"jwt.private-key-file", "jwt-private-key-file"},
-		"Metrics.Addr":                   {"metrics.addr", "metrics-addr"},
-		"Services":                       {"services", "service"},
-		"TemporalClientConfig.CAFile":    {"temporal.ca-file", "ca-file"},
-		"TemporalClientConfig.HostPort":  {"temporal.host-port", "temporal-host-port"},
-		"TemporalClientConfig.Namespace": {"temporal.namespace", "temporal-namespace"},
-		"Tracer":                         {"tracer", "tracer"},
-		"VaultClientConfig.CAFile":       {"vault.ca-file", "ca-file"},
-		"VaultClientConfig.Token":        {"vault.token", "vault-token"},
-		"VaultClientConfig.URL":          {"vault.url", "vault-url"},
-		"WebApp.URI":                     {"webapp.uri", "webapp-uri"},
-		"Zone":                           {"zone", "zone"},
-	}[strings.TrimPrefix(structNamespace, "Config.")]
-	if !ok {
-		return structNamespace
-	}
-	return fmt.Sprintf("--%s", b.cobra)
+func convertStructNamespace(cfg Config, structNamespace string) string {
+	paths := strings.Split(structNamespace, ".")
+	return "--" + tagInformation(reflect.TypeOf(cfg).Elem(), paths[1:], "")
 }
 
 func unique(stringSlice []string) []string {

@@ -47,9 +47,8 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 		cleanup()
 		return nil, nil, err
 	}
-	configDB := cfg.DB
-	connString := configDB.Connection
-	dbtx, cleanup4, err := repository.ProvideDBTX(ctx, connString, sugaredLogger)
+	repositoryConfig := cfg.DB
+	dbtx, cleanup4, err := repository.Provide(ctx, repositoryConfig, sugaredLogger)
 	if err != nil {
 		cleanup3()
 		cleanup2()

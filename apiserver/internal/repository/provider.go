@@ -10,14 +10,12 @@ import (
 
 var Provider = wire.NewSet(
 	New,
-	ProvideDBTX,
+	Provide,
 )
 
-type ConnString string
-
-func ProvideDBTX(ctx context.Context, connString ConnString, logger *zap.SugaredLogger) (DBTX, func(), error) {
+func Provide(ctx context.Context, cfg Config, logger *zap.SugaredLogger) (DBTX, func(), error) {
 	logger = logger.With("component", "db")
-	db, err := pgx.Connect(ctx, string(connString))
+	db, err := pgx.Connect(ctx, cfg.ConnString)
 	if err != nil {
 		return nil, nil, err
 	}

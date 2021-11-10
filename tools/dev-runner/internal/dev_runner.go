@@ -32,7 +32,7 @@ func Run() error {
 	g.Go(func() error {
 		var logger *zap.SugaredLogger
 		var err error
-		if logger, err = log.NewLogger(log.Config{
+		if logger, err = log.New(log.Config{
 			Env: "production",
 		}); err != nil {
 			return err

@@ -5,7 +5,7 @@ import "go.uber.org/zap"
 const production = "production"
 
 type Config struct {
-	Env     string       `flag:"env;e;;environment"`
+	Env     string       `flag:"env;e;production;environment" validate:"required"`
 	Options []zap.Option `flag:"-"`
 }
 
