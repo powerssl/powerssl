@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	acme "github.com/eggsampler/acme/v2"
+	"github.com/eggsampler/acme/v2"
 	"github.com/opentracing/opentracing-go"
 )
 

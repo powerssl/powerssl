@@ -42,7 +42,7 @@ func (a *Activity) Execute(ctx context.Context) error {
 		return err
 	}
 	activityIntegration.Send(&apiv1.Activity{
-		Name:  apiv1.Activity_Name(a.activityName),
+		Name:  a.activityName,
 		Token: a.Token(),
 		Workflow: &apiv1.Activity_Workflow{
 			Activities: []string{},

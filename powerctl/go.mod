@@ -18,6 +18,7 @@ require (
 	github.com/spf13/viper v1.8.1
 	go.uber.org/zap v1.19.1
 	gopkg.in/yaml.v2 v2.4.0
+	powerssl.dev/api v0.0.0-00010101000000-000000000000
 	powerssl.dev/common v0.0.0-00010101000000-000000000000
 	powerssl.dev/sdk v0.0.0-00010101000000-000000000000
 )
@@ -33,7 +34,6 @@ require (
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
-	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/wire v0.5.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.6.0 // indirect
@@ -71,5 +71,4 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	powerssl.dev/api v0.0.0-00010101000000-000000000000 // indirect
 )

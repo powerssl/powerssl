@@ -5,18 +5,9 @@ import (
 	"crypto/tls"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
-
-func ClientConfigValidator(sl validator.StructLevel) {
-	cfg := sl.Current().Interface().(ClientConfig)
-
-	if !cfg.Insecure && !cfg.InsecureSkipTLSVerify && cfg.CAFile == "" {
-		sl.ReportError(cfg.CAFile, "CAFile", "CAFile", "required", "")
-	}
-}
 
 func NewClientConn(ctx context.Context, cfg ClientConfig) (*grpc.ClientConn, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Second)

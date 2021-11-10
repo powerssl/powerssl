@@ -103,7 +103,7 @@ func (i *integration) receive(stream apiv1.IntegrationService_RegisterClient, ha
 func (i *integration) register(ctx context.Context) (apiv1.IntegrationService_RegisterClient, error) {
 	stream, err := i.client.Integration.Register(ctx, &apiv1.RegisterIntegrationRequest{
 		Kind: i.cfg.Kind,
-		Name: string(i.cfg.Name),
+		Name: i.cfg.Name,
 	})
 	if err != nil {
 		return nil, err

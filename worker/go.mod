@@ -16,6 +16,8 @@ require (
 	github.com/google/wire v0.5.0
 	github.com/spf13/cobra v1.2.1
 	go.temporal.io/sdk v1.10.0
+	google.golang.org/protobuf v1.27.1
+	powerssl.dev/api v0.0.0-00010101000000-000000000000
 	powerssl.dev/backend v0.0.0-00010101000000-000000000000
 	powerssl.dev/common v0.0.0-00010101000000-000000000000
 	powerssl.dev/sdk v0.0.0-00010101000000-000000000000
@@ -102,10 +104,8 @@ require (
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/genproto v0.0.0-20210917145530-b395a37504d4 // indirect
 	google.golang.org/grpc v1.40.0 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	powerssl.dev/api v0.0.0-00010101000000-000000000000 // indirect
 )

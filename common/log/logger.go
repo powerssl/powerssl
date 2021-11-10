@@ -1,8 +1,6 @@
 package log // import "powerssl.dev/common/log"
 
 import (
-	kitlog "github.com/go-kit/kit/log"
-	kitzap "github.com/go-kit/kit/log/zap"
 	"go.uber.org/zap"
 )
 
@@ -14,10 +12,6 @@ func NewLogger(cfg Config) (_ *zap.SugaredLogger, err error) {
 	}
 	zap.ReplaceGlobals(logger)
 	return logger.Sugar(), nil
-}
-
-func KitLogger(logger *zap.SugaredLogger) kitlog.Logger {
-	return kitzap.NewZapSugarLogger(logger.Desugar(), zap.DebugLevel)
 }
 
 func zapConfig(cfg Config) (config zap.Config) {

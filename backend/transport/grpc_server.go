@@ -15,7 +15,6 @@ import (
 	"time"
 
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
-	"github.com/go-playground/validator/v10"
 	middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/johanbrandhorst/certify"
@@ -40,16 +39,6 @@ type ServerConfig struct {
 	VaultRole  string `flag:"vaultRole;;;server vault role"`
 	VaultToken string `flag:"vaultToken;;;server vault token"`
 	VaultURL   string `flag:"vaultURL;;;server vault URL"`
-}
-
-func ServerConfigValidator(sl validator.StructLevel) {
-	cfg := sl.Current().Interface().(ServerConfig)
-
-	if !cfg.Insecure && cfg.CommonName == "" && (cfg.CertFile == "" || cfg.KeyFile == "") {
-		sl.ReportError(cfg.CommonName, "CommonName", "CommonName", "required", "CommonName or CertFile and KeyFile required")
-		sl.ReportError(cfg.CertFile, "CertFile", "CertFile", "required", "CommonName or CertFile and KeyFile required")
-		sl.ReportError(cfg.KeyFile, "KeyFile", "KeyFile", "required", "CommonName or CertFile and KeyFile required")
-	}
 }
 
 type keyGeneratorFunc func() (crypto.PrivateKey, error)

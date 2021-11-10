@@ -12,6 +12,7 @@ require (
 	github.com/eggsampler/acme/v2 v2.0.1
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/spf13/cobra v1.2.1
+	powerssl.dev/api v0.0.0-00010101000000-000000000000
 	powerssl.dev/common v0.0.0-00010101000000-000000000000
 	powerssl.dev/sdk v0.0.0-00010101000000-000000000000
 )
@@ -28,7 +29,6 @@ require (
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
-	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
@@ -83,5 +83,4 @@ require (
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	powerssl.dev/api v0.0.0-00010101000000-000000000000 // indirect
 )
