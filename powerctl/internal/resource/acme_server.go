@@ -10,9 +10,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	apiv1 "powerssl.dev/api/apiserver/v1"
 	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/sdk/apiserver"
-	"powerssl.dev/sdk/apiserver/api"
 
 	"powerssl.dev/powerctl/internal"
 )
@@ -21,12 +21,14 @@ type acmeServer struct{}
 
 func (r acmeServer) Create(client *apiserver.Client, resource *Resource) (*Resource, error) {
 	spec := resource.Spec.(*acmeServerSpec)
-	acmeServer := &api.ACMEServer{
-		DirectoryURL:    spec.DirectoryURL,
+	acmeServer := &apiv1.ACMEServer{
+		DirectoryUrl:    spec.DirectoryURL,
 		DisplayName:     spec.DisplayName,
 		IntegrationName: spec.IntegrationName,
 	}
-	acmeServer, err := client.ACMEServer.Create(context.Background(), acmeServer)
+	acmeServer, err := client.ACMEServer.Create(context.Background(), &apiv1.CreateACMEServerRequest{
+		AcmeServer: acmeServer,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -34,28 +36,33 @@ func (r acmeServer) Create(client *apiserver.Client, resource *Resource) (*Resou
 }
 
 func (r acmeServer) Delete(client *apiserver.Client, name string) error {
-	return client.ACMEServer.Delete(context.Background(), fmt.Sprintf("acmeServers/%s", name))
+	_, err := client.ACMEServer.Delete(context.Background(), &apiv1.DeleteACMEServerRequest{
+		Name: fmt.Sprintf("acmeServers/%s", name),
+	})
+	return err
 }
 
-func (r acmeServer) Encode(acmeServer *api.ACMEServer) *Resource {
+func (r acmeServer) Encode(acmeServer *apiv1.ACMEServer) *Resource {
 	uid := strings.Split(acmeServer.Name, "/")[1]
 	return &Resource{
 		Kind: "acmeserver",
 		Meta: &resourceMeta{
 			UID:        uid,
-			CreateTime: acmeServer.CreateTime,
-			UpdateTime: acmeServer.UpdateTime,
+			CreateTime: acmeServer.GetCreateTime().AsTime(),
+			UpdateTime: acmeServer.GetUpdateTime().AsTime(),
 		},
 		Spec: &acmeServerSpec{
-			DisplayName:     acmeServer.DisplayName,
-			DirectoryURL:    acmeServer.DirectoryURL,
-			IntegrationName: acmeServer.IntegrationName,
+			DisplayName:     acmeServer.GetDisplayName(),
+			DirectoryURL:    acmeServer.GetDirectoryUrl(),
+			IntegrationName: acmeServer.GetIntegrationName(),
 		},
 	}
 }
 
 func (r acmeServer) Get(client *apiserver.Client, name string) (*Resource, error) {
-	acmeServer, err := client.ACMEServer.Get(context.Background(), fmt.Sprintf("acmeServers/%s", name))
+	acmeServer, err := client.ACMEServer.Get(context.Background(), &apiv1.GetACMEServerRequest{
+		Name: fmt.Sprintf("acmeServers/%s", name),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -64,15 +71,18 @@ func (r acmeServer) Get(client *apiserver.Client, name string) (*Resource, error
 
 func (r acmeServer) List(client *apiserver.Client) ([]*Resource, error) {
 	return listResource(func(pageToken string) ([]*Resource, string, error) {
-		acmeServers, nextPageToken, err := client.ACMEServer.List(context.Background(), 0, pageToken)
+		response, err := client.ACMEServer.List(context.Background(), &apiv1.ListACMEServersRequest{
+			PageToken: pageToken,
+			PageSize:  0,
+		})
 		if err != nil {
-			return nil, nextPageToken, err
+			return nil, "", err
 		}
-		a := make([]*Resource, len(acmeServers))
-		for i, acmeServer := range acmeServers {
+		a := make([]*Resource, len(response.GetAcmeServers()))
+		for i, acmeServer := range response.GetAcmeServers() {
 			a[i] = r.Encode(acmeServer)
 		}
-		return a, nextPageToken, nil
+		return a, response.GetNextPageToken(), nil
 	})
 }
 
@@ -131,27 +141,29 @@ func NewCmdCreateACMEServer() *cobra.Command {
 			return err
 		},
 		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) (err error) {
-			var apiACMEServer *api.ACMEServer
+			var apiACMEServer *apiv1.ACMEServer
 			if letsEncrypt {
-				apiACMEServer = &api.ACMEServer{
-					DirectoryURL:    "https://acme-v02.api.letsencrypt.org/directory",
+				apiACMEServer = &apiv1.ACMEServer{
+					DirectoryUrl:    "https://acme-v02.api.letsencrypt.org/directory",
 					DisplayName:     "Let's Encrypt",
 					IntegrationName: "acme",
 				}
 			} else if letsEncryptStaging {
-				apiACMEServer = &api.ACMEServer{
-					DirectoryURL:    "https://acme-staging-v02.api.letsencrypt.org/directory",
+				apiACMEServer = &apiv1.ACMEServer{
+					DirectoryUrl:    "https://acme-staging-v02.api.letsencrypt.org/directory",
 					DisplayName:     "Let's Encrypt Staging",
 					IntegrationName: "acme",
 				}
 			} else {
-				apiACMEServer = &api.ACMEServer{
-					DirectoryURL:    directoryURL,
+				apiACMEServer = &apiv1.ACMEServer{
+					DirectoryUrl:    directoryURL,
 					DisplayName:     displayName,
 					IntegrationName: integrationName,
 				}
 			}
-			if apiACMEServer, err = client.ACMEServer.Create(context.Background(), apiACMEServer); err != nil {
+			if apiACMEServer, err = client.ACMEServer.Create(context.Background(), &apiv1.CreateACMEServerRequest{
+				AcmeServer: apiACMEServer,
+			}); err != nil {
 				return err
 			}
 			return FormatResource(acmeServer{}.Encode(apiACMEServer), os.Stdout)

@@ -10,18 +10,17 @@ import (
 	temporalclient "go.temporal.io/sdk/client"
 
 	apiv1 "powerssl.dev/api/controller/v1"
-	"powerssl.dev/sdk/controller/api"
 
 	"powerssl.dev/controller/internal/service/integration"
 )
 
 type Activity struct {
-	activityName api.ActivityName
+	activityName apiv1.Activity_Name
 	input        interface{}
 	token        string
 }
 
-func New(ctx context.Context, activityName api.ActivityName, input interface{}) *Activity {
+func New(ctx context.Context, activityName apiv1.Activity_Name, input interface{}) *Activity {
 	activityInfo := temporalactivity.GetInfo(ctx)
 	taskToken := activityInfo.TaskToken
 	token := base64.RawStdEncoding.EncodeToString(taskToken)
@@ -78,7 +77,15 @@ func (a *Activity) SetResult(ctx context.Context, temporal temporalclient.Client
 }
 
 func (a *Activity) integrationKind() integration.Kind {
-	return integration.Kind(a.activityName.IntegrationKind())
+	x := a.activityName
+	switch {
+	case x > 100 && x < 200:
+		return integration.KindACME
+	case x > 200 && x < 300:
+		return integration.KindDNS
+	default:
+		return ""
+	}
 }
 
 func (a *Activity) integration(ctx context.Context) (*integration.Integration, error) {

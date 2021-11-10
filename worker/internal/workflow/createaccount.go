@@ -6,8 +6,8 @@ import (
 	"go.temporal.io/sdk/temporal"
 	temporalworkflow "go.temporal.io/sdk/workflow"
 
+	apiv1 "powerssl.dev/api/apiserver/v1"
 	temporalutil "powerssl.dev/backend/temporal"
-	"powerssl.dev/sdk/apiserver/api"
 	"powerssl.dev/workflow"
 	"powerssl.dev/workflow/activity"
 )
@@ -48,8 +48,8 @@ func CreateAccount(ctx temporalworkflow.Context, params workflow.CreateAccountPa
 	if err := temporalworkflow.ExecuteActivity(workerCtx, activity.UpdateAccount, &activity.UpdateAccountParams{
 		Name:       params.Account,
 		UpdateMask: []string{"account_url"},
-		ACMEAccount: &api.ACMEAccount{
-			AccountURL: createACMEAccountResult.Account.GetUrl(),
+		ACMEAccount: &apiv1.ACMEAccount{
+			AccountUrl: createACMEAccountResult.Account.GetUrl(),
 		},
 	}).Get(ctx, nil); err != nil {
 		return err

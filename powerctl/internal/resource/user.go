@@ -10,9 +10,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	apiv1 "powerssl.dev/api/apiserver/v1"
 	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/sdk/apiserver"
-	"powerssl.dev/sdk/apiserver/api"
 
 	"powerssl.dev/powerctl/internal"
 )
@@ -21,11 +21,13 @@ type user struct{}
 
 func (r user) Create(client *apiserver.Client, resource *Resource) (*Resource, error) {
 	spec := resource.Spec.(*userSpec)
-	user := &api.User{
+	user := &apiv1.User{
 		DisplayName: spec.DisplayName,
 		UserName:    spec.UserName,
 	}
-	user, err := client.User.Create(context.Background(), user)
+	user, err := client.User.Create(context.Background(), &apiv1.CreateUserRequest{
+		User: user,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -33,17 +35,20 @@ func (r user) Create(client *apiserver.Client, resource *Resource) (*Resource, e
 }
 
 func (r user) Delete(client *apiserver.Client, name string) error {
-	return client.User.Delete(context.Background(), fmt.Sprintf("users/%s", name))
+	_, err := client.User.Delete(context.Background(), &apiv1.DeleteUserRequest{
+		Name: fmt.Sprintf("users/%s", name),
+	})
+	return err
 }
 
-func (r user) Encode(user *api.User) *Resource {
-	uid := strings.Split(user.Name, "/")[1]
+func (r user) Encode(user *apiv1.User) *Resource {
+	uid := strings.Split(user.GetName(), "/")[1]
 	return &Resource{
 		Kind: "user",
 		Meta: &resourceMeta{
 			UID:        uid,
-			CreateTime: user.CreateTime,
-			UpdateTime: user.UpdateTime,
+			CreateTime: user.GetCreateTime().AsTime(),
+			UpdateTime: user.GetUpdateTime().AsTime(),
 		},
 		Spec: &userSpec{
 			DisplayName: user.DisplayName,
@@ -53,7 +58,9 @@ func (r user) Encode(user *api.User) *Resource {
 }
 
 func (r user) Get(client *apiserver.Client, name string) (*Resource, error) {
-	user, err := client.User.Get(context.Background(), fmt.Sprintf("users/%s", name))
+	user, err := client.User.Get(context.Background(), &apiv1.GetUserRequest{
+		Name: fmt.Sprintf("users/%s", name),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -62,15 +69,18 @@ func (r user) Get(client *apiserver.Client, name string) (*Resource, error) {
 
 func (r user) List(client *apiserver.Client) ([]*Resource, error) {
 	return listResource(func(pageToken string) ([]*Resource, string, error) {
-		users, nextPageToken, err := client.User.List(context.Background(), 0, pageToken)
+		response, err := client.User.List(context.Background(), &apiv1.ListUsersRequest{
+			PageSize:  0,
+			PageToken: pageToken,
+		})
 		if err != nil {
-			return nil, nextPageToken, err
+			return nil, "", err
 		}
-		a := make([]*Resource, len(users))
-		for i, user := range users {
+		a := make([]*Resource, len(response.GetUsers()))
+		for i, user := range response.GetUsers() {
 			a[i] = r.Encode(user)
 		}
-		return a, nextPageToken, nil
+		return a, response.GetNextPageToken(), nil
 	})
 }
 
@@ -122,11 +132,13 @@ func NewCmdCreateUser() *cobra.Command {
 			return err
 		},
 		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) (err error) {
-			apiUser := &api.User{
+			apiUser := &apiv1.User{
 				DisplayName: displayName,
 				UserName:    userName,
 			}
-			if apiUser, err = client.User.Create(context.Background(), apiUser); err != nil {
+			if apiUser, err = client.User.Create(context.Background(), &apiv1.CreateUserRequest{
+				User: apiUser,
+			}); err != nil {
 				return err
 			}
 			return FormatResource(user{}.Encode(apiUser), os.Stdout)

@@ -1,18 +1,20 @@
 package acme
 
-import "powerssl.dev/sdk/controller/api"
+import (
+	apiv1 "powerssl.dev/api/controller/v1"
+)
 
 type CreateOrderInput struct {
 	DirectoryURL string
 	AccountURL   string
-	Identifiers  []*api.Identifier
+	Identifiers  []*apiv1.Identifier
 	NotBefore    string
 	NotAfter     string
 }
 
 type CreateOrderResult struct {
-	Order *api.Order
-	Error *api.Error
+	Order *apiv1.Order
+	Error *apiv1.Error
 }
 
 type CreateOrder struct {

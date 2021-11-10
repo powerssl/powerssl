@@ -6,24 +6,17 @@ import (
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 
+	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/common/transport"
 
-	"powerssl.dev/sdk/apiserver/acmeaccount"
-	acmeaccounttransport "powerssl.dev/sdk/apiserver/acmeaccount/transport"
-	"powerssl.dev/sdk/apiserver/acmeserver"
-	acmeservertransport "powerssl.dev/sdk/apiserver/acmeserver/transport"
-	"powerssl.dev/sdk/apiserver/certificate"
-	certificatetransport "powerssl.dev/sdk/apiserver/certificate/transport"
-	"powerssl.dev/sdk/apiserver/user"
-	usertransport "powerssl.dev/sdk/apiserver/user/transport"
 	"powerssl.dev/sdk/internal"
 )
 
 type Client struct {
-	ACMEAccount acmeaccount.Service
-	ACMEServer  acmeserver.Service
-	Certificate certificate.Service
-	User        user.Service
+	ACMEAccount apiv1.ACMEAccountServiceClient
+	ACMEServer  apiv1.ACMEServerServiceClient
+	Certificate apiv1.CertificateServiceClient
+	User        apiv1.UserServiceClient
 }
 
 func NewClient(ctx context.Context, cfg Config, logger *zap.SugaredLogger, tracer stdopentracing.Tracer) (*Client, error) {
@@ -31,11 +24,11 @@ func NewClient(ctx context.Context, cfg Config, logger *zap.SugaredLogger, trace
 	if err != nil {
 		return nil, err
 	}
-	authSigner := internal.NewSigner(cfg.AuthToken)
+	_ = internal.NewSigner(cfg.AuthToken)
 	return &Client{
-		ACMEAccount: acmeaccounttransport.NewGRPCClient(conn, logger, tracer, authSigner),
-		ACMEServer:  acmeservertransport.NewGRPCClient(conn, logger, tracer, authSigner),
-		Certificate: certificatetransport.NewGRPCClient(conn, logger, tracer, authSigner),
-		User:        usertransport.NewGRPCClient(conn, logger, tracer, authSigner),
+		ACMEAccount: apiv1.NewACMEAccountServiceClient(conn),
+		ACMEServer:  apiv1.NewACMEServerServiceClient(conn),
+		Certificate: apiv1.NewCertificateServiceClient(conn),
+		User:        apiv1.NewUserServiceClient(conn),
 	}, nil
 }

@@ -11,22 +11,24 @@ import (
 
 	"github.com/spf13/cobra"
 
+	apiv1 "powerssl.dev/api/apiserver/v1"
 	cmdutil "powerssl.dev/common/cmd"
-	"powerssl.dev/sdk/apiserver"
-	"powerssl.dev/sdk/apiserver/api"
-
 	"powerssl.dev/powerctl/internal"
+	"powerssl.dev/sdk/apiserver"
 )
 
 type acmeAccount struct{}
 
 func (r acmeAccount) Create(client *apiserver.Client, resource *Resource) (*Resource, error) {
 	spec := resource.Spec.(*acmeAccountSpec)
-	acmeAccount := &api.ACMEAccount{
-		Contacts:             spec.Contacts,
+	acmeAccount := &apiv1.ACMEAccount{
 		TermsOfServiceAgreed: spec.TermsOfServiceAgreed,
+		Contacts:             spec.Contacts,
 	}
-	acmeAccount, err := client.ACMEAccount.Create(context.Background(), fmt.Sprintf("acmeServers/%s", spec.ACMEServer), acmeAccount)
+	acmeAccount, err := client.ACMEAccount.Create(context.Background(), &apiv1.CreateACMEAccountRequest{
+		Parent:      fmt.Sprintf("acmeServers/%s", spec.ACMEServer),
+		AcmeAccount: acmeAccount,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -34,33 +36,38 @@ func (r acmeAccount) Create(client *apiserver.Client, resource *Resource) (*Reso
 }
 
 func (r acmeAccount) Delete(client *apiserver.Client, name string) error {
-	return client.ACMEAccount.Delete(context.Background(), fmt.Sprintf("acmeServers/-/acmeAccounts/%s", name))
+	_, err := client.ACMEAccount.Delete(context.Background(), &apiv1.DeleteACMEAccountRequest{
+		Name: fmt.Sprintf("acmeServers/-/acmeAccounts/%s", name),
+	})
+	return err
 }
 
-func (r acmeAccount) Encode(acmeAccount *api.ACMEAccount) *Resource {
+func (r acmeAccount) Encode(acmeAccount *apiv1.ACMEAccount) *Resource {
 	uid := strings.Split(acmeAccount.Name, "/")[3]
 	acmeServer := strings.Split(acmeAccount.Name, "/")[1]
 	return &Resource{
 		Kind: "acmeaccount",
 		Meta: &resourceMeta{
 			UID:        uid,
-			CreateTime: acmeAccount.CreateTime,
-			UpdateTime: acmeAccount.UpdateTime,
+			CreateTime: acmeAccount.GetCreateTime().AsTime(),
+			UpdateTime: acmeAccount.GetUpdateTime().AsTime(),
 		},
 		Spec: &acmeAccountSpec{
-			DisplayName:          acmeAccount.DisplayName,
-			Title:                acmeAccount.Title,
-			Description:          acmeAccount.Description,
+			DisplayName:          acmeAccount.GetDisplayName(),
+			Title:                acmeAccount.GetTitle(),
+			Description:          acmeAccount.GetDescription(),
 			ACMEServer:           acmeServer,
-			TermsOfServiceAgreed: acmeAccount.TermsOfServiceAgreed,
-			Contacts:             acmeAccount.Contacts,
-			AccountURL:           acmeAccount.AccountURL,
+			TermsOfServiceAgreed: acmeAccount.GetTermsOfServiceAgreed(),
+			Contacts:             acmeAccount.GetContacts(),
+			AccountURL:           acmeAccount.GetAccountUrl(),
 		},
 	}
 }
 
 func (r acmeAccount) Get(client *apiserver.Client, name string) (*Resource, error) {
-	acmeAccount, err := client.ACMEAccount.Get(context.Background(), fmt.Sprintf("acmeServers/-/acmeAccounts/%s", name))
+	acmeAccount, err := client.ACMEAccount.Get(context.Background(), &apiv1.GetACMEAccountRequest{
+		Name: fmt.Sprintf("acmeServers/-/acmeAccounts/%s", name),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -69,15 +76,19 @@ func (r acmeAccount) Get(client *apiserver.Client, name string) (*Resource, erro
 
 func (r acmeAccount) List(client *apiserver.Client) ([]*Resource, error) {
 	return listResource(func(pageToken string) ([]*Resource, string, error) {
-		acmeAccounts, nextPageToken, err := client.ACMEAccount.List(context.Background(), "parent", 0, pageToken)
+		response, err := client.ACMEAccount.List(context.Background(), &apiv1.ListACMEAccountsRequest{
+			Parent:    "parent",
+			PageToken: pageToken,
+			PageSize:  0,
+		})
 		if err != nil {
-			return nil, nextPageToken, err
+			return nil, "", err
 		}
-		a := make([]*Resource, len(acmeAccounts))
-		for i, acmeAccount := range acmeAccounts {
+		a := make([]*Resource, len(response.GetAcmeAccounts()))
+		for i, acmeAccount := range response.GetAcmeAccounts() {
 			a[i] = r.Encode(acmeAccount)
 		}
-		return a, nextPageToken, nil
+		return a, response.GetNextPageToken(), nil
 	})
 }
 
@@ -163,11 +174,14 @@ func NewCmdCreateACMEAccount() *cobra.Command {
 			return err
 		},
 		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) (err error) {
-			apiACMEAccount := &api.ACMEAccount{
+			apiACMEAccount := &apiv1.ACMEAccount{
 				Contacts:             strings.Split(contacts, ","),
 				TermsOfServiceAgreed: termsOfServiceAgreed,
 			}
-			if apiACMEAccount, err = client.ACMEAccount.Create(context.Background(), fmt.Sprintf("acmeServers/%s", acmeServerID), apiACMEAccount); err != nil {
+			if apiACMEAccount, err = client.ACMEAccount.Create(context.Background(), &apiv1.CreateACMEAccountRequest{
+				Parent:      fmt.Sprintf("acmeServers/%s", acmeServerID),
+				AcmeAccount: apiACMEAccount,
+			}); err != nil {
 				return err
 			}
 			return FormatResource(acmeAccount{}.Encode(apiACMEAccount), cmd.OutOrStdout())

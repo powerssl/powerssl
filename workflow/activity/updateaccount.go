@@ -1,13 +1,15 @@
 package activity // import "powerssl.dev/workflow/activity"
 
-import "powerssl.dev/sdk/apiserver/api"
+import (
+	apiv1 "powerssl.dev/api/apiserver/v1"
+)
 
 const UpdateAccount = "UpdateAccount"
 
 type UpdateAccountParams struct {
 	Name        string
 	UpdateMask  []string
-	ACMEAccount *api.ACMEAccount
+	ACMEAccount *apiv1.ACMEAccount
 }
 
 func (p *UpdateAccountParams) ToKeyVals() []interface{} {
@@ -19,5 +21,5 @@ func (p *UpdateAccountParams) ToKeyVals() []interface{} {
 }
 
 type UpdateAccountResults struct {
-	ACMEAccount *api.ACMEAccount
+	ACMEAccount *apiv1.ACMEAccount
 }

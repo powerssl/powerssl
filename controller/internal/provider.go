@@ -30,7 +30,7 @@ var Provider = wire.NewSet(
 	transport.Provider,
 	vault.Provider,
 	wire.FieldsOf(new(*Config), "APIServerClient", "Log", "Metrics", "Server", "TemporalClient", "Tracer", "VaultClient"),
-	worker.Provide,
+	worker.Provider,
 )
 
 func Provide(interruptHandlerF interrupthandler.F, metricsServerF metrics.F, serverF backendtransport.F, workerF worker.F) []func() error {

@@ -10,9 +10,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	apiv1 "powerssl.dev/api/apiserver/v1"
 	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/sdk/apiserver"
-	"powerssl.dev/sdk/apiserver/api"
 
 	"powerssl.dev/powerctl/internal"
 )
@@ -21,14 +21,16 @@ type certificate struct{}
 
 func (r certificate) Create(client *apiserver.Client, resource *Resource) (*Resource, error) {
 	spec := resource.Spec.(*certificateSpec)
-	certificate := &api.Certificate{
+	certificate := &apiv1.Certificate{
 		Dnsnames:        spec.Dnsnames,
-		KeyAlgorithm:    spec.KeyAlgorithm,
+		KeyAlgorithm:    apiv1.KeyAlgorithm(apiv1.KeyAlgorithm_value[spec.KeyAlgorithm]),
 		KeySize:         spec.KeySize,
-		DigestAlgorithm: spec.DigestAlgorithm,
+		DigestAlgorithm: apiv1.DigestAlgorithm(apiv1.DigestAlgorithm_value[spec.DigestAlgorithm]),
 		AutoRenew:       spec.AutoRenew,
 	}
-	certificate, err := client.Certificate.Create(context.Background(), certificate)
+	certificate, err := client.Certificate.Create(context.Background(), &apiv1.CreateCertificateRequest{
+		Certificate: certificate,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -36,30 +38,35 @@ func (r certificate) Create(client *apiserver.Client, resource *Resource) (*Reso
 }
 
 func (r certificate) Delete(client *apiserver.Client, name string) error {
-	return client.Certificate.Delete(context.Background(), fmt.Sprintf("certificates/%s", name))
+	_, err := client.Certificate.Delete(context.Background(), &apiv1.DeleteCertificateRequest{
+		Name: fmt.Sprintf("certificates/%s", name),
+	})
+	return err
 }
 
-func (r certificate) Encode(certificate *api.Certificate) *Resource {
-	uid := strings.Split(certificate.Name, "/")[1]
+func (r certificate) Encode(certificate *apiv1.Certificate) *Resource {
+	uid := strings.Split(certificate.GetName(), "/")[1]
 	return &Resource{
 		Kind: "certificate",
 		Meta: &resourceMeta{
 			UID:        uid,
-			CreateTime: certificate.CreateTime,
-			UpdateTime: certificate.UpdateTime,
+			CreateTime: certificate.GetCreateTime().AsTime(),
+			UpdateTime: certificate.GetUpdateTime().AsTime(),
 		},
 		Spec: &certificateSpec{
-			Dnsnames:        certificate.Dnsnames,
-			KeyAlgorithm:    certificate.KeyAlgorithm,
-			KeySize:         certificate.KeySize,
-			DigestAlgorithm: certificate.DigestAlgorithm,
-			AutoRenew:       certificate.AutoRenew,
+			Dnsnames:        certificate.GetDnsnames(),
+			KeyAlgorithm:    certificate.GetKeyAlgorithm().String(),
+			KeySize:         certificate.GetKeySize(),
+			DigestAlgorithm: certificate.GetDigestAlgorithm().String(),
+			AutoRenew:       certificate.GetAutoRenew(),
 		},
 	}
 }
 
 func (r certificate) Get(client *apiserver.Client, name string) (*Resource, error) {
-	certificate, err := client.Certificate.Get(context.Background(), fmt.Sprintf("certificates/%s", name))
+	certificate, err := client.Certificate.Get(context.Background(), &apiv1.GetCertificateRequest{
+		Name: fmt.Sprintf("certificates/%s", name),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -68,15 +75,18 @@ func (r certificate) Get(client *apiserver.Client, name string) (*Resource, erro
 
 func (r certificate) List(client *apiserver.Client) ([]*Resource, error) {
 	return listResource(func(pageToken string) ([]*Resource, string, error) {
-		certificates, nextPageToken, err := client.Certificate.List(context.Background(), 0, pageToken)
+		response, err := client.Certificate.List(context.Background(), &apiv1.ListCertificatesRequest{
+			PageToken: pageToken,
+			PageSize:  0,
+		})
 		if err != nil {
-			return nil, nextPageToken, err
+			return nil, "", err
 		}
-		a := make([]*Resource, len(certificates))
-		for i, certificate := range certificates {
+		a := make([]*Resource, len(response.GetCertificates()))
+		for i, certificate := range response.GetCertificates() {
 			a[i] = r.Encode(certificate)
 		}
-		return a, nextPageToken, nil
+		return a, response.GetNextPageToken(), nil
 	})
 }
 
@@ -142,14 +152,16 @@ func NewCmdCreateCertificate() *cobra.Command {
 			return err
 		},
 		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) (err error) {
-			apiCertificate := &api.Certificate{
+			apiCertificate := &apiv1.Certificate{
 				Dnsnames:        strings.Split(dnsNames, ","),
-				KeyAlgorithm:    keyAlgorithm,
+				KeyAlgorithm:    apiv1.KeyAlgorithm(apiv1.KeyAlgorithm_value[keyAlgorithm]),
 				KeySize:         int32(keySize),
-				DigestAlgorithm: digestAlgorithm,
+				DigestAlgorithm: apiv1.DigestAlgorithm(apiv1.DigestAlgorithm_value[digestAlgorithm]),
 				AutoRenew:       autoRenew,
 			}
-			if apiCertificate, err = client.Certificate.Create(context.Background(), apiCertificate); err != nil {
+			if apiCertificate, err = client.Certificate.Create(context.Background(), &apiv1.CreateCertificateRequest{
+				Certificate: apiCertificate,
+			}); err != nil {
 				return err
 			}
 			return FormatResource(certificate{}.Encode(apiCertificate), os.Stdout)

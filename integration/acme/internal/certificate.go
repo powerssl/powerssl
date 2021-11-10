@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"time"
 
-	"powerssl.dev/sdk/controller/api"
+	apiv1 "powerssl.dev/api/controller/v1"
 )
 
 func (acme *ACME) GetCertificate(_ context.Context, accountURL string, certificateURL string) ([]*x509.Certificate, error) {
@@ -14,7 +14,7 @@ func (acme *ACME) GetCertificate(_ context.Context, accountURL string, certifica
 	return nil, ErrNotImplemented
 }
 
-func (acme *ACME) RevokeCertificate(_ context.Context, directoryURL string, accountURL string, certificate *x509.Certificate, reason *api.RevocationReason) error {
+func (acme *ACME) RevokeCertificate(_ context.Context, directoryURL string, accountURL string, certificate *x509.Certificate, reason *apiv1.RevocationReason) error {
 	time.Sleep(1 * time.Second)
 
 	return ErrNotImplemented

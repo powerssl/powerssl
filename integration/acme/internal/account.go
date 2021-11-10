@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"powerssl.dev/sdk/controller/api"
+	apiv1 "powerssl.dev/api/controller/v1"
 )
 
-func (acme *ACME) CreateAccount(ctx context.Context, keyToken, directoryURL string, termsOfServiceAgreed bool, contacts []string) (*api.Account, error) {
+func (acme *ACME) CreateAccount(ctx context.Context, keyToken, directoryURL string, termsOfServiceAgreed bool, contacts []string) (*apiv1.Account, error) {
 	client, err := NewClient(ctx, directoryURL)
 	if err != nil {
 		return nil, err
@@ -21,27 +21,27 @@ func (acme *ACME) CreateAccount(ctx context.Context, keyToken, directoryURL stri
 	if err != nil {
 		return nil, fmt.Errorf("error creating new account: %v", err)
 	}
-	return &api.Account{
+	return &apiv1.Account{
 		Contacts:             account.Contact,
-		Status:               api.AccountStatusRevoked, // TODO
+		Status:               apiv1.Account_REVOKED, // TODO
 		TermsOfServiceAgreed: account.TermsOfServiceAgreed,
-		URL:                  account.URL,
+		Url:                  account.URL,
 	}, nil
 }
 
-func (acme *ACME) DeactivateAccount(_ context.Context, accountURL string) (*api.Account, error) {
+func (acme *ACME) DeactivateAccount(_ context.Context, accountURL string) (*apiv1.Account, error) {
 	time.Sleep(1 * time.Second)
 
 	return nil, ErrNotImplemented
 }
 
-func (acme *ACME) RekeyAccount(_ context.Context, accountURL string, directoryURL string) (*api.Account, error) {
+func (acme *ACME) RekeyAccount(_ context.Context, accountURL string, directoryURL string) (*apiv1.Account, error) {
 	time.Sleep(1 * time.Second)
 
 	return nil, ErrNotImplemented
 }
 
-func (acme *ACME) UpdateAccount(_ context.Context, accountURL string, contacts []string) (*api.Account, error) {
+func (acme *ACME) UpdateAccount(_ context.Context, accountURL string, contacts []string) (*apiv1.Account, error) {
 	time.Sleep(1 * time.Second)
 
 	return nil, ErrNotImplemented
