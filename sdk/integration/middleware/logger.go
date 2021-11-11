@@ -1,4 +1,4 @@
-package middleware
+package middleware // import "powerssl.dev/sdk/integration/middleware"
 
 import (
 	"go.uber.org/zap"

@@ -8,8 +8,7 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-func New(ctx context.Context, cfg Config) (*grpc.ClientConn, error) {
-	var opts []grpc.DialOption
+func New(ctx context.Context, cfg Config, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	if cfg.Insecure {
 		opts = append(opts, grpc.WithInsecure())
 	} else {

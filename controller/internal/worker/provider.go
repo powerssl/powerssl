@@ -8,7 +8,7 @@ import (
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
 
-	apiserver2 "powerssl.dev/backend/apiserver"
+	apiserver2 "powerssl.dev/backend/context"
 	"powerssl.dev/backend/temporal"
 	"powerssl.dev/backend/vault"
 	"powerssl.dev/controller/internal/activity"
@@ -25,8 +25,8 @@ type F func() error
 func Provide(ctx context.Context, apiserverClient *apiserver.Client, vaultClient *vault.Client, temporalClient client.Client) F {
 	return func() error {
 		backgroundActivityContext := context.Background()
-		backgroundActivityContext = apiserver2.SetClient(backgroundActivityContext, apiserverClient)
-		backgroundActivityContext = vault.SetClient(backgroundActivityContext, vaultClient)
+		backgroundActivityContext = apiserver2.SetAPIClient(backgroundActivityContext, apiserverClient)
+		backgroundActivityContext = apiserver2.SetVaultClient(backgroundActivityContext, vaultClient)
 		worker.EnableVerboseLogging(true)
 		w := worker.New(temporalClient, temporal.ControllerTaskQueue, worker.Options{
 			BackgroundActivityContext: backgroundActivityContext,

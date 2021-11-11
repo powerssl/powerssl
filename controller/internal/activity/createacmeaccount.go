@@ -6,7 +6,7 @@ import (
 	temporalactivity "go.temporal.io/sdk/activity"
 
 	apiv1 "powerssl.dev/api/controller/v1"
-	"powerssl.dev/backend/vault"
+	context2 "powerssl.dev/backend/context"
 	"powerssl.dev/controller/internal/service/acme"
 	"powerssl.dev/controller/internal/service/integration/activity"
 	sharedactivity "powerssl.dev/workflow/activity"
@@ -17,7 +17,7 @@ func CreateACMEAccount(ctx context.Context, params *sharedactivity.CreateACMEAcc
 	logger.Info("CreateACMEAccount", params.ToKeyVals()...)
 
 	var keyToken string
-	if keyToken, err = vault.GetClient(ctx).ExportWrappedTransitKey(ctx, params.KeyName); err != nil {
+	if keyToken, err = context2.GetVaultClient(ctx).ExportWrappedTransitKey(ctx, params.KeyName); err != nil {
 		return nil, err
 	}
 

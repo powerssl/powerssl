@@ -1,4 +1,4 @@
-package transport // import "powerssl.dev/backend/transport"
+package transport
 
 import (
 	"context"

@@ -1,4 +1,4 @@
-package httpfs // import "powerssl.dev/backend/httpfs"
+package httpfs
 
 import (
 	"net/http"

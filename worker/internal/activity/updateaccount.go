@@ -7,7 +7,7 @@ import (
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
-	"powerssl.dev/backend/apiserver"
+	context2 "powerssl.dev/backend/context"
 	"powerssl.dev/workflow/activity"
 )
 
@@ -20,7 +20,7 @@ func UpdateAccount(ctx context.Context, params *activity.UpdateAccountParams) (_
 	if err != nil {
 		return nil, err
 	}
-	if acmeAccount, err = apiserver.GetClient(ctx).ACMEAccount.Update(ctx, &apiv1.UpdateACMEAccountRequest{
+	if acmeAccount, err = context2.GetAPIClient(ctx).ACMEAccount.Update(ctx, &apiv1.UpdateACMEAccountRequest{
 		Name:        params.Name,
 		UpdateMask:  updateMask,
 		AcmeAccount: params.ACMEAccount,

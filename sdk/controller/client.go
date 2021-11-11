@@ -8,8 +8,6 @@ import (
 
 	apiv1 "powerssl.dev/api/controller/v1"
 	"powerssl.dev/common/transport"
-
-	"powerssl.dev/sdk/internal"
 )
 
 type GRPCClient struct {
@@ -22,7 +20,6 @@ func NewGRPCClient(ctx context.Context, cfg Config, logger *zap.SugaredLogger, t
 	if err != nil {
 		return nil, err
 	}
-	_ = internal.NewSigner(cfg.AuthToken)
 	return &GRPCClient{
 		ACME:        apiv1.NewACMEServiceClient(conn),
 		Integration: apiv1.NewIntegrationServiceClient(conn),

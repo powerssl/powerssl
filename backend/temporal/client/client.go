@@ -1,4 +1,4 @@
-package client // import "powerssl.dev/backend/temporal/client"
+package client
 
 import (
 	"crypto/tls"
@@ -16,7 +16,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewClient(cfg Config, logger *zap.SugaredLogger, tracer opentracing.Tracer) (client temporalclient.Client, closer io.Closer, err error) {
+func New(cfg Config, logger *zap.SugaredLogger, tracer opentracing.Tracer) (client temporalclient.Client, closer io.Closer, err error) {
 	var tlsConnectionOptions tls.Config
 	if cfg.TLSCertFile != "" && cfg.TLSKeyFile != "" {
 		var cert tls.Certificate

@@ -1,4 +1,4 @@
-package ctxkey // import "powerssl.dev/backend/ctexkey"
+package context
 
 import "fmt"
 

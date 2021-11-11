@@ -9,7 +9,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
-	"powerssl.dev/backend/auth"
+	context2 "powerssl.dev/backend/context"
 )
 
 var acmeServerMessageType *apiv1.ACMEServer
@@ -41,7 +41,7 @@ func (q *Queries) CreateACMEServerFromAPI(ctx context.Context, acmeServer *apiv1
 }
 
 func (q *Queries) UpdateACMEServerWithMask(ctx context.Context, id uuid.UUID, fm *fieldmaskpb.FieldMask, acmeServer *apiv1.ACMEServer) (AcmeServer, error) {
-	fm = acmeServerUpdateMaskSanitizer.Sanitize(fm, auth.IsInternal(ctx))
+	fm = acmeServerUpdateMaskSanitizer.Sanitize(fm, context2.IsInternal(ctx))
 	updateParams := UpdateACMEServerParams{ID: id}
 	if err := setUpdateParams(fm, acmeServer, &updateParams); err != nil {
 		return AcmeServer{}, err

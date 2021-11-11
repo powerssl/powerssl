@@ -1,4 +1,4 @@
-package vault // import "powerssl.dev/backend/vault"
+package vault
 
 import (
 	"context"

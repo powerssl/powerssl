@@ -8,8 +8,6 @@ import (
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/common/transport"
-
-	"powerssl.dev/sdk/internal"
 )
 
 type Client struct {
@@ -24,7 +22,6 @@ func NewClient(ctx context.Context, cfg Config, logger *zap.SugaredLogger, trace
 	if err != nil {
 		return nil, err
 	}
-	_ = internal.NewSigner(cfg.AuthToken)
 	return &Client{
 		ACMEAccount: apiv1.NewACMEAccountServiceClient(conn),
 		ACMEServer:  apiv1.NewACMEServerServiceClient(conn),

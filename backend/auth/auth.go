@@ -1,7 +1,6 @@
-package auth // import "powerssl.dev/backend/auth"
+package auth
 
 import (
-	"context"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
@@ -17,14 +16,6 @@ import (
 )
 
 var Method = stdjwt.SigningMethodRS256
-
-func ClaimsFromContext(ctx context.Context) *stdjwt.StandardClaims {
-	claims, ok := ctx.Value(jwt.JWTClaimsContextKey).(*stdjwt.StandardClaims)
-	if !ok {
-		return &stdjwt.StandardClaims{}
-	}
-	return claims
-}
 
 func NewParser(jwksURL string, tlsConfig *tls.Config) (endpoint.Middleware, error) {
 	client := http.DefaultClient
@@ -59,12 +50,4 @@ func NewParser(jwksURL string, tlsConfig *tls.Config) (endpoint.Middleware, erro
 		}
 		return keys[0].Key, nil
 	}, Method, jwt.StandardClaimsFactory), nil
-}
-
-func SubjectFromContext(ctx context.Context) string {
-	return ClaimsFromContext(ctx).Subject
-}
-
-func IsInternal(ctx context.Context) bool {
-	return SubjectFromContext(ctx) == "{...}"
 }

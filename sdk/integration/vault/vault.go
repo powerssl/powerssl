@@ -1,4 +1,4 @@
-package vault
+package vault // import "powerssl.dev/sdk/integration/vault"
 
 import (
 	"crypto"

@@ -1,4 +1,4 @@
-package apiserver
+package apiserver // import "powerssl.dev/sdk/apiserver"
 
 import (
 	"github.com/google/wire"

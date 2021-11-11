@@ -1,23 +1,11 @@
-package vault // import "powerssl.dev/backend/vault"
+package vault
 
 import (
 	"context"
 
 	"github.com/hashicorp/vault/api"
 	"github.com/opentracing/opentracing-go"
-
-	"powerssl.dev/backend/ctxkey"
 )
-
-var clientValue = ctxkey.New("dev.powerssl.backend.vault")
-
-func GetClient(ctx context.Context) *Client {
-	return ctx.Value(clientValue).(*Client)
-}
-
-func SetClient(ctx context.Context, client *Client) context.Context {
-	return context.WithValue(ctx, clientValue, client)
-}
 
 type AppRole struct {
 	RoleID   string `flag:"roleID;;;vault app role ID" mapstructure:"role-id"`

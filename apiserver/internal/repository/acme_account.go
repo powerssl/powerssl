@@ -12,7 +12,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
-	"powerssl.dev/backend/auth"
+	context2 "powerssl.dev/backend/context"
 )
 
 var acmeAccountMessageType *apiv1.ACMEAccount
@@ -63,7 +63,7 @@ func (q *Queries) CreateACMEAccountFromAPI(ctx context.Context, parent string, a
 }
 
 func (q *Queries) UpdateACMEAccountWithMask(ctx context.Context, id uuid.UUID, fm *fieldmaskpb.FieldMask, acmeAccount *apiv1.ACMEAccount) (AcmeAccount, error) {
-	fm = acmeAccountUpdateMaskSanitizer.Sanitize(fm, auth.IsInternal(ctx))
+	fm = acmeAccountUpdateMaskSanitizer.Sanitize(fm, context2.IsInternal(ctx))
 	updateParams := UpdateACMEAccountParams{ID: id}
 	if err := setUpdateParams(fm, acmeAccount, &updateParams); err != nil {
 		return AcmeAccount{}, err

@@ -1,4 +1,4 @@
-package middleware
+package middleware // import "powerssl.dev/sdk/integration/middleware"
 
 import (
 	apiv1 "powerssl.dev/api/controller/v1"

@@ -1,4 +1,4 @@
-package transport // import "powerssl.dev/backend/transport"
+package transport
 
 import (
 	"context"
@@ -12,6 +12,7 @@ var Provider = wire.NewSet(
 )
 
 type F func() error
+
 type Register func(srv *Server)
 
 func Provide(ctx context.Context, cfg Config, logger *zap.SugaredLogger, f Register) (F, error) {
@@ -21,6 +22,5 @@ func Provide(ctx context.Context, cfg Config, logger *zap.SugaredLogger, f Regis
 		return nil, err
 	}
 	f(srv)
-
 	return func() error { return srv.Serve(ctx) }, nil
 }

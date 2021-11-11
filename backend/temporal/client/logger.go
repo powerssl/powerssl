@@ -1,8 +1,6 @@
-package client // import "powerssl.dev/backend/temporal/client"
+package client
 
-import (
-	"go.uber.org/zap"
-)
+import "go.uber.org/zap"
 
 type logger struct {
 	*zap.SugaredLogger

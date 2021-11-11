@@ -1,4 +1,4 @@
-package transport // import "powerssl.dev/backend/transport"
+package transport
 
 type Config struct {
 	Addr       string `flag:"addr;;;server addr" validate:"required,hostname_port"`
