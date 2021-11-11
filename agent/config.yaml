@@ -1,0 +1,12 @@
+apiServerClient:
+  authToken:
+  client:
+    addr:
+    caFile:
+    insecure:
+    insecureSkipTLSVerify:
+    serverNameOverride:
+log:
+  env: development
+tracer:
+  implementation: jaeger

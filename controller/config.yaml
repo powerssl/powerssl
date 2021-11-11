@@ -1,24 +1,40 @@
-addr: localhost:8083
-apiserver:
-  addr: localhost:8082
-  ca-file:
-  insecure: false
-  insecure-skip-tls-verify: false
-  server-name-override:
-auth-token:
-ca-file: local/certs/ca.pem
-common-name: localhost
-insecure: false
+apiServerClient:
+  authToken:
+  client:
+    addr: localhost:8082
+    caFile: local/certs/ca.pem
+    insecure: false
+    insecureSkipTLSVerify: false
+    serverNameOverride:
+log:
+  env: development
 metrics:
-  addr: localhost:9093
-temporal:
-  ca-file:
-  host-port: localhost:7233
+  addr: localhost:9092
+server:
+  addr: localhost:8083
+  caFile: local/certs/ca.pem
+  certFile:
+  commonName: localhost
+  insecure: false
+  keyFile:
+  vaultRole:
+  vaultToken:
+  vaultURL: https://localhost:8200
+temporalClient:
+  caFile: local/certs/ca.pem
+  disableHealthCheck:
+  healthCheckTimeout:
+  hostPort: localhost:7233
+  identity:
   namespace: powerssl
-tls:
-  cert-file:
-  private-key-file:
-tracer: jaeger
-vault:
-  ca-file:
+  tlsCertFile:
+  tlsKeyFile:
+tracer:
+  implementation: jaeger
+vaultClient:
+  appRole:
+    roleID:
+    secretID:
+  caFile: local/certs/ca.pem
+  token:
   url: https://localhost:8200

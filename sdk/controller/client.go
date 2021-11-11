@@ -18,7 +18,7 @@ type GRPCClient struct {
 }
 
 func NewGRPCClient(ctx context.Context, cfg Config, logger *zap.SugaredLogger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
-	conn, err := transport.NewClientConn(ctx, cfg.Client)
+	conn, err := transport.New(ctx, cfg.Client)
 	if err != nil {
 		return nil, err
 	}

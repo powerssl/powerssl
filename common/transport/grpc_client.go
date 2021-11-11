@@ -3,16 +3,12 @@ package transport // import "powerssl.dev/common/transport"
 import (
 	"context"
 	"crypto/tls"
-	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
 
-func NewClientConn(ctx context.Context, cfg ClientConfig) (*grpc.ClientConn, error) {
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
-	defer cancel()
-
+func New(ctx context.Context, cfg Config) (*grpc.ClientConn, error) {
 	var opts []grpc.DialOption
 	if cfg.Insecure {
 		opts = append(opts, grpc.WithInsecure())

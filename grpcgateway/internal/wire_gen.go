@@ -28,7 +28,7 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 	metricsF := metrics.Provide(ctx, metricsConfig, sugaredLogger)
 	serverConfig := cfg.Server
 	clientConfig := cfg.APIServerClient
-	clientConn, err := transport.NewClientConn(ctx, clientConfig)
+	clientConn, err := transport.New(ctx, clientConfig)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

@@ -24,7 +24,7 @@ type AppRole struct {
 	SecretID string `flag:"secretID;;;vault app role secret ID" mapstructure:"secret-id"`
 }
 
-type ClientConfig struct {
+type Config struct {
 	AppRole AppRole `flag:"appRole;;;vault app role"`
 	CAFile  string  `flag:"caFile;;;vault CA file"`
 	Token   string  `flag:"token;;;vault token"`
@@ -33,10 +33,10 @@ type ClientConfig struct {
 
 type Client struct {
 	c   *api.Client
-	cfg ClientConfig
+	cfg Config
 }
 
-func New(cfg *ClientConfig) (*Client, error) {
+func New(cfg *Config) (*Client, error) {
 	conf := api.DefaultConfig()
 	if cfg.CAFile != "" {
 		if err := conf.ConfigureTLS(&api.TLSConfig{

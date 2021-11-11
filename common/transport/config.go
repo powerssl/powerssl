@@ -1,6 +1,6 @@
 package transport
 
-type ClientConfig struct {
+type Config struct {
 	Addr                  string `flag:"addr;;;apiserver client addr" validate:"required,hostname_port"`
 	CAFile                string `flag:"caFile;;;apiserver client CA file"`
 	Insecure              bool   `flag:"insecure;;;apiserver client insecure"`

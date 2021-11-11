@@ -1,4 +1,9 @@
-env: development
-config-dir: temporal/configs
-services: frontend,history,matching,worker
-zone:
+log:
+  env: development
+metrics:
+  addr:
+server:
+  configDir: temporal/configs
+  env: development
+  services: frontend,history,matching,worker
+  zone:

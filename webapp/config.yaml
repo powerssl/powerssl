@@ -1,13 +1,12 @@
-addr: localhost:8443
-apiserver:
-  addr: localhost:8082
-auth:
-  uri: https://localhost:8843
-grpcweb:
-  uri: https://localhost:8883
-insecure: false
+log:
+  env: development
 metrics:
   addr: localhost:9090
-tls:
-  cert-file: local/certs/localhost.pem
-  private-key-file: local/certs/localhost-key.pem
+server:
+  apiAddr: localhost:8082
+  addr: localhost:8443
+  authURI: https://localhost:8843
+  certFile: local/certs/localhost.pem
+  grpcWebURI: https://localhost:8883
+  insecure: false
+  keyFile: local/certs/localhost-key.pem

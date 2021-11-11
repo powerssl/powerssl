@@ -20,7 +20,7 @@ type Client struct {
 }
 
 func NewClient(ctx context.Context, cfg Config, logger *zap.SugaredLogger, tracer stdopentracing.Tracer) (*Client, error) {
-	conn, err := transport.NewClientConn(ctx, cfg.Client)
+	conn, err := transport.New(ctx, cfg.Client)
 	if err != nil {
 		return nil, err
 	}

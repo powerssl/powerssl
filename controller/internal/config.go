@@ -13,13 +13,13 @@ import (
 const component = "powerssl-controller"
 
 type Config struct {
-	APIServerClient apiserver.Config              `flag:"apiServerClient" validate:"required"`
-	Log             log.Config                    `flag:"log"`
+	APIServerClient apiserver.Config        `flag:"apiServerClient" validate:"required"`
+	Log             log.Config              `flag:"log"`
 	Metrics         metrics.Config          `flag:"metrics"`
 	Server          backendtransport.Config `flag:"server"`
 	TemporalClient  client.Config           `flag:"temporalClient"`
-	Tracer          tracer.Config                 `flag:"tracer"`
-	VaultClient     vault.ClientConfig            `flag:"vaultClient"`
+	Tracer          tracer.Config           `flag:"tracer"`
+	VaultClient     vault.Config            `flag:"vaultClient"`
 }
 
 func (cfg *Config) Defaults() {

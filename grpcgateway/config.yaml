@@ -1,10 +1,12 @@
-addr: localhost:8085
-apiserver:
+apiServerClient:
   addr: localhost:8082
-  ca-file:
+  caFile: local/certs/ca.pem
   insecure: false
-  insecure-skip-tls-verify: false
-  server-name-override:
-ca-file: local/certs/ca.pem
+  insecureSkipTLSVerify: false
+  serverNameOverride:
+log:
+  env: development
 metrics:
   addr: localhost:9095
+server:
+  addr: localhost:8085

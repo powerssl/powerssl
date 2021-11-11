@@ -1,17 +1,16 @@
-addr: localhost:8843
-auth:
-  uri: https://localhost:8843
-jwt:
-  private-key-file: local/certs/ca-key.pem
-insecure: false
+log:
+  env: development
+server:
+  addr: localhost:8843
+  insecure: false
+  certFile: local/certs/localhost.pem
+  keyFile: local/certs/localhost-key.pem
+  jwtPrivateKeyFile: local/certs/ca-key.pem
+  webppURI: https://localhost:8443
+oauth2:
+  authURI: https://localhost:8843
+  github:
+    clientID: da92ab4fd752a1e5dc1a
+    clientSecret: 5b2a050592c3add5da9903fc3b975b160f5f8924
 metrics:
   addr: localhost:9091
-oauth2:
-  github:
-    client-id: da92ab4fd752a1e5dc1a
-    client-secret: 5b2a050592c3add5da9903fc3b975b160f5f8924
-tls:
-  cert-file: local/certs/localhost.pem
-  private-key-file: local/certs/localhost-key.pem
-webapp:
-  uri: https://localhost:8443

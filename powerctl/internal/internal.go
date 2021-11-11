@@ -43,7 +43,7 @@ func NewGRPCClient() (_ *apiserver.Client, err error) {
 	}
 	return apiserver.NewClient(context.Background(), apiserver.Config{
 		AuthToken: authToken,
-		Client: transport.ClientConfig{
+		Client: transport.Config{
 			Addr:                  addr,
 			CAFile:                caFle,
 			Insecure:              insecure,

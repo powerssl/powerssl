@@ -1,24 +1,27 @@
-addr: localhost:8082
-ca-file: local/certs/ca.pem
-common-name: localhost
 db:
-  connection: postgresql://powerssl:powerssl@localhost:5432/powerssl?sslmode=disable
-  dialect: postgres
-insecure: false
-jwks:
-  insecure-skip-tls-verify: false
-  server-name-override:
-  url: https://localhost:8843/.well-known/jwks.json
+  connString: postgresql://powerssl:powerssl@localhost:5432/powerssl?sslmode=disable
+log:
+  env: development
 metrics:
   addr: localhost:9092
-temporal:
-  ca-file:
-  host-port: localhost:7233
+server:
+  addr: localhost:8082
+  caFile: local/certs/ca.pem
+  certFile:
+  commonName: localhost
+  insecure: false
+  keyFile:
+  vaultRole:
+  vaultToken:
+  vaultURL: https://localhost:8200
+temporalClient:
+  caFile: local/certs/ca.pem
+  disableHealthCheck:
+  healthCheckTimeout:
+  hostPort: localhost:7233
+  identity:
   namespace: powerssl
-tls:
-  cert-file:
-  private-key-file:
-tracer: jaeger
-vault:
-  ca-file:
-  url: https://localhost:8200
+  tlsCertFile:
+  tlsKeyFile:
+tracer:
+  implementation: jaeger
