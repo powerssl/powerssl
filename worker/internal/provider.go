@@ -26,10 +26,10 @@ var Provider = wire.NewSet(
 	worker.Provider,
 )
 
-func Provide(interruptHandlerF interrupthandler.F, metricsServerF metrics.F, workerF worker.F) []func() error {
+func Provide(interruptHandlerF interrupthandler.F, metricsF metrics.F, workerF worker.F) []func() error {
 	return []func() error{
 		interruptHandlerF,
-		metricsServerF,
+		metricsF,
 		workerF,
 	}
 }

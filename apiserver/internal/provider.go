@@ -26,10 +26,10 @@ var Provider = wire.NewSet(
 	wire.FieldsOf(new(*Config), "DB", "Log", "Metrics", "Server", "TemporalClient", "Tracer"),
 )
 
-func Provide(interruptHandlerF interrupthandler.F, metricsServerF metrics.F, serverF backendtransport.F) []func() error {
+func Provide(interruptHandlerF interrupthandler.F, metricsF metrics.F, serverF backendtransport.F) []func() error {
 	return []func() error{
 		interruptHandlerF,
-		metricsServerF,
+		metricsF,
 		serverF,
 	}
 }

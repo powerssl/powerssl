@@ -40,10 +40,10 @@ var provider = wire.NewSet(
 
 type F func() error
 
-func Provide(interruptHandlerF interrupthandler.F, metricsServerF metrics.F, runnerF F) []func() error {
+func Provide(interruptHandlerF interrupthandler.F, metricsF metrics.F, runnerF F) []func() error {
 	return []func() error{
 		interruptHandlerF,
-		metricsServerF,
+		metricsF,
 		runnerF,
 	}
 }
