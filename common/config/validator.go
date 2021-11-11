@@ -1,63 +1,98 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 	"strings"
 
+	"github.com/go-playground/locales/en"
+	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	entranslations "github.com/go-playground/validator/v10/translations/en"
 )
 
 func Validate(cfg Config) error {
 	cfg.Defaults()
 	validate := validator.New()
-	if err := validate.Struct(cfg); err != nil {
+	trans, err := registerTranslations(cfg, validate)
+	if err != nil {
+		return err
+	}
+	if err = validate.Struct(cfg); err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
 			return err
 		}
 		var fieldErrors []string
 		for _, fieldError := range err.(validator.ValidationErrors) {
-			fieldErrors = append(fieldErrors, "  "+convertFieldError(cfg, fieldError))
+			fieldErrors = append(fieldErrors, "  "+fieldError.Translate(trans))
 		}
-		return errors.New("\n" + strings.Join(unique(fieldErrors), "\n") + "\n")
+		return fmt.Errorf("\n%s\n", strings.Join(unique(fieldErrors), "\n"))
 	}
 	return nil
 }
 
-func convertFieldError(cfg Config, fieldError validator.FieldError) string {
-	switch fieldError.Tag() {
-	case "gt":
-		if fieldError.Kind() == reflect.Slice {
-			return fmt.Sprintf("%s needs to have more than %v values", convertStructNamespace(cfg, fieldError.StructNamespace()), fieldError.Param())
+type translation struct {
+	tag             string
+	translation     string
+	override        bool
+	customRegisFunc validator.RegisterTranslationsFunc
+	customTransFunc validator.TranslationFunc
+}
+
+func registerTranslations(cfg Config, v *validator.Validate) (_ ut.Translator, err error) {
+	trans, _ := ut.New(en.New()).GetTranslator("en")
+	if err = entranslations.RegisterDefaultTranslations(v, trans); err != nil {
+		return nil, err
+	}
+	translations := []translation{
+		{
+			tag:         "required",
+			translation: "{0} is required",
+			override:    true,
+		},
+		{
+			tag:         "hostname_port",
+			translation: "{0} must to be a valid HostPort",
+			override:    true,
+		},
+	}
+	for _, t := range translations {
+		if t.customTransFunc != nil && t.customRegisFunc != nil {
+			err = v.RegisterTranslation(t.tag, trans, t.customRegisFunc, t.customTransFunc)
+		} else if t.customTransFunc != nil && t.customRegisFunc == nil {
+			err = v.RegisterTranslation(t.tag, trans, registrationFunc(t.tag, t.translation, t.override), t.customTransFunc)
+		} else if t.customTransFunc == nil && t.customRegisFunc != nil {
+			err = v.RegisterTranslation(t.tag, trans, t.customRegisFunc, translateFuncFactory(cfg))
+		} else {
+			err = v.RegisterTranslation(t.tag, trans, registrationFunc(t.tag, t.translation, t.override), translateFuncFactory(cfg))
 		}
-		fallthrough
-	case "hostname_port":
-		return fmt.Sprintf("%s with value \"%v\", needs to be an hostname with port", convertStructNamespace(cfg, fieldError.StructNamespace()), fieldError.Value())
-	case "required":
-		return fmt.Sprintf("%s is required", convertStructNamespace(cfg, fieldError.StructNamespace()))
-	case "uri":
-		return fmt.Sprintf("%s with value \"%v\", needs to be an URI", convertStructNamespace(cfg, fieldError.StructNamespace()), fieldError.Value())
-	case "url":
-		return fmt.Sprintf("%s with value \"%v\", needs to be an URL", convertStructNamespace(cfg, fieldError.StructNamespace()), fieldError.Value())
-	default:
-		return fmt.Sprintf("namespace: %v, field: %v, struct_namespace: %v, struct_field: %v, tag: %v, actual_tag: %v, kind: %v, type: %v, value: %v, param: %v",
-			fieldError.Namespace(),
-			fieldError.Field(),
-			fieldError.StructNamespace(),
-			fieldError.StructField(),
-			fieldError.Tag(),
-			fieldError.ActualTag(),
-			fieldError.Kind(),
-			fieldError.Type(),
-			fieldError.Value(),
-			fieldError.Param())
+		if err != nil {
+			return nil, err
+		}
+	}
+	return trans, nil
+}
+
+func registrationFunc(tag string, translation string, override bool) validator.RegisterTranslationsFunc {
+	return func(ut ut.Translator) error {
+		if err := ut.Add(tag, translation, override); err != nil {
+			return err
+		}
+		return nil
 	}
 }
 
-func convertStructNamespace(cfg Config, structNamespace string) string {
-	paths := strings.Split(structNamespace, ".")
-	return "--" + tagInformation(reflect.TypeOf(cfg).Elem(), paths[1:], "")
+func translateFuncFactory(cfg Config) func(ut ut.Translator, fe validator.FieldError) string {
+	return func(ut ut.Translator, fe validator.FieldError) string {
+		paths := strings.Split(fe.StructNamespace(), ".")
+		field := "--" + tagInformation(reflect.TypeOf(cfg).Elem(), paths[1:], "")
+		t, err := ut.T(fe.Tag(), field)
+		if err != nil {
+			panic(fmt.Sprintf("warning: error translating FieldError: %#v", fe))
+			return fe.(error).Error()
+		}
+		return t
+	}
 }
 
 func unique(stringSlice []string) []string {
