@@ -6,10 +6,9 @@ import (
 	"path/filepath"
 	"regexp"
 
+	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
-	cmdutil "powerssl.dev/common/cmd"
 )
 
 func newCmdLogin() *cobra.Command {
@@ -17,7 +16,7 @@ func newCmdLogin() *cobra.Command {
 		Use:   "login",
 		Short: "Login to PowerSSL",
 		Args:  cobra.MaximumNArgs(1),
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
+		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 && args[0] != "" {
 				viper.Set("addr", args[0])
 			}

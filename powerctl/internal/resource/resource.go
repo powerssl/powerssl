@@ -361,3 +361,9 @@ func FormatResource(res interface{}, w io.Writer) (err error) {
 	_, _ = fmt.Fprintln(w, string(out))
 	return nil
 }
+
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}

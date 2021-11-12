@@ -1,16 +1,16 @@
 package cmd
 
 import (
+	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
 
-	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/common/version"
 )
 
 var verbose bool
 
 func Execute() {
-	cmdutil.Execute(NewCmdRoot())
+	snakecharmer.Execute(NewCmdRoot())
 }
 
 func NewCmdRoot() *cobra.Command {

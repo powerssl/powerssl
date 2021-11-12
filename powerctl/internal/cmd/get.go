@@ -3,9 +3,9 @@ package cmd
 import (
 	"strings"
 
+	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
 
-	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/sdk/apiserver"
 
 	"powerssl.dev/powerctl/internal"
@@ -23,7 +23,7 @@ func newCmdGet() *cobra.Command {
 			client, err = internal.NewGRPCClient()
 			return err
 		},
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) (err error) {
+		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) (err error) {
 			var resources []*resource.Resource
 			if len(args) == 1 && !strings.Contains(args[0], "/") {
 				kinds := strings.Split(args[0], ",")

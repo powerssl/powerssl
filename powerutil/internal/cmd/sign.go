@@ -2,9 +2,8 @@ package cmd
 
 import (
 	"github.com/cloudflare/cfssl/cli"
+	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
-
-	cmdutil "powerssl.dev/common/cmd"
 
 	"powerssl.dev/powerutil/internal/pki"
 )
@@ -16,7 +15,7 @@ func newCmdCASign() *cobra.Command {
 		Use:   "sign",
 		Short: "Signs a certificate by a given CA and CA key",
 		Args:  cobra.NoArgs,
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
+		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) error {
 			var byt, cert []byte
 			var err error
 			if byt, err = cli.ReadStdin(csr); err != nil {

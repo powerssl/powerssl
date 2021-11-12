@@ -5,9 +5,11 @@ import (
 
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/common/transport"
+	"powerssl.dev/sdk/internal"
 )
 
 type Client struct {
@@ -18,7 +20,12 @@ type Client struct {
 }
 
 func NewClient(ctx context.Context, cfg Config, logger *zap.SugaredLogger, tracer stdopentracing.Tracer) (*Client, error) {
-	conn, err := transport.New(ctx, cfg.Client)
+	opts := []grpc.DialOption{
+		grpc.WithUnaryInterceptor(internal.AuthInterceptor()),
+		grpc.WithUnaryInterceptor(internal.LoggerInterceptor(logger)),
+		grpc.WithUnaryInterceptor(internal.TracerInterceptor(tracer)),
+	}
+	conn, err := transport.New(ctx, cfg.Client, opts...)
 	if err != nil {
 		return nil, err
 	}

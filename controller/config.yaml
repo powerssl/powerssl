@@ -9,7 +9,7 @@ apiServerClient:
 log:
   env: development
 metrics:
-  addr: localhost:9092
+  addr: localhost:9093
 server:
   addr: localhost:8083
   caFile: local/certs/ca.pem

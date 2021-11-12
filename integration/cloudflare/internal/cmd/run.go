@@ -5,16 +5,16 @@ import (
 
 	"github.com/spf13/cobra"
 
-	cmdutil "powerssl.dev/common/cmd"
+	"powerssl.dev/common/runner"
 	cloudflare "powerssl.dev/integration/cloudflare/internal"
 	"powerssl.dev/sdk/integration"
 )
 
 func newCmdRun() *cobra.Command {
 	cfg := new(cloudflare.Config)
-	cmd := cmdutil.InitAndRun(&cobra.Command{
+	cmd := runner.RunCmd(&cobra.Command{
 		Use:   "run",
-		Short: "Run CloudFlare integration",
+		Short: "RunCmd CloudFlare integration",
 		Args:  cobra.NoArgs,
 	}, cfg, func(ctx context.Context) ([]func() error, func(), error) {
 		handler := cloudflare.New()

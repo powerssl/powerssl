@@ -10,9 +10,8 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source"
 	"github.com/golang-migrate/migrate/v4/source/go_bindata"
+	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
-
-	cmdutil "powerssl.dev/common/cmd"
 
 	"powerssl.dev/apiserver/internal/migration"
 )
@@ -79,7 +78,7 @@ func newCmdMigrateDown(databaseURL *string) *cobra.Command {
 			}
 			return nil
 		}),
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
+		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) error {
 			if limit >= 0 {
 				if err := m.Steps(-limit); err != nil {
 					if err != migrate.ErrNoChange {
@@ -128,7 +127,7 @@ func newCmdMigrateDrop(databaseURL *string) *cobra.Command {
 			}
 			return nil
 		}),
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
+		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) error {
 			return m.Drop()
 		}),
 		PostRunE: migratePostRunE(m),
@@ -161,7 +160,7 @@ func newCmdMigrateForce(databaseURL *string) *cobra.Command {
 			v = int(v64)
 			return nil
 		}),
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
+		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) error {
 			return m.Force(v)
 		}),
 		PostRunE: migratePostRunE(m),
@@ -189,7 +188,7 @@ func newCmdMigrateGoto(databaseURL *string) *cobra.Command {
 			v = uint(v64)
 			return nil
 		}),
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
+		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) error {
 			if err := m.Migrate(v); err != nil {
 				if err != migrate.ErrNoChange {
 					return err
@@ -222,7 +221,7 @@ func newCmdMigrateUp(databaseURL *string) *cobra.Command {
 			}
 			return nil
 		}),
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
+		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) error {
 			if limit >= 0 {
 				if err := m.Steps(limit); err != nil {
 					if err != migrate.ErrNoChange {

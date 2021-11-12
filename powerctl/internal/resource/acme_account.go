@@ -9,10 +9,10 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
-	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/powerctl/internal"
 	"powerssl.dev/sdk/apiserver"
 )
@@ -173,7 +173,7 @@ func NewCmdCreateACMEAccount() *cobra.Command {
 			client, err = internal.NewGRPCClient()
 			return err
 		},
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) (err error) {
+		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) (err error) {
 			apiACMEAccount := &apiv1.ACMEAccount{
 				Contacts:             strings.Split(contacts, ","),
 				TermsOfServiceAgreed: termsOfServiceAgreed,
@@ -192,7 +192,7 @@ func NewCmdCreateACMEAccount() *cobra.Command {
 	cmd.Flags().StringVar(&contacts, "contacts", "", "Contact URLs (e.g. mailto:contact@example.com) (seperated by \",\")")
 	cmd.Flags().StringVar(&acmeServerID, "acmeserver", "", "ACME Server")
 
-	cmdutil.Must(cmd.MarkFlagRequired("acmeserver"))
+	must(cmd.MarkFlagRequired("acmeserver"))
 
 	return cmd
 }

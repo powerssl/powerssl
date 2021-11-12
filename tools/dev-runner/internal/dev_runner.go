@@ -99,16 +99,16 @@ func Run() error {
 			interrupts[comp.Command] = make(chan struct{})
 			localComp := comp
 			g.Go(func() error {
-				if val, ok := localComp.Env["POWERSSL_AUTH_TOKEN"]; ok && val == component.Generate {
+				if val, ok := localComp.Env["POWERSSL_SERVER_AUTH_TOKEN"]; ok && val == component.Generate {
 					var err error
-					if localComp.Env["POWERSSL_AUTH_TOKEN"], err = serviceToken(comp.Name); err != nil {
+					if localComp.Env["POWERSSL_SERVER_AUTH_TOKEN"], err = serviceToken(comp.Name); err != nil {
 						of.SystemOutput(err.Error())
 						cancel()
 					}
 				}
-				if val, ok := localComp.Env["POWERSSL_VAULT_ROLE_ID"]; ok && val == component.Generate {
+				if val, ok := localComp.Env["POWERSSL_SERVER_VAULT_ROLE_ID"]; ok && val == component.Generate {
 					var err error
-					if localComp.Env["POWERSSL_VAULT_ROLE_ID"], err = vaultRoleID(comp.Name); err != nil {
+					if localComp.Env["POWERSSL_SERVER_VAULT_ROLE_ID"], err = vaultRoleID(comp.Name); err != nil {
 						of.SystemOutput(err.Error())
 						cancel()
 					}

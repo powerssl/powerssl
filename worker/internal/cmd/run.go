@@ -5,16 +5,16 @@ import (
 
 	"github.com/spf13/cobra"
 
-	cmdutil "powerssl.dev/common/cmd"
+	"powerssl.dev/common/runner"
 
 	"powerssl.dev/worker/internal"
 )
 
 func newCmdRun() *cobra.Command {
 	cfg := new(internal.Config)
-	cmd := cmdutil.InitAndRun(&cobra.Command{
+	cmd := runner.RunCmd(&cobra.Command{
 		Use:   "run",
-		Short: "Run the Worker",
+		Short: "RunCmd the Worker",
 		Args:  cobra.NoArgs,
 	}, cfg, func(ctx context.Context) ([]func() error, func(), error) {
 		return internal.Initialize(ctx, cfg)

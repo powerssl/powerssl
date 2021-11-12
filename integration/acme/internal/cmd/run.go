@@ -5,16 +5,17 @@ import (
 
 	"github.com/spf13/cobra"
 
-	cmdutil "powerssl.dev/common/cmd"
-	acme "powerssl.dev/integration/acme/internal"
+	"powerssl.dev/common/runner"
 	"powerssl.dev/sdk/integration"
+
+	acme "powerssl.dev/integration/acme/internal"
 )
 
 func newCmdRun() *cobra.Command {
 	cfg := new(acme.Config)
-	cmd := cmdutil.InitAndRun(&cobra.Command{
+	cmd := runner.RunCmd(&cobra.Command{
 		Use:   "run",
-		Short: "Run ACME integration",
+		Short: "RunCmd ACME integration",
 		Args:  cobra.NoArgs,
 	}, cfg, func(ctx context.Context) ([]func() error, func(), error) {
 		handler, err := acme.New(cfg.Vault)

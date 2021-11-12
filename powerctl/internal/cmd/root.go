@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/common/version"
 )
 
@@ -48,13 +48,13 @@ Find more information at: https://docs.powerssl.io/powerctl`,
 	cmd.PersistentFlags().String("server-name-override", "", "It will override the virtual host name of authority")
 	cmd.PersistentFlags().StringP("output", "o", "table", "Output format")
 
-	cmdutil.Must(viper.BindPFlag("addr", cmd.PersistentFlags().Lookup("addr")))
-	cmdutil.Must(viper.BindPFlag("auth-token", cmd.PersistentFlags().Lookup("auth-token")))
-	cmdutil.Must(viper.BindPFlag("ca-file", cmd.PersistentFlags().Lookup("ca-file")))
-	cmdutil.Must(viper.BindPFlag("insecure", cmd.PersistentFlags().Lookup("insecure")))
-	cmdutil.Must(viper.BindPFlag("insecure-skip-tls-verify", cmd.PersistentFlags().Lookup("insecure-skip-tls-verify")))
-	cmdutil.Must(viper.BindPFlag("output", cmd.PersistentFlags().Lookup("output")))
-	cmdutil.Must(viper.BindPFlag("server-name-override", cmd.PersistentFlags().Lookup("server-name-override")))
+	must(viper.BindPFlag("addr", cmd.PersistentFlags().Lookup("addr")))
+	must(viper.BindPFlag("auth-token", cmd.PersistentFlags().Lookup("auth-token")))
+	must(viper.BindPFlag("ca-file", cmd.PersistentFlags().Lookup("ca-file")))
+	must(viper.BindPFlag("insecure", cmd.PersistentFlags().Lookup("insecure")))
+	must(viper.BindPFlag("insecure-skip-tls-verify", cmd.PersistentFlags().Lookup("insecure-skip-tls-verify")))
+	must(viper.BindPFlag("output", cmd.PersistentFlags().Lookup("output")))
+	must(viper.BindPFlag("server-name-override", cmd.PersistentFlags().Lookup("server-name-override")))
 
 	cmd.AddCommand(newCmdCompletion())
 	cmd.AddCommand(newCmdCreate())
@@ -70,7 +70,7 @@ Find more information at: https://docs.powerssl.io/powerctl`,
 func Execute() {
 	cobra.OnInitialize(initConfig)
 
-	cmdutil.Execute(NewCmdRoot())
+	snakecharmer.Execute(NewCmdRoot())
 }
 
 func initConfig() {
@@ -94,5 +94,11 @@ func initConfig() {
 		log.Fatal("Can't read config:", err)
 	} else if err == nil && verbose {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	}
+}
+
+func must(err error) {
+	if err != nil {
+		panic(err)
 	}
 }

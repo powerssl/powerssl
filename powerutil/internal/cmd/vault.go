@@ -1,9 +1,8 @@
 package cmd
 
 import (
+	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
-
-	cmdutil "powerssl.dev/common/cmd"
 
 	"powerssl.dev/powerutil/internal/vault"
 )
@@ -15,7 +14,7 @@ func newCmdVault() *cobra.Command {
 		Use:   "vault",
 		Short: "Vault migrations",
 		Args:  cobra.NoArgs,
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
+		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) error {
 			return vault.RunVault(addr, ca, caKey)
 		}),
 	}

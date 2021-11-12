@@ -1,11 +1,10 @@
 package main
 
 import (
-	cmdutil "powerssl.dev/common/cmd"
-
+	"github.com/spangenberg/snakecharmer"
 	"powerssl.dev/apiserver/internal/cmd"
 )
 
 func main() {
-	cmdutil.GenDocs(cmd.NewCmdRoot(), "migrate")
+	snakecharmer.GenDocs(cmd.NewCmdRoot(), "migrate")
 }

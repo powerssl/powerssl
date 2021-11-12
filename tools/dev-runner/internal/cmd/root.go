@@ -1,16 +1,16 @@
 package cmd
 
 import (
+	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
 
-	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/common/version"
 
 	"powerssl.dev/tools/dev-runner/internal"
 )
 
 func Execute() {
-	cmdutil.Execute(NewCmdRoot())
+	snakecharmer.Execute(NewCmdRoot())
 }
 
 func NewCmdRoot() *cobra.Command {
@@ -19,7 +19,7 @@ func NewCmdRoot() *cobra.Command {
 		Short:   "powerssl-dev-runner spins up the local dev environment",
 		Version: version.String(),
 		Args:    cobra.NoArgs,
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
+		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) error {
 			return internal.Run()
 		}),
 	}

@@ -5,14 +5,14 @@ import (
 
 	"github.com/spf13/cobra"
 
-	cmdutil "powerssl.dev/common/cmd"
+	"powerssl.dev/common/runner"
 
 	"powerssl.dev/auth/internal"
 )
 
 func newCmdServe() *cobra.Command {
 	cfg := new(internal.Config)
-	cmd := cmdutil.InitAndRun(&cobra.Command{
+	cmd := runner.RunCmd(&cobra.Command{
 		Use:   "serve",
 		Short: "Serve Web",
 		Args:  cobra.NoArgs,

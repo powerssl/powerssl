@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
-
-	cmdutil "powerssl.dev/common/cmd"
 
 	"powerssl.dev/powerutil/internal/pki"
 )
@@ -19,7 +18,7 @@ func newCmdCAGen() *cobra.Command {
 		Use:   "gen",
 		Short: "Generate certificate",
 		Args:  cobra.NoArgs,
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
+		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) error {
 			var cert, csr, key []byte
 			var err error
 			if cert, csr, key, err = pki.Gen(ca, caKey, hostname, keyAlgo, keySize); err != nil {

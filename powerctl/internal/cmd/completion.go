@@ -1,9 +1,8 @@
 package cmd
 
 import (
+	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
-
-	cmdutil "powerssl.dev/common/cmd"
 )
 
 func newCmdCompletion() *cobra.Command {
@@ -33,7 +32,7 @@ To configure your bash shell to load completions for each session add to your ba
 . <(powerctl completion bash)
 `,
 		Args: cobra.NoArgs,
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
+		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) error {
 			return NewCmdRoot().GenBashCompletion(cmd.OutOrStdout())
 		}),
 	}
@@ -46,7 +45,7 @@ func newCmdZSHCompletion() *cobra.Command {
 		Use:   "zsh",
 		Short: "Generates zsh completion scripts",
 		Args:  cobra.NoArgs,
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
+		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) error {
 			return NewCmdRoot().GenZshCompletion(cmd.OutOrStdout())
 		}),
 	}

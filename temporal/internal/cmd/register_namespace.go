@@ -3,9 +3,8 @@ package cmd
 import (
 	"time"
 
+	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
-
-	cmdutil "powerssl.dev/common/cmd"
 
 	"powerssl.dev/temporal/internal"
 )
@@ -23,7 +22,7 @@ func newCmdRegisterNamespace() *cobra.Command {
 			workflowExecutionRetentionPeriodDuration, err = time.ParseDuration(workflowExecutionRetentionPeriod)
 			return err
 		},
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) error {
+		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) error {
 			return internal.RunRegisterNamespace(address, namespace, description, ownerEmail, &workflowExecutionRetentionPeriodDuration, tlsCertPath, tlsKeyPath, tlsCAPath, tlsServerName, tlsEnableHostVerification)
 		}),
 	}

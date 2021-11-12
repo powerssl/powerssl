@@ -25,4 +25,5 @@ type (
 func (cfg *Config) Defaults() {
 	cfg.TemporalClient.Component = component
 	cfg.Tracer.Component = component
+	cfg.Server.VaultRole = component
 }

@@ -8,10 +8,10 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
-	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/sdk/apiserver"
 
 	"powerssl.dev/powerctl/internal"
@@ -140,7 +140,7 @@ func NewCmdCreateACMEServer() *cobra.Command {
 			client, err = internal.NewGRPCClient()
 			return err
 		},
-		Run: cmdutil.HandleError(func(cmd *cobra.Command, args []string) (err error) {
+		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) (err error) {
 			var apiACMEServer *apiv1.ACMEServer
 			if letsEncrypt {
 				apiACMEServer = &apiv1.ACMEServer{

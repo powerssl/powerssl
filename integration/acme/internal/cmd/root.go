@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
 
-	cmdutil "powerssl.dev/common/cmd"
 	"powerssl.dev/common/version"
 )
 
@@ -15,7 +15,7 @@ var (
 )
 
 func Execute() {
-	cmdutil.ExecuteWithConfig(newCmdRoot(), component, &cfgFile, &verbose)
+	snakecharmer.ExecuteWithConfig(newCmdRoot(), "/etc/powerssl/"+component, "powerssl", &cfgFile, &verbose)
 }
 
 func newCmdRoot() *cobra.Command {
