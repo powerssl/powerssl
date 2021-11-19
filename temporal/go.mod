@@ -12,7 +12,7 @@ replace powerssl.dev/sdk => ../sdk
 
 require (
 	github.com/google/wire v0.5.0
-	github.com/spangenberg/snakecharmer v0.0.0-20211112165124-bdf527df7363
+	github.com/spangenberg/snakecharmer v0.0.0-20211116223337-14b423b5bb64
 	github.com/spf13/cobra v1.2.1
 	go.temporal.io/api v1.5.0
 	go.temporal.io/sdk v1.10.0

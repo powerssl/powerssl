@@ -18,5 +18,6 @@ func RunCmd(cmd *cobra.Command, cfg snakecharmer.Config, f func(ctx context.Cont
 	cmd.Run = snakecharmer.HandleError(func(cmd *cobra.Command, args []string) error {
 		return Run(f)
 	})
-	return snakecharmer.GenerateFlags(cmd, cfg)
+	snakecharmer.GenerateFlags(cmd, cfg)
+	return cmd
 }

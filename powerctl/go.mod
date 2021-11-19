@@ -14,7 +14,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/opentracing/opentracing-go v1.2.0
-	github.com/spangenberg/snakecharmer v0.0.0-20211112165124-bdf527df7363
+	github.com/spangenberg/snakecharmer v0.0.0-20211116223337-14b423b5bb64
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
 	go.uber.org/zap v1.19.1

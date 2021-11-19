@@ -13,7 +13,7 @@ replace powerssl.dev/sdk => ../sdk
 require (
 	github.com/google/wire v0.5.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.6.0
-	github.com/spangenberg/snakecharmer v0.0.0-20211112165124-bdf527df7363
+	github.com/spangenberg/snakecharmer v0.0.0-20211116223337-14b423b5bb64
 	github.com/spf13/cobra v1.2.1
 	go.uber.org/zap v1.19.1
 	golang.org/x/net v0.0.0-20210917163549-3c21e5b27794

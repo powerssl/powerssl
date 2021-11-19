@@ -7,8 +7,6 @@ import (
 	"powerssl.dev/common/version"
 )
 
-var verbose bool
-
 func Execute() {
 	snakecharmer.Execute(NewCmdRoot())
 }
@@ -22,8 +20,6 @@ func NewCmdRoot() *cobra.Command {
 Find more information at: https://docs.powerssl.io/powerutil`,
 		Version: version.String(),
 	}
-
-	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output")
 
 	cmd.AddCommand(newCmdCA())
 	cmd.AddCommand(newCmdVault())

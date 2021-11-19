@@ -11,7 +11,7 @@ replace powerssl.dev/sdk => ../../sdk
 require (
 	github.com/eggsampler/acme/v2 v2.0.1
 	github.com/opentracing/opentracing-go v1.2.0
-	github.com/spangenberg/snakecharmer v0.0.0-20211112165124-bdf527df7363
+	github.com/spangenberg/snakecharmer v0.0.0-20211116223337-14b423b5bb64
 	github.com/spf13/cobra v1.2.1
 	powerssl.dev/api v0.0.0-00010101000000-000000000000
 	powerssl.dev/common v0.0.0-00010101000000-000000000000

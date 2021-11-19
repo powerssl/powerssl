@@ -11,16 +11,14 @@ import (
 
 const component = "powerssl-apiserver"
 
-type (
-	Config struct {
-		DB             repository.Config `flag:"db"`
-		Log            log.Config        `flag:"log"`
-		Metrics        metrics.Config    `flag:"metrics"`
-		Server         transport.Config  `flag:"server"`
-		TemporalClient client.Config     `flag:"temporalClient"`
-		Tracer         tracer.Config     `flag:"tracer"`
-	}
-)
+type Config struct {
+	DB             repository.Config `flag:"db"`
+	Log            log.Config        `flag:"log"`
+	Metrics        metrics.Config    `flag:"metrics"`
+	Server         transport.Config  `flag:"server"`
+	TemporalClient client.Config     `flag:"temporalClient"`
+	Tracer         tracer.Config     `flag:"tracer"`
+}
 
 func (cfg *Config) Defaults() {
 	cfg.TemporalClient.Component = component

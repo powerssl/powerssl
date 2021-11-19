@@ -19,7 +19,7 @@ require (
 	github.com/jackc/pgconn v1.10.0
 	github.com/jackc/pgx/v4 v4.13.0
 	github.com/mennanov/fieldmask-utils v0.4.1
-	github.com/spangenberg/snakecharmer v0.0.0-20211112165124-bdf527df7363
+	github.com/spangenberg/snakecharmer v0.0.0-20211116223337-14b423b5bb64
 	github.com/spf13/cobra v1.2.1
 	go.temporal.io/sdk v1.10.0
 	go.uber.org/zap v1.19.1

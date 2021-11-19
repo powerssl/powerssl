@@ -7,15 +7,8 @@ import (
 	"powerssl.dev/common/version"
 )
 
-const component = "apiserver"
-
-var (
-	cfgFile string
-	verbose bool
-)
-
 func Execute() {
-	snakecharmer.ExecuteWithConfig(NewCmdRoot(), "/etc/powerssl/"+component, "powerssl", &cfgFile, &verbose)
+	snakecharmer.ExecuteWithConfig(NewCmdRoot(), "/etc/powerssl/apiserver", "powerssl")
 }
 
 func NewCmdRoot() *cobra.Command {
@@ -27,9 +20,6 @@ func NewCmdRoot() *cobra.Command {
 Find more information at: https://docs.powerssl.io/powerssl-apiserver`,
 		Version: version.String(),
 	}
-
-	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output")
-	cmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is /etc/powerssl/api/config.yaml)")
 
 	cmd.AddCommand(newCmdMigrate())
 	cmd.AddCommand(newCmdServe())

@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/vault/api v1.1.1
 	github.com/lib/pq v1.10.3
 	github.com/pkg/errors v0.9.1
-	github.com/spangenberg/snakecharmer v0.0.0-20211112165124-bdf527df7363
+	github.com/spangenberg/snakecharmer v0.0.0-20211116223337-14b423b5bb64
 	github.com/spf13/cobra v1.2.1
 	go.uber.org/zap v1.19.1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c

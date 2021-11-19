@@ -14,7 +14,7 @@ require (
 	github.com/cloudflare/cfssl v1.6.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/hashicorp/vault/api v1.1.1
-	github.com/spangenberg/snakecharmer v0.0.0-20211112165124-bdf527df7363
+	github.com/spangenberg/snakecharmer v0.0.0-20211116223337-14b423b5bb64
 	github.com/spf13/cobra v1.2.1
 	powerssl.dev/backend v0.0.0-00010101000000-000000000000
 	powerssl.dev/common v0.0.0-00010101000000-000000000000
