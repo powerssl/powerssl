@@ -10,7 +10,7 @@ import (
 	_ "go.temporal.io/server/common/persistence/sql/sqlplugin/postgresql"
 	"go.temporal.io/server/tools/sql"
 
-	error2 "powerssl.dev/common/error"
+	"powerssl.dev/common/errutil"
 
 	"powerssl.dev/temporal/internal/migration"
 )
@@ -71,7 +71,7 @@ func runTemporalSQLTool(commonArgs []string, args ...string) (err error) {
 			err = removeErr
 		}
 	}()
-	defer error2.ErrWrapCloser(stderrFile, &err)
+	defer errutil.ErrWrapCloser(stderrFile, &err)
 
 	if stdoutFile, err = ioutil.TempFile("", fmt.Sprintf("%s-", filepath.Base(os.Args[0]))); err != nil {
 		return err
@@ -83,7 +83,7 @@ func runTemporalSQLTool(commonArgs []string, args ...string) (err error) {
 			err = removeErr
 		}
 	}()
-	defer error2.ErrWrapCloser(stdoutFile, &err)
+	defer errutil.ErrWrapCloser(stdoutFile, &err)
 
 	stderr := os.Stderr
 	os.Stderr = stderrFile

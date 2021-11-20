@@ -42,7 +42,7 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 		cleanup()
 		return nil, nil, err
 	}
-	clientConfig := &cfg.VaultClient
+	clientConfig := cfg.VaultClient
 	vaultClient, err := vault.New(clientConfig)
 	if err != nil {
 		cleanup2()

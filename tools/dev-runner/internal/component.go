@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 	"sync"
 	"time"
 
@@ -13,7 +12,7 @@ import (
 )
 
 func makeCmd(comp component.Component, idx int, of *Outlet) (*exec.Cmd, *sync.WaitGroup, error) {
-	cmd := exec.Command(comp.Command, strings.Fields(comp.Args)...)
+	cmd := exec.Command(comp.Command, comp.Args...)
 	cmd.Env = append(os.Environ(), comp.Env.Environ()...)
 
 	stdout, err := cmd.StdoutPipe()

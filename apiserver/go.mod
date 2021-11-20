@@ -120,5 +120,7 @@ require (
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	logur.dev/adapter/zap v0.5.0 // indirect
+	logur.dev/logur v0.16.1 // indirect
 	powerssl.dev/sdk v0.0.0-00010101000000-000000000000 // indirect
 )

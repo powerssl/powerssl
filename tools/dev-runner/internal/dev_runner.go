@@ -18,7 +18,7 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
-	error2 "powerssl.dev/common/error"
+	"powerssl.dev/common/errutil"
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
 
@@ -37,7 +37,7 @@ func Run() error {
 		}); err != nil {
 			return err
 		}
-		defer error2.ErrWrapSync(logger, &err)
+		defer errutil.ErrWrapSync(logger, &err)
 		return interrupthandler.InterruptHandler(ctx, logger)
 	})
 
@@ -68,7 +68,7 @@ func Run() error {
 		if watcher, err = fsnotify.NewWatcher(); err != nil {
 			of.ErrorOutput(fmt.Sprintf("watcher error: %s", err))
 		}
-		defer error2.ErrWrapCloser(watcher, &err)
+		defer errutil.ErrWrapCloser(watcher, &err)
 	}
 
 	interrupts := make(map[string]chan struct{}, len(component.Components)+1)
@@ -99,25 +99,26 @@ func Run() error {
 			interrupts[comp.Command] = make(chan struct{})
 			localComp := comp
 			g.Go(func() error {
-				if val, ok := localComp.Env["POWERSSL_SERVER_AUTHTOKEN"]; ok && val == component.Generate {
-					var err error
-					if localComp.Env["POWERSSL_SERVER_AUTHTOKEN"], err = serviceToken(comp.Name); err != nil {
-						of.SystemOutput(err.Error())
-						cancel()
-					}
-				}
-				if val, ok := localComp.Env["POWERSSL_SERVER_VAULTROLE"]; ok && val == component.Generate {
-					var err error
-					if localComp.Env["POWERSSL_SERVER_VAULTROLE"], err = vaultRoleID(comp.Name); err != nil {
-						of.SystemOutput(err.Error())
-						cancel()
-					}
-				}
-				if val, ok := localComp.Env["POWERSSL_VAULTSECRET"]; ok && val == component.Generate {
-					var err error
-					if localComp.Env["POWERSSL_VAULTSECRET"], err = vaultSecretID(comp.Name); err != nil {
-						of.SystemOutput(err.Error())
-						cancel()
+				for k, v := range localComp.Env {
+					switch v {
+					case component.GenerateAuthToken:
+						var err error
+						if localComp.Env[k], err = serviceToken(comp.Name); err != nil {
+							of.SystemOutput(err.Error())
+							cancel()
+						}
+					case component.GenerateVaultAppRoleID:
+						var err error
+						if localComp.Env[k], err = vaultRoleID(comp.Name); err != nil {
+							of.SystemOutput(err.Error())
+							cancel()
+						}
+					case component.GenerateVaultAppSecretID:
+						var err error
+						if localComp.Env[k], err = vaultSecretID(comp.Name); err != nil {
+							of.SystemOutput(err.Error())
+							cancel()
+						}
 					}
 				}
 				return observeComponent(ctx, of, localComp, i, interrupts[comp.Command])
@@ -134,7 +135,16 @@ func Run() error {
 	addComponent(component.Component{
 		Name:    "postgres",
 		Command: "docker",
-		Args:    fmt.Sprintf("run --rm -e POSTGRES_PASSWORD=powerssl -e POSTGRES_DB=powerssl -e POSTGRES_USER=powerssl -e PGDATA=/var/lib/postgresql/data/pgdata -p 5432:5432 -v %s/local/postgresql/data:/var/lib/postgresql/data postgres:13.1", wd),
+		Args: []string{
+			"run", "--rm",
+			"-e", "POSTGRES_PASSWORD=powerssl",
+			"-e", "POSTGRES_DB=powerssl",
+			"-e", "POSTGRES_USER=powerssl",
+			"-e", "PGDATA=/var/lib/postgresql/data/pgdata",
+			"-p", "5432:5432",
+			"-v", wd + "/local/postgresql/data:/var/lib/postgresql/data",
+			"postgres:13.1",
+		},
 	})
 
 	if err = waitForService("localhost:5432", time.Minute); err != nil {
@@ -150,7 +160,15 @@ func Run() error {
 	addComponent(component.Component{
 		Name:    "vault",
 		Command: "docker",
-		Args:    fmt.Sprintf("run --rm --cap-add=IPC_LOCK -v %s/tools/dev-runner/configs:/vault/config -v %s/local/certs/localhost.pem:/etc/ssl/certs/localhost.pem -v %s/local/certs/localhost-key.pem:/etc/ssl/private/localhost-key.pem -p 8200:8200 vault:1.7.0 server", wd, wd, wd),
+		Args: []string{
+			"run", "--rm", "--cap-add=IPC_LOCK",
+			"-v", wd + "/tools/dev-runner/configs:/vault/config",
+			"-v", wd + "/local/certs/localhost.pem:/etc/ssl/certs/localhost.pem",
+			"-v", wd + "/local/certs/localhost-key.pem:/etc/ssl/private/localhost-key.pem",
+			"-p", "8200:8200",
+			"vault:1.7.0",
+			"server",
+		},
 	})
 
 	if err = waitForService("localhost:8200", time.Minute); err != nil {
@@ -196,25 +214,25 @@ func Run() error {
 	addComponent(component.Component{
 		Name:    "grpcwebproxy",
 		Command: "go",
-		Args: strings.Join([]string{
+		Args: []string{
 			"run",
 			"github.com/improbable-eng/grpc-web/go/grpcwebproxy@latest",
-			"--allowed_origins https://localhost:8443",
-			"--backend_addr localhost:8082",
+			"--allowed_origins", "https://localhost:8443",
+			"--backend_addr", "localhost:8082",
 			"--backend_tls",
-			"--backend_tls_ca_files local/certs/ca.pem,local/certs/intermediate.pem",
-			"--server_bind_address localhost",
-			"--server_http_debug_port 8889",
-			"--server_http_tls_port 8883",
-			"--server_tls_cert_file local/certs/localhost.pem",
-			"--server_tls_key_file local/certs/localhost-key.pem",
-		}, " "),
+			"--backend_tls_ca_files", "local/certs/ca.pem,local/certs/intermediate.pem",
+			"--server_bind_address", "localhost",
+			"--server_http_debug_port", "8889",
+			"--server_http_tls_port", "8883",
+			"--server_tls_cert_file", "local/certs/localhost.pem",
+			"--server_tls_key_file", "local/certs/localhost-key.pem",
+		},
 	})
 
 	addComponent(component.Component{
 		Name:    "temporalweb",
 		Command: "docker",
-		Args: strings.Join([]string{
+		Args: []string{
 			"run", "--rm", "--init",
 			"-e", "TEMPORAL_GRPC_ENDPOINT=host.docker.internal:7233",
 			"-e", "TEMPORAL_TLS_CERT_PATH=/certs/localhost.pem",
@@ -222,9 +240,9 @@ func Run() error {
 			"-e", "TEMPORAL_TLS_CA_PATH=/certs/ca.pem",
 			"-e", "TEMPORAL_TLS_SERVER_NAME=localhost",
 			"-p", "8088:8088",
-			"-v", fmt.Sprintf("%s/local/certs:/certs", wd),
+			"-v", wd + "/local/certs:/certs",
 			"temporalio/web:latest",
-		}, " "),
+		},
 	})
 
 	if err = g.Wait(); err != nil {
@@ -245,7 +263,7 @@ func handlePostgres(of *Outlet) error {
 			return errors.Wrap(err, "connecting default database")
 		}
 		defer func() {
-			error2.ErrWrapCloser(db, &err)
+			errutil.ErrWrapCloser(db, &err)
 		}()
 		for {
 			if err = db.Ping(); err == nil {
@@ -271,7 +289,7 @@ func handlePostgres(of *Outlet) error {
 				return errors.Wrap(err, "creating database vault")
 			}
 		}
-		error2.ErrWrapCloser(db, &err)
+		errutil.ErrWrapCloser(db, &err)
 	}
 	{
 		var err error
@@ -279,7 +297,7 @@ func handlePostgres(of *Outlet) error {
 		if db, err = sql.Open("postgres", "postgresql://powerssl:powerssl@localhost:5432/vault?sslmode=disable"); err != nil {
 			return errors.Wrap(err, "connecting vault database")
 		}
-		defer error2.ErrWrapCloser(db, &err)
+		defer errutil.ErrWrapCloser(db, &err)
 		for {
 			if err = db.Ping(); err == nil {
 				break
@@ -293,13 +311,17 @@ func handlePostgres(of *Outlet) error {
 				return errors.Wrap(err, "creating vault table and index")
 			}
 		}
-		error2.ErrWrapCloser(db, &err)
+		errutil.ErrWrapCloser(db, &err)
 	}
 	{
 		comp := component.Component{
 			Name:    "powerssl-apiserver",
 			Command: "bin/powerssl-apiserver",
-			Args:    "migrate --database-url postgres://powerssl:powerssl@localhost:5432/powerssl?sslmode=disable up",
+			Args: []string{
+				"migrate",
+				"--database-url", "postgres://powerssl:powerssl@localhost:5432/powerssl?sslmode=disable",
+				"up",
+			},
 		}
 		cmd, _, err := makeCmd(comp, 0, of)
 		if err != nil {
@@ -316,7 +338,14 @@ func handlePostgres(of *Outlet) error {
 		comp := component.Component{
 			Name:    "powerssl-temporal",
 			Command: "bin/powerssl-temporal",
-			Args:    "migrate --host localhost --password powerssl --plugin postgres --port 5432 --user powerssl",
+			Args: []string{
+				"migrate",
+				"--host", "localhost",
+				"--password", "powerssl",
+				"--plugin", "postgres",
+				"--port", "5432",
+				"--user", "powerssl",
+			},
 		}
 		cmd, _, err := makeCmd(comp, 0, of)
 		if err != nil {
@@ -336,7 +365,16 @@ func handleTemporal(of *Outlet) error {
 	comp := component.Component{
 		Name:    "powerssl-temporal",
 		Command: "bin/powerssl-temporal",
-		Args:    "register-namespace --address localhost:7233 --namespace powerssl --tls-cert-path local/certs/localhost.pem --tls-key-path local/certs/localhost-key.pem --tls-ca-path local/certs/ca.pem --tls-enable-host-verification --tls-server-name localhost",
+		Args: []string{
+			"register-namespace",
+			"--address", "localhost:7233",
+			"--namespace", "powerssl",
+			"--tls-cert-path", "local/certs/localhost.pem",
+			"--tls-key-path", "local/certs/localhost-key.pem",
+			"--tls-ca-path", "local/certs/ca.pem",
+			"--tls-enable-host-verification",
+			"--tls-server-name", "localhost",
+		},
 	}
 	cmd, _, err := makeCmd(comp, 0, of)
 	if err != nil {
@@ -373,7 +411,7 @@ func serviceToken(_ string) (_ string, err error) {
 	if resp, err = httpClient.Get("https://localhost:8843/service"); err != nil {
 		return
 	}
-	defer error2.ErrWrapCloser(resp.Body, &err)
+	defer errutil.ErrWrapCloser(resp.Body, &err)
 	var byt []byte
 	if byt, err = ioutil.ReadAll(resp.Body); err != nil {
 		return

@@ -6,7 +6,7 @@ server:
   certFile: local/certs/localhost.pem
   keyFile: local/certs/localhost-key.pem
   jwtPrivateKeyFile: local/certs/ca-key.pem
-  webppURI: https://localhost:8443
+  webappURI: https://localhost:8443
 oauth2:
   authURI: https://localhost:8843
   github:

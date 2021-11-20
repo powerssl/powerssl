@@ -28,7 +28,11 @@ func handleVault(of *Outlet) error {
 		comp := component.Component{
 			Name:    "vault",
 			Command: "bin/powerutil",
-			Args:    "vault --ca local/certs/ca.pem --ca-key local/certs/ca-key.pem",
+			Args: []string{
+				"vault",
+				"--ca", "local/certs/ca.pem",
+				"--ca-key", "local/certs/ca-key.pem",
+			},
 		}
 		var cmd *exec.Cmd
 		if cmd, _, err = makeCmd(comp, 0, of); err != nil {

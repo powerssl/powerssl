@@ -1,4 +1,4 @@
-package error // import "powerssl.dev/common/error"
+package errutil // import "powerssl.dev/common/errutil"
 
 import (
 	"fmt"

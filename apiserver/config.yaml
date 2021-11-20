@@ -6,14 +6,16 @@ metrics:
   addr: localhost:9092
 server:
   addr: localhost:8082
-  caFile: local/certs/ca.pem
   certFile:
   commonName: localhost
   insecure: false
   keyFile:
-  vaultRole:
-  vaultToken:
-  vaultURL: https://localhost:8200
+  vault:
+    appRoleID:
+    appRoleSecretID:
+    caFile: local/certs/ca.pem
+    token:
+    url: https://localhost:8200
 temporalClient:
   caFile: local/certs/ca.pem
   disableHealthCheck:

@@ -6,5 +6,5 @@ type Config struct {
 	CertFile          string `flag:"certFile;;;server cert file"`
 	KeyFile           string `flag:"keyFile;;;server key file"`
 	JWTPrivateKeyFile string `flag:"jwtPrivateKeyFile;;;server JWT private key file"`
-	WebappURI         string `flag:"webppURI;;;webapp URI"`
+	WebappURI         string `flag:"webappURI;;;webapp URI"`
 }

@@ -1,5 +1,7 @@
+create extension if not exists "uuid-ossp";
+
 create table acme_accounts (
-                               id uuid not null,
+                               id uuid not null default uuid_generate_v4(),
                                acme_server_id uuid not null references acme_servers,
                                display_name varchar not null,
                                title varchar not null,
@@ -14,7 +16,7 @@ create table acme_accounts (
 );
 
 create table acme_servers (
-                              id uuid not null,
+                              id uuid not null default uuid_generate_v4(),
                               display_name varchar not null,
                               directory_url varchar not null,
                               integration_name varchar not null,

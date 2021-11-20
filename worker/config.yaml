@@ -22,9 +22,8 @@ tracer:
 log:
   env: development
 vaultClient:
-  appRole:
-    roleID:
-    secretID:
+  appRoleID:
+  appRoleSecretID:
   caFile: local/certs/ca.pem
   token:
   url: https://localhost:8200

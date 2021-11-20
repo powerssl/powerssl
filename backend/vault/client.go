@@ -12,7 +12,7 @@ type Client struct {
 	cfg Config
 }
 
-func New(cfg *Config) (*Client, error) {
+func New(cfg Config) (*Client, error) {
 	conf := api.DefaultConfig()
 	if cfg.CAFile != "" {
 		if err := conf.ConfigureTLS(&api.TLSConfig{
@@ -29,11 +29,11 @@ func New(cfg *Config) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	if cfg.Token == "" && cfg.AppRole.RoleID != "" && cfg.AppRole.SecretID != "" {
+	if cfg.Token == "" && cfg.AppRoleID != "" && cfg.AppRoleSecretID != "" {
 		var resp *api.Secret
 		if resp, err = c.Logical().Write("auth/approle/login", map[string]interface{}{
-			"role_id":   cfg.AppRole.RoleID,
-			"secret_id": cfg.AppRole.SecretID,
+			"role_id":   cfg.AppRoleID,
+			"secret_id": cfg.AppRoleSecretID,
 		}); err != nil {
 			return nil, err
 		}
@@ -45,12 +45,16 @@ func New(cfg *Config) (*Client, error) {
 
 	return &Client{
 		c:   c,
-		cfg: *cfg,
+		cfg: cfg,
 	}, nil
 }
 
 func (c *Client) Auth() *api.Auth {
 	return c.c.Auth()
+}
+
+func (c *Client) Client() *api.Client {
+	return c.c
 }
 
 func (c *Client) Clone() (*api.Client, error) {
@@ -70,6 +74,10 @@ func (c *Client) Logical() *api.Logical {
 
 func (c *Client) Sys() *api.Sys {
 	return c.c.Sys()
+}
+
+func (c *Client) Token() string {
+	return c.cfg.Token
 }
 
 func (c *Client) logicalWrite(ctx context.Context, operation, path string, data map[string]interface{}) (*api.Secret, error) {

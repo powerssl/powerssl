@@ -70,17 +70,21 @@ func (s Service) Get(ctx context.Context, request *apiv1.GetACMEServerRequest) (
 }
 
 func (s Service) List(ctx context.Context, request *apiv1.ListACMEServersRequest) (*apiv1.ListACMEServersResponse, error) {
+	var limit int32
+	if request.GetPageSize() < 1 {
+		limit = 10
+	}
 	acmeServers, err := s.queries.ListACMEServers(ctx, repository.ListACMEServersParams{
 		SqlOrder:  "created_at",
 		SqlOffset: 0,
-		SqlLimit:  request.GetPageSize(),
+		SqlLimit:  limit,
 	})
 	if err != nil {
 		return nil, err
 	}
 	return &apiv1.ListACMEServersResponse{
 		AcmeServers:   repository.AcmeServers(acmeServers).ToAPI(),
-		NextPageToken: "TODO",
+		NextPageToken: "",
 	}, nil
 }
 

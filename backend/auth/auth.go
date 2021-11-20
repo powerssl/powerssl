@@ -12,7 +12,7 @@ import (
 	"github.com/go-kit/kit/endpoint"
 	"gopkg.in/square/go-jose.v2"
 
-	error2 "powerssl.dev/common/error"
+	"powerssl.dev/common/errutil"
 )
 
 var Method = stdjwt.SigningMethodRS256
@@ -26,7 +26,7 @@ func NewParser(jwksURL string, tlsConfig *tls.Config) (endpoint.Middleware, erro
 	if err != nil {
 		return nil, err
 	}
-	defer error2.ErrWrapCloser(resp.Body, &err)
+	defer errutil.ErrWrapCloser(resp.Body, &err)
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err

@@ -5,6 +5,12 @@ import (
 	"strings"
 )
 
+const (
+	GenerateAuthToken        = "{{GENERATE_AUTHTOKEN}}"
+	GenerateVaultAppRoleID   = "{{GENERATE_VAULTAPPROLEID}}"
+	GenerateVaultAppSecretID = "{{GENERATE_VAULTAPPSECRETID}}"
+)
+
 type Environment map[string]string
 
 func (e Environment) Environ() []string {
@@ -18,7 +24,7 @@ func (e Environment) Environ() []string {
 type Component struct {
 	Name    string      `json:"name,omitempty"`
 	Command string      `json:"command,omitempty"`
-	Args    string      `json:"args,omitempty"`
+	Args    []string    `json:"args,omitempty"`
 	Env     Environment `json:"env,omitempty"`
 }
 
@@ -31,4 +37,29 @@ func (c Component) String() string {
 		return strings.TrimPrefix(c.Command, "bin/")
 	}
 	return c.Name
+}
+
+
+func args(component, cmd string) []string {
+	return []string{"--config", component + "/config.yaml", cmd}
+}
+
+func command(component string) string {
+	return "bin/powerssl-" + component
+}
+
+func name(component string) string {
+	return "powerssl-" + component
+}
+
+func component(component, cmd string, env *Environment) Component {
+	c := Component{
+		Name:    name(component),
+		Command: command(component),
+		Args:    args(component, cmd),
+	}
+	if env != nil {
+		c.Env = *env
+	}
+	return c
 }

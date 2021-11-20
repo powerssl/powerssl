@@ -59,7 +59,7 @@ func RunVault(addr, ca, caKey string) error {
 	var keys []string
 	var rootToken string
 	{
-		c, err := vault.New(&vault.Config{
+		c, err := vault.New(vault.Config{
 			CAFile: ca,
 			URL:    addr,
 		})
@@ -89,7 +89,7 @@ func RunVault(addr, ca, caKey string) error {
 		}
 	}
 
-	c, err := vault.New(&vault.Config{
+	c, err := vault.New(vault.Config{
 		CAFile: ca,
 		Token:  rootToken,
 		URL:    addr,

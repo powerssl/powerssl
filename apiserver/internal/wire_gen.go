@@ -14,8 +14,8 @@ import (
 	"powerssl.dev/apiserver/internal/service/acmeserver"
 	"powerssl.dev/apiserver/internal/service/certificate"
 	"powerssl.dev/apiserver/internal/service/user"
-	"powerssl.dev/backend/temporal/client"
 	"powerssl.dev/backend/grpcserver"
+	"powerssl.dev/backend/temporal/client"
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
 	"powerssl.dev/common/metrics"
@@ -33,7 +33,7 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 	f := interrupthandler.Provide(ctx, sugaredLogger)
 	metricsConfig := cfg.Metrics
 	metricsF := metrics.Provide(ctx, metricsConfig, sugaredLogger)
-	serverConfig := cfg.Server
+	grpcserverConfig := cfg.Server
 	clientConfig := cfg.TemporalClient
 	tracerConfig := cfg.Tracer
 	opentracingTracer, cleanup2, err := tracer.Provide(tracerConfig, sugaredLogger)
@@ -61,7 +61,7 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 	certificateService := certificate.New()
 	userService := user.New()
 	register := service.Provide(acmeaccountService, acmeserverService, certificateService, userService)
-	transportF, err := grpcserver.Provide(ctx, serverConfig, sugaredLogger, register)
+	grpcserverF, err := grpcserver.Provide(ctx, grpcserverConfig, sugaredLogger, register)
 	if err != nil {
 		cleanup4()
 		cleanup3()
@@ -69,7 +69,7 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 		cleanup()
 		return nil, nil, err
 	}
-	v := Provide(f, metricsF, transportF)
+	v := Provide(f, metricsF, grpcserverF)
 	return v, func() {
 		cleanup4()
 		cleanup3()
