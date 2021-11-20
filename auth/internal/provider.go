@@ -11,13 +11,13 @@ import (
 )
 
 var Provider = wire.NewSet(
+	Provide,
+	ConfigFields,
 	interrupthandler.Provider,
 	log.Provider,
 	metrics.Provider,
 	oauth2.Provider,
-	Provide,
 	server.Provider,
-	wire.FieldsOf(new(*Config), "Log", "Metrics", "OAuth2", "Server"),
 )
 
 func Provide(interruptHandlerF interrupthandler.F, metricsF metrics.F, serverF server.F) []func() error {

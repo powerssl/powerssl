@@ -1,10 +1,14 @@
 package internal
 
 import (
+	"github.com/google/wire"
+
 	"powerssl.dev/common/log"
 	"powerssl.dev/common/metrics"
 	"powerssl.dev/temporal/internal/server"
 )
+
+var ConfigFields = wire.FieldsOf(new(*Config), "Log", "Metrics", "Server")
 
 type Config struct {
 	Log     log.Config     `flag:"log"`

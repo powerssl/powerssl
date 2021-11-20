@@ -99,23 +99,23 @@ func Run() error {
 			interrupts[comp.Command] = make(chan struct{})
 			localComp := comp
 			g.Go(func() error {
-				if val, ok := localComp.Env["POWERSSL_SERVER_AUTH_TOKEN"]; ok && val == component.Generate {
+				if val, ok := localComp.Env["POWERSSL_SERVER_AUTHTOKEN"]; ok && val == component.Generate {
 					var err error
-					if localComp.Env["POWERSSL_SERVER_AUTH_TOKEN"], err = serviceToken(comp.Name); err != nil {
+					if localComp.Env["POWERSSL_SERVER_AUTHTOKEN"], err = serviceToken(comp.Name); err != nil {
 						of.SystemOutput(err.Error())
 						cancel()
 					}
 				}
-				if val, ok := localComp.Env["POWERSSL_SERVER_VAULT_ROLE_ID"]; ok && val == component.Generate {
+				if val, ok := localComp.Env["POWERSSL_SERVER_VAULTROLE"]; ok && val == component.Generate {
 					var err error
-					if localComp.Env["POWERSSL_SERVER_VAULT_ROLE_ID"], err = vaultRoleID(comp.Name); err != nil {
+					if localComp.Env["POWERSSL_SERVER_VAULTROLE"], err = vaultRoleID(comp.Name); err != nil {
 						of.SystemOutput(err.Error())
 						cancel()
 					}
 				}
-				if val, ok := localComp.Env["POWERSSL_VAULT_SECRET_ID"]; ok && val == component.Generate {
+				if val, ok := localComp.Env["POWERSSL_VAULTSECRET"]; ok && val == component.Generate {
 					var err error
-					if localComp.Env["POWERSSL_VAULT_SECRET_ID"], err = vaultSecretID(comp.Name); err != nil {
+					if localComp.Env["POWERSSL_VAULTSECRET"], err = vaultSecretID(comp.Name); err != nil {
 						of.SystemOutput(err.Error())
 						cancel()
 					}
@@ -164,7 +164,7 @@ func Run() error {
 	}
 
 	for _, comp := range component.Components {
-		if comp.Command != "bin/powerssl-temporal" {
+		if comp.Name != "powerssl-temporal" {
 			continue
 		}
 		if err = watcher.Add(comp.Command); err != nil {
@@ -184,7 +184,7 @@ func Run() error {
 	}
 
 	for _, comp := range component.Components {
-		if comp.Command == "bin/powerssl-temporal" {
+		if comp.Name == "powerssl-temporal" {
 			continue
 		}
 		if err = watcher.Add(comp.Command); err != nil {

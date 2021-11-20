@@ -29,13 +29,13 @@ var ProviderDNS = wire.NewSet(
 )
 
 var provider = wire.NewSet(
+	ConfigFields,
 	Provide,
 	controller.Provider,
 	interrupthandler.Provider,
 	log.Provider,
 	metrics.Provider,
 	tracer.Provider,
-	wire.FieldsOf(new(*Config), "ControllerClient", "Integration", "Log", "Metrics", "Tracer"),
 )
 
 type F func() error

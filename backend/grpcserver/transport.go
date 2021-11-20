@@ -1,4 +1,4 @@
-package transport
+package grpcserver
 
 import (
 	"context"
@@ -37,7 +37,6 @@ type Server struct {
 }
 
 func New(cfg Config, logger *zap.SugaredLogger) (_ *Server, err error) {
-	logger = logger.With("transport", "gRPC")
 	recoveryOptions := []recovery.Option{
 		recovery.WithRecoveryHandler(recoveryHandler(logger)),
 	}

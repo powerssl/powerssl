@@ -15,7 +15,7 @@ import (
 	"powerssl.dev/apiserver/internal/service/certificate"
 	"powerssl.dev/apiserver/internal/service/user"
 	"powerssl.dev/backend/temporal/client"
-	"powerssl.dev/backend/transport"
+	"powerssl.dev/backend/grpcserver"
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
 	"powerssl.dev/common/metrics"
@@ -61,7 +61,7 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 	certificateService := certificate.New()
 	userService := user.New()
 	register := service.Provide(acmeaccountService, acmeserverService, certificateService, userService)
-	transportF, err := transport.Provide(ctx, serverConfig, sugaredLogger, register)
+	transportF, err := grpcserver.Provide(ctx, serverConfig, sugaredLogger, register)
 	if err != nil {
 		cleanup4()
 		cleanup3()

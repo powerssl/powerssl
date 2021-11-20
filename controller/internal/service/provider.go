@@ -4,7 +4,7 @@ import (
 	"github.com/google/wire"
 
 	apiv1 "powerssl.dev/api/controller/v1"
-	"powerssl.dev/backend/transport"
+	"powerssl.dev/backend/grpcserver"
 
 	"powerssl.dev/controller/internal/service/acme"
 	"powerssl.dev/controller/internal/service/integration"
@@ -19,8 +19,8 @@ var Provider = wire.NewSet(
 func Provide(
 	acmeServiceServer apiv1.ACMEServiceServer,
 	integrationServiceServer apiv1.IntegrationServiceServer,
-) transport.Register {
-	return func(srv *transport.Server) {
+) grpcserver.Register {
+	return func(srv *grpcserver.Server) {
 		srv.RegisterService(acme.ServiceDesc, acmeServiceServer)
 		srv.RegisterService(integration.ServiceDesc, integrationServiceServer)
 	}

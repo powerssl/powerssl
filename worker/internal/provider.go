@@ -14,6 +14,7 @@ import (
 )
 
 var Provider = wire.NewSet(
+	ConfigFields,
 	Provide,
 	apiserver.Provider,
 	client.Provider,
@@ -22,7 +23,6 @@ var Provider = wire.NewSet(
 	metrics.Provider,
 	tracer.Provider,
 	vault.Provider,
-	wire.FieldsOf(new(*Config), "APIServerClient", "Log", "Metrics", "TemporalClient", "Tracer", "VaultClient"),
 	worker.Provider,
 )
 

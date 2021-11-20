@@ -12,13 +12,13 @@ import (
 )
 
 var Provider = wire.NewSet(
+	ConfigFields,
 	Provide,
 	interrupthandler.Provider,
 	log.Provider,
 	metrics.Provider,
 	server.Provider,
 	transport.Provider,
-	wire.FieldsOf(new(*Config), "APIServerClient", "Log", "Metrics", "Server"),
 )
 
 func Provide(interruptHandlerF interrupthandler.F, metricsF metrics.F, serverF server.F) []func() error {

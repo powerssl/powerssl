@@ -9,7 +9,7 @@ package internal
 import (
 	"context"
 	"powerssl.dev/backend/temporal/client"
-	"powerssl.dev/backend/transport"
+	"powerssl.dev/backend/grpcserver"
 	"powerssl.dev/backend/vault"
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
@@ -50,7 +50,7 @@ func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error
 	acmeService := acme.New(sugaredLogger, clientClient)
 	integrationService := integration.New(ctx, sugaredLogger)
 	register := service.Provide(acmeService, integrationService)
-	transportF, err := transport.Provide(ctx, serverConfig, sugaredLogger, register)
+	transportF, err := grpcserver.Provide(ctx, serverConfig, sugaredLogger, register)
 	if err != nil {
 		cleanup3()
 		cleanup2()

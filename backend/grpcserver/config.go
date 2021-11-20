@@ -1,4 +1,4 @@
-package transport
+package grpcserver
 
 type Config struct {
 	Addr       string `flag:"addr;;;server addr" validate:"required,hostname_port"`

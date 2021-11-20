@@ -9,7 +9,7 @@ import (
 	"powerssl.dev/apiserver/internal/service/acmeserver"
 	"powerssl.dev/apiserver/internal/service/certificate"
 	"powerssl.dev/apiserver/internal/service/user"
-	"powerssl.dev/backend/transport"
+	"powerssl.dev/backend/grpcserver"
 )
 
 var Provider = wire.NewSet(
@@ -26,8 +26,8 @@ func Provide(
 	acmeServerServiceServer apiv1.ACMEServerServiceServer,
 	certificateServiceServer apiv1.CertificateServiceServer,
 	userServiceServer apiv1.UserServiceServer,
-) transport.Register {
-	return func(srv *transport.Server) {
+) grpcserver.Register {
+	return func(srv *grpcserver.Server) {
 		srv.RegisterService(acmeaccount.ServiceDesc, acmeAccountServiceServer)
 		srv.RegisterService(acmeserver.ServiceDesc, acmeServerServiceServer)
 		srv.RegisterService(certificate.ServiceDesc, certificateServiceServer)

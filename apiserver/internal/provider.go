@@ -4,8 +4,8 @@ import (
 	"github.com/google/wire"
 
 	"powerssl.dev/apiserver/internal/service"
+	"powerssl.dev/backend/grpcserver"
 	"powerssl.dev/backend/temporal/client"
-	backendtransport "powerssl.dev/backend/transport"
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
 	"powerssl.dev/common/metrics"
@@ -14,19 +14,19 @@ import (
 )
 
 var Provider = wire.NewSet(
+	ConfigFields,
 	Provide,
 	client.Provider,
 	interrupthandler.Provider,
 	log.Provider,
 	metrics.Provider,
 	service.Provider,
-	backendtransport.Provider,
+	grpcserver.Provider,
 	tracer.Provider,
 	transport.Provider,
-	wire.FieldsOf(new(*Config), "DB", "Log", "Metrics", "Server", "TemporalClient", "Tracer"),
 )
 
-func Provide(interruptHandlerF interrupthandler.F, metricsF metrics.F, serverF backendtransport.F) []func() error {
+func Provide(interruptHandlerF interrupthandler.F, metricsF metrics.F, serverF grpcserver.F) []func() error {
 	return []func() error{
 		interruptHandlerF,
 		metricsF,
