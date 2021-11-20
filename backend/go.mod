@@ -17,6 +17,8 @@ require (
 	github.com/johanbrandhorst/certify v1.9.0
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/uber-go/tally v3.4.2+incompatible
+	go.opentelemetry.io/otel v1.2.0
+	go.opentelemetry.io/otel/sdk v1.2.0
 	go.temporal.io/sdk v1.10.0
 	go.uber.org/zap v1.19.1
 	google.golang.org/grpc v1.40.0
@@ -56,6 +58,7 @@ require (
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/twmb/murmur3 v1.1.6 // indirect
+	go.opentelemetry.io/otel/trace v1.2.0 // indirect
 	go.temporal.io/api v1.5.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
