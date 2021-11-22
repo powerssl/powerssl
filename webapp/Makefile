@@ -6,3 +6,4 @@ include ../makefiles/component.mk
 # Copy webapp resources
 copy:
 	cp -rf $(root_path)/../webapp/dist/* internal/asset
+	go run powerssl.dev/webapp/tools/injecttemplate
