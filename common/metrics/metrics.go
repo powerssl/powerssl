@@ -7,10 +7,11 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.uber.org/zap"
+
+	"powerssl.dev/common/log"
 )
 
-func ServeMetrics(ctx context.Context, cfg Config, logger *zap.SugaredLogger) error {
+func ServeMetrics(ctx context.Context, cfg Config, logger log.Logger) error {
 	return NewMetrics(cfg, logger).Serve(ctx)
 }
 
@@ -20,10 +21,10 @@ type Config struct {
 
 type Metrics struct {
 	*http.Server
-	logger *zap.SugaredLogger
+	logger log.Logger
 }
 
-func NewMetrics(cfg Config, logger *zap.SugaredLogger) *Metrics {
+func NewMetrics(cfg Config, logger log.Logger) *Metrics {
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("/debug/pprof/", pprof.Index)

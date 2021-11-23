@@ -9,10 +9,9 @@ import (
 
 	"github.com/johanbrandhorst/certify"
 	certifyvault "github.com/johanbrandhorst/certify/issuers/vault"
-	"go.uber.org/zap"
-	zapadapter "logur.dev/adapter/zap"
 
 	"powerssl.dev/backend/vault"
+	"powerssl.dev/common/log"
 )
 
 type keyGeneratorFunc func() (crypto.PrivateKey, error)
@@ -21,7 +20,7 @@ func (kgf keyGeneratorFunc) Generate() (crypto.PrivateKey, error) {
 	return kgf()
 }
 
-func makeCertify(cfg Config, logger *zap.SugaredLogger) (*tls.Config, error) {
+func makeCertify(cfg Config, logger log.Logger) (*tls.Config, error) {
 	client, err := vault.New(cfg.Vault)
 	if err != nil {
 		return nil, err
@@ -39,7 +38,7 @@ func makeCertify(cfg Config, logger *zap.SugaredLogger) (*tls.Config, error) {
 			}),
 		},
 		IssueTimeout: time.Minute,
-		Logger:       certifyLogger(logger),
+		Logger:       logger.CertifyLogger(),
 	}
 	getCertificate := func(hello *tls.ClientHelloInfo) (cert *tls.Certificate, err error) {
 		// TODO: ???
@@ -54,8 +53,4 @@ func makeCertify(cfg Config, logger *zap.SugaredLogger) (*tls.Config, error) {
 	// 	return err
 	// }
 	return &tls.Config{GetCertificate: getCertificate}, nil
-}
-
-func certifyLogger(logger *zap.SugaredLogger) certify.Logger {
-	return zapadapter.New(logger.Desugar())
 }

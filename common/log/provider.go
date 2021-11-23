@@ -2,14 +2,13 @@ package log // import "powerssl.dev/common/log"
 
 import (
 	"github.com/google/wire"
-	"go.uber.org/zap"
 )
 
 var Provider = wire.NewSet(
 	Provide,
 )
 
-func Provide(cfg Config) (*zap.SugaredLogger, func(), error) {
+func Provide(cfg Config) (Logger, func(), error) {
 	logger, err := New(cfg)
 	if err != nil {
 		return nil, nil, err

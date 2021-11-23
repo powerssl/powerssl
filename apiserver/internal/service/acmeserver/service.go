@@ -5,22 +5,22 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/apiserver/internal/repository"
+	"powerssl.dev/common/log"
 )
 
 var ServiceDesc = &apiv1.ACMEServerService_ServiceDesc
 
 type Service struct {
 	apiv1.UnimplementedACMEServerServiceServer
-	logger  *zap.SugaredLogger
+	logger  log.Logger
 	queries *repository.Queries
 }
 
-func New(logger *zap.SugaredLogger, queries *repository.Queries) *Service {
+func New(logger log.Logger, queries *repository.Queries) *Service {
 	return &Service{
 		logger:  logger,
 		queries: queries,

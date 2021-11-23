@@ -13,10 +13,11 @@ import (
 	"github.com/uber-go/tally"
 	temporalclient "go.temporal.io/sdk/client"
 	temporalworkflow "go.temporal.io/sdk/workflow"
-	"go.uber.org/zap"
+
+	"powerssl.dev/common/log"
 )
 
-func New(cfg Config, logger *zap.SugaredLogger, tracer opentracing.Tracer) (client temporalclient.Client, closer io.Closer, err error) {
+func New(cfg Config, logger log.Logger, tracer opentracing.Tracer) (client temporalclient.Client, closer io.Closer, err error) {
 	var tlsConnectionOptions tls.Config
 	if cfg.TLSCertFile != "" && cfg.TLSKeyFile != "" {
 		var cert tls.Certificate
@@ -45,7 +46,7 @@ func New(cfg Config, logger *zap.SugaredLogger, tracer opentracing.Tracer) (clie
 	if client, err = temporalclient.NewClient(temporalclient.Options{
 		HostPort:           cfg.HostPort,
 		Namespace:          cfg.Namespace,
-		Logger:             newLogger(logger),
+		Logger:             logger.TemporalLogger(),
 		MetricsScope:       scope,
 		Identity:           identity,
 		DataConverter:      cfg.DataConverter,

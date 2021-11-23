@@ -30,7 +30,6 @@ require (
 require (
 	github.com/google/wire v0.5.0
 	github.com/spangenberg/snakecharmer v0.0.0-20211116223337-14b423b5bb64
-	go.uber.org/zap v1.19.1
 )
 
 require (
@@ -67,6 +66,7 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/goleak v1.1.11 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/zap v1.19.1 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/net v0.0.0-20210913180222-943fd674d43e // indirect
@@ -81,4 +81,6 @@ require (
 	gopkg.in/ini.v1 v1.63.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	logur.dev/adapter/zap v0.5.0 // indirect
+	logur.dev/logur v0.16.1 // indirect
 )

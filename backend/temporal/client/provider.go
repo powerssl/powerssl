@@ -4,14 +4,15 @@ import (
 	"github.com/google/wire"
 	"github.com/opentracing/opentracing-go"
 	"go.temporal.io/sdk/client"
-	"go.uber.org/zap"
+
+	"powerssl.dev/common/log"
 )
 
 var Provider = wire.NewSet(
 	Provide,
 )
 
-func Provide(cfg Config, logger *zap.SugaredLogger, tracer opentracing.Tracer) (client.Client, func(), error) {
+func Provide(cfg Config, logger log.Logger, tracer opentracing.Tracer) (client.Client, func(), error) {
 	logger = logger.With("component", "temporal")
 	c, closer, err := New(cfg, logger, tracer)
 	if err != nil {

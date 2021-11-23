@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/google/wire"
-	"go.uber.org/zap"
 
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
@@ -48,7 +47,7 @@ func Provide(interruptHandlerF interrupthandler.F, metricsF metrics.F, runnerF F
 	}
 }
 
-func ProvideACME(ctx context.Context, cfg *internal.IntegrationConfig, logger *zap.SugaredLogger, client *controller.GRPCClient, handler acme.Integration) F {
+func ProvideACME(ctx context.Context, cfg *internal.IntegrationConfig, logger log.Logger, client *controller.GRPCClient, handler acme.Integration) F {
 	return func() error {
 		integration := internal.NewACME(cfg.Name, logger, client, handler)
 		for {
@@ -63,7 +62,7 @@ func ProvideACME(ctx context.Context, cfg *internal.IntegrationConfig, logger *z
 	}
 }
 
-func ProvideDNS(ctx context.Context, cfg *internal.IntegrationConfig, logger *zap.SugaredLogger, client *controller.GRPCClient, handler dns.Integration) F {
+func ProvideDNS(ctx context.Context, cfg *internal.IntegrationConfig, logger log.Logger, client *controller.GRPCClient, handler dns.Integration) F {
 	return func() error {
 		integration := internal.NewDNS(cfg.Name, logger, client, handler)
 		for {

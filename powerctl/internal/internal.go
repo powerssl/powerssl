@@ -6,7 +6,6 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 
 	"powerssl.dev/common/log"
 	"powerssl.dev/common/tracer"
@@ -27,7 +26,7 @@ func NewGRPCClient() (_ *apiserver.Client, err error) {
 	if !insecure && !insecureSkipTLSVerify && caFle == "" {
 		return nil, errors.New("provide ca-file")
 	}
-	var logger *zap.SugaredLogger
+	var logger log.Logger
 	if logger, err = log.New(log.Config{
 		Env: "production",
 	}); err != nil {

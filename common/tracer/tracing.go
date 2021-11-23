@@ -7,10 +7,11 @@ import (
 	"io"
 
 	"github.com/opentracing/opentracing-go"
-	"go.uber.org/zap"
+
+	"powerssl.dev/common/log"
 )
 
-func New(cfg Config, logger *zap.SugaredLogger) (opentracing.Tracer, io.Closer, error) {
+func New(cfg Config, logger log.Logger) (opentracing.Tracer, io.Closer, error) {
 	switch cfg.Implementation {
 	case "":
 		return NewNoopTracer(cfg, logger)

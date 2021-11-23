@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/vault/api v1.1.1
 	github.com/kenshaw/pemutil v0.1.0
 	github.com/opentracing/opentracing-go v1.2.0
-	go.uber.org/zap v1.19.1
+	go.uber.org/zap v1.19.1 // indirect
 	powerssl.dev/api v0.0.0-00010101000000-000000000000
 	powerssl.dev/common v0.0.0-00010101000000-000000000000
 )
@@ -64,4 +64,6 @@ require (
 	google.golang.org/genproto v0.0.0-20210917145530-b395a37504d4 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
+	logur.dev/adapter/zap v0.5.0 // indirect
+	logur.dev/logur v0.16.1 // indirect
 )

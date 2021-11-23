@@ -4,7 +4,8 @@ import (
 	"context"
 
 	"github.com/google/wire"
-	"go.uber.org/zap"
+
+	"powerssl.dev/common/log"
 )
 
 var Provider = wire.NewSet(
@@ -13,7 +14,7 @@ var Provider = wire.NewSet(
 
 type F func() error
 
-func Provide(ctx context.Context, logger *zap.SugaredLogger) F {
+func Provide(ctx context.Context, logger log.Logger) F {
 	logger = logger.With("component", "interruptHandler")
 	return func() error {
 		return InterruptHandler(ctx, logger)

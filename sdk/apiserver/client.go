@@ -4,10 +4,10 @@ import (
 	"context"
 
 	stdopentracing "github.com/opentracing/opentracing-go"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
+	"powerssl.dev/common/log"
 	"powerssl.dev/common/transport"
 	"powerssl.dev/sdk/internal"
 )
@@ -19,7 +19,7 @@ type Client struct {
 	User        apiv1.UserServiceClient
 }
 
-func NewClient(ctx context.Context, cfg Config, logger *zap.SugaredLogger, tracer stdopentracing.Tracer) (*Client, error) {
+func NewClient(ctx context.Context, cfg Config, logger log.Logger, tracer stdopentracing.Tracer) (*Client, error) {
 	opts := []grpc.DialOption{
 		grpc.WithUnaryInterceptor(internal.AuthInterceptor()),
 		grpc.WithUnaryInterceptor(internal.LoggerInterceptor(logger)),

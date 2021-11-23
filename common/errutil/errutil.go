@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"go.uber.org/zap"
+	"powerssl.dev/common/log"
 )
 
 func ErrWrapCloser(closer io.Closer, wErr *error) {
@@ -15,7 +15,7 @@ func ErrWrapCloser(closer io.Closer, wErr *error) {
 	}
 }
 
-func ErrWrapSync(logger *zap.SugaredLogger, wErr *error) {
+func ErrWrapSync(logger log.Logger, wErr *error) {
 	if err := logger.Sync(); err != nil && *wErr != nil {
 		*wErr = fmt.Errorf("%s: %w", err, *wErr)
 	} else if err != nil {

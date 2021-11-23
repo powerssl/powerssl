@@ -6,9 +6,10 @@ import (
 	"io/ioutil"
 
 	"github.com/opentracing/opentracing-go"
-	"go.uber.org/zap"
+
+	"powerssl.dev/common/log"
 )
 
-func NewNoopTracer(_ Config, _ *zap.SugaredLogger) (opentracing.Tracer, io.Closer, error) {
+func NewNoopTracer(_ Config, _ log.Logger) (opentracing.Tracer, io.Closer, error) {
 	return opentracing.NoopTracer{}, ioutil.NopCloser(bytes.NewBuffer([]byte{})), nil
 }

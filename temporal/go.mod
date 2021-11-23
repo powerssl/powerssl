@@ -17,7 +17,6 @@ require (
 	go.temporal.io/api v1.5.0
 	go.temporal.io/sdk v1.10.0
 	go.temporal.io/server v1.12.1
-	go.uber.org/zap v1.19.1
 	powerssl.dev/common v0.0.0-00010101000000-000000000000
 )
 
@@ -108,6 +107,7 @@ require (
 	go.temporal.io/version v0.0.0-20201015012359-4d3bb966d193 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/zap v1.19.1 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/net v0.0.0-20210913180222-943fd674d43e // indirect
@@ -129,4 +129,6 @@ require (
 	gopkg.in/validator.v2 v2.0.0-20210331031555-b37d688a7fb0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	logur.dev/adapter/zap v0.5.0 // indirect
+	logur.dev/logur v0.16.1 // indirect
 )

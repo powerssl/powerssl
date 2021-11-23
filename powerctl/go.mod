@@ -17,7 +17,6 @@ require (
 	github.com/spangenberg/snakecharmer v0.0.0-20211116223337-14b423b5bb64
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
-	go.uber.org/zap v1.19.1
 	gopkg.in/yaml.v2 v2.4.0
 	powerssl.dev/api v0.0.0-00010101000000-000000000000
 	powerssl.dev/common v0.0.0-00010101000000-000000000000
@@ -59,6 +58,7 @@ require (
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/zap v1.19.1 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420 // indirect
 	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
@@ -68,4 +68,6 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	logur.dev/adapter/zap v0.5.0 // indirect
+	logur.dev/logur v0.16.1 // indirect
 )

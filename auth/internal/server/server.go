@@ -15,7 +15,6 @@ import (
 	bindatahtmltemplate "github.com/arschles/go-bindata-html-template"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pborman/uuid"
-	"go.uber.org/zap"
 	"gopkg.in/square/go-jose.v2"
 
 	"powerssl.dev/auth/internal/asset"
@@ -23,19 +22,20 @@ import (
 	"powerssl.dev/auth/internal/template"
 	"powerssl.dev/backend/auth"
 	"powerssl.dev/backend/httpfs"
+	"powerssl.dev/common/log"
 )
 
 type Server struct {
 	cfg    *Config
-	logger *zap.SugaredLogger
+	logger log.Logger
 	oAuth2 *oauth2.OAuth2
 }
 
-func ServeHTTP(ctx context.Context, cfg *Config, logger *zap.SugaredLogger, oAuth2 *oauth2.OAuth2) error {
+func ServeHTTP(ctx context.Context, cfg *Config, logger log.Logger, oAuth2 *oauth2.OAuth2) error {
 	return New(cfg, logger, oAuth2).ServeHTTP(ctx)
 }
 
-func New(cfg *Config, logger *zap.SugaredLogger, oAuth2 *oauth2.OAuth2) *Server {
+func New(cfg *Config, logger log.Logger, oAuth2 *oauth2.OAuth2) *Server {
 	return &Server{
 		cfg:    cfg,
 		logger: logger,

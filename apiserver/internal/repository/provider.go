@@ -5,7 +5,8 @@ import (
 
 	"github.com/google/wire"
 	"github.com/jackc/pgx/v4"
-	"go.uber.org/zap"
+
+	"powerssl.dev/common/log"
 )
 
 var Provider = wire.NewSet(
@@ -13,7 +14,7 @@ var Provider = wire.NewSet(
 	Provide,
 )
 
-func Provide(ctx context.Context, cfg Config, logger *zap.SugaredLogger) (DBTX, func(), error) {
+func Provide(ctx context.Context, cfg Config, logger log.Logger) (DBTX, func(), error) {
 	logger = logger.With("component", "db")
 	db, err := pgx.Connect(ctx, cfg.ConnString)
 	if err != nil {

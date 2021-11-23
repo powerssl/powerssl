@@ -23,7 +23,6 @@ require (
 	go.uber.org/zap v1.19.1
 	google.golang.org/grpc v1.40.0
 	gopkg.in/square/go-jose.v2 v2.6.0
-	logur.dev/adapter/zap v0.5.0
 	powerssl.dev/common v0.0.0-00010101000000-000000000000
 	powerssl.dev/sdk v0.0.0-00010101000000-000000000000
 )
@@ -73,6 +72,7 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	logur.dev/adapter/zap v0.5.0 // indirect
 	logur.dev/logur v0.16.1 // indirect
 	powerssl.dev/api v0.0.0-00010101000000-000000000000 // indirect
 )

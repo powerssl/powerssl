@@ -5,9 +5,9 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 
 	apiv1 "powerssl.dev/api/controller/v1"
+	"powerssl.dev/common/log"
 )
 
 var ServiceDesc = &apiv1.IntegrationService_ServiceDesc
@@ -17,10 +17,10 @@ var errUnknown = errors.New("unknown error")
 type Service struct {
 	apiv1.UnimplementedIntegrationServiceServer
 	ctx    context.Context
-	logger *zap.SugaredLogger
+	logger log.Logger
 }
 
-func New(ctx context.Context, logger *zap.SugaredLogger) *Service {
+func New(ctx context.Context, logger log.Logger) *Service {
 	return &Service{
 		ctx: ctx,
 		logger: logger,

@@ -6,10 +6,11 @@ import (
 
 	temporalconfig "go.temporal.io/server/common/config"
 	"go.temporal.io/server/temporal"
-	"go.uber.org/zap"
+
+	"powerssl.dev/common/log"
 )
 
-func Run(ctx context.Context, cfg *Config, logger *zap.SugaredLogger) error {
+func Run(ctx context.Context, cfg *Config, logger log.Logger) error {
 	config, err := temporalconfig.LoadConfig(cfg.Env, cfg.ConfigDir, cfg.Zone)
 	if err != nil {
 		return fmt.Errorf("unable to load configuration: %w", err)
@@ -19,7 +20,7 @@ func Run(ctx context.Context, cfg *Config, logger *zap.SugaredLogger) error {
 		temporal.ForServices(cfg.Services),
 		temporal.InterruptOn(interruptCh(ctx)),
 		temporal.WithConfig(config),
-		temporal.WithLogger(newLogger(logger)),
+		temporal.WithLogger(&temporalLogger{Logger: logger}),
 	)
 
 	if err = s.Start(); err != nil {

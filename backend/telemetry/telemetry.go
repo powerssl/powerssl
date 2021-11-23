@@ -5,17 +5,18 @@ import (
 
 	"go.opentelemetry.io/otel/sdk/trace"
 	otrace "go.opentelemetry.io/otel/trace"
-	"go.uber.org/zap"
+
+	"powerssl.dev/common/log"
 )
 
 type Client struct {
 	DefaultTracer  otrace.Tracer
 	cfg            Config
-	log            *zap.SugaredLogger
+	log            log.Logger
 	tracerProvider *trace.TracerProvider
 }
 
-func New(cfg Config, logger *zap.SugaredLogger) (*Client, error) {
+func New(cfg Config, logger log.Logger) (*Client, error) {
 	opts := []trace.TracerProviderOption{
 		trace.WithSampler(trace.AlwaysSample()),
 	}

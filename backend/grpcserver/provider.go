@@ -4,7 +4,8 @@ import (
 	"context"
 
 	"github.com/google/wire"
-	"go.uber.org/zap"
+
+	"powerssl.dev/common/log"
 )
 
 var Provider = wire.NewSet(
@@ -15,7 +16,7 @@ type F func() error
 
 type Register func(srv *Server)
 
-func Provide(ctx context.Context, cfg Config, logger *zap.SugaredLogger, f Register) (F, error) {
+func Provide(ctx context.Context, cfg Config, logger log.Logger, f Register) (F, error) {
 	logger = logger.With("component", "grpcServer")
 	srv, err := New(cfg, logger)
 	if err != nil {

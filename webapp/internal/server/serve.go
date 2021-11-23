@@ -8,21 +8,20 @@ import (
 	"strconv"
 	"time"
 
-	"go.uber.org/zap"
-
+	"powerssl.dev/common/log"
 	"powerssl.dev/webapp/internal/asset"
 )
 
 type Server struct {
 	cfg    *Config
-	logger *zap.SugaredLogger
+	logger log.Logger
 }
 
-func ServeHTTP(ctx context.Context, cfg *Config, logger *zap.SugaredLogger) error {
+func ServeHTTP(ctx context.Context, cfg *Config, logger log.Logger) error {
 	return New(cfg, logger).ServeHTTP(ctx)
 }
 
-func New(cfg *Config, logger *zap.SugaredLogger) *Server {
+func New(cfg *Config, logger log.Logger) *Server {
 	return &Server{
 		cfg:    cfg,
 		logger: logger,

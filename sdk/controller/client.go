@@ -4,9 +4,9 @@ import (
 	"context"
 
 	stdopentracing "github.com/opentracing/opentracing-go"
-	"go.uber.org/zap"
 
 	apiv1 "powerssl.dev/api/controller/v1"
+	"powerssl.dev/common/log"
 	"powerssl.dev/common/transport"
 )
 
@@ -15,7 +15,7 @@ type GRPCClient struct {
 	Integration apiv1.IntegrationServiceClient
 }
 
-func NewGRPCClient(ctx context.Context, cfg Config, logger *zap.SugaredLogger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
+func NewGRPCClient(ctx context.Context, cfg Config, logger log.Logger, tracer stdopentracing.Tracer) (*GRPCClient, error) {
 	conn, err := transport.New(ctx, cfg.Client)
 	if err != nil {
 		return nil, err

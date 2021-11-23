@@ -16,16 +16,17 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"powerssl.dev/common/errutil"
+	"powerssl.dev/common/log"
 )
 
 type Server struct {
 	cfg    Config
 	health *health.Server
-	logger *zap.SugaredLogger
+	logger log.Logger
 	grpc   *grpc.Server
 }
 
-func New(cfg Config, logger *zap.SugaredLogger) (*Server, error) {
+func New(cfg Config, logger log.Logger) (*Server, error) {
 	recoveryOptions := []recovery.Option{
 		recovery.WithRecoveryHandler(recoveryHandler(logger)),
 	}
@@ -94,7 +95,7 @@ func (s *Server) RegisterService(sd *grpc.ServiceDesc, ss interface{}) {
 	s.health.SetServingStatus(sd.ServiceName, healthpb.HealthCheckResponse_SERVING)
 }
 
-func recoveryHandler(logger *zap.SugaredLogger) func(interface{}) error {
+func recoveryHandler(logger log.Logger) func(interface{}) error {
 	return func(err interface{}) error {
 		logger.With(zap.Stack("stack")).Errorf("%s", err)
 		return errors.New("unknown error")

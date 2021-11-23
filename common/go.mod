@@ -20,6 +20,7 @@ require (
 	github.com/google/wire v0.5.0
 	github.com/spangenberg/snakecharmer v0.0.0-20211112165124-bdf527df7363
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	logur.dev/adapter/zap v0.5.0
 )
 
 require (
@@ -58,4 +59,5 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	logur.dev/logur v0.16.1 // indirect
 )

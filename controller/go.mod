@@ -18,7 +18,6 @@ require (
 	github.com/spangenberg/snakecharmer v0.0.0-20211116223337-14b423b5bb64
 	github.com/spf13/cobra v1.2.1
 	go.temporal.io/sdk v1.10.0
-	go.uber.org/zap v1.19.1
 	google.golang.org/grpc v1.40.0
 	google.golang.org/protobuf v1.27.1
 	powerssl.dev/api v0.0.0-00010101000000-000000000000
@@ -96,6 +95,7 @@ require (
 	go.temporal.io/api v1.5.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/zap v1.19.1 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/net v0.0.0-20210913180222-943fd674d43e // indirect

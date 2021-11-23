@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 	"go.temporal.io/sdk/client"
-	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/apiserver/internal/repository"
 	"powerssl.dev/backend/temporal"
+	"powerssl.dev/common/log"
 	"powerssl.dev/workflow"
 )
 
@@ -20,12 +20,12 @@ var ServiceDesc = &apiv1.ACMEAccountService_ServiceDesc
 
 type Service struct {
 	apiv1.UnimplementedACMEAccountServiceServer
-	logger   *zap.SugaredLogger
+	logger   log.Logger
 	temporal client.Client
 	queries  *repository.Queries
 }
 
-func New(logger *zap.SugaredLogger, temporal client.Client, queries *repository.Queries) *Service {
+func New(logger log.Logger, temporal client.Client, queries *repository.Queries) *Service {
 	return &Service{
 		logger:   logger,
 		temporal: temporal,

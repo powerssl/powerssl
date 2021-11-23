@@ -2,36 +2,31 @@ package server
 
 import (
 	"go.temporal.io/server/common/log/tag"
-	"go.uber.org/zap"
+
+	"powerssl.dev/common/log"
 )
 
-type logger struct {
-	*zap.SugaredLogger
+type temporalLogger struct {
+	log.Logger
 }
 
-func newLogger(sugaredLogger *zap.SugaredLogger) *logger {
-	return &logger{
-		SugaredLogger: sugaredLogger,
-	}
-}
-
-func (l logger) Debug(msg string, tags ...tag.Tag) {
+func (l *temporalLogger) Debug(msg string, tags ...tag.Tag) {
 	l.Debugw(msg, keysAndValues(tags...)...)
 }
 
-func (l logger) Info(msg string, tags ...tag.Tag) {
+func (l *temporalLogger) Info(msg string, tags ...tag.Tag) {
 	l.Infow(msg, keysAndValues(tags...)...)
 }
 
-func (l logger) Warn(msg string, tags ...tag.Tag) {
+func (l *temporalLogger) Warn(msg string, tags ...tag.Tag) {
 	l.Warnw(msg, keysAndValues(tags...)...)
 }
 
-func (l logger) Error(msg string, tags ...tag.Tag) {
+func (l *temporalLogger) Error(msg string, tags ...tag.Tag) {
 	l.Errorw(msg, keysAndValues(tags...)...)
 }
 
-func (l logger) Fatal(msg string, tags ...tag.Tag) {
+func (l *temporalLogger) Fatal(msg string, tags ...tag.Tag) {
 	l.Fatalw(msg, keysAndValues(tags...)...)
 }
 

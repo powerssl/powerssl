@@ -7,10 +7,11 @@ import (
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	jaegerzap "github.com/uber/jaeger-client-go/log/zap"
 	jaegerprometheus "github.com/uber/jaeger-lib/metrics/prometheus"
-	"go.uber.org/zap"
+
+	"powerssl.dev/common/log"
 )
 
-func NewJaegerTracer(cfg Config, logger *zap.SugaredLogger) (opentracing.Tracer, io.Closer, error) {
+func NewJaegerTracer(cfg Config, logger log.Logger) (opentracing.Tracer, io.Closer, error) {
 	config, err := jaegercfg.FromEnv()
 	if err != nil {
 		return nil, nil, err

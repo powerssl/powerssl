@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"go.uber.org/zap"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
@@ -16,6 +15,7 @@ import (
 	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/api/openapi"
 	"powerssl.dev/backend/httpfs"
+	"powerssl.dev/common/log"
 
 	"powerssl.dev/grpcgateway/internal/swaggerui"
 )
@@ -32,15 +32,15 @@ type serviceHandler func(context.Context, *runtime.ServeMux, *grpc.ClientConn) e
 
 type Server struct {
 	cfg    Config
-	logger *zap.SugaredLogger
+	logger log.Logger
 	conn   *grpc.ClientConn
 }
 
-func ServeHTTP(ctx context.Context, cfg Config, logger *zap.SugaredLogger, conn *grpc.ClientConn) error {
+func ServeHTTP(ctx context.Context, cfg Config, logger log.Logger, conn *grpc.ClientConn) error {
 	return New(cfg, logger, conn).ServeHTTP(ctx)
 }
 
-func New(cfg Config, logger *zap.SugaredLogger, conn *grpc.ClientConn) *Server {
+func New(cfg Config, logger log.Logger, conn *grpc.ClientConn) *Server {
 	return &Server{
 		cfg:    cfg,
 		logger: logger,
