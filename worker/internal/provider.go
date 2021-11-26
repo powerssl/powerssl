@@ -9,6 +9,7 @@ import (
 	"powerssl.dev/common/log"
 	"powerssl.dev/common/telemetry"
 	"powerssl.dev/sdk/apiserver"
+
 	"powerssl.dev/worker/internal/worker"
 )
 

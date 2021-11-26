@@ -4,12 +4,13 @@ import (
 	"github.com/google/wire"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
+	"powerssl.dev/backend/grpcserver"
+
 	"powerssl.dev/apiserver/internal/repository"
 	"powerssl.dev/apiserver/internal/service/acmeaccount"
 	"powerssl.dev/apiserver/internal/service/acmeserver"
 	"powerssl.dev/apiserver/internal/service/certificate"
 	"powerssl.dev/apiserver/internal/service/user"
-	"powerssl.dev/backend/grpcserver"
 )
 
 var Provider = wire.NewSet(

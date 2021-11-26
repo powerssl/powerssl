@@ -5,8 +5,9 @@ import (
 
 	"github.com/google/wire"
 
-	"powerssl.dev/auth/internal/oauth2"
 	"powerssl.dev/common/log"
+
+	"powerssl.dev/auth/internal/oauth2"
 )
 
 var Provider = wire.NewSet(

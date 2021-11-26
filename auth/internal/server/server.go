@@ -17,12 +17,13 @@ import (
 	"github.com/pborman/uuid"
 	"gopkg.in/square/go-jose.v2"
 
-	"powerssl.dev/auth/internal/asset"
-	"powerssl.dev/auth/internal/oauth2"
-	"powerssl.dev/auth/internal/template"
 	"powerssl.dev/backend/auth"
 	"powerssl.dev/backend/httpfs"
 	"powerssl.dev/common/log"
+
+	"powerssl.dev/auth/internal/asset"
+	"powerssl.dev/auth/internal/oauth2"
+	"powerssl.dev/auth/internal/template"
 )
 
 type Server struct {

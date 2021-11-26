@@ -6,6 +6,7 @@ import (
 	"powerssl.dev/common/log"
 	"powerssl.dev/common/telemetry"
 	"powerssl.dev/common/transport"
+
 	"powerssl.dev/grpcgateway/internal/server"
 )
 

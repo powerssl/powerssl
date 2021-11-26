@@ -3,10 +3,11 @@ package internal
 import (
 	"github.com/google/wire"
 
-	"powerssl.dev/auth/internal/oauth2"
-	"powerssl.dev/auth/internal/server"
 	"powerssl.dev/common/log"
 	"powerssl.dev/common/telemetry"
+
+	"powerssl.dev/auth/internal/oauth2"
+	"powerssl.dev/auth/internal/server"
 )
 
 const component = "powerssl-auth"
