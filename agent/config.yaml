@@ -8,5 +8,9 @@ apiServerClient:
     serverNameOverride:
 log:
   env: development
-tracer:
-  implementation: jaeger
+telemetry:
+  meter:
+    addr:
+    exporter: prometheus
+  tracer:
+    exporter: jaeger

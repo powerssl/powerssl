@@ -1,7 +1,5 @@
 log:
   env: development
-metrics:
-  addr: localhost:9090
 server:
   apiAddr: localhost:8082
   addr: localhost:8443
@@ -10,3 +8,9 @@ server:
   grpcWebURI: https://localhost:8883
   insecure: false
   keyFile: local/certs/localhost-key.pem
+telemetry:
+  meter:
+    addr: localhost:9090
+    exporter: prometheus
+  tracer:
+    exporter: jaeger

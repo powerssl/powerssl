@@ -2,8 +2,6 @@ db:
   connString: postgresql://powerssl:powerssl@localhost:5432/powerssl?sslmode=disable
 log:
   env: development
-metrics:
-  addr: localhost:9092
 server:
   addr: localhost:8082
   certFile:
@@ -25,5 +23,9 @@ temporalClient:
   namespace: powerssl
   tlsCertFile:
   tlsKeyFile:
-tracer:
-  implementation: jaeger
+telemetry:
+  meter:
+    addr: localhost:9092
+    exporter: prometheus
+  tracer:
+    exporter: jaeger

@@ -8,8 +8,6 @@ apiServerClient:
     serverNameOverride:
 log:
   env: development
-metrics:
-  addr: localhost:9093
 server:
   addr: localhost:8083
   certFile:
@@ -31,8 +29,12 @@ temporalClient:
   namespace: powerssl
   tlsCertFile:
   tlsKeyFile:
-tracer:
-  implementation: jaeger
+telemetry:
+  meter:
+    addr: localhost:9093
+    exporter: prometheus
+  tracer:
+    exporter: jaeger
 vaultClient:
   appRoleID:
   appRoleSecretID:

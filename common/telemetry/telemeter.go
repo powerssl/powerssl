@@ -33,9 +33,6 @@ func (t *Telemeter) Cleanup(_ context.Context) error {
 
 func (t *Telemeter) F(ctx context.Context) F {
 	return func() error {
-		if t.cfg.Meter.Addr == "" {
-			return nil
-		}
 		return t.Meter.Serve(ctx)
 	}
 }

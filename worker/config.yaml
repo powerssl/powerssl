@@ -6,8 +6,6 @@ apiServerClient:
     insecure: false
     insecureSkipTLSVerify: false
     serverNameOverride:
-metrics:
-  addr: localhost:9096
 temporalClient:
   caFile: local/certs/ca.pem
   disableHealthCheck:
@@ -17,8 +15,12 @@ temporalClient:
   namespace: powerssl
   tlsCertFile:
   tlsKeyFile:
-tracer:
-  implementation: jaeger
+telemetry:
+  meter:
+    addr: localhost:9096
+    exporter: prometheus
+  tracer:
+    exporter: jaeger
 log:
   env: development
 vaultClient:

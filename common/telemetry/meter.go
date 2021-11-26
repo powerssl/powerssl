@@ -7,6 +7,7 @@ import (
 	"net/http/pprof"
 	"time"
 
+	prom "github.com/prometheus/client_golang/prometheus"
 	"go.opentelemetry.io/otel/exporters/prometheus"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
@@ -25,25 +26,23 @@ type Meter struct {
 }
 
 func NewMeter(cfg MeterConfig, logger log.Logger) (*Meter, error) {
-	config := prometheus.Config{}
-	c := controller.New(
-		processor.NewFactory(
-			selector.NewWithHistogramDistribution(
-				histogram.WithExplicitBoundaries(config.DefaultHistogramBoundaries),
-			),
-			aggregation.CumulativeTemporalitySelector(),
-			processor.WithMemory(true),
-		),
-	)
-	exporter, err := prometheus.New(config, c)
+	var meterProvider metric.MeterProvider
+	var server *http.Server
+	var err error
+	switch cfg.Exporter {
+	case "prometheus":
+		meterProvider, server, err = newPrometheusExporter(cfg)
+	default:
+		err = fmt.Errorf("unknown metrics exporter %v", cfg.Exporter)
+	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize prometheus exporter: %w", err)
+		return nil, err
 	}
 
 	return &Meter{
 		logger:        logger,
-		meterProvider: exporter.MeterProvider(),
-		server:        newServer(cfg.Addr, exporter),
+		meterProvider: meterProvider,
+		server:        server,
 	}, nil
 }
 
@@ -52,6 +51,9 @@ func (m *Meter) Meter(instrumentationName string, opts ...metric.MeterOption) me
 }
 
 func (m *Meter) Serve(ctx context.Context) error {
+	if m.server == nil || m.server.Addr == "" {
+		return nil
+	}
 	c := make(chan error)
 	go func() {
 		c <- m.server.ListenAndServe()
@@ -74,6 +76,29 @@ func (m *Meter) Serve(ctx context.Context) error {
 		}
 		return ctx.Err()
 	}
+}
+
+func newPrometheusExporter(cfg MeterConfig) (metric.MeterProvider, *http.Server, error) {
+	config := prometheus.Config{
+		Gatherer:   prom.DefaultGatherer,
+		Registerer: prom.DefaultRegisterer,
+	}
+	c := controller.New(
+		processor.NewFactory(
+			selector.NewWithHistogramDistribution(
+				histogram.WithExplicitBoundaries(config.DefaultHistogramBoundaries),
+			),
+			aggregation.CumulativeTemporalitySelector(),
+			processor.WithMemory(true),
+		),
+	)
+	exporter, err := prometheus.New(config, c)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to initialize prometheus exporter: %w", err)
+	}
+	meterProvider := exporter.MeterProvider()
+	server := newServer(cfg.Addr, exporter)
+	return meterProvider, server, nil
 }
 
 func newServer(addr string, exporter *prometheus.Exporter) *http.Server {

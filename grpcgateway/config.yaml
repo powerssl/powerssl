@@ -6,7 +6,11 @@ apiServerClient:
   serverNameOverride:
 log:
   env: development
-metrics:
-  addr: localhost:9095
+telemetry:
+  meter:
+    addr: localhost:9095
+    exporter: prometheus
+  tracer:
+    exporter: jaeger
 server:
   addr: localhost:8085

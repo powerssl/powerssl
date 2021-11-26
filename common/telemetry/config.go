@@ -7,7 +7,8 @@ type Config struct {
 }
 
 type MeterConfig struct {
-	Addr string `flag:"addr;;;metrics addr"`
+	Addr     string `flag:"addr;;;metrics addr"`
+	Exporter string `flag:"exporter;;prometheus;metrics exporter"`
 }
 
 type TracerConfig struct {

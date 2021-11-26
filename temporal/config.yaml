@@ -1,7 +1,5 @@
 log:
   env: development
-metrics:
-  addr:
 server:
   configDir: temporal/configs
   env: development

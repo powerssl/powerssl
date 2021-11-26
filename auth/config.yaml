@@ -12,5 +12,9 @@ oauth2:
   github:
     clientID: da92ab4fd752a1e5dc1a
     clientSecret: 5b2a050592c3add5da9903fc3b975b160f5f8924
-metrics:
-  addr: localhost:9091
+telemetry:
+  meter:
+    addr: localhost:9091
+    exporter: prometheus
+  tracer:
+    exporter: jaeger
