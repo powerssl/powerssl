@@ -8,6 +8,8 @@ replace powerssl.dev/backend => ../backend
 
 replace powerssl.dev/common => ../common
 
+replace powerssl.dev/common/telemetry => ../common/telemetry
+
 replace powerssl.dev/sdk => ../sdk
 
 require (
@@ -15,12 +17,12 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.6.0
 	github.com/spangenberg/snakecharmer v0.0.0-20211116223337-14b423b5bb64
 	github.com/spf13/cobra v1.2.1
-	go.uber.org/zap v1.19.1
 	golang.org/x/net v0.0.0-20210917163549-3c21e5b27794
-	google.golang.org/grpc v1.40.0
+	google.golang.org/grpc v1.42.0
 	powerssl.dev/api v0.0.0-00010101000000-000000000000
 	powerssl.dev/backend v0.0.0-00010101000000-000000000000
 	powerssl.dev/common v0.0.0-00010101000000-000000000000
+	powerssl.dev/common/telemetry v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -53,9 +55,18 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.9.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
+	go.opentelemetry.io/otel v1.2.0 // indirect
+	go.opentelemetry.io/otel/exporters/prometheus v0.25.0 // indirect
+	go.opentelemetry.io/otel/internal/metric v0.25.0 // indirect
+	go.opentelemetry.io/otel/metric v0.25.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.2.0 // indirect
+	go.opentelemetry.io/otel/sdk/export/metric v0.25.0 // indirect
+	go.opentelemetry.io/otel/sdk/metric v0.25.0 // indirect
+	go.opentelemetry.io/otel/trace v1.2.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/goleak v1.1.11 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/zap v1.19.1 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect

@@ -2,12 +2,9 @@ package internal
 
 import (
 	"github.com/google/wire"
-
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/transport"
-
+	"powerssl.dev/common/telemetry"
 	"powerssl.dev/grpcgateway/internal/server"
 )
 
@@ -16,15 +13,14 @@ var Provider = wire.NewSet(
 	Provide,
 	interrupthandler.Provider,
 	log.Provider,
-	metrics.Provider,
 	server.Provider,
-	transport.Provider,
+	telemetry.Provider,
 )
 
-func Provide(interruptHandlerF interrupthandler.F, metricsF metrics.F, serverF server.F) []func() error {
+func Provide(interruptHandlerF interrupthandler.F, serverF server.F, telemetryF telemetry.F) []func() error {
 	return []func() error{
 		interruptHandlerF,
-		metricsF,
 		serverF,
+		telemetryF,
 	}
 }

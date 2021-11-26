@@ -7,27 +7,25 @@ import (
 	"powerssl.dev/backend/temporal/client"
 	"powerssl.dev/backend/vault"
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/tracer"
+	"powerssl.dev/common/telemetry"
 	"powerssl.dev/sdk/apiserver"
 )
 
 const component = "powerssl-controller"
 
-var ConfigFields = wire.FieldsOf(new(*Config), "APIServerClient", "Log", "Metrics", "Server", "TemporalClient", "Tracer", "VaultClient")
+var ConfigFields = wire.FieldsOf(new(*Config), "APIServerClient", "Log", "Server", "TemporalClient", "Telemetry", "VaultClient")
 
 type Config struct {
 	APIServerClient apiserver.Config  `flag:"apiServerClient" validate:"required"`
 	Log             log.Config        `flag:"log"`
-	Metrics         metrics.Config    `flag:"metrics"`
 	Server          grpcserver.Config `flag:"server"`
 	TemporalClient  client.Config     `flag:"temporalClient"`
-	Tracer          tracer.Config     `flag:"tracer"`
+	Telemetry       telemetry.Config  `flag:"telemetry"`
 	VaultClient     vault.Config      `flag:"vaultClient"`
 }
 
 func (cfg *Config) Defaults() {
-	cfg.TemporalClient.Component = component
-	cfg.Tracer.Component = component
 	cfg.Server.VaultRole = component
+	cfg.TemporalClient.Component = component
+	cfg.Telemetry.Component = component
 }

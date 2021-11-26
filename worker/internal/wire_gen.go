@@ -12,8 +12,7 @@ import (
 	"powerssl.dev/backend/vault"
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/tracer"
+	"powerssl.dev/common/telemetry"
 	"powerssl.dev/sdk/apiserver"
 	"powerssl.dev/worker/internal/worker"
 )
@@ -22,44 +21,42 @@ import (
 
 func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error) {
 	config := cfg.Log
-	sugaredLogger, cleanup, err := log.Provide(config)
+	logger, cleanup, err := log.Provide(config)
 	if err != nil {
 		return nil, nil, err
 	}
-	f := interrupthandler.Provide(ctx, sugaredLogger)
-	metricsConfig := cfg.Metrics
-	metricsF := metrics.Provide(ctx, metricsConfig, sugaredLogger)
+	f := interrupthandler.Provide(ctx, logger)
+	telemetryConfig := cfg.Telemetry
+	telemeter, cleanup2, err := telemetry.Provide(ctx, telemetryConfig, logger)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	telemetryF := telemetry.ProvideF(ctx, telemeter)
 	apiserverConfig := cfg.APIServerClient
-	tracerConfig := cfg.Tracer
-	opentracingTracer, cleanup2, err := tracer.Provide(tracerConfig, sugaredLogger)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	apiserverClient, err := apiserver.NewClient(ctx, apiserverConfig, sugaredLogger, opentracingTracer)
+	apiserverClient, err := apiserver.NewClient(ctx, apiserverConfig, logger, telemeter)
 	if err != nil {
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
-	clientConfig := cfg.VaultClient
-	vaultClient, err := vault.New(clientConfig)
+	vaultConfig := cfg.VaultClient
+	vaultClient, err := vault.New(vaultConfig)
 	if err != nil {
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
-	config2 := cfg.TemporalClient
-	clientClient, cleanup3, err := client.Provide(config2, sugaredLogger, opentracingTracer)
+	clientConfig := cfg.TemporalClient
+	clientClient, err := client.Provide(clientConfig, logger)
 	if err != nil {
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
 	workerF := worker.Provide(ctx, apiserverClient, vaultClient, clientClient)
-	v := Provide(f, metricsF, workerF)
+	v := Provide(f, telemetryF, workerF)
 	return v, func() {
-		cleanup3()
 		cleanup2()
 		cleanup()
 	}, nil

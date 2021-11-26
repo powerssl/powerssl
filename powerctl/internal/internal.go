@@ -4,11 +4,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/opentracing/opentracing-go"
 	"github.com/spf13/viper"
 
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/tracer"
+	"powerssl.dev/common/telemetry"
 	"powerssl.dev/common/transport"
 	"powerssl.dev/sdk/apiserver"
 )
@@ -33,10 +32,9 @@ func NewGRPCClient() (_ *apiserver.Client, err error) {
 		return nil, err
 	}
 	// TODO: logger.Sync()
-	var trace opentracing.Tracer
-	if trace, _, err = tracer.New(tracer.Config{
-		Component:      "powerctl",
-		Implementation: "",
+	var telemeter *telemetry.Telemeter
+	if telemeter, err = telemetry.New(telemetry.Config{
+		Component: "powerctl",
 	}, logger); err != nil {
 		return nil, err
 	}
@@ -49,5 +47,5 @@ func NewGRPCClient() (_ *apiserver.Client, err error) {
 			InsecureSkipTLSVerify: insecureSkipTLSVerify,
 			ServerNameOverride:    serverNameOverride,
 		},
-	}, logger, trace)
+	}, logger, telemeter)
 }

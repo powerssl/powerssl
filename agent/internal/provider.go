@@ -2,10 +2,10 @@ package internal
 
 import (
 	"github.com/google/wire"
+	"powerssl.dev/common/telemetry"
 
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/tracer"
 	"powerssl.dev/sdk/apiserver"
 )
 
@@ -15,7 +15,7 @@ var Provider = wire.NewSet(
 	apiserver.Provider,
 	interrupthandler.Provider,
 	log.Provider,
-	tracer.Provider,
+	telemetry.Provider,
 )
 
 func Provide(interruptHandlerF interrupthandler.F, _ *apiserver.Client) []func() error {

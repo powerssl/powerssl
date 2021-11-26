@@ -10,7 +10,7 @@ import (
 	"context"
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/metrics"
+	"powerssl.dev/common/telemetry"
 	"powerssl.dev/webapp/internal/server"
 )
 
@@ -18,17 +18,23 @@ import (
 
 func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error) {
 	config := cfg.Log
-	sugaredLogger, cleanup, err := log.Provide(config)
+	logger, cleanup, err := log.Provide(config)
 	if err != nil {
 		return nil, nil, err
 	}
-	f := interrupthandler.Provide(ctx, sugaredLogger)
-	metricsConfig := cfg.Metrics
-	metricsF := metrics.Provide(ctx, metricsConfig, sugaredLogger)
+	f := interrupthandler.Provide(ctx, logger)
 	serverConfig := &cfg.Server
-	serverF := server.Provide(ctx, serverConfig, sugaredLogger)
-	v := Provide(f, metricsF, serverF)
+	serverF := server.Provide(ctx, serverConfig, logger)
+	telemetryConfig := cfg.Telemetry
+	telemeter, cleanup2, err := telemetry.Provide(ctx, telemetryConfig, logger)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	telemetryF := telemetry.ProvideF(ctx, telemeter)
+	v := Provide(f, serverF, telemetryF)
 	return v, func() {
+		cleanup2()
 		cleanup()
 	}, nil
 }

@@ -3,29 +3,28 @@ package internal
 import (
 	"github.com/google/wire"
 
-	"powerssl.dev/apiserver/internal/repository"
 	"powerssl.dev/backend/grpcserver"
 	"powerssl.dev/backend/temporal/client"
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/tracer"
+	"powerssl.dev/common/telemetry"
+
+	"powerssl.dev/apiserver/internal/repository"
 )
 
 const component = "powerssl-apiserver"
 
-var ConfigFields = wire.FieldsOf(new(*Config), "DB", "Log", "Metrics", "Server", "TemporalClient", "Tracer")
+var ConfigFields = wire.FieldsOf(new(*Config), "DB", "Log", "Server", "TemporalClient", "Telemetry")
 
 type Config struct {
 	DB             repository.Config `flag:"db"`
 	Log            log.Config        `flag:"log"`
-	Metrics        metrics.Config    `flag:"metrics"`
 	Server         grpcserver.Config `flag:"server"`
+	Telemetry      telemetry.Config  `flag:"telemetry"`
 	TemporalClient client.Config     `flag:"temporalClient"`
-	Tracer         tracer.Config     `flag:"tracer"`
 }
 
 func (cfg *Config) Defaults() {
-	cfg.TemporalClient.Component = component
-	cfg.Tracer.Component = component
 	cfg.Server.VaultRole = component
+	cfg.Telemetry.Component = component
+	cfg.TemporalClient.Component = component
 }

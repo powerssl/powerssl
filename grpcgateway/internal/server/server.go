@@ -36,10 +36,6 @@ type Server struct {
 	conn   *grpc.ClientConn
 }
 
-func ServeHTTP(ctx context.Context, cfg Config, logger log.Logger, conn *grpc.ClientConn) error {
-	return New(cfg, logger, conn).ServeHTTP(ctx)
-}
-
 func New(cfg Config, logger log.Logger, conn *grpc.ClientConn) *Server {
 	return &Server{
 		cfg:    cfg,

@@ -4,32 +4,27 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"os"
-	"time"
-
-	"github.com/opentracing/opentracing-go"
-	"github.com/uber-go/tally"
 	temporalclient "go.temporal.io/sdk/client"
 	temporalworkflow "go.temporal.io/sdk/workflow"
+	"io/ioutil"
+	"os"
 
 	"powerssl.dev/common/log"
 )
 
-func New(cfg Config, logger log.Logger, tracer opentracing.Tracer) (client temporalclient.Client, closer io.Closer, err error) {
+func New(cfg Config, logger log.Logger) (client temporalclient.Client, err error) {
 	var tlsConnectionOptions tls.Config
 	if cfg.TLSCertFile != "" && cfg.TLSKeyFile != "" {
 		var cert tls.Certificate
 		if cert, err = tls.LoadX509KeyPair(cfg.TLSCertFile, cfg.TLSKeyFile); err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		tlsConnectionOptions.Certificates = []tls.Certificate{cert}
 	}
 	if cfg.CAFile != "" {
 		var caData []byte
 		if caData, err = ioutil.ReadFile(cfg.CAFile); err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		certPool := x509.NewCertPool()
 		certPool.AppendCertsFromPEM(caData)
@@ -41,16 +36,12 @@ func New(cfg Config, logger log.Logger, tracer opentracing.Tracer) (client tempo
 		identity = fmt.Sprintf("%d@%s@%s", os.Getpid(), getHostName(), cfg.Component)
 	}
 
-	scope, closer := tally.NewRootScope(tally.ScopeOptions{Separator: "_"}, time.Second)
-
 	if client, err = temporalclient.NewClient(temporalclient.Options{
 		HostPort:           cfg.HostPort,
 		Namespace:          cfg.Namespace,
 		Logger:             logger.TemporalLogger(),
-		MetricsScope:       scope,
 		Identity:           identity,
 		DataConverter:      cfg.DataConverter,
-		Tracer:             tracer,
 		ContextPropagators: []temporalworkflow.ContextPropagator{},
 		ConnectionOptions: temporalclient.ConnectionOptions{
 			TLS:                &tlsConnectionOptions,
@@ -58,23 +49,9 @@ func New(cfg Config, logger log.Logger, tracer opentracing.Tracer) (client tempo
 			HealthCheckTimeout: cfg.HealthCheckTimeout,
 		},
 	}); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	closer = clientCloser{
-		client: client,
-		closer: closer,
-	}
-	return client, closer, nil
-}
-
-type clientCloser struct {
-	client temporalclient.Client
-	closer io.Closer
-}
-
-func (c clientCloser) Close() error {
-	c.client.Close()
-	return c.closer.Close()
+	return client, nil
 }
 
 func getHostName() string {

@@ -10,26 +10,30 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
-	"powerssl.dev/apiserver/internal/repository"
 	"powerssl.dev/backend/temporal"
 	"powerssl.dev/common/log"
+	"powerssl.dev/common/telemetry"
 	"powerssl.dev/workflow"
+
+	"powerssl.dev/apiserver/internal/repository"
 )
 
 var ServiceDesc = &apiv1.ACMEAccountService_ServiceDesc
 
 type Service struct {
 	apiv1.UnimplementedACMEAccountServiceServer
-	logger   log.Logger
-	temporal client.Client
-	queries  *repository.Queries
+	logger    log.Logger
+	queries   *repository.Queries
+	telemeter *telemetry.Telemeter
+	temporal  client.Client
 }
 
-func New(logger log.Logger, temporal client.Client, queries *repository.Queries) *Service {
+func New(logger log.Logger, queries *repository.Queries, telemeter *telemetry.Telemeter, temporal client.Client) *Service {
 	return &Service{
-		logger:   logger,
-		temporal: temporal,
-		queries:  queries,
+		logger:    logger,
+		queries:   queries,
+		telemeter: telemeter,
+		temporal:  temporal,
 	}
 }
 

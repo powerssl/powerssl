@@ -10,7 +10,7 @@ import (
 	"context"
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/tracer"
+	"powerssl.dev/common/telemetry"
 	"powerssl.dev/sdk/apiserver"
 )
 
@@ -18,19 +18,19 @@ import (
 
 func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error) {
 	config := cfg.Log
-	sugaredLogger, cleanup, err := log.Provide(config)
+	logger, cleanup, err := log.Provide(config)
 	if err != nil {
 		return nil, nil, err
 	}
-	f := interrupthandler.Provide(ctx, sugaredLogger)
+	f := interrupthandler.Provide(ctx, logger)
 	apiserverConfig := cfg.APIServerClient
-	tracerConfig := cfg.Tracer
-	opentracingTracer, cleanup2, err := tracer.Provide(tracerConfig, sugaredLogger)
+	telemetryConfig := cfg.Telemetry
+	telemeter, cleanup2, err := telemetry.Provide(ctx, telemetryConfig, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	client, err := apiserver.NewClient(ctx, apiserverConfig, sugaredLogger, opentracingTracer)
+	client, err := apiserver.NewClient(ctx, apiserverConfig, logger, telemeter)
 	if err != nil {
 		cleanup2()
 		cleanup()

@@ -18,60 +18,56 @@ import (
 	"powerssl.dev/backend/temporal/client"
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/tracer"
+	"powerssl.dev/common/telemetry"
 )
 
 // Injectors from wire.go:
 
 func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error) {
 	config := cfg.Log
-	sugaredLogger, cleanup, err := log.Provide(config)
+	logger, cleanup, err := log.Provide(config)
 	if err != nil {
 		return nil, nil, err
 	}
-	f := interrupthandler.Provide(ctx, sugaredLogger)
-	metricsConfig := cfg.Metrics
-	metricsF := metrics.Provide(ctx, metricsConfig, sugaredLogger)
+	f := interrupthandler.Provide(ctx, logger)
 	grpcserverConfig := cfg.Server
-	clientConfig := cfg.TemporalClient
-	tracerConfig := cfg.Tracer
-	opentracingTracer, cleanup2, err := tracer.Provide(tracerConfig, sugaredLogger)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	clientClient, cleanup3, err := client.Provide(clientConfig, sugaredLogger, opentracingTracer)
-	if err != nil {
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
 	repositoryConfig := cfg.DB
-	dbtx, cleanup4, err := repository.Provide(ctx, repositoryConfig, sugaredLogger)
+	dbtx, cleanup2, err := repository.Provide(ctx, repositoryConfig, logger)
 	if err != nil {
-		cleanup3()
-		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
 	queries := repository.New(dbtx)
-	acmeaccountService := acmeaccount.New(sugaredLogger, clientClient, queries)
-	acmeserverService := acmeserver.New(sugaredLogger, queries)
-	certificateService := certificate.New()
-	userService := user.New()
-	register := service.Provide(acmeaccountService, acmeserverService, certificateService, userService)
-	grpcserverF, err := grpcserver.Provide(ctx, grpcserverConfig, sugaredLogger, register)
+	telemetryConfig := cfg.Telemetry
+	telemeter, cleanup3, err := telemetry.Provide(ctx, telemetryConfig, logger)
 	if err != nil {
-		cleanup4()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	clientConfig := cfg.TemporalClient
+	clientClient, err := client.Provide(clientConfig, logger)
+	if err != nil {
 		cleanup3()
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
-	v := Provide(f, metricsF, grpcserverF)
+	acmeaccountService := acmeaccount.New(logger, queries, telemeter, clientClient)
+	acmeserverService := acmeserver.New(logger, queries, telemeter)
+	certificateService := certificate.New(logger, queries, telemeter)
+	userService := user.New(logger, queries, telemeter)
+	register := service.Provide(acmeaccountService, acmeserverService, certificateService, userService)
+	grpcserverF, err := grpcserver.Provide(ctx, grpcserverConfig, logger, register)
+	if err != nil {
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	telemetryF := telemetry.ProvideF(ctx, telemeter)
+	v := Provide(f, grpcserverF, telemetryF)
 	return v, func() {
-		cleanup4()
 		cleanup3()
 		cleanup2()
 		cleanup()

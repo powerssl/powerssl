@@ -6,18 +6,20 @@ import (
 	"powerssl.dev/auth/internal/oauth2"
 	"powerssl.dev/auth/internal/server"
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/metrics"
+	"powerssl.dev/common/telemetry"
 )
 
-var ConfigFields = wire.FieldsOf(new(*Config), "Log", "Metrics", "OAuth2", "Server")
+const component = "powerssl-auth"
+
+var ConfigFields = wire.FieldsOf(new(*Config), "Log", "OAuth2", "Server", "Telemetry")
 
 type Config struct {
-	Log     log.Config     `flag:"log"`
-	Server  server.Config  `flag:"server"`
-	OAuth2  oauth2.Config  `flag:"oauth2"`
-	Metrics metrics.Config `flag:"metrics"`
+	Log       log.Config       `flag:"log"`
+	OAuth2    oauth2.Config    `flag:"oauth2"`
+	Server    server.Config    `flag:"server"`
+	Telemetry telemetry.Config `flag:"telemetry"`
 }
 
-func (c *Config) Defaults() {
-	return
+func (cfg *Config) Defaults() {
+	cfg.Telemetry.Component = component
 }

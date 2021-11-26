@@ -8,6 +8,8 @@ replace powerssl.dev/backend => ../backend
 
 replace powerssl.dev/common => ../common
 
+replace powerssl.dev/common/telemetry => ../common/telemetry
+
 replace powerssl.dev/sdk => ../sdk
 
 replace powerssl.dev/workflow => ../workflow
@@ -23,11 +25,12 @@ require (
 	github.com/spf13/cobra v1.2.1
 	go.temporal.io/sdk v1.10.0
 	google.golang.org/genproto v0.0.0-20210917145530-b395a37504d4
-	google.golang.org/grpc v1.40.0
+	google.golang.org/grpc v1.42.0
 	google.golang.org/protobuf v1.27.1
 	powerssl.dev/api v0.0.0-00010101000000-000000000000
 	powerssl.dev/backend v0.0.0-00010101000000-000000000000
 	powerssl.dev/common v0.0.0-00010101000000-000000000000
+	powerssl.dev/common/telemetry v0.0.0-00010101000000-000000000000
 	powerssl.dev/workflow v0.0.0-00010101000000-000000000000
 )
 
@@ -101,8 +104,14 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/twmb/murmur3 v1.1.6 // indirect
 	github.com/uber-go/tally v3.4.2+incompatible // indirect
-	github.com/uber/jaeger-client-go v2.29.1+incompatible // indirect
-	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
+	go.opentelemetry.io/otel v1.2.0 // indirect
+	go.opentelemetry.io/otel/exporters/prometheus v0.25.0 // indirect
+	go.opentelemetry.io/otel/internal/metric v0.25.0 // indirect
+	go.opentelemetry.io/otel/metric v0.25.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.2.0 // indirect
+	go.opentelemetry.io/otel/sdk/export/metric v0.25.0 // indirect
+	go.opentelemetry.io/otel/sdk/metric v0.25.0 // indirect
+	go.opentelemetry.io/otel/trace v1.2.0 // indirect
 	go.temporal.io/api v1.5.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect

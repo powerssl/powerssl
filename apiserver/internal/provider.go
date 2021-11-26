@@ -8,8 +8,7 @@ import (
 	"powerssl.dev/backend/temporal/client"
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/tracer"
+	"powerssl.dev/common/telemetry"
 	"powerssl.dev/common/transport"
 )
 
@@ -19,17 +18,16 @@ var Provider = wire.NewSet(
 	client.Provider,
 	interrupthandler.Provider,
 	log.Provider,
-	metrics.Provider,
 	service.Provider,
 	grpcserver.Provider,
-	tracer.Provider,
+	telemetry.Provider,
 	transport.Provider,
 )
 
-func Provide(interruptHandlerF interrupthandler.F, metricsF metrics.F, serverF grpcserver.F) []func() error {
+func Provide(interruptHandlerF interrupthandler.F, serverF grpcserver.F, telemetryF telemetry.F) []func() error {
 	return []func() error{
 		interruptHandlerF,
-		metricsF,
 		serverF,
+		telemetryF,
 	}
 }

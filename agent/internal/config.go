@@ -4,20 +4,20 @@ import (
 	"github.com/google/wire"
 
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/tracer"
+	"powerssl.dev/common/telemetry"
 	"powerssl.dev/sdk/apiserver"
 )
 
 const component = "powerssl-agent"
 
-var ConfigFields = wire.FieldsOf(new(*Config), "APIServerClient", "Log", "Tracer")
+var ConfigFields = wire.FieldsOf(new(*Config), "APIServerClient", "Log", "Telemetry")
 
 type Config struct {
 	APIServerClient apiserver.Config `flag:"apiServerClient"`
 	Log             log.Config       `flag:"log"`
-	Tracer          tracer.Config    `flag:"tracer"`
+	Telemetry       telemetry.Config `flag:"telemetry"`
 }
 
 func (cfg *Config) Defaults() {
-	cfg.Tracer.Component = component
+	cfg.Telemetry.Component = component
 }

@@ -2,8 +2,8 @@ package internal
 
 import (
 	"context"
+	"powerssl.dev/common/telemetry"
 
-	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 
 	"powerssl.dev/common/log"
@@ -22,9 +22,9 @@ func LoggerInterceptor(logger log.Logger) grpc.UnaryClientInterceptor {
 	}
 }
 
-func TracerInterceptor(tracer stdopentracing.Tracer) grpc.UnaryClientInterceptor {
+func TelemetryInterceptor(telemetry *telemetry.Telemeter) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		_ = tracer
+		_ = telemetry.Tracer
 		return invoker(ctx, method, req, reply, cc, opts...)
 	}
 }

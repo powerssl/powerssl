@@ -10,9 +10,12 @@ import (
 
 var Provider = wire.NewSet(
 	Provide,
+	ProvideF,
 )
 
-func Provide(ctx context.Context, cfg Config, logger log.Logger) (*Client, func(), error) {
+type F func() error
+
+func Provide(ctx context.Context, cfg Config, logger log.Logger) (*Telemeter, func(), error) {
 	logger = logger.With("component", "telemetry")
 	telemetry, err := New(cfg, logger)
 	if err != nil {
@@ -24,4 +27,8 @@ func Provide(ctx context.Context, cfg Config, logger log.Logger) (*Client, func(
 		}
 	}
 	return telemetry, cleanup, nil
+}
+
+func ProvideF(ctx context.Context, telemeter *Telemeter) F {
+	return telemeter.F(ctx)
 }

@@ -8,13 +8,12 @@ import (
 
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/tracer"
+	"powerssl.dev/common/telemetry"
+
+	"powerssl.dev/sdk/controller"
 	"powerssl.dev/sdk/integration/acme"
 	"powerssl.dev/sdk/integration/dns"
 	"powerssl.dev/sdk/integration/internal"
-
-	"powerssl.dev/sdk/controller"
 )
 
 var ProviderACME = wire.NewSet(
@@ -33,17 +32,16 @@ var provider = wire.NewSet(
 	controller.Provider,
 	interrupthandler.Provider,
 	log.Provider,
-	metrics.Provider,
-	tracer.Provider,
+	telemetry.Provider,
 )
 
 type F func() error
 
-func Provide(interruptHandlerF interrupthandler.F, metricsF metrics.F, runnerF F) []func() error {
+func Provide(interruptHandlerF interrupthandler.F, runnerF F, telemetryF telemetry.F) []func() error {
 	return []func() error{
 		interruptHandlerF,
-		metricsF,
 		runnerF,
+		telemetryF,
 	}
 }
 

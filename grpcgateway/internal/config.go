@@ -4,20 +4,22 @@ import (
 	"github.com/google/wire"
 
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/metrics"
+	"powerssl.dev/common/telemetry"
 	"powerssl.dev/common/transport"
 	"powerssl.dev/grpcgateway/internal/server"
 )
 
-var ConfigFields = wire.FieldsOf(new(*Config), "APIServerClient", "Log", "Metrics", "Server")
+const component = "powerssl-grpcgateway"
+
+var ConfigFields = wire.FieldsOf(new(*Config), "APIServerClient", "Log", "Server", "Telemetry")
 
 type Config struct {
 	APIServerClient transport.Config `flag:"apiServerClient"`
 	Log             log.Config       `flag:"log"`
-	Metrics         metrics.Config   `flag:"metrics"`
 	Server          server.Config    `flag:"server"`
+	Telemetry       telemetry.Config `flag:"telemetry"`
 }
 
 func (cfg *Config) Defaults() {
-	return
+	cfg.Telemetry.Component = component
 }

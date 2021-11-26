@@ -1,9 +1,9 @@
 package transport
 
 type Config struct {
-	Addr                  string `flag:"addr;;;apiserver client addr" validate:"required,hostname_port"`
-	CAFile                string `flag:"caFile;;;apiserver client CA file"`
-	Insecure              bool   `flag:"insecure;;;apiserver client insecure"`
-	InsecureSkipTLSVerify bool   `flag:"insecureSkipTLSVerify;;;apiserver client insecure skip TLS verify"`
-	ServerNameOverride    string `flag:"serverNameOverride;;;apiserver client server name override"`
+	Addr                  string `flag:"addr;;;client addr" validate:"required,hostname_port"`
+	CAFile                string `flag:"caFile;;;client CA file"`
+	Insecure              bool   `flag:"insecure;;;client insecure"`
+	InsecureSkipTLSVerify bool   `flag:"insecureSkipTLSVerify;;;client insecure skip TLS verify"`
+	ServerNameOverride    string `flag:"serverNameOverride;;;client server name override"`
 }

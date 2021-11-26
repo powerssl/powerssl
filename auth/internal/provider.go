@@ -7,7 +7,7 @@ import (
 	"powerssl.dev/auth/internal/server"
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/metrics"
+	"powerssl.dev/common/telemetry"
 )
 
 var Provider = wire.NewSet(
@@ -15,15 +15,15 @@ var Provider = wire.NewSet(
 	ConfigFields,
 	interrupthandler.Provider,
 	log.Provider,
-	metrics.Provider,
 	oauth2.Provider,
 	server.Provider,
+	telemetry.Provider,
 )
 
-func Provide(interruptHandlerF interrupthandler.F, metricsF metrics.F, serverF server.F) []func() error {
+func Provide(interruptHandlerF interrupthandler.F, telemetryF telemetry.F, serverF server.F) []func() error {
 	return []func() error{
 		interruptHandlerF,
-		metricsF,
 		serverF,
+		telemetryF,
 	}
 }

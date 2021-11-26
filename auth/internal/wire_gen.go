@@ -12,26 +12,32 @@ import (
 	"powerssl.dev/auth/internal/server"
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/metrics"
+	"powerssl.dev/common/telemetry"
 )
 
 // Injectors from wire.go:
 
 func Initialize(ctx context.Context, cfg *Config) ([]func() error, func(), error) {
 	config := cfg.Log
-	sugaredLogger, cleanup, err := log.Provide(config)
+	logger, cleanup, err := log.Provide(config)
 	if err != nil {
 		return nil, nil, err
 	}
-	f := interrupthandler.Provide(ctx, sugaredLogger)
-	metricsConfig := cfg.Metrics
-	metricsF := metrics.Provide(ctx, metricsConfig, sugaredLogger)
+	f := interrupthandler.Provide(ctx, logger)
+	telemetryConfig := cfg.Telemetry
+	telemeter, cleanup2, err := telemetry.Provide(ctx, telemetryConfig, logger)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	telemetryF := telemetry.ProvideF(ctx, telemeter)
 	serverConfig := &cfg.Server
 	oauth2Config := &cfg.OAuth2
 	oAuth2 := oauth2.New(oauth2Config)
-	serverF := server.Provide(ctx, serverConfig, sugaredLogger, oAuth2)
-	v := Provide(f, metricsF, serverF)
+	serverF := server.Provide(ctx, serverConfig, logger, oAuth2)
+	v := Provide(f, telemetryF, serverF)
 	return v, func() {
+		cleanup2()
 		cleanup()
 	}, nil
 }

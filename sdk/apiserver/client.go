@@ -3,12 +3,13 @@ package apiserver // import "powerssl.dev/sdk/apiserver"
 import (
 	"context"
 
-	stdopentracing "github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
 	"powerssl.dev/common/log"
+	"powerssl.dev/common/telemetry"
 	"powerssl.dev/common/transport"
+
 	"powerssl.dev/sdk/internal"
 )
 
@@ -19,11 +20,11 @@ type Client struct {
 	User        apiv1.UserServiceClient
 }
 
-func NewClient(ctx context.Context, cfg Config, logger log.Logger, tracer stdopentracing.Tracer) (*Client, error) {
+func NewClient(ctx context.Context, cfg Config, logger log.Logger, telemetry *telemetry.Telemeter) (*Client, error) {
 	opts := []grpc.DialOption{
 		grpc.WithUnaryInterceptor(internal.AuthInterceptor()),
 		grpc.WithUnaryInterceptor(internal.LoggerInterceptor(logger)),
-		grpc.WithUnaryInterceptor(internal.TracerInterceptor(tracer)),
+		grpc.WithUnaryInterceptor(internal.TelemetryInterceptor(telemetry)),
 	}
 	conn, err := transport.New(ctx, cfg.Client, opts...)
 	if err != nil {

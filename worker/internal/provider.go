@@ -7,8 +7,7 @@ import (
 	"powerssl.dev/backend/vault"
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
-	"powerssl.dev/common/metrics"
-	"powerssl.dev/common/tracer"
+	"powerssl.dev/common/telemetry"
 	"powerssl.dev/sdk/apiserver"
 	"powerssl.dev/worker/internal/worker"
 )
@@ -20,16 +19,15 @@ var Provider = wire.NewSet(
 	client.Provider,
 	interrupthandler.Provider,
 	log.Provider,
-	metrics.Provider,
-	tracer.Provider,
+	telemetry.Provider,
 	vault.Provider,
 	worker.Provider,
 )
 
-func Provide(interruptHandlerF interrupthandler.F, metricsF metrics.F, workerF worker.F) []func() error {
+func Provide(interruptHandlerF interrupthandler.F, telemetryF telemetry.F, workerF worker.F) []func() error {
 	return []func() error{
 		interruptHandlerF,
-		metricsF,
+		telemetryF,
 		workerF,
 	}
 }
