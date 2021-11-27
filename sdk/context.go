@@ -1,4 +1,4 @@
-package context
+package sdk
 
 import (
 	"context"
@@ -6,7 +6,11 @@ import (
 	"powerssl.dev/sdk/apiserver"
 )
 
-var apiClient = New("dev.powerssl.backend.apiserver")
+type ctxKey struct {
+	name string
+}
+
+var apiClient = ctxKey{name: "dev.powerssl.backend.apiserver"}
 
 func GetAPIClient(ctx context.Context) *apiserver.Client {
 	return ctx.Value(apiClient).(*apiserver.Client)

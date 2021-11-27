@@ -5,3 +5,75 @@
 // +build !wireinject
 
 package integration
+
+import (
+	"context"
+	"powerssl.dev/common/interrupthandler"
+	"powerssl.dev/common/log"
+	"powerssl.dev/common/telemetry"
+	"powerssl.dev/sdk/controller"
+	"powerssl.dev/sdk/integration/acme"
+	"powerssl.dev/sdk/integration/dns"
+)
+
+// Injectors from wire.go:
+
+func InitializeACME(ctx context.Context, cfg *Config, handler acme.Integration) ([]func() error, func(), error) {
+	config := cfg.Log
+	logger, cleanup, err := log.Provide(config)
+	if err != nil {
+		return nil, nil, err
+	}
+	f := interrupthandler.Provide(ctx, logger)
+	integrationConfig := &cfg.Integration
+	controllerConfig := cfg.ControllerClient
+	telemetryConfig := cfg.Telemetry
+	telemeter, cleanup2, err := telemetry.Provide(ctx, telemetryConfig, logger)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	grpcClient, err := controller.NewGRPCClient(ctx, controllerConfig, logger, telemeter)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	integrationF := ProvideACME(ctx, integrationConfig, logger, grpcClient, handler)
+	telemetryF := telemetry.ProvideF(ctx, telemeter)
+	v := Provide(f, integrationF, telemetryF)
+	return v, func() {
+		cleanup2()
+		cleanup()
+	}, nil
+}
+
+func InitializeDNS(ctx context.Context, cfg *Config, handler dns.Integration) ([]func() error, func(), error) {
+	config := cfg.Log
+	logger, cleanup, err := log.Provide(config)
+	if err != nil {
+		return nil, nil, err
+	}
+	f := interrupthandler.Provide(ctx, logger)
+	integrationConfig := &cfg.Integration
+	controllerConfig := cfg.ControllerClient
+	telemetryConfig := cfg.Telemetry
+	telemeter, cleanup2, err := telemetry.Provide(ctx, telemetryConfig, logger)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	grpcClient, err := controller.NewGRPCClient(ctx, controllerConfig, logger, telemeter)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	integrationF := ProvideDNS(ctx, integrationConfig, logger, grpcClient, handler)
+	telemetryF := telemetry.ProvideF(ctx, telemeter)
+	v := Provide(f, integrationF, telemetryF)
+	return v, func() {
+		cleanup2()
+		cleanup()
+	}, nil
+}

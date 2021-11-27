@@ -4,16 +4,18 @@ import (
 	"context"
 
 	"github.com/google/wire"
-	activity2 "go.temporal.io/sdk/activity"
+	temporalactivity "go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
 
-	apiserver2 "powerssl.dev/backend/context"
+	contextutil "powerssl.dev/backend/context"
 	"powerssl.dev/backend/temporal"
 	"powerssl.dev/backend/vault"
-	"powerssl.dev/controller/internal/activity"
+	"powerssl.dev/sdk"
 	"powerssl.dev/sdk/apiserver"
-	activity3 "powerssl.dev/workflow/activity"
+	workflowactivity "powerssl.dev/workflow/activity"
+
+	"powerssl.dev/controller/internal/activity"
 )
 
 var Provider = wire.NewSet(
@@ -25,14 +27,14 @@ type F func() error
 func Provide(ctx context.Context, apiserverClient *apiserver.Client, vaultClient *vault.Client, temporalClient client.Client) F {
 	return func() error {
 		backgroundActivityContext := context.Background()
-		backgroundActivityContext = apiserver2.SetAPIClient(backgroundActivityContext, apiserverClient)
-		backgroundActivityContext = apiserver2.SetVaultClient(backgroundActivityContext, vaultClient)
+		backgroundActivityContext = sdk.SetAPIClient(backgroundActivityContext, apiserverClient)
+		backgroundActivityContext = contextutil.SetVaultClient(backgroundActivityContext, vaultClient)
 		worker.EnableVerboseLogging(true)
 		w := worker.New(temporalClient, temporal.ControllerTaskQueue, worker.Options{
 			BackgroundActivityContext: backgroundActivityContext,
 		})
-		w.RegisterActivityWithOptions(activity.CreateACMEAccount, activity2.RegisterOptions{
-			Name: activity3.CreateACMEAccount,
+		w.RegisterActivityWithOptions(activity.CreateACMEAccount, temporalactivity.RegisterOptions{
+			Name: workflowactivity.CreateACMEAccount,
 		})
 		if err := w.Start(); err != nil {
 			return err

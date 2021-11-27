@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"powerssl.dev/sdk"
 
 	"github.com/google/wire"
 	temporalactivity "go.temporal.io/sdk/activity"
@@ -30,7 +31,7 @@ func Provide(ctx context.Context, apiserverClient *apiserver.Client, vaultClient
 	return func() error {
 		worker.EnableVerboseLogging(true)
 		backgroundActivityContext := context.Background()
-		backgroundActivityContext = backendapiserver.SetAPIClient(backgroundActivityContext, apiserverClient)
+		backgroundActivityContext = sdk.SetAPIClient(backgroundActivityContext, apiserverClient)
 		backgroundActivityContext = backendapiserver.SetVaultClient(backgroundActivityContext, vaultClient)
 		w := worker.New(temporalClient, temporal.WorkerTaskQueue, worker.Options{
 			BackgroundActivityContext: backgroundActivityContext,

@@ -6,7 +6,7 @@ import (
 
 	temporalactivity "go.temporal.io/sdk/activity"
 
-	context2 "powerssl.dev/backend/context"
+	ctxutil "powerssl.dev/backend/context"
 	"powerssl.dev/workflow/activity"
 )
 
@@ -16,5 +16,5 @@ func CreateVaultTransitKey(ctx context.Context, params *activity.CreateVaultTran
 
 	name := strings.ReplaceAll(params.Name, "/", "-")
 	logger.Info("Creating Vault Transit Key", "Name", name)
-	return context2.GetVaultClient(ctx).CreateTransitKey(ctx, name)
+	return ctxutil.GetVaultClient(ctx).CreateTransitKey(ctx, name)
 }
