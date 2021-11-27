@@ -17,13 +17,6 @@ Migrate
   -h, --help                  help for migrate
 ```
 
-### Options inherited from parent commands
-
-```
-      --config string   config file (default is /etc/powerssl/api/config.yaml)
-  -v, --verbose         Verbose output
-```
-
 ### SEE ALSO
 
 * [powerssl-apiserver](/powerssl-apiserver)	 - powerssl-apiserver provides PowerSSL API

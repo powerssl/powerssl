@@ -29,13 +29,6 @@ powerssl-temporal register-namespace [flags]
       --workflow-execution-retention-period string   Temporal workflow namespace execution retention period (default "24h")
 ```
 
-### Options inherited from parent commands
-
-```
-      --config string   config file (default is /etc/powerssl/temporal/config.yaml)
-  -v, --verbose         Verbose output
-```
-
 ### SEE ALSO
 
 * [powerssl-temporal](/powerssl-temporal)	 - powerssl-temporal provides PowerSSL Temporal Server

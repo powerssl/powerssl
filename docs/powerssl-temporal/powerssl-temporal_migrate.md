@@ -26,13 +26,6 @@ powerssl-temporal migrate [flags]
       --visibility-database string   Visibility DB (default "temporal_visibility")
 ```
 
-### Options inherited from parent commands
-
-```
-      --config string   config file (default is /etc/powerssl/temporal/config.yaml)
-  -v, --verbose         Verbose output
-```
-
 ### SEE ALSO
 
 * [powerssl-temporal](/powerssl-temporal)	 - powerssl-temporal provides PowerSSL Temporal Server

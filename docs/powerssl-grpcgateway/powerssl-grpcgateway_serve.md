@@ -16,22 +16,17 @@ powerssl-grpcgateway serve [flags]
 ### Options
 
 ```
-      --addr string                             GRPC Addr (default ":8080")
-      --apiserver-addr string                   GRPC address of API server
-      --apiserver-insecure                      Use insecure communication
-      --apiserver-insecure-skip-tls-verify      Accepts any certificate presented by the server and any host name in that certificate
-      --apiserver-server-name-override string   It will override the virtual host name of authority
-      --ca-file string                          Certificate authority file
-  -h, --help                                    help for serve
-      --metrics-addr string                     HTTP Addr (default ":9090")
-      --no-metrics                              Do not serve metrics
-```
-
-### Options inherited from parent commands
-
-```
-      --config string   config file (default is /etc/powerssl/grpcgateway/config.yaml)
-  -v, --verbose         Verbose output
+      --api-server-client-addr string                   client addr
+      --api-server-client-ca-file string                client CA file
+      --api-server-client-insecure                      client insecure
+      --api-server-client-insecure-skip-tls-verify      client insecure skip TLS verify
+      --api-server-client-server-name-override string   client server name override
+  -h, --help                                            help for serve
+  -e, --log-env string                                  environment (default "production")
+      --server-addr string                              server addr
+      --telemetry-meter-addr string                     metrics addr
+      --telemetry-meter-exporter string                 metrics exporter (default "prometheus")
+      --telemetry-tracer-disabled                       disable tracer
 ```
 
 ### SEE ALSO

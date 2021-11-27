@@ -16,9 +16,7 @@ powerssl-grpcgateway provides PowerSSL gRPC Gareway.
 ### Options
 
 ```
-      --config string   config file (default is /etc/powerssl/grpcgateway/config.yaml)
-  -h, --help            help for powerssl-grpcgateway
-  -v, --verbose         Verbose output
+  -h, --help   help for powerssl-grpcgateway
 ```
 
 ### SEE ALSO

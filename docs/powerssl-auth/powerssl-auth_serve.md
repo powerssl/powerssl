@@ -7,7 +7,7 @@ title: serve
 ---
 ## powerssl-auth serve
 
-Serve the API
+Serve Web
 
 ```
 powerssl-auth serve [flags]
@@ -16,20 +16,20 @@ powerssl-auth serve [flags]
 ### Options
 
 ```
-      --addr string                   GRPC (default ":8080")
-  -h, --help                          help for serve
-      --insecure                      Do not use TLS for the server
-      --jwt-private-key-file string   JWT private key file
-      --metrics-addr string           HTTP Addr (default ":9090")
-      --no-metrics                    Do not serve metrics
-      --webapp-uri string             WebApp URI
-```
-
-### Options inherited from parent commands
-
-```
-      --config string   config file (default is /etc/powerssl/auth/config.yaml)
-  -v, --verbose         Verbose output
+  -h, --help                                 help for serve
+  -e, --log-env string                       environment (default "production")
+      --oauth2-auth-uri string               oAuth2 auth URI
+      --oauth2-github-client-id string       oAuth2 GitHub client ID
+      --oauth2-github-client-secret string   oAuth2 GitHub client secret
+      --server-addr string                   server addr
+      --server-cert-file string              server cert file
+      --server-insecure                      server insecure
+      --server-jwt-private-key-file string   server JWT private key file
+      --server-key-file string               server key file
+      --server-webapp-uri string             webapp URI
+      --telemetry-meter-addr string          metrics addr
+      --telemetry-meter-exporter string      metrics exporter (default "prometheus")
+      --telemetry-tracer-disabled            disable tracer
 ```
 
 ### SEE ALSO

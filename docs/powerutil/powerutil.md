@@ -16,8 +16,7 @@ powerutil provides PowerSSL utilities.
 ### Options
 
 ```
-  -h, --help      help for powerutil
-  -v, --verbose   Verbose output
+  -h, --help   help for powerutil
 ```
 
 ### SEE ALSO

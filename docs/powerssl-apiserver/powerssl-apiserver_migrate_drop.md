@@ -24,9 +24,7 @@ powerssl-apiserver migrate drop [--force | -f] [flags]
 ### Options inherited from parent commands
 
 ```
-      --config string         config file (default is /etc/powerssl/api/config.yaml)
       --database-url string   Database URL
-  -v, --verbose               Verbose output
 ```
 
 ### SEE ALSO

@@ -16,21 +16,18 @@ powerssl-webapp serve [flags]
 ### Options
 
 ```
-      --addr string             Addr (default ":8080")
-      --apiserver-addr string   GRPC address of API server
-      --auth-uri string         Auth URI
-      --grpcweb-uri string      gRPC-Web URI
-  -h, --help                    help for serve
-      --insecure                Do not use TLS for the server
-      --metrics-addr string     HTTP Addr (default ":9090")
-      --no-metrics              Do not serve metrics
-```
-
-### Options inherited from parent commands
-
-```
-      --config string   config file (default is /etc/powerssl/webapp/config.yaml)
-  -v, --verbose         Verbose output
+  -h, --help                              help for serve
+  -e, --log-env string                    environment (default "production")
+      --server-addr string                server addr
+      --server-api-addr string            server API addr
+      --server-auth-uri string            server auth URI
+      --server-cert-file string           server cert file
+      --server-grpc-web-uri string        server gRPC web URI
+      --server-insecure                   server insecure
+      --server-key-file string            server key file
+      --telemetry-meter-addr string       metrics addr
+      --telemetry-meter-exporter string   metrics exporter (default "prometheus")
+      --telemetry-tracer-disabled         disable tracer
 ```
 
 ### SEE ALSO

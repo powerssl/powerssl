@@ -16,28 +16,30 @@ powerssl-worker run [flags]
 ### Options
 
 ```
-      --apiserver-addr string                   GRPC address of API server
-      --apiserver-insecure                      Use insecure communication
-      --apiserver-insecure-skip-tls-verify      Accepts any certificate presented by the server and any host name in that certificate
-      --apiserver-server-name-override string   It will override the virtual host name of authority
-      --auth-token string                       Authentication token
-      --ca-file string                          Certificate authority file
-  -h, --help                                    help for run
-      --metrics-addr string                     HTTP Addr (default ":9090")
-      --no-metrics                              Do not serve metrics
-      --no-tracing                              Do not trace
-      --temporal-host-port string               Host and port for this client to connect to (default "localhost:7233")
-      --temporal-namespace string               Namespace name for this client to work with (default "powerssl")
-      --tracer string                           Tracing implementation (default "jaeger")
-      --vault-token string                      Vault Token
-      --vault-url string                        Vault URL
-```
-
-### Options inherited from parent commands
-
-```
-      --config string   config file (default is /etc/powerssl/worker/config.yaml)
-  -v, --verbose         Verbose output
+      --api-server-client-auth-token string                    apiserver client addr
+      --api-server-client-client-addr string                   client addr
+      --api-server-client-client-ca-file string                client CA file
+      --api-server-client-client-insecure                      client insecure
+      --api-server-client-client-insecure-skip-tls-verify      client insecure skip TLS verify
+      --api-server-client-client-server-name-override string   client server name override
+  -h, --help                                                   help for run
+  -e, --log-env string                                         environment (default "production")
+      --telemetry-meter-addr string                            metrics addr
+      --telemetry-meter-exporter string                        metrics exporter (default "prometheus")
+      --telemetry-tracer-disabled                              disable tracer
+      --temporal-client-ca-file string                         temporal CA file
+      --temporal-client-disable-health-check                   temporal disable health check
+      --temporal-client-health-check-timeout int               temporal health check timeout
+      --temporal-client-host-port string                       temporal host port
+      --temporal-client-identity string                        temporal identity
+      --temporal-client-namespace string                       temporal namespace
+      --temporal-client-tls-cert-file string                   temporal TLS cert file
+      --temporal-client-tls-key-file string                    temporal TLS key file
+      --vault-client-app-role-id string                        vault app role ID
+      --vault-client-app-role-secret-id string                 vault app role secret ID
+      --vault-client-ca-file string                            vault CA file
+      --vault-client-token string                              vault token
+      --vault-client-url string                                vault URL
 ```
 
 ### SEE ALSO

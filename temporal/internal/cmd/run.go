@@ -14,7 +14,7 @@ func newCmdRun() *cobra.Command {
 	cfg := new(internal.Config)
 	cmd := runner.RunCmd(&cobra.Command{
 		Use:   "run",
-		Short: "RunCmd the Temporal Server",
+		Short: "Run the Temporal Server",
 		Args:  cobra.NoArgs,
 	}, cfg, func(ctx context.Context) ([]func() error, func(), error) {
 		return internal.Initialize(ctx, cfg)

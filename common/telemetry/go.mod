@@ -8,7 +8,6 @@ require (
 	github.com/google/wire v0.5.0
 	github.com/prometheus/client_golang v1.11.0
 	go.opentelemetry.io/otel/exporters/prometheus v0.25.0
-	go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v0.25.0
 	go.opentelemetry.io/otel/metric v0.25.0
 	go.opentelemetry.io/otel/sdk v1.2.0
 	go.opentelemetry.io/otel/sdk/export/metric v0.25.0

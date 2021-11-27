@@ -16,9 +16,7 @@ powerssl-worker provides PowerSSL Worker.
 ### Options
 
 ```
-      --config string   config file (default is /etc/powerssl/worker/config.yaml)
-  -h, --help            help for powerssl-worker
-  -v, --verbose         Verbose output
+  -h, --help   help for powerssl-worker
 ```
 
 ### SEE ALSO

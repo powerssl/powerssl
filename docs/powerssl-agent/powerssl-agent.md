@@ -15,9 +15,7 @@ powerssl-agent provides PowerSSL Agent.
 ### Options
 
 ```
-      --config string   config file (default is /etc/powerssl/agent/config.yaml)
-  -h, --help            help for powerssl-agent
-  -v, --verbose         Verbose output
+  -h, --help   help for powerssl-agent
 ```
 
 ### SEE ALSO

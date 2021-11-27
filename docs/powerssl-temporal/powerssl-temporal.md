@@ -16,9 +16,7 @@ powerssl-temporal provides PowerSSL Temporal Server.
 ### Options
 
 ```
-      --config string   config file (default is /etc/powerssl/temporal/config.yaml)
-  -h, --help            help for powerssl-temporal
-  -v, --verbose         Verbose output
+  -h, --help   help for powerssl-temporal
 ```
 
 ### SEE ALSO

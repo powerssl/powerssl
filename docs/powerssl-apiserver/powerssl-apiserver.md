@@ -16,9 +16,7 @@ powerssl-apiserver provides PowerSSL API.
 ### Options
 
 ```
-      --config string   config file (default is /etc/powerssl/api/config.yaml)
-  -h, --help            help for powerssl-apiserver
-  -v, --verbose         Verbose output
+  -h, --help   help for powerssl-apiserver
 ```
 
 ### SEE ALSO

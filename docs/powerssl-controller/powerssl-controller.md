@@ -16,9 +16,7 @@ powerssl-controller provides PowerSSL Controller.
 ### Options
 
 ```
-      --config string   config file (default is /etc/powerssl/controller/config.yaml)
-  -h, --help            help for powerssl-controller
-  -v, --verbose         Verbose output
+  -h, --help   help for powerssl-controller
 ```
 
 ### SEE ALSO

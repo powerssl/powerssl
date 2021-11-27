@@ -22,12 +22,6 @@ powerutil vault [flags]
   -h, --help            help for vault
 ```
 
-### Options inherited from parent commands
-
-```
-  -v, --verbose   Verbose output
-```
-
 ### SEE ALSO
 
 * [powerutil](/powerutil)	 - powerutil provides PowerSSL utilities
