@@ -103,11 +103,12 @@ func runTemporalSQLTool(commonArgs []string, args ...string) (err error) {
 		return err
 	}
 
-	if len(stderrContent) > 0 {
-		return fmt.Errorf(string(stderrContent))
+	if _, err = fmt.Fprintln(os.Stderr, string(stderrContent)); err != nil {
+		return err
 	}
-
-	fmt.Println(string(stdoutContent))
+	if _, err = fmt.Fprintln(os.Stdout, string(stdoutContent)); err != nil {
+		return err
+	}
 
 	return err
 }
