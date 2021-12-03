@@ -15,7 +15,6 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
-	"powerssl.dev/common/errutil"
 	"powerssl.dev/common/log"
 )
 
@@ -72,7 +71,13 @@ func (s *Server) Serve(ctx context.Context) (err error) {
 	if listener, err = net.Listen("tcp", s.cfg.Addr); err != nil {
 		return err
 	}
-	defer errutil.ErrWrapCloser(listener, &err)
+	defer func() {
+		if e := listener.Close(); e != nil && err != nil {
+			err = fmt.Errorf("%s: %w", e, err)
+		} else if e != nil {
+			err = e
+		}
+	}()
 	c := make(chan error)
 	go func() {
 		c <- s.grpc.Serve(listener)

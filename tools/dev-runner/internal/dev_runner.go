@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"database/sql"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -17,7 +18,6 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 
-	"powerssl.dev/common/errutil"
 	"powerssl.dev/common/interrupthandler"
 	"powerssl.dev/common/log"
 
@@ -36,7 +36,7 @@ func Run() error {
 		}); err != nil {
 			return err
 		}
-		defer errutil.ErrWrapSync(logger, &err)
+		defer errWrapSync(logger, &err)
 		return interrupthandler.InterruptHandler(ctx, logger)
 	})
 
@@ -67,7 +67,7 @@ func Run() error {
 		if watcher, err = fsnotify.NewWatcher(); err != nil {
 			of.ErrorOutput(fmt.Sprintf("watcher error: %s", err))
 		}
-		defer errutil.ErrWrapCloser(watcher, &err)
+		defer errWrapCloser(watcher, &err)
 	}
 
 	interrupts := make(map[string]chan struct{}, len(component.Components)+1)
@@ -262,7 +262,7 @@ func handlePostgres(of *Outlet) error {
 			return errors.Wrap(err, "connecting default database")
 		}
 		defer func() {
-			errutil.ErrWrapCloser(db, &err)
+			errWrapCloser(db, &err)
 		}()
 		for {
 			if err = db.Ping(); err == nil {
@@ -288,7 +288,7 @@ func handlePostgres(of *Outlet) error {
 				return errors.Wrap(err, "creating database vault")
 			}
 		}
-		errutil.ErrWrapCloser(db, &err)
+		errWrapCloser(db, &err)
 	}
 	{
 		var err error
@@ -296,7 +296,7 @@ func handlePostgres(of *Outlet) error {
 		if db, err = sql.Open("postgres", "postgresql://powerssl:powerssl@localhost:5432/vault?sslmode=disable"); err != nil {
 			return errors.Wrap(err, "connecting vault database")
 		}
-		defer errutil.ErrWrapCloser(db, &err)
+		defer errWrapCloser(db, &err)
 		for {
 			if err = db.Ping(); err == nil {
 				break
@@ -305,12 +305,12 @@ func handlePostgres(of *Outlet) error {
 		}
 		of.SystemOutput("Create table: vault_kv_store")
 		of.SystemOutput("Create index: parent_path_idx")
-		if _, err = db.Exec("CREATE TABLE vault_kv_store(parent_path TEXT COLLATE \"C\" NOT NULL, path TEXT COLLATE \"C\", key TEXT COLLATE \"C\", value BYTEA, CONSTRAINT pkey PRIMARY KEY (path, key)); CREATE INDEX parent_path_idx ON vault_kv_store (parent_path);"); err != nil {
+		if _, err = db.Exec("CREATE TABLE vault_kv_store(parent_path TEXT COLLATE c NOT NULL, path TEXT COLLATE c, key TEXT COLLATE c, value BYTEA, CONSTRAINT pkey PRIMARY KEY (path, key)); CREATE INDEX parent_path_idx ON vault_kv_store (parent_path);"); err != nil {
 			if !strings.Contains(err.Error(), "already exists") {
 				return errors.Wrap(err, "creating vault table and index")
 			}
 		}
-		errutil.ErrWrapCloser(db, &err)
+		errWrapCloser(db, &err)
 	}
 	{
 		comp := component.Component{
@@ -410,10 +410,26 @@ func serviceToken(_ string) (_ string, err error) {
 	if resp, err = httpClient.Get("https://localhost:8843/service"); err != nil {
 		return
 	}
-	defer errutil.ErrWrapCloser(resp.Body, &err)
+	defer errWrapCloser(resp.Body, &err)
 	var byt []byte
 	if byt, err = ioutil.ReadAll(resp.Body); err != nil {
 		return
 	}
 	return string(byt), nil
+}
+
+func errWrapSync(logger log.Logger, wErr *error) {
+	if err := logger.Sync(); err != nil && *wErr != nil {
+		*wErr = fmt.Errorf("%s: %w", err, *wErr)
+	} else if err != nil {
+		*wErr = err
+	}
+}
+
+func errWrapCloser(closer io.Closer, wErr *error) {
+	if err := closer.Close(); err != nil && *wErr != nil {
+		*wErr = fmt.Errorf("%s: %w", err, *wErr)
+	} else if err != nil {
+		*wErr = err
+	}
 }

@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -9,8 +10,6 @@ import (
 
 	_ "go.temporal.io/server/common/persistence/sql/sqlplugin/postgresql"
 	"go.temporal.io/server/tools/sql"
-
-	"powerssl.dev/common/errutil"
 
 	"powerssl.dev/temporal/internal/migration"
 )
@@ -58,6 +57,14 @@ func RunMigrate(host, password, plugin, port, temporalDatabase, user, visibility
 	return nil
 }
 
+func errWrapCloser(closer io.Closer, wErr *error) {
+	if err := closer.Close(); err != nil && *wErr != nil {
+		*wErr = fmt.Errorf("%s: %w", err, *wErr)
+	} else if err != nil {
+		*wErr = err
+	}
+}
+
 func runTemporalSQLTool(commonArgs []string, args ...string) (err error) {
 	var stderrFile, stdoutFile *os.File
 
@@ -71,7 +78,7 @@ func runTemporalSQLTool(commonArgs []string, args ...string) (err error) {
 			err = removeErr
 		}
 	}()
-	defer errutil.ErrWrapCloser(stderrFile, &err)
+	defer errWrapCloser(stderrFile, &err)
 
 	if stdoutFile, err = ioutil.TempFile("", fmt.Sprintf("%s-", filepath.Base(os.Args[0]))); err != nil {
 		return err
@@ -83,7 +90,7 @@ func runTemporalSQLTool(commonArgs []string, args ...string) (err error) {
 			err = removeErr
 		}
 	}()
-	defer errutil.ErrWrapCloser(stdoutFile, &err)
+	defer errWrapCloser(stdoutFile, &err)
 
 	stderr := os.Stderr
 	os.Stderr = stderrFile
