@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/hashicorp/vault/api"
 	"github.com/kenshaw/pemutil"
 )
@@ -18,6 +19,8 @@ type Config struct {
 	Insecure      bool
 	TLSServerName string
 }
+
+func (cfg *Config) PreValidate(validate *validator.Validate) {}
 
 type Client struct {
 	c *api.Client

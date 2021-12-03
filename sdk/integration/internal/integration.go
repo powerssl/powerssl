@@ -4,6 +4,8 @@ import (
 	"context"
 	"io"
 
+	"github.com/go-playground/validator/v10"
+
 	apiv1 "powerssl.dev/api/controller/v1"
 	"powerssl.dev/common/log"
 	"powerssl.dev/sdk/controller"
@@ -23,6 +25,8 @@ type IntegrationConfig struct {
 	Kind apiv1.IntegrationKind
 	Name string
 }
+
+func (cfg *IntegrationConfig) PreValidate(_ *validator.Validate) {}
 
 type integration struct {
 	cfg     *IntegrationConfig

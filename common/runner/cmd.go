@@ -9,15 +9,23 @@ import (
 )
 
 func RunCmd(cmd *cobra.Command, cfg snakecharmer.Config, f func(ctx context.Context) ([]func() error, func(), error)) *cobra.Command {
-	cmd.PreRunE = snakecharmer.Validate(func(cmd *cobra.Command, args []string) (snakecharmer.Config, error) {
+	cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
 		if err := viper.Unmarshal(&cfg); err != nil {
-			return nil, err
+			return err
 		}
-		return cfg, nil
-	})
+		return snakecharmer.Validate(cfg)
+	}
 	cmd.Run = snakecharmer.HandleError(func(cmd *cobra.Command, args []string) error {
-		return Run(f)
+		ctx := context.Background()
+		runner, ctx := New(ctx)
+		fn, cleanup, err := f(ctx)
+		if err != nil {
+			return err
+		}
+		defer cleanup()
+		x, fn := fn[0], fn[1:]
+		return runner.Run(x, fn...)
 	})
-	snakecharmer.GenerateFlags(cmd, cfg)
+	snakecharmer.GenerateFlags(cmd.Flags(), cfg)
 	return cmd
 }

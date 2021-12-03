@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/google/wire"
 
 	"powerssl.dev/backend/grpcserver"
@@ -23,8 +24,12 @@ type Config struct {
 	TemporalClient client.Config     `flag:"temporalClient"`
 }
 
-func (cfg *Config) Defaults() {
+func (cfg *Config) PreValidate(validate *validator.Validate) {
 	cfg.Server.VaultRole = component
 	cfg.Telemetry.Component = component
-	cfg.TemporalClient.Component = component
+	cfg.DB.PreValidate(validate)
+	cfg.Log.PreValidate(validate)
+	cfg.Server.PreValidate(validate)
+	cfg.Telemetry.PreValidate(validate)
+	cfg.TemporalClient.PreValidate(validate)
 }

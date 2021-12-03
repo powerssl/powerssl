@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/google/wire"
 
 	"powerssl.dev/common/log"
@@ -14,4 +15,7 @@ type Config struct {
 	Server server.Config `flag:"server"`
 }
 
-func (cfg *Config) Defaults() {}
+func (cfg *Config) PreValidate(validate *validator.Validate) {
+	cfg.Log.PreValidate(validate)
+	cfg.Server.PreValidate(validate)
+}

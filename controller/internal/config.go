@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/google/wire"
 
 	"powerssl.dev/backend/grpcserver"
@@ -16,7 +17,7 @@ const component = "powerssl-controller"
 var ConfigFields = wire.FieldsOf(new(*Config), "APIServerClient", "Log", "Server", "TemporalClient", "Telemetry", "VaultClient")
 
 type Config struct {
-	APIServerClient apiserver.Config  `flag:"apiServerClient" validate:"required"`
+	APIServerClient apiserver.Config  `flag:"apiServerClient"`
 	Log             log.Config        `flag:"log"`
 	Server          grpcserver.Config `flag:"server"`
 	TemporalClient  client.Config     `flag:"temporalClient"`
@@ -24,8 +25,14 @@ type Config struct {
 	VaultClient     vault.Config      `flag:"vaultClient"`
 }
 
-func (cfg *Config) Defaults() {
+func (cfg *Config) PreValidate(validate *validator.Validate) {
 	cfg.Server.VaultRole = component
 	cfg.TemporalClient.Component = component
 	cfg.Telemetry.Component = component
+	cfg.APIServerClient.PreValidate(validate)
+	cfg.Log.PreValidate(validate)
+	cfg.Server.PreValidate(validate)
+	cfg.TemporalClient.PreValidate(validate)
+	cfg.Telemetry.PreValidate(validate)
+	cfg.VaultClient.PreValidate(validate)
 }

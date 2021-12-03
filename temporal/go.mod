@@ -5,8 +5,9 @@ go 1.17
 replace powerssl.dev/common => ../common
 
 require (
+	github.com/go-playground/validator/v10 v10.9.0
 	github.com/google/wire v0.5.0
-	github.com/spangenberg/snakecharmer v0.0.0-20211116223337-14b423b5bb64
+	github.com/spangenberg/snakecharmer v0.0.0-20211203173439-8d5f70fc1273
 	github.com/spf13/cobra v1.2.1
 	go.temporal.io/api v1.5.1-0.20211018190919-a5f4a169cd08
 	go.temporal.io/sdk v1.10.0
@@ -33,7 +34,6 @@ require (
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
-	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/gocql/gocql v0.0.0-20210817081954-bc256bbb90de // indirect
 	github.com/gogo/googleapis v1.4.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
@@ -64,7 +64,7 @@ require (
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
-	github.com/mitchellh/mapstructure v1.4.2 // indirect
+	github.com/mitchellh/mapstructure v1.4.3 // indirect
 	github.com/olivere/elastic v6.2.37+incompatible // indirect
 	github.com/olivere/elastic/v7 v7.0.29 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
@@ -105,7 +105,7 @@ require (
 	go.uber.org/fx v1.14.2 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
 	go.uber.org/zap v1.19.1 // indirect
-	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871 // indirect
+	golang.org/x/crypto v0.0.0-20211202192323-5770296d904e // indirect
 	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9 // indirect
 	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1 // indirect
@@ -121,7 +121,7 @@ require (
 	google.golang.org/grpc v1.42.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	gopkg.in/ini.v1 v1.64.0 // indirect
+	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/validator.v2 v2.0.0-20210331031555-b37d688a7fb0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

@@ -1,4 +1,4 @@
-package transport
+package transport // import "powerssl.dev/common/transport"
 
 import (
 	"github.com/google/wire"

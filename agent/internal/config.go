@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/google/wire"
 
 	"powerssl.dev/common/log"
@@ -18,6 +19,9 @@ type Config struct {
 	Telemetry       telemetry.Config `flag:"telemetry"`
 }
 
-func (cfg *Config) Defaults() {
+func (cfg *Config) PreValidate(validate *validator.Validate) {
 	cfg.Telemetry.Component = component
+	cfg.APIServerClient.PreValidate(validate)
+	cfg.Log.PreValidate(validate)
+	cfg.Telemetry.PreValidate(validate)
 }

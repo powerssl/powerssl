@@ -32,6 +32,8 @@ func NewMeter(cfg MeterConfig, logger log.Logger) (*Meter, error) {
 	switch cfg.Exporter {
 	case "prometheus":
 		meterProvider, server, err = newPrometheusExporter(cfg)
+	case "noop", "":
+		meterProvider = metric.NewNoopMeterProvider()
 	default:
 		err = fmt.Errorf("unknown metrics exporter %v", cfg.Exporter)
 	}

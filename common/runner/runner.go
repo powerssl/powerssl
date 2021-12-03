@@ -8,18 +8,6 @@ import (
 	"powerssl.dev/common/interrupthandler"
 )
 
-func Run(f func(ctx context.Context) ([]func() error, func(), error)) error {
-	ctx := context.Background()
-	runner, ctx := New(ctx)
-	fn, cleanup, err := f(ctx)
-	if err != nil {
-		return err
-	}
-	defer cleanup()
-	x, fn := fn[0], fn[1:]
-	return runner.Run(x, fn...)
-}
-
 type Runner struct {
 	*errgroup.Group
 }
