@@ -9,7 +9,6 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
@@ -17,15 +16,51 @@ import (
 	"powerssl.dev/sdk/apiserver"
 )
 
+func NewCmdCreateACMEAccount() *cobra.Command {
+	var (
+		acmeServerID         string
+		contacts             string
+		termsOfServiceAgreed bool
+	)
+
+	cmd := internal.CmdWithClient(&cobra.Command{
+		Use:     "acmeaccount",
+		Short:   "Create ACME account",
+		Args:    cobra.NoArgs,
+		Example: `  powerctl create acmeaccount --agree-terms-of-service --contacts mailto:john.doe@example.com --acmeserver 42   Create ACME account within ACME server`,
+	}, func(ctx context.Context, client *apiserver.Client, cmd *cobra.Command, args []string) error {
+		apiACMEAccount := &apiv1.ACMEAccount{
+			Contacts:             strings.Split(contacts, ","),
+			TermsOfServiceAgreed: termsOfServiceAgreed,
+		}
+		var err error
+		if apiACMEAccount, err = client.ACMEAccount.Create(ctx, &apiv1.CreateACMEAccountRequest{
+			Parent:      fmt.Sprintf("acmeServers/%s", acmeServerID),
+			AcmeAccount: apiACMEAccount,
+		}); err != nil {
+			return err
+		}
+		return FormatResource(acmeAccount{}.Encode(apiACMEAccount), cmd.OutOrStdout())
+	})
+
+	cmd.Flags().BoolVar(&termsOfServiceAgreed, "agree-terms-of-service", false, "Terms of Service agreed")
+	cmd.Flags().StringVar(&contacts, "contacts", "", "Contact URLs (e.g. mailto:contact@example.com) (seperated by \",\")")
+	cmd.Flags().StringVar(&acmeServerID, "acmeserver", "", "ACME Server")
+
+	must(cmd.MarkFlagRequired("acmeserver"))
+
+	return cmd
+}
+
 type acmeAccount struct{}
 
-func (r acmeAccount) Create(client *apiserver.Client, resource *Resource) (*Resource, error) {
+func (r acmeAccount) Create(ctx context.Context, client *apiserver.Client, resource *Resource) (*Resource, error) {
 	spec := resource.Spec.(*acmeAccountSpec)
 	acmeAccount := &apiv1.ACMEAccount{
 		TermsOfServiceAgreed: spec.TermsOfServiceAgreed,
 		Contacts:             spec.Contacts,
 	}
-	acmeAccount, err := client.ACMEAccount.Create(context.Background(), &apiv1.CreateACMEAccountRequest{
+	acmeAccount, err := client.ACMEAccount.Create(ctx, &apiv1.CreateACMEAccountRequest{
 		Parent:      fmt.Sprintf("acmeServers/%s", spec.ACMEServer),
 		AcmeAccount: acmeAccount,
 	})
@@ -35,8 +70,8 @@ func (r acmeAccount) Create(client *apiserver.Client, resource *Resource) (*Reso
 	return r.Encode(acmeAccount), nil
 }
 
-func (r acmeAccount) Delete(client *apiserver.Client, name string) error {
-	_, err := client.ACMEAccount.Delete(context.Background(), &apiv1.DeleteACMEAccountRequest{
+func (r acmeAccount) Delete(ctx context.Context, client *apiserver.Client, name string) error {
+	_, err := client.ACMEAccount.Delete(ctx, &apiv1.DeleteACMEAccountRequest{
 		Name: fmt.Sprintf("acmeServers/-/acmeAccounts/%s", name),
 	})
 	return err
@@ -64,8 +99,8 @@ func (r acmeAccount) Encode(acmeAccount *apiv1.ACMEAccount) *Resource {
 	}
 }
 
-func (r acmeAccount) Get(client *apiserver.Client, name string) (*Resource, error) {
-	acmeAccount, err := client.ACMEAccount.Get(context.Background(), &apiv1.GetACMEAccountRequest{
+func (r acmeAccount) Get(ctx context.Context, client *apiserver.Client, name string) (*Resource, error) {
+	acmeAccount, err := client.ACMEAccount.Get(ctx, &apiv1.GetACMEAccountRequest{
 		Name: fmt.Sprintf("acmeServers/-/acmeAccounts/%s", name),
 	})
 	if err != nil {
@@ -74,9 +109,9 @@ func (r acmeAccount) Get(client *apiserver.Client, name string) (*Resource, erro
 	return r.Encode(acmeAccount), nil
 }
 
-func (r acmeAccount) List(client *apiserver.Client) ([]*Resource, error) {
+func (r acmeAccount) List(ctx context.Context, client *apiserver.Client) ([]*Resource, error) {
 	return listResource(func(pageToken string) ([]*Resource, string, error) {
-		response, err := client.ACMEAccount.List(context.Background(), &apiv1.ListACMEAccountsRequest{
+		response, err := client.ACMEAccount.List(ctx, &apiv1.ListACMEAccountsRequest{
 			Parent:    "parent",
 			PageToken: pageToken,
 			PageSize:  0,
@@ -113,7 +148,7 @@ func (r acmeAccount) Columns(resource *Resource) ([]string, []string) {
 		}
 }
 
-func (r acmeAccount) Describe(client *apiserver.Client, resource *Resource, output io.Writer) (err error) {
+func (r acmeAccount) Describe(ctx context.Context, client *apiserver.Client, resource *Resource, output io.Writer) (err error) {
 	spec := resource.Spec.(*acmeAccountSpec)
 	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
 	_, _ = fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
@@ -132,11 +167,11 @@ func (r acmeAccount) Describe(client *apiserver.Client, resource *Resource, outp
 			UID: spec.ACMEServer,
 		},
 	}
-	if acmeServer, err = acmeServer.Get(client); err != nil {
+	if acmeServer, err = acmeServer.Get(ctx, client); err != nil {
 		return err
 	}
 	acmeServerDescription := new(bytes.Buffer)
-	if err = acmeServer.Describe(client, acmeServerDescription); err != nil {
+	if err = acmeServer.Describe(ctx, client, acmeServerDescription); err != nil {
 		return err
 	}
 	scanner := bufio.NewScanner(acmeServerDescription)
@@ -154,47 +189,6 @@ type acmeAccountSpec struct {
 	TermsOfServiceAgreed bool     `json:"termsOfServiceAgreed,omitempty" yaml:"termsOfServiceAgreed,omitempty"`
 	Contacts             []string `json:"contacts,omitempty"             yaml:"contacts,omitempty"`
 	AccountURL           string   `json:"accountURL,omitempty"           yaml:"accountURL,omitempty"`
-}
-
-func NewCmdCreateACMEAccount() *cobra.Command {
-	var client *apiserver.Client
-	var (
-		acmeServerID         string
-		contacts             string
-		termsOfServiceAgreed bool
-	)
-
-	cmd := &cobra.Command{
-		Use:     "acmeaccount",
-		Short:   "Create ACME account",
-		Args:    cobra.NoArgs,
-		Example: `  powerctl create acmeaccount --agree-terms-of-service --contacts mailto:john.doe@example.com --acmeserver 42   Create ACME account within ACME server`,
-		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
-			client, err = internal.NewGRPCClient()
-			return err
-		},
-		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) (err error) {
-			apiACMEAccount := &apiv1.ACMEAccount{
-				Contacts:             strings.Split(contacts, ","),
-				TermsOfServiceAgreed: termsOfServiceAgreed,
-			}
-			if apiACMEAccount, err = client.ACMEAccount.Create(context.Background(), &apiv1.CreateACMEAccountRequest{
-				Parent:      fmt.Sprintf("acmeServers/%s", acmeServerID),
-				AcmeAccount: apiACMEAccount,
-			}); err != nil {
-				return err
-			}
-			return FormatResource(acmeAccount{}.Encode(apiACMEAccount), cmd.OutOrStdout())
-		}),
-	}
-
-	cmd.Flags().BoolVar(&termsOfServiceAgreed, "agree-terms-of-service", false, "Terms of Service agreed")
-	cmd.Flags().StringVar(&contacts, "contacts", "", "Contact URLs (e.g. mailto:contact@example.com) (seperated by \",\")")
-	cmd.Flags().StringVar(&acmeServerID, "acmeserver", "", "ACME Server")
-
-	must(cmd.MarkFlagRequired("acmeserver"))
-
-	return cmd
 }
 
 func init() {

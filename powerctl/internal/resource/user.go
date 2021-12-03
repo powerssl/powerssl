@@ -4,11 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"text/tabwriter"
 
-	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
@@ -17,15 +15,46 @@ import (
 	"powerssl.dev/powerctl/internal"
 )
 
+func NewCmdCreateUser() *cobra.Command {
+	var (
+		displayName string
+		userName    string
+	)
+
+	cmd := internal.CmdWithClient(&cobra.Command{
+		Use:     "user",
+		Aliases: []string{"user"},
+		Short:   "Create ACME server",
+		Args:    cobra.NoArgs,
+	}, func(ctx context.Context, client *apiserver.Client, cmd *cobra.Command, args []string) error {
+		apiUser := &apiv1.User{
+			DisplayName: displayName,
+			UserName:    userName,
+		}
+		var err error
+		if apiUser, err = client.User.Create(context.Background(), &apiv1.CreateUserRequest{
+			User: apiUser,
+		}); err != nil {
+			return err
+		}
+		return FormatResource(user{}.Encode(apiUser), cmd.OutOrStdout())
+	})
+
+	cmd.Flags().StringVar(&displayName, "display-name", "", "Display name")
+	cmd.Flags().StringVar(&userName, "user-name", "", "User name")
+
+	return cmd
+}
+
 type user struct{}
 
-func (r user) Create(client *apiserver.Client, resource *Resource) (*Resource, error) {
+func (r user) Create(ctx context.Context, client *apiserver.Client, resource *Resource) (*Resource, error) {
 	spec := resource.Spec.(*userSpec)
 	user := &apiv1.User{
 		DisplayName: spec.DisplayName,
 		UserName:    spec.UserName,
 	}
-	user, err := client.User.Create(context.Background(), &apiv1.CreateUserRequest{
+	user, err := client.User.Create(ctx, &apiv1.CreateUserRequest{
 		User: user,
 	})
 	if err != nil {
@@ -34,8 +63,8 @@ func (r user) Create(client *apiserver.Client, resource *Resource) (*Resource, e
 	return r.Encode(user), nil
 }
 
-func (r user) Delete(client *apiserver.Client, name string) error {
-	_, err := client.User.Delete(context.Background(), &apiv1.DeleteUserRequest{
+func (r user) Delete(ctx context.Context, client *apiserver.Client, name string) error {
+	_, err := client.User.Delete(ctx, &apiv1.DeleteUserRequest{
 		Name: fmt.Sprintf("users/%s", name),
 	})
 	return err
@@ -57,8 +86,8 @@ func (r user) Encode(user *apiv1.User) *Resource {
 	}
 }
 
-func (r user) Get(client *apiserver.Client, name string) (*Resource, error) {
-	user, err := client.User.Get(context.Background(), &apiv1.GetUserRequest{
+func (r user) Get(ctx context.Context, client *apiserver.Client, name string) (*Resource, error) {
+	user, err := client.User.Get(ctx, &apiv1.GetUserRequest{
 		Name: fmt.Sprintf("users/%s", name),
 	})
 	if err != nil {
@@ -67,9 +96,9 @@ func (r user) Get(client *apiserver.Client, name string) (*Resource, error) {
 	return r.Encode(user), nil
 }
 
-func (r user) List(client *apiserver.Client) ([]*Resource, error) {
+func (r user) List(ctx context.Context, client *apiserver.Client) ([]*Resource, error) {
 	return listResource(func(pageToken string) ([]*Resource, string, error) {
-		response, err := client.User.List(context.Background(), &apiv1.ListUsersRequest{
+		response, err := client.User.List(ctx, &apiv1.ListUsersRequest{
 			PageSize:  0,
 			PageToken: pageToken,
 		})
@@ -99,7 +128,7 @@ func (r user) Columns(resource *Resource) ([]string, []string) {
 		}
 }
 
-func (r user) Describe(_ *apiserver.Client, resource *Resource, output io.Writer) (err error) {
+func (r user) Describe(_ context.Context, _ *apiserver.Client, resource *Resource, output io.Writer) (err error) {
 	spec := resource.Spec.(*userSpec)
 	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
 	_, _ = fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
@@ -113,42 +142,6 @@ func (r user) Describe(_ *apiserver.Client, resource *Resource, output io.Writer
 type userSpec struct {
 	DisplayName string `json:"displayName,omitempty" yaml:"displayName,omitempty"`
 	UserName    string `json:"userName,omitempty"    yaml:"userName,omitempty"`
-}
-
-func NewCmdCreateUser() *cobra.Command {
-	var client *apiserver.Client
-	var (
-		displayName string
-		userName    string
-	)
-
-	cmd := &cobra.Command{
-		Use:     "user",
-		Aliases: []string{"user"},
-		Short:   "Create ACME server",
-		Args:    cobra.NoArgs,
-		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
-			client, err = internal.NewGRPCClient()
-			return err
-		},
-		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) (err error) {
-			apiUser := &apiv1.User{
-				DisplayName: displayName,
-				UserName:    userName,
-			}
-			if apiUser, err = client.User.Create(context.Background(), &apiv1.CreateUserRequest{
-				User: apiUser,
-			}); err != nil {
-				return err
-			}
-			return FormatResource(user{}.Encode(apiUser), os.Stdout)
-		}),
-	}
-
-	cmd.Flags().StringVar(&displayName, "display-name", "", "Display name")
-	cmd.Flags().StringVar(&userName, "user-name", "", "User name")
-
-	return cmd
 }
 
 func init() {

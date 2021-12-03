@@ -3,6 +3,7 @@ package resource
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -24,13 +25,13 @@ import (
 )
 
 type Handler interface {
-	Create(client *apiserver.Client, resource *Resource) (*Resource, error)
-	Delete(client *apiserver.Client, name string) error
-	Get(client *apiserver.Client, name string) (*Resource, error)
-	List(client *apiserver.Client) ([]*Resource, error)
+	Create(ctx context.Context, client *apiserver.Client, resource *Resource) (*Resource, error)
+	Delete(ctx context.Context, client *apiserver.Client, name string) error
+	Get(ctx context.Context, client *apiserver.Client, name string) (*Resource, error)
+	List(ctx context.Context, client *apiserver.Client) ([]*Resource, error)
 	Spec() interface{}
 	Columns(resource *Resource) ([]string, []string)
-	Describe(client *apiserver.Client, resource *Resource, output io.Writer) error
+	Describe(ctx context.Context, client *apiserver.Client, resource *Resource, output io.Writer) error
 }
 
 type resourcesStruct struct {
@@ -166,28 +167,28 @@ func ResourcesFromFile(filename string) ([]*Resource, error) {
 	return out, nil
 }
 
-func (r *Resource) Create(client *apiserver.Client) (*Resource, error) {
+func (r *Resource) Create(ctx context.Context, client *apiserver.Client) (*Resource, error) {
 	resourceHandler, err := resources.Get(r.Kind)
 	if err != nil {
 		return nil, err
 	}
-	return resourceHandler.Create(client, r)
+	return resourceHandler.Create(ctx, client, r)
 }
 
-func (r *Resource) Delete(client *apiserver.Client) error {
+func (r *Resource) Delete(ctx context.Context, client *apiserver.Client) error {
 	resourceHandler, err := resources.Get(r.Kind)
 	if err != nil {
 		return err
 	}
-	return resourceHandler.Delete(client, r.Meta.UID)
+	return resourceHandler.Delete(ctx, client, r.Meta.UID)
 }
 
-func (r *Resource) Get(client *apiserver.Client) (*Resource, error) {
+func (r *Resource) Get(ctx context.Context, client *apiserver.Client) (*Resource, error) {
 	resourceHandler, err := resources.Get(r.Kind)
 	if err != nil {
 		return nil, err
 	}
-	return resourceHandler.Get(client, r.Meta.UID)
+	return resourceHandler.Get(ctx, client, r.Meta.UID)
 }
 
 func (r *Resource) ToTable() ([]string, []string, error) {
@@ -205,12 +206,12 @@ func (r *Resource) ToTable() ([]string, []string, error) {
 	return header, columns, nil
 }
 
-func (r *Resource) Describe(client *apiserver.Client, output io.Writer) error {
+func (r *Resource) Describe(ctx context.Context, client *apiserver.Client, output io.Writer) error {
 	resourceHandler, err := resources.Get(r.Kind)
 	if err != nil {
 		return err
 	}
-	return resourceHandler.Describe(client, r, output)
+	return resourceHandler.Describe(ctx, client, r, output)
 }
 
 type resourceLoader struct {

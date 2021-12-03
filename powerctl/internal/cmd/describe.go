@@ -1,7 +1,8 @@
 package cmd
 
 import (
-	"github.com/spangenberg/snakecharmer"
+	"context"
+
 	"github.com/spf13/cobra"
 
 	"powerssl.dev/sdk/apiserver"
@@ -11,27 +12,18 @@ import (
 )
 
 func newCmdDescribe() *cobra.Command {
-	var client *apiserver.Client
-
-	cmd := &cobra.Command{
+	return internal.CmdWithClient(&cobra.Command{
 		Use:   "describe",
 		Short: "Describe resource",
 		Args:  cobra.RangeArgs(1, 2),
-		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
-			client, err = internal.NewGRPCClient()
+	}, func(ctx context.Context, client *apiserver.Client, cmd *cobra.Command, args []string) error {
+		res, err := resource.ResourceFromArgs(args)
+		if err != nil {
 			return err
-		},
-		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) (err error) {
-			var res *resource.Resource
-			if res, err = resource.ResourceFromArgs(args); err != nil {
-				return err
-			}
-			if res, err = res.Get(client); err != nil {
-				return err
-			}
-			return res.Describe(client, cmd.OutOrStdout())
-		}),
-	}
-
-	return cmd
+		}
+		if res, err = res.Get(ctx, client); err != nil {
+			return err
+		}
+		return res.Describe(ctx, client, cmd.OutOrStdout())
+	})
 }

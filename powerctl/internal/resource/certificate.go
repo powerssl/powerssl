@@ -4,11 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"text/tabwriter"
 
-	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
@@ -17,9 +15,48 @@ import (
 	"powerssl.dev/powerctl/internal"
 )
 
+func NewCmdCreateCertificate() *cobra.Command {
+	var (
+		autoRenew       bool
+		dnsNames        string
+		digestAlgorithm string
+		keyAlgorithm    string
+		keySize         int
+	)
+
+	cmd := internal.CmdWithClient(&cobra.Command{
+		Use:   "certificate",
+		Short: "Create Certificate",
+		Args:  cobra.NoArgs,
+	}, func(ctx context.Context, client *apiserver.Client, cmd *cobra.Command, args []string) error {
+		apiCertificate := &apiv1.Certificate{
+			Dnsnames:        strings.Split(dnsNames, ","),
+			KeyAlgorithm:    apiv1.KeyAlgorithm(apiv1.KeyAlgorithm_value[keyAlgorithm]),
+			KeySize:         int32(keySize),
+			DigestAlgorithm: apiv1.DigestAlgorithm(apiv1.DigestAlgorithm_value[digestAlgorithm]),
+			AutoRenew:       autoRenew,
+		}
+		var err error
+		if apiCertificate, err = client.Certificate.Create(context.Background(), &apiv1.CreateCertificateRequest{
+			Certificate: apiCertificate,
+		}); err != nil {
+			return err
+		}
+		return FormatResource(certificate{}.Encode(apiCertificate), cmd.OutOrStdout())
+	})
+
+	cmd.Flags().BoolVar(&autoRenew, "auto-renew", false, "Auto renew ...")
+	cmd.Flags().IntVar(&keySize, "key-size", 0, "Key size ...")
+	cmd.Flags().StringVar(&digestAlgorithm, "digest-algorithm", "", "Digest algorithm ...")
+	cmd.Flags().StringVar(&dnsNames, "dns-names", "", "DNS name for the certificate (seperated by \",\")")
+	cmd.Flags().StringVar(&keyAlgorithm, "key-algorithm", "", "Key algorithm ...")
+
+	return cmd
+}
+
 type certificate struct{}
 
-func (r certificate) Create(client *apiserver.Client, resource *Resource) (*Resource, error) {
+func (r certificate) Create(ctx context.Context, client *apiserver.Client, resource *Resource) (*Resource, error) {
 	spec := resource.Spec.(*certificateSpec)
 	certificate := &apiv1.Certificate{
 		Dnsnames:        spec.Dnsnames,
@@ -28,7 +65,7 @@ func (r certificate) Create(client *apiserver.Client, resource *Resource) (*Reso
 		DigestAlgorithm: apiv1.DigestAlgorithm(apiv1.DigestAlgorithm_value[spec.DigestAlgorithm]),
 		AutoRenew:       spec.AutoRenew,
 	}
-	certificate, err := client.Certificate.Create(context.Background(), &apiv1.CreateCertificateRequest{
+	certificate, err := client.Certificate.Create(ctx, &apiv1.CreateCertificateRequest{
 		Certificate: certificate,
 	})
 	if err != nil {
@@ -37,8 +74,8 @@ func (r certificate) Create(client *apiserver.Client, resource *Resource) (*Reso
 	return r.Encode(certificate), nil
 }
 
-func (r certificate) Delete(client *apiserver.Client, name string) error {
-	_, err := client.Certificate.Delete(context.Background(), &apiv1.DeleteCertificateRequest{
+func (r certificate) Delete(ctx context.Context, client *apiserver.Client, name string) error {
+	_, err := client.Certificate.Delete(ctx, &apiv1.DeleteCertificateRequest{
 		Name: fmt.Sprintf("certificates/%s", name),
 	})
 	return err
@@ -63,8 +100,8 @@ func (r certificate) Encode(certificate *apiv1.Certificate) *Resource {
 	}
 }
 
-func (r certificate) Get(client *apiserver.Client, name string) (*Resource, error) {
-	certificate, err := client.Certificate.Get(context.Background(), &apiv1.GetCertificateRequest{
+func (r certificate) Get(ctx context.Context, client *apiserver.Client, name string) (*Resource, error) {
+	certificate, err := client.Certificate.Get(ctx, &apiv1.GetCertificateRequest{
 		Name: fmt.Sprintf("certificates/%s", name),
 	})
 	if err != nil {
@@ -73,9 +110,9 @@ func (r certificate) Get(client *apiserver.Client, name string) (*Resource, erro
 	return r.Encode(certificate), nil
 }
 
-func (r certificate) List(client *apiserver.Client) ([]*Resource, error) {
+func (r certificate) List(ctx context.Context, client *apiserver.Client) ([]*Resource, error) {
 	return listResource(func(pageToken string) ([]*Resource, string, error) {
-		response, err := client.Certificate.List(context.Background(), &apiv1.ListCertificatesRequest{
+		response, err := client.Certificate.List(ctx, &apiv1.ListCertificatesRequest{
 			PageToken: pageToken,
 			PageSize:  0,
 		})
@@ -111,7 +148,7 @@ func (r certificate) Columns(resource *Resource) ([]string, []string) {
 		}
 }
 
-func (r certificate) Describe(_ *apiserver.Client, resource *Resource, output io.Writer) (err error) {
+func (r certificate) Describe(_ context.Context, _ *apiserver.Client, resource *Resource, output io.Writer) (err error) {
 	spec := resource.Spec.(*certificateSpec)
 	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
 	_, _ = fmt.Fprintln(w, fmt.Sprintf("UID:\t%s", resource.Meta.UID))
@@ -131,50 +168,6 @@ type certificateSpec struct {
 	KeySize         int32    `json:"keySize,omitempty"         yaml:"keySize,omitempty"`
 	DigestAlgorithm string   `json:"digestAlgorithm,omitempty" yaml:"digestAlgorithm,omitempty"`
 	AutoRenew       bool     `json:"autoRenew,omitempty"       yaml:"autoRenew,omitempty"`
-}
-
-func NewCmdCreateCertificate() *cobra.Command {
-	var client *apiserver.Client
-	var (
-		autoRenew       bool
-		dnsNames        string
-		digestAlgorithm string
-		keyAlgorithm    string
-		keySize         int
-	)
-
-	cmd := &cobra.Command{
-		Use:   "certificate",
-		Short: "Create Certificate",
-		Args:  cobra.NoArgs,
-		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
-			client, err = internal.NewGRPCClient()
-			return err
-		},
-		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) (err error) {
-			apiCertificate := &apiv1.Certificate{
-				Dnsnames:        strings.Split(dnsNames, ","),
-				KeyAlgorithm:    apiv1.KeyAlgorithm(apiv1.KeyAlgorithm_value[keyAlgorithm]),
-				KeySize:         int32(keySize),
-				DigestAlgorithm: apiv1.DigestAlgorithm(apiv1.DigestAlgorithm_value[digestAlgorithm]),
-				AutoRenew:       autoRenew,
-			}
-			if apiCertificate, err = client.Certificate.Create(context.Background(), &apiv1.CreateCertificateRequest{
-				Certificate: apiCertificate,
-			}); err != nil {
-				return err
-			}
-			return FormatResource(certificate{}.Encode(apiCertificate), os.Stdout)
-		}),
-	}
-
-	cmd.Flags().BoolVar(&autoRenew, "auto-renew", false, "Auto renew ...")
-	cmd.Flags().IntVar(&keySize, "key-size", 0, "Key size ...")
-	cmd.Flags().StringVar(&digestAlgorithm, "digest-algorithm", "", "Digest algorithm ...")
-	cmd.Flags().StringVar(&dnsNames, "dns-names", "", "DNS name for the certificate (seperated by \",\")")
-	cmd.Flags().StringVar(&keyAlgorithm, "key-algorithm", "", "Key algorithm ...")
-
-	return cmd
 }
 
 func init() {

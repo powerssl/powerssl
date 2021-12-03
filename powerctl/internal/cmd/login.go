@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -9,26 +8,19 @@ import (
 	"github.com/spangenberg/snakecharmer"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"powerssl.dev/powerctl/internal"
 )
 
 func newCmdLogin() *cobra.Command {
-	cmd := &cobra.Command{
+	return &cobra.Command{
 		Use:   "login",
 		Short: "Login to PowerSSL",
-		Args:  cobra.MaximumNArgs(1),
+		Args:  cobra.NoArgs,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			return viper.Unmarshal(new(internal.Config))
+		},
 		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) error {
-			if len(args) > 0 && args[0] != "" {
-				viper.Set("addr", args[0])
-			}
-
-			if viper.GetString("addr") == "" {
-				return errors.New("address must be set")
-			}
-
-			if viper.GetString("auth-token") == "" {
-				return errors.New("auth token must be set")
-			}
-
 			location := viper.ConfigFileUsed()
 			if err := viper.WriteConfig(); err != nil {
 				if _, ok := err.(viper.ConfigFileNotFoundError); ok {
@@ -44,12 +36,8 @@ func newCmdLogin() *cobra.Command {
 					return err
 				}
 			}
-
 			cmd.Printf("Wrote config to %s\n", location)
-
 			return nil
 		}),
 	}
-
-	return cmd
 }

@@ -19,7 +19,7 @@ func newCmdCompletion() *cobra.Command {
 }
 
 func newCmdBashCompletion() *cobra.Command {
-	cmd := &cobra.Command{
+	return &cobra.Command{
 		Use:   "bash",
 		Short: "Generates bash completion scripts",
 		Long: `To load completion run
@@ -36,12 +36,10 @@ To configure your bash shell to load completions for each session add to your ba
 			return NewCmdRoot().GenBashCompletion(cmd.OutOrStdout())
 		}),
 	}
-
-	return cmd
 }
 
 func newCmdZSHCompletion() *cobra.Command {
-	cmd := &cobra.Command{
+	return &cobra.Command{
 		Use:   "zsh",
 		Short: "Generates zsh completion scripts",
 		Args:  cobra.NoArgs,
@@ -49,6 +47,4 @@ func newCmdZSHCompletion() *cobra.Command {
 			return NewCmdRoot().GenZshCompletion(cmd.OutOrStdout())
 		}),
 	}
-
-	return cmd
 }

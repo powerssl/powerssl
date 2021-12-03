@@ -1,7 +1,8 @@
 package cmd
 
 import (
-	"github.com/spangenberg/snakecharmer"
+	"context"
+
 	"github.com/spf13/cobra"
 
 	"powerssl.dev/sdk/apiserver"
@@ -11,10 +12,9 @@ import (
 )
 
 func newCmdCreate() *cobra.Command {
-	var client *apiserver.Client
 	var filename string
 
-	cmd := &cobra.Command{
+	cmd := internal.CmdWithClient(&cobra.Command{
 		Use:   "create",
 		Short: "Create resource",
 		Args:  cobra.NoArgs,
@@ -23,28 +23,23 @@ func newCmdCreate() *cobra.Command {
 
   # Create a certificate based on the JSON passed into stdin.
   cat certificate.json | powerctl create -f -`,
-		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
-			client, err = internal.NewGRPCClient()
+	}, func(ctx context.Context, client *apiserver.Client, cmd *cobra.Command, args []string) error {
+		resources, err := resource.ResourcesFromFile(filename)
+		if err != nil {
 			return err
-		},
-		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) (err error) {
-			var resources []*resource.Resource
-			if resources, err = resource.ResourcesFromFile(filename); err != nil {
+		}
+		for i, res := range resources {
+			if resources[i], err = res.Create(ctx, client); err != nil {
 				return err
 			}
-			for i, res := range resources {
-				if resources[i], err = res.Create(client); err != nil {
-					return err
-				}
-			}
-			if len(resources) > 1 {
-				return resource.FormatResource(resources, cmd.OutOrStdout())
-			} else if len(resources) == 1 {
-				return resource.FormatResource(resources[0], cmd.OutOrStdout())
-			}
-			return nil
-		}),
-	}
+		}
+		if len(resources) > 1 {
+			return resource.FormatResource(resources, cmd.OutOrStdout())
+		} else if len(resources) == 1 {
+			return resource.FormatResource(resources[0], cmd.OutOrStdout())
+		}
+		return nil
+	})
 
 	cmd.Flags().StringVarP(&filename, "filename", "f", "", "Filename to file to use to create the resources")
 

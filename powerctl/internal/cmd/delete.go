@@ -1,7 +1,8 @@
 package cmd
 
 import (
-	"github.com/spangenberg/snakecharmer"
+	"context"
+
 	"github.com/spf13/cobra"
 
 	"powerssl.dev/sdk/apiserver"
@@ -11,30 +12,20 @@ import (
 )
 
 func newCmdDelete() *cobra.Command {
-	var client *apiserver.Client
-
-	cmd := &cobra.Command{
+	return internal.CmdWithClient(&cobra.Command{
 		Use:   "delete",
 		Short: "Delete resource",
 		Args:  cobra.MinimumNArgs(1),
-		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
-			client, err = internal.NewGRPCClient()
+	}, func(ctx context.Context, client *apiserver.Client, cmd *cobra.Command, args []string) error {
+		resources, err := resource.ResourcesFromArgs(args)
+		if err != nil {
 			return err
-
-		},
-		Run: snakecharmer.HandleError(func(cmd *cobra.Command, args []string) (err error) {
-			var resources []*resource.Resource
-			if resources, err = resource.ResourcesFromArgs(args); err != nil {
+		}
+		for _, res := range resources {
+			if err = res.Delete(ctx, client); err != nil {
 				return err
 			}
-			for _, res := range resources {
-				if err = res.Delete(client); err != nil {
-					return err
-				}
-			}
-			return nil
-		}),
-	}
-
-	return cmd
+		}
+		return nil
+	})
 }
