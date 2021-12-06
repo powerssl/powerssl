@@ -3,9 +3,10 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"powerssl.dev/apiserver/internal/db"
 	"strconv"
 	"strings"
+
+	"powerssl.dev/apiserver/internal/db"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -31,7 +32,7 @@ func newCmdMigrate() *cobra.Command {
 			if sourceInstance, err = iofs.New(db.MigrationsFS, "migrations"); err != nil {
 				return err
 			}
-			m, err = migrate.NewWithSourceInstance("go-bindata", sourceInstance, databaseURL)
+			m, err = migrate.NewWithSourceInstance("go-iofs", sourceInstance, databaseURL)
 			return err
 		},
 		PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
