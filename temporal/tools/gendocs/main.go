@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/spangenberg/snakecharmer"
+
 	"powerssl.dev/temporal/internal/cmd"
 )
 

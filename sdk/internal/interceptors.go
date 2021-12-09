@@ -2,11 +2,11 @@ package internal
 
 import (
 	"context"
-	"powerssl.dev/common/telemetry"
 
 	"google.golang.org/grpc"
 
 	"powerssl.dev/common/log"
+	"powerssl.dev/common/telemetry"
 )
 
 func AuthInterceptor() grpc.UnaryClientInterceptor {

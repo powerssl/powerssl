@@ -4,10 +4,11 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	temporalclient "go.temporal.io/sdk/client"
-	temporalworkflow "go.temporal.io/sdk/workflow"
 	"io/ioutil"
 	"os"
+
+	temporalclient "go.temporal.io/sdk/client"
+	temporalworkflow "go.temporal.io/sdk/workflow"
 
 	"powerssl.dev/common/log"
 )

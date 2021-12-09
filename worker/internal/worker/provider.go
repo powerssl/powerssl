@@ -2,7 +2,6 @@ package worker
 
 import (
 	"context"
-	"powerssl.dev/sdk"
 
 	"github.com/google/wire"
 	temporalactivity "go.temporal.io/sdk/activity"
@@ -13,6 +12,7 @@ import (
 	backendapiserver "powerssl.dev/backend/context"
 	"powerssl.dev/backend/temporal"
 	"powerssl.dev/backend/vault"
+	"powerssl.dev/sdk"
 	"powerssl.dev/sdk/apiserver"
 	sharedworkflow "powerssl.dev/workflow"
 	sharedactivity "powerssl.dev/workflow/activity"

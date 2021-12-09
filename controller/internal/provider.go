@@ -2,6 +2,7 @@ package internal
 
 import (
 	"github.com/google/wire"
+
 	"powerssl.dev/backend/grpcserver"
 	"powerssl.dev/backend/temporal/client"
 	"powerssl.dev/backend/vault"

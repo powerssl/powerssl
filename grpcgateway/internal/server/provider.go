@@ -2,12 +2,12 @@ package server
 
 import (
 	"context"
-	"powerssl.dev/common/transport"
 
 	"github.com/google/wire"
 	"google.golang.org/grpc"
 
 	"powerssl.dev/common/log"
+	"powerssl.dev/common/transport"
 )
 
 var Provider = wire.NewSet(
