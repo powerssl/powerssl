@@ -44,6 +44,9 @@ func (s Service) Create(ctx context.Context, request *apiv1.CreateACMEServerRequ
 
 func (s Service) Delete(ctx context.Context, request *apiv1.DeleteACMEServerRequest) (*emptypb.Empty, error) {
 	queries, rollback, err := s.queries.NewTx(ctx)
+	if err != nil {
+		return nil, err
+	}
 	defer rollback(&err)
 	id, err := model.ParseAcmeServerID(request.GetName())
 	if err != nil {
@@ -95,6 +98,9 @@ func (s Service) List(ctx context.Context, request *apiv1.ListACMEServersRequest
 
 func (s Service) Update(ctx context.Context, request *apiv1.UpdateACMEServerRequest) (*apiv1.ACMEServer, error) {
 	queries, rollback, err := s.queries.NewTx(ctx)
+	if err != nil {
+		return nil, err
+	}
 	defer rollback(&err)
 	id, err := model.ParseAcmeServerID(request.GetName())
 	if err != nil {

@@ -74,6 +74,9 @@ func (s Service) Create(ctx context.Context, request *apiv1.CreateACMEAccountReq
 
 func (s Service) Delete(ctx context.Context, request *apiv1.DeleteACMEAccountRequest) (*emptypb.Empty, error) {
 	queries, rollback, err := s.queries.NewTx(ctx)
+	if err != nil {
+		return nil, err
+	}
 	defer rollback(&err)
 	id, err := model.ParseAcmeAccountID(request.GetName())
 	if err != nil {
@@ -121,6 +124,9 @@ func (s Service) List(ctx context.Context, request *apiv1.ListACMEAccountsReques
 
 func (s Service) Update(ctx context.Context, request *apiv1.UpdateACMEAccountRequest) (*apiv1.ACMEAccount, error) {
 	queries, rollback, err := s.queries.NewTx(ctx)
+	if err != nil {
+		return nil, err
+	}
 	defer rollback(&err)
 	id, err := model.ParseAcmeAccountID(request.GetName())
 	if err != nil {
