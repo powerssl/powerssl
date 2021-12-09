@@ -2,12 +2,11 @@ package acmeserver
 
 import (
 	"context"
-	"strings"
 
-	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
+	"powerssl.dev/apiserver/internal/model"
 	"powerssl.dev/common/log"
 	"powerssl.dev/common/telemetry"
 
@@ -32,18 +31,21 @@ func New(logger log.Logger, queries *repository.Queries, telemeter *telemetry.Te
 }
 
 func (s Service) Create(ctx context.Context, request *apiv1.CreateACMEServerRequest) (*apiv1.ACMEServer, error) {
-	acmeServer, err := s.queries.CreateACMEServerFromAPI(ctx, request.GetAcmeServer())
+	acmeServer, err := s.queries.CreateACMEServer(ctx, repository.CreateACMEServerParams{
+		DisplayName:     request.GetAcmeServer().GetDisplayName(),
+		DirectoryUrl:    request.GetAcmeServer().GetDirectoryUrl(),
+		IntegrationName: request.GetAcmeServer().GetIntegrationName(),
+	})
 	if err != nil {
 		return nil, err
 	}
-	return acmeServer.ToAPI(), nil
+	return model.NewAcmeServer(acmeServer).Encode(), nil
 }
 
 func (s Service) Delete(ctx context.Context, request *apiv1.DeleteACMEServerRequest) (*emptypb.Empty, error) {
 	queries, rollback, err := s.queries.NewTx(ctx)
 	defer rollback(&err)
-	n := strings.Split(request.GetName(), "/")
-	id, err := uuid.Parse(n[1])
+	id, err := model.ParseAcmeServerID(request.GetName())
 	if err != nil {
 		return nil, err
 	}
@@ -61,8 +63,7 @@ func (s Service) Delete(ctx context.Context, request *apiv1.DeleteACMEServerRequ
 }
 
 func (s Service) Get(ctx context.Context, request *apiv1.GetACMEServerRequest) (*apiv1.ACMEServer, error) {
-	n := strings.Split(request.GetName(), "/")
-	id, err := uuid.Parse(n[1])
+	id, err := model.ParseAcmeServerID(request.GetName())
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +71,7 @@ func (s Service) Get(ctx context.Context, request *apiv1.GetACMEServerRequest) (
 	if err != nil {
 		return nil, err
 	}
-	return acmeServer.ToAPI(), nil
+	return model.NewAcmeServer(acmeServer).Encode(), nil
 }
 
 func (s Service) List(ctx context.Context, request *apiv1.ListACMEServersRequest) (*apiv1.ListACMEServersResponse, error) {
@@ -87,7 +88,7 @@ func (s Service) List(ctx context.Context, request *apiv1.ListACMEServersRequest
 		return nil, err
 	}
 	return &apiv1.ListACMEServersResponse{
-		AcmeServers:   repository.AcmeServers(acmeServers).ToAPI(),
+		AcmeServers:   model.NewAcmeServers(acmeServers).Encode(),
 		NextPageToken: "",
 	}, nil
 }
@@ -95,18 +96,20 @@ func (s Service) List(ctx context.Context, request *apiv1.ListACMEServersRequest
 func (s Service) Update(ctx context.Context, request *apiv1.UpdateACMEServerRequest) (*apiv1.ACMEServer, error) {
 	queries, rollback, err := s.queries.NewTx(ctx)
 	defer rollback(&err)
-	n := strings.Split(request.GetName(), "/")
-	id, err := uuid.Parse(n[1])
+	id, err := model.ParseAcmeServerID(request.GetName())
 	if err != nil {
 		return nil, err
 	}
-	request.GetUpdateMask()
-	acmeServer, err := queries.UpdateACMEServerWithMask(ctx, id, request.GetUpdateMask(), request.GetAcmeServer())
+	updateACMEServerParams, err := model.AcmeServerUpdateParams(ctx, id, request.GetUpdateMask(), request.GetAcmeServer())
+	if err != nil {
+		return nil, err
+	}
+	acmeServer, err := queries.UpdateACMEServer(ctx, updateACMEServerParams)
 	if err != nil {
 		return nil, err
 	}
 	if err = queries.Tx().Commit(ctx); err != nil {
 		return nil, err
 	}
-	return acmeServer.ToAPI(), nil
+	return model.NewAcmeServer(acmeServer).Encode(), nil
 }

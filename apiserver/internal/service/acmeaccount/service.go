@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/google/uuid"
 	"go.temporal.io/sdk/client"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	apiv1 "powerssl.dev/api/apiserver/v1"
+	"powerssl.dev/apiserver/internal/model"
 	"powerssl.dev/backend/temporal"
 	"powerssl.dev/common/log"
 	"powerssl.dev/common/telemetry"
@@ -38,28 +38,44 @@ func New(logger log.Logger, queries *repository.Queries, telemeter *telemetry.Te
 }
 
 func (s Service) Create(ctx context.Context, request *apiv1.CreateACMEAccountRequest) (*apiv1.ACMEAccount, error) {
-	acmeAccount, err := s.queries.CreateACMEAccountFromAPI(ctx, request.GetParent(), request.GetAcmeAccount())
+	acmeServerID, err := model.ParseAcmeServerID(request.GetParent())
 	if err != nil {
 		return nil, err
 	}
-	acmeServer, err := s.queries.GetACMEServer(ctx, acmeAccount.AcmeServerID)
-	_, err = s.temporal.ExecuteWorkflow(ctx, client.StartWorkflowOptions{
-		ID:        fmt.Sprintf("%s/create-account", acmeAccount.Name()),
+	acmeAccount, err := s.queries.CreateACMEAccount(ctx, repository.CreateACMEAccountParams{
+		AcmeServerID:         acmeServerID,
+		DisplayName:          request.GetAcmeAccount().GetDisplayName(),
+		Title:                request.GetAcmeAccount().GetTitle(),
+		Description:          request.GetAcmeAccount().GetDescription(),
+		TermsOfServiceAgreed: request.GetAcmeAccount().GetTermsOfServiceAgreed(),
+		Contacts:             strings.Join(request.GetAcmeAccount().GetContacts(), ","),
+	})
+	if err != nil {
+		return nil, err
+	}
+	acmeAccountModel := model.NewAcmeAccount(acmeAccount)
+	acmeServer, err := s.queries.GetACMEServer(ctx, acmeAccountModel.AcmeServerID)
+	if err != nil {
+		return nil, err
+	}
+	if _, err = s.temporal.ExecuteWorkflow(ctx, client.StartWorkflowOptions{
+		ID:        fmt.Sprintf("%s/create-account", acmeAccountModel.Name()),
 		TaskQueue: temporal.WorkerTaskQueue,
 	}, workflow.CreateAccount, workflow.CreateAccountParams{
-		Account:              acmeAccount.Name(),
+		Account:              acmeAccountModel.Name(),
 		DirectoryURL:         acmeServer.DirectoryUrl,
-		TermsOfServiceAgreed: acmeAccount.TermsOfServiceAgreed,
-		Contacts:             strings.Split(acmeAccount.Contacts, ","),
-	})
-	return acmeAccount.ToAPI(), nil
+		TermsOfServiceAgreed: acmeAccountModel.TermsOfServiceAgreed,
+		Contacts:             strings.Split(acmeAccountModel.Contacts, ","),
+	}); err != nil {
+		return nil, err
+	}
+	return acmeAccountModel.Encode(), nil
 }
 
 func (s Service) Delete(ctx context.Context, request *apiv1.DeleteACMEAccountRequest) (*emptypb.Empty, error) {
 	queries, rollback, err := s.queries.NewTx(ctx)
 	defer rollback(&err)
-	n := strings.Split(request.GetName(), "/")
-	id, err := uuid.Parse(n[3])
+	id, err := model.ParseAcmeAccountID(request.GetName())
 	if err != nil {
 		return nil, err
 	}
@@ -77,8 +93,7 @@ func (s Service) Delete(ctx context.Context, request *apiv1.DeleteACMEAccountReq
 }
 
 func (s Service) Get(ctx context.Context, request *apiv1.GetACMEAccountRequest) (*apiv1.ACMEAccount, error) {
-	n := strings.Split(request.GetName(), "/")
-	id, err := uuid.Parse(n[3])
+	id, err := model.ParseAcmeAccountID(request.GetName())
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +101,7 @@ func (s Service) Get(ctx context.Context, request *apiv1.GetACMEAccountRequest) 
 	if err != nil {
 		return nil, err
 	}
-	return acmeAccount.ToAPI(), nil
+	return model.NewAcmeAccount(acmeAccount).Encode(), nil
 }
 
 func (s Service) List(ctx context.Context, request *apiv1.ListACMEAccountsRequest) (*apiv1.ListACMEAccountsResponse, error) {
@@ -99,24 +114,28 @@ func (s Service) List(ctx context.Context, request *apiv1.ListACMEAccountsReques
 		return nil, err
 	}
 	return &apiv1.ListACMEAccountsResponse{
-		AcmeAccounts: repository.AcmeAccounts(acmeAccounts).ToAPI(),
+		AcmeAccounts:  model.NewAcmeAccounts(acmeAccounts).Encode(),
+		NextPageToken: "",
 	}, nil
 }
 
 func (s Service) Update(ctx context.Context, request *apiv1.UpdateACMEAccountRequest) (*apiv1.ACMEAccount, error) {
 	queries, rollback, err := s.queries.NewTx(ctx)
 	defer rollback(&err)
-	n := strings.Split(request.GetName(), "/")
-	id, err := uuid.Parse(n[1])
+	id, err := model.ParseAcmeAccountID(request.GetName())
 	if err != nil {
 		return nil, err
 	}
-	acmeAccount, err := queries.UpdateACMEAccountWithMask(ctx, id, nil, request.GetAcmeAccount())
+	updateACMEAccountParams, err := model.AcmeAccountUpdateParams(ctx, id, request.GetUpdateMask(), request.GetAcmeAccount())
+	if err != nil {
+		return nil, err
+	}
+	acmeAccount, err := queries.UpdateACMEAccount(ctx, updateACMEAccountParams)
 	if err != nil {
 		return nil, err
 	}
 	if err = queries.Tx().Commit(ctx); err != nil {
 		return nil, err
 	}
-	return acmeAccount.ToAPI(), nil
+	return model.NewAcmeAccount(acmeAccount).Encode(), nil
 }
