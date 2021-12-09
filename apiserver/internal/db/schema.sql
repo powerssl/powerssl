@@ -1,27 +1,29 @@
-create extension if not exists "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-create table acme_accounts (
-                               id uuid not null default uuid_generate_v4(),
-                               acme_server_id uuid not null references acme_servers,
-                               display_name varchar not null,
-                               title varchar not null,
-                               description varchar not null,
-                               terms_of_service_agreed boolean not null,
-                               contacts varchar not null,
-                               account_url varchar not null,
-                               created_at timestamp not null default now(),
-                               updated_at timestamp not null default now(),
-                               deleted_at timestamp null,
-                               primary key (id)
+CREATE TABLE acme_accounts
+(
+    id                      UUID      NOT NULL DEFAULT uuid_generate_v4(),
+    acme_server_id          UUID      NOT NULL REFERENCES acme_servers,
+    display_name            VARCHAR   NOT NULL,
+    title                   VARCHAR   NOT NULL,
+    description             VARCHAR   NOT NULL,
+    terms_of_service_agreed BOOLEAN   NOT NULL,
+    contacts                VARCHAR   NOT NULL,
+    account_url             VARCHAR   NOT NULL,
+    created_at              TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at              TIMESTAMP NOT NULL DEFAULT NOW(),
+    deleted_at              TIMESTAMP NULL,
+    PRIMARY KEY (id)
 );
 
-create table acme_servers (
-                              id uuid not null default uuid_generate_v4(),
-                              display_name varchar not null,
-                              directory_url varchar not null,
-                              integration_name varchar not null,
-                              created_at timestamp not null default now(),
-                              updated_at timestamp not null default now(),
-                              deleted_at timestamp null,
-                              primary key (id)
+CREATE TABLE acme_servers
+(
+    id               UUID      NOT NULL DEFAULT uuid_generate_v4(),
+    display_name     VARCHAR   NOT NULL,
+    directory_url    VARCHAR   NOT NULL,
+    integration_name VARCHAR   NOT NULL,
+    created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at       TIMESTAMP NOT NULL DEFAULT NOW(),
+    deleted_at       TIMESTAMP NULL,
+    PRIMARY KEY (id)
 );

@@ -1,3 +1,3 @@
-drop extension if exists "uuid-ossp";
+DROP EXTENSION IF EXISTS "uuid-ossp";
 
-drop table acme_servers;
+DROP TABLE acme_servers;

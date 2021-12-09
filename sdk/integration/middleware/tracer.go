@@ -19,4 +19,3 @@ func TracingMiddleware() Middleware {
 func (h *tracingMiddleware) Handle(activity *apiv1.Activity) {
 	h.next.Handle(activity)
 }
-

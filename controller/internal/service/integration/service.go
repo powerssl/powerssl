@@ -22,7 +22,7 @@ type Service struct {
 
 func New(ctx context.Context, logger log.Logger) *Service {
 	return &Service{
-		ctx: ctx,
+		ctx:    ctx,
 		logger: logger,
 	}
 }

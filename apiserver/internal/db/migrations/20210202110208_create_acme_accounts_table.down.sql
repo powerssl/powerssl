@@ -1,1 +1,1 @@
-drop table acme_accounts;
+DROP TABLE acme_accounts;

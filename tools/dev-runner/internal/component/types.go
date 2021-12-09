@@ -39,7 +39,6 @@ func (c Component) String() string {
 	return c.Name
 }
 
-
 func args(component, cmd string) []string {
 	return []string{"--config", component + "/config.yaml", cmd}
 }

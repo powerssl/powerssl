@@ -21,23 +21,23 @@ SELECT *
 FROM acme_servers
 WHERE deleted_at IS NULL
 ORDER BY CASE
-             WHEN @sql_order::text = 'created_at' THEN created_at
-             WHEN @sql_order::text = 'updated_at' THEN updated_at
+             WHEN @sql_order::TEXT = 'created_at' THEN created_at
+             WHEN @sql_order::TEXT = 'updated_at' THEN updated_at
              END
 LIMIT @sql_limit OFFSET @sql_offset;
 
 -- name: UpdateACMEServer :one
 UPDATE acme_servers
 SET display_name     = CASE
-                           WHEN @set_display_name::bool THEN @display_name::text
+                           WHEN @set_display_name::BOOL THEN @display_name::TEXT
                            ELSE display_name
     END,
     directory_url    = CASE
-                           WHEN @set_directory_url::bool THEN @directory_url::text
+                           WHEN @set_directory_url::BOOL THEN @directory_url::TEXT
                            ELSE directory_url
         END,
     integration_name = CASE
-                           WHEN @set_integration_name::bool THEN @integration_name::text
+                           WHEN @set_integration_name::BOOL THEN @integration_name::TEXT
                            ELSE integration_name
         END,
     updated_at       = NOW()

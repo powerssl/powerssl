@@ -1,12 +1,13 @@
-create extension if not exists "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-create table acme_servers (
-    id uuid not null default uuid_generate_v4(),
-    display_name varchar not null,
-    directory_url varchar not null,
-    integration_name varchar not null,
-    created_at timestamp not null default now(),
-    updated_at timestamp not null default now(),
-    deleted_at timestamp null,
-    primary key (id)
+CREATE TABLE acme_servers
+(
+    id               UUID      NOT NULL DEFAULT uuid_generate_v4(),
+    display_name     VARCHAR   NOT NULL,
+    directory_url    VARCHAR   NOT NULL,
+    integration_name VARCHAR   NOT NULL,
+    created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at       TIMESTAMP NOT NULL DEFAULT NOW(),
+    deleted_at       TIMESTAMP NULL,
+    PRIMARY KEY (id)
 );
