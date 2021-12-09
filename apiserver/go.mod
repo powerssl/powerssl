@@ -10,8 +10,6 @@ replace powerssl.dev/common => ../common
 
 replace powerssl.dev/common/telemetry => ../common/telemetry
 
-replace powerssl.dev/sdk => ../sdk
-
 replace powerssl.dev/workflow => ../workflow
 
 require (
@@ -22,11 +20,10 @@ require (
 	github.com/jackc/pgconn v1.10.1
 	github.com/jackc/pgx/v4 v4.14.0
 	github.com/mennanov/fieldmask-utils v0.5.0
-	github.com/spangenberg/snakecharmer v0.0.0-20211116223337-14b423b5bb64
+	github.com/spangenberg/snakecharmer v0.0.0-20211203173439-8d5f70fc1273
 	github.com/spf13/cobra v1.2.1
 	go.temporal.io/sdk v1.11.1
 	google.golang.org/genproto v0.0.0-20211118181313-81c1377c94b1
-	google.golang.org/grpc v1.42.0
 	google.golang.org/protobuf v1.27.1
 	powerssl.dev/api v0.0.0-00010101000000-000000000000
 	powerssl.dev/backend v0.0.0-00010101000000-000000000000
@@ -140,11 +137,12 @@ require (
 	golang.org/x/mod v0.5.1 // indirect
 	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
+	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
 	golang.org/x/tools v0.1.7 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	google.golang.org/grpc v1.42.0 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

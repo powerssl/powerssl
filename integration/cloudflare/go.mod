@@ -10,12 +10,14 @@ replace powerssl.dev/common/telemetry => ../../common/telemetry
 
 replace powerssl.dev/sdk => ../../sdk
 
+replace powerssl.dev/sdk/integration => ../../sdk/integration
+
 require (
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/spangenberg/snakecharmer v0.0.0-20211203173439-8d5f70fc1273
 	github.com/spf13/cobra v1.2.1
 	powerssl.dev/common v0.0.0-00010101000000-000000000000
-	powerssl.dev/sdk v0.0.0-00010101000000-000000000000
+	powerssl.dev/sdk/integration v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -59,7 +61,7 @@ require (
 	golang.org/x/crypto v0.0.0-20211202192323-5770296d904e // indirect
 	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
+	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/genproto v0.0.0-20211118181313-81c1377c94b1 // indirect
 	google.golang.org/grpc v1.42.0 // indirect
@@ -71,4 +73,5 @@ require (
 	logur.dev/logur v0.17.0 // indirect
 	powerssl.dev/api v0.0.0-00010101000000-000000000000 // indirect
 	powerssl.dev/common/telemetry v0.0.0-00010101000000-000000000000 // indirect
+	powerssl.dev/sdk v0.0.0-00010101000000-000000000000 // indirect
 )

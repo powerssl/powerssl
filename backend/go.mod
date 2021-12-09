@@ -2,13 +2,7 @@ module powerssl.dev/backend
 
 go 1.17
 
-replace powerssl.dev/api => ../api
-
 replace powerssl.dev/common => ../common
-
-replace powerssl.dev/common/telemetry => ../common/telemetry
-
-replace powerssl.dev/sdk => ../sdk
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -86,7 +80,7 @@ require (
 	golang.org/x/crypto v0.0.0-20211202192323-5770296d904e // indirect
 	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
+	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
 	google.golang.org/genproto v0.0.0-20211118181313-81c1377c94b1 // indirect

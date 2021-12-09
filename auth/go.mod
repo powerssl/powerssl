@@ -2,15 +2,11 @@ module powerssl.dev/auth
 
 go 1.17
 
-replace powerssl.dev/api => ../api
-
 replace powerssl.dev/backend => ../backend
 
 replace powerssl.dev/common => ../common
 
 replace powerssl.dev/common/telemetry => ../common/telemetry
-
-replace powerssl.dev/sdk => ../sdk
 
 require (
 	github.com/arschles/assert v2.0.0+incompatible // indirect
@@ -29,7 +25,7 @@ require (
 require (
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/google/wire v0.5.0
-	github.com/spangenberg/snakecharmer v0.0.0-20211116223337-14b423b5bb64
+	github.com/spangenberg/snakecharmer v0.0.0-20211203173439-8d5f70fc1273
 	powerssl.dev/common/telemetry v0.0.0-00010101000000-000000000000
 )
 
@@ -78,7 +74,7 @@ require (
 	golang.org/x/mod v0.5.1 // indirect
 	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
+	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.7 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect

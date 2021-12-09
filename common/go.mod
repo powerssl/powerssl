@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/google/wire v0.5.0
-	github.com/spangenberg/snakecharmer v0.0.0-20211116223337-14b423b5bb64
+	github.com/spangenberg/snakecharmer v0.0.0-20211203173439-8d5f70fc1273
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
 	go.uber.org/zap v1.19.1
@@ -38,7 +38,7 @@ require (
 	go.uber.org/multierr v1.7.0 // indirect
 	golang.org/x/crypto v0.0.0-20211202192323-5770296d904e // indirect
 	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9 // indirect
-	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
+	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/genproto v0.0.0-20211118181313-81c1377c94b1 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect

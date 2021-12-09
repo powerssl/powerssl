@@ -4,10 +4,6 @@ go 1.17
 
 replace powerssl.dev/api => ../api
 
-replace powerssl.dev/common => ../common
-
-replace powerssl.dev/sdk => ../sdk
-
 require powerssl.dev/api v0.0.0-00010101000000-000000000000
 
 require (
