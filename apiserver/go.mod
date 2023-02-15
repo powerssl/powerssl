@@ -24,7 +24,7 @@ require (
 	github.com/lib/pq v1.10.3
 	github.com/mennanov/fieldmask-utils v0.4.1
 	github.com/opentracing/opentracing-go v1.2.0
-	github.com/prometheus/client_golang v1.11.0
+	github.com/prometheus/client_golang v1.11.1
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.8.1
 	go.temporal.io/sdk v1.10.0
