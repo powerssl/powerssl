@@ -7,7 +7,7 @@ require (
 	github.com/go-kit/kit v0.11.0
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/opentracing/opentracing-go v1.2.0
-	github.com/prometheus/client_golang v1.11.0
+	github.com/prometheus/client_golang v1.11.1
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.8.1
 	github.com/uber/jaeger-client-go v2.29.1+incompatible
